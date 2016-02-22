@@ -16,3 +16,8 @@ __This project was a learning experience for me in 2010, this is not idiomatic c
 
 <img src="screenshot.png">
 
+Videos:
+
+* https://www.youtube.com/watch?v=gVRvadHqaT8
+* https://www.youtube.com/watch?v=71WBZr9RqDo
+
