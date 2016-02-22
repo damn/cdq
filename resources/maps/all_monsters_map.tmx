@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="70" height="50" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" source="gauntletly1.tsx"/>
+ <tileset firstgid="64" source="16entities.tsx"/>
+ <tileset firstgid="164" source="details.tsx"/>
+ <layer name="ground" width="70" height="50">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3ZOw6AIBBAQa/hSfT+J7OigGDDJyw6L9mazYTQcBxSe9egOQNNFJe0zyjj3l0iuaz24MJlZ5dIbwuX+C5pl9UeXLjs7OJ9iX9XuHDhwoULl5a5i+GSO3DJTcr7MsJmV5eaBZe6T+8OX3KZNVz+6/L2P7SLy8xpOU+SJEmSJEmSJKnWA57KjZWwNgAA
+  </data>
+ </layer>
+ <layer name="entities" width="70" height="50">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3OuQ3CUBRFQZfmGMwSYEK2iMUl2L1zIxoA6X2hGenkp+sAAPjWUj0AAHys0joNaZO2aZf2lVMNOKQxHatHGnNK53RJ13QrvWnHPT3SM73SVLsD/Km+eoCmzNUDAAAAAAAAwM+8AQpxOD2wNgAA
+  </data>
+ </layer>
+ <layer name="details" width="70" height="50">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC+3QuU6CURRFYf5aAo0dvIE+tjQgQqGNIzXiUCuDtQJSAw5LoPMBzglZX7Jyi9vsnFJJkiRpfxwW2/eEGqFLcjqni+gRkqRwTWrRKbXpjDrUjRyVwCVd0TXd0C3dUS9wUwZ9uqcBPdAjPdFz5KgEXuiVhjSiMU3oLXBTBu/0QVOa0Zw+aRE5KoElrWhNX/RNP38fReCoJA64QXl3hwpv1Zts1LhD3Vv8c8RNjr2LJEmSJEmSJEmSJKX3C6h5XPywNgAA
+  </data>
+ </layer>
+</map>

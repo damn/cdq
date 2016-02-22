@@ -1,0 +1,15 @@
+Programmed by Michael Sappler
+Devlog: http://resatori.com
+
+Free Graphics:
+Skill&Menu Icons by Lorc
+Graphics from lostgarden.com by Daniel Cook
+AI Wars Graphics pack (Monster graphics):
+Chris Park, Daniel Cook, Philippe Chabot and Hans Martin Portmann.
+AngbandTk Icons by David Gervais
+Townspeople by Philipp Lenssen "Last Guardian" sprites
+
+Music:
+dungeon1.xm
+http://modarchive.org/index.php?request=view_by_moduleid&query=41673
+From: Gammis of Lemonride 

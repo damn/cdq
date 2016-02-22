@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="21" height="10" tilewidth="16" tileheight="16">
+ <tileset firstgid="1" source="../../gauntletly2.tsx"/>
+ <tileset firstgid="64" source="../../16entities.tsx"/>
+ <tileset firstgid="164" source="../../details.tsx"/>
+ <layer name="ground" width="21" height="10">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC7NjYGCwowHWwoENycADYSY+s3HJEWsmNr3EmomunpywINVMYswlxe/EmkuumfjMpUVaB2EA4rNJOkgDAAA=
+  </data>
+ </layer>
+ <layer name="entities" width="21" height="10">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC2NgwASOWMRGAgghQw5dnJ5hh8+9uORBYiM1fkkFpIQTAFcaNf5IAwAA
+  </data>
+ </layer>
+ <layer name="details" width="21" height="10">
+  <data encoding="base64" compression="gzip">
+   H4sIAAAAAAAAC2NgGAWjYBRQCgAhUXGlSAMAAA==
+  </data>
+ </layer>
+</map>
