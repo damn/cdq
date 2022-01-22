@@ -3,7 +3,7 @@
     [utils.core :only (runmap)]
     game.session
     (game.components
-      [core :only (get-components)]
+      [core :only (get-id get-components)]
       [active :only (not-blocked? try-slowdown-delta)])))
 
 ; only change @player-death and switch-debug
@@ -24,4 +24,9 @@
           component (get-components entity)
           :when (and (:updatefn component)
                      (not-blocked? component))]
-    (update-component (try-slowdown-delta delta component) component entity)))
+    (try
+      (update-component (try-slowdown-delta delta component) component entity)
+      (catch Throwable t
+        (println "Entity " (get-id entity) " with component " (:type component) " fails: " t)
+        (reset! running false)
+        (throw t)))))

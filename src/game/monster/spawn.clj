@@ -115,7 +115,10 @@
       (when champions
         (when-chance 5
                      ;(log "monsters at posi " (first posis) "championized" " in map " @game.maps.data/current-map)
-                     (runmap championize-monster monsters))))))
+                     ;(runmap championize-monster monsters)
+                     ; deactivated because problem with 'current-animation' in game.render and because
+                     ; sleeping monsters with blocks fails because new components added dont have blocks
+                     )))))
 
 
 

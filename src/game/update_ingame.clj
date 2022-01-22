@@ -45,10 +45,18 @@
     ; Erst map-independent, da:
     ; - gui im vordergrund kann input consumen bevor player ihn erf�hrt bei player-body @ map-dependent-comps
     ; - map contentfields bauen neue current fields zusammen die bei update map dependent comps genutzt werden.
-    (update-active-components delta (get-ingame-loop-entities))
+    (try
+      (update-active-components delta (get-ingame-loop-entities))
+      (catch Throwable t
+        (println "Catched throwable: " t)
+        (reset! running false)))
 
     (reset! iterating-map-dependent-comps true)
-    (update-active-components delta (get-entities-in-active-content-fields))
+    (try
+      (update-active-components delta (get-entities-in-active-content-fields))
+      (catch Throwable t
+        (println "Catched throwable: " t)
+        (reset! running false)))
     (reset! iterating-map-dependent-comps  false)
 
     (when (is-dead? player-body)

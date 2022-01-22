@@ -40,13 +40,21 @@
                 (update-in [:cooldown-counter] reset)
                 (assoc :state :ready))))
 
+(defn- update-counter-skill! [entity delta skill & [counterkey & _]]
+  (let [k (or counterkey :counter)
+        counter (update (k skill) delta)]
+    (assoc-in! entity [:skillmanager :skills (:type skill) k] counter)
+    (:stopped? counter)))
+
 ; Warning:
 ; entities which attacktime is driven through their animation and .isStopped
 ; check they dont have an :attack-counter!
 ; and entities which attack through :attack-counter and have :animation component are ok because first :Attack-counter is checked
 (defn- attack-finished? [entity skill delta]
   (if (:attack-counter skill)
-    (update-counter! entity delta skill :attack-counter)
+    (if (get-component entity :skillmanager)
+      (update-counter-skill! entity delta skill :attack-counter)
+      (update-counter! entity delta skill :attack-counter))
     (is-stopped? (current-animation entity))))
 
 (defn- do-skill-effect [entity {:keys [do-skill] :as skill}]

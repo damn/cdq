@@ -50,8 +50,9 @@
 
 (defn regeneration-component [ctype ks percent-reg-per-second]
   (create-comp ctype
-               (active [delta _ entity]
-                 (update-in! entity ks regenerate delta percent-reg-per-second))))
+               (active [delta component entity]
+                 (update-in! entity ks regenerate delta (:reg-per-second component)))
+               {:reg-per-second percent-reg-per-second}))
 
 (defn hp-regen-component [percent-reg-per-second]
   (regeneration-component :hp-regen [:destructible :hp] percent-reg-per-second))

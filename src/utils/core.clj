@@ -348,7 +348,7 @@
 
 (defn increase-min-max-val ; bound-inc ?
   [{current :current mx :max :as data} by]
-  {:pre [(pos? by)]}
+  {:pre [(>= by 0)]}
   (update-in data [:current] + (min by (- mx current))))
 
 ; just bound-inc ? and pass (- val) ?

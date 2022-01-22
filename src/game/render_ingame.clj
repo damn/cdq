@@ -23,10 +23,13 @@
     (translate g xtranslate ytranslate)
     (doseq [[entity {:keys [renderfn] :as component}] (sort-by-order (to-be-rendered-entities-from-map)
                                                                      (comp :order second) render-on-map-order)]
-      (renderfn g
-                entity
-                component
-                (translate-position (get-position entity))))
+      (try
+       (renderfn g
+                 entity
+                 component
+                 (translate-position (get-position entity)))
+        (catch Throwable t
+          (println "Render error for entity " (get-id entity) " and component type " (:type component)))))
     ;(translate g (- xtranslate) (- ytranslate))
     (reset-transform g)))
 

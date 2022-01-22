@@ -1,5 +1,5 @@
 (defproject cyberdungeonquest "alpha 3-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.6.0"]
+  :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/tools.macro "0.1.2"]
                  [org.lwjgl.lwjgl/lwjgl          "2.9.3"]
                  [org.lwjgl.lwjgl/lwjgl-platform "2.9.3" :classifier "natives-osx" :native-prefix ""]
@@ -24,3 +24,7 @@
 ;
 ; TODO: set correct natives for OSX, linux
 
+; TODO
+; * seeking slowdown missle shoots even if no line of sight to player
+; * check spells ignore armor?
+; * nova should need line of sight to damage?
