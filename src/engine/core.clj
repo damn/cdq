@@ -55,8 +55,12 @@
         (.setTargetFrameRate 60)
         (.setVSync true)))
     (def app-game-container container)
-    (.start (Thread.
-              #(.start container)))))
+    ;; macOS OpenGL/Cocoa must create the Display on the first thread
+    ;; (-XstartOnFirstThread). Elsewhere, keep the old background-thread
+    ;; start so Swing resolution setup does not block the EDT.
+    (if (.startsWith (.toLowerCase (System/getProperty "os.name")) "mac")
+      (.start container)
+      (.start (Thread. #(.start container))))))
 
 (defnks start-slick-basicgame
   [:opt :full-screen

@@ -38,7 +38,10 @@
                    :else "config/production.clj")]
     (utils/log "Using config file: " file)
     (init-config! file))
-  (if (get-setting :show-resolution-setup)
+  ;; Swing resolution UI fights -XstartOnFirstThread on macOS; start
+  ;; directly on the main thread so the LWJGL window can appear.
+  (if (and (get-setting :show-resolution-setup)
+           (not (.startsWith (.toLowerCase (System/getProperty "os.name")) "mac")))
     (resolution-setup-frame start-the-game)
     (start-the-game false)))
 
