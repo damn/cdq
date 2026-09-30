@@ -9,8 +9,7 @@
                 [ingame :only (ingame-gamestate)]
                 [minimap :only (minimap-gamestate)]
                 [options :only (options-gamestate)]))
-  (:require game.music
-            game.serialization
+  (:require game.serialization
             game.monster.monsters
             game.item.instance-impl
             game.player.skill.learnable-impl

@@ -6,6 +6,7 @@
         [game.player.session-data :only (current-character-name get-session-file-character-names)])
   (:import org.newdawn.slick.gui.TextField
            org.newdawn.slick.Input
+           org.newdawn.slick.Music
            (org.newdawn.slick.loading LoadingList DeferredResource)))
 
 (def- creditstxt
@@ -122,9 +123,19 @@
 
 (def ^:private skipped (atom false))
 
+;; Built during deferred preload (LoadingList); do not .play/.loop until loaded.
+(def ^:private music nil)
+
+(initialize
+  (alter-var-root #'music (constantly
+                            (doto (Music. "sounds/dungeon1.xm" true)
+                              (.setVolume (float 1))))))
+
 (defgamestate mainmenu
   (enter [container statebasedgame]
     (LoadingList/setDeferredLoading false)
+    (when music
+      (.loop ^Music music))
     (reset-state))
 
   (keyPressed [int-key chr]

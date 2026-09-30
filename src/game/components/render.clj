@@ -6,7 +6,7 @@
     utils.core
     engine.render
     (game settings)
-    (game.components core misc position render ingame-loop)
+    (game.components core misc position ingame-loop)
     (game.utils geom tilemap lightning))
   (:import org.newdawn.slick.Color))
 
