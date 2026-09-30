@@ -1,0 +1,7 @@
+(defproject com.nothingtofind/slick2d "customized-0.1.0-SNAPSHOT"
+  :dependencies  [[org.lwjgl.lwjgl/lwjgl "2.9.0"]
+                  [org.jcraft/jorbis "0.0.17"]
+                  [org.clojars.aseipp/ibxm "0.0.1"]]
+  :java-source-paths ["src"])
+
+; lein deploy clojars
