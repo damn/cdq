@@ -6,8 +6,9 @@
                  [org.lwjgl.lwjgl/lwjgl-platform "2.9.3" :classifier "natives-osx"]
                  ;; inlined from com.nothingtofind/slick2d (customized-0.1.0-SNAPSHOT) -> slick/src
                  [org.jcraft/jorbis "0.0.17"]
-                 [org.clojars.aseipp/ibxm "0.0.1"]
-                 [grid2d "0.1.0-SNAPSHOT"]]
+                 [org.clojars.aseipp/ibxm "0.0.1"]]
+  ;; grid2d inlined at src/data/grid2d.clj
+  ;; slick2d inlined at slick/src
   :java-source-paths ["src" "slick/src"]
   :aot [engine.render] ; read-string of Animation record
   :main game.start
