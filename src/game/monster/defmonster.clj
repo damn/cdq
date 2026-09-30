@@ -35,7 +35,7 @@
 
 (defn get-monster-properties [type] ; use ns-resolve 'game.monster.monsters (name monster-type) ? NO NEED FOR PREFIX CHECK? but then ...?
   (find-prefixed-var
-    :namespace 'game.monster.monsters
+    :namespace 'game.start
     :prefix defmonster-prefix
     :prefixed-type type))
 

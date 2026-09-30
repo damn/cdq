@@ -4,8 +4,8 @@
   (:use
     game.settings
     (game.components ingame-loop render core destructible)
-    (game.utils tilemap raycast)
-    (game.monster monsters)))
+    (game.utils tilemap raycast)))
+; monsters live in game.start
 
 (def opponent (atom nil))
 
