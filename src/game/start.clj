@@ -9,7 +9,12 @@
                 [ingame :only (ingame-gamestate)]
                 [minimap :only (minimap-gamestate)]
                 [options :only (options-gamestate)]))
-  (:load "ns_without_deps")
+  (:require game.music
+            game.serialization
+            game.monster.monsters
+            game.item.instance-impl
+            game.player.skill.learnable-impl
+            game.components.body-render)
   (:gen-class))
 
 (defn- start-the-game [fullscreen]
