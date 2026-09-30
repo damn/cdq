@@ -199,6 +199,9 @@
       (number? scale) (get-scaled-copy image scale)
       :else image)))
 
+(defn create-empty-image [w h]
+  (Image. (int w) (int h)))
+
 (defprotocol Animation
   (is-stopped?  [_])
   (restart      [_])
