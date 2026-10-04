@@ -1,11 +1,13 @@
 (ns game.tools.dirtpath
-  (:use data.grid2d
-        utils.core
-        engine.core
-        game.utils.random
-        mapgen.findpath
-        game.maps.tiledmaps
-        (game.tools transitiontilemaker tiledmap-grid-convert)))
+  (:require
+    [data.grid2d :refer [get-8-neighbour-positions]]
+    [utils.core :refer [def-]]
+    [engine.core :refer [start-slick-basicgame]]
+    [game.utils.random :refer [if-chance]]
+    [mapgen.findpath :refer [find-path]]
+    [game.maps.tiledmaps :refer [construct-tiledmap create-grid-from-tiled-map]]
+    [game.tools.transitiontilemaker :refer [get-transition-tile-value]]
+    [game.tools.tiledmap-grid-convert :refer [make-tiledmap-file resource]]))
 
 (def- ground-firstgid 1)
 (def- circle-tiles-firstgid 91)

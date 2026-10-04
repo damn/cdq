@@ -1,7 +1,7 @@
 (ns game.test.session
-  (:require [clojure.test :refer :all]
-            [game.test.helper :refer :all]
-            [game.components.render :refer :all]
+  (:require [clojure.test :refer [is use-fixtures]]
+            [game.test.helper :refer [deftest-ingame start-game-once-fixture]]
+            [game.components.render :refer [create-circle-render-effect]]
             [engine.render :as color]
             [game.maps.contentfields :refer [get-all-entities-of-current-map]]
             [game.components.core :refer [get-component get-position]]

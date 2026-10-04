@@ -1,7 +1,8 @@
 (ns game.tests.fnplotter
-  (:require [engine.render :as color])
-  (:use (engine core render)
-        game.utils.random))
+  (:require
+    [engine.render :as color :refer [draw-rect fill-rect]]
+    [engine.core :refer [start-slick-basicgame]]
+    [game.utils.random :refer [high-weighted]]))
 
 (def width 400)
 (def height width)

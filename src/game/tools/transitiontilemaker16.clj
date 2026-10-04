@@ -1,9 +1,11 @@
 (ns game.tools.transitiontilemaker16
-  (:use data.grid2d
-        utils.core
-        (engine core render)
-        game.utils.random
-        game.tools.tiledmap-grid-convert))
+  (:require
+    [data.grid2d :refer [get-4-neighbour-positions]]
+    [utils.core :refer [def-]]
+    engine.core
+    engine.render
+    game.utils.random
+    [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi]]))
 
 (let [idxvalues-order [[1 0] [-1 0] [0 1] [0 -1]]]
   (assert (= (get-4-neighbour-positions [0 0]) idxvalues-order)))

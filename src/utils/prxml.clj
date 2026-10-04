@@ -27,7 +27,7 @@
     :doc "Compact syntax for generating XML. See the documentation of \"prxml\"
     for details."}
   utils.prxml
-  (:use [clojure.string :only (escape)]))
+  (:require [clojure.string :refer [escape]]))
 
 (def
   ^{:doc "If true, empty tags will have a space before the closing />"

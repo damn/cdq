@@ -1,15 +1,24 @@
 (ns game.player.session-data
-  (:require [clojure.walk :refer [postwalk]]
-            game.mouseoverbody
-            [game.session :as session]
-            (game.components core sleeping burrow update)
-            game.item.save
-            (game.maps cell-grid data add load)
-            (game.player.skill learnable selection-list)
-            (game.utils lightning msg-to-player)
-            [utils.core :as utils])
-  (:use utils.core
-        (game settings status-options session)))
+  (:require
+    [clojure.walk :refer [postwalk]]
+    game.mouseoverbody
+    [game.session :as session :refer [load-session new-session-data save-session]]
+    game.components.core
+    game.components.sleeping
+    game.components.burrow
+    game.components.update
+    game.item.save
+    game.maps.cell-grid
+    game.maps.data
+    game.maps.add
+    game.maps.load
+    game.player.skill.learnable
+    game.player.skill.selection-list
+    game.utils.lightning
+    game.utils.msg-to-player
+    [utils.core :as utils :refer [distinct-seq?]]
+    [game.settings :refer [version]]
+    [game.status-options :refer [session]]))
 
 (def current-character-name (atom nil))
 

@@ -129,7 +129,7 @@
   ([text] (get-text-height text (get-font)))
   ([text font] (* (number-of-lines text) (get-line-height font))))
 
-(use '[clojure.string :only (split-lines)])
+(require '[clojure.string :refer [split-lines]])
 
 (defn get-text-width
   ([text font] (.getWidth ^Font font (apply max-key count (split-lines text))))

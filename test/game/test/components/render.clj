@@ -1,10 +1,11 @@
 (ns game.test.components.render
-  (:use clojure.test
-        game.test.utils
-        game.components.core
-        game.components.position
-        game.components.render
-        engine.render))
+  (:require
+    [clojure.test :refer [deftest is]]
+    [game.test.utils :refer [with-private-fns]]
+    [game.components.core :refer [create-entity get-component]]
+    [game.components.position :refer [position-component]]
+    [game.components.render :refer [animation-component current-animation]]
+    [engine.render :refer [create-animation]]))
 
 (with-private-fns [game.components.render [update-animation]]
   (deftest test-animation-component-update

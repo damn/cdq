@@ -1,10 +1,17 @@
 (ns game.components.burrow
-  (:use
-    utils.core
-    (engine core render)
-    game.session
-    (game.components active core render body position ingame-loop)
-    (game.maps contentfields cell-grid)))
+  (:require
+    [utils.core :refer [->! create-counter runmap update-counter]]
+    [engine.core :refer [defpreload play-sound]]
+    [engine.render :refer [create-animation spritesheet-frames]]
+    [game.session :refer [atom-session]]
+    game.components.active
+    [game.components.core :refer [active block-active-components defcomponent get-component get-position is-solid? reset-component-state-after-blocked unblock-active-components]]
+    [game.components.render :refer [animation-entity]]
+    [game.components.body :refer [colliding-with-other-solid-bodies? get-dist-to-player get-other-bodies-in-adjacent-cells is-burrowed? is-multiple-cell?]]
+    game.components.position
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
+    game.maps.cell-grid))
 
 (defpreload ^:private dust-frames (spritesheet-frames "effects/dust.png" 15 15))
 (defpreload ^:private dark-dust-frames (spritesheet-frames "effects/darkdust.png" 30 30))

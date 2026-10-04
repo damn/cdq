@@ -1,12 +1,19 @@
 (ns game.item.instance  ; TODO refactor dependencies wg. instance-impl abkapselung
-  (:use
-    utils.core
-    (engine core render)
-    (game [settings :only (tile-width)])
+  (:require
+    [game.settings :refer [tile-width]]
+    [utils.core :refer [def- find-prefixed-var]]
+    [engine.core :refer [play-sound]]
+    [engine.render :refer [get-scaled-copy]]
     game.maps.data
-    game.item.cells
-    (game.components core position body misc render glittering pressable)
-    game.utils.msg-to-player))
+    [game.item.cells :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand showing-player-inventory? try-pickup-item]]
+    [game.components.core :refer [add-to-removelist create-entity create-entity-no-init defentity get-position player-body]]
+    [game.components.position :refer [position-component]]
+    [game.components.body :refer [blocked-location? create-body]]
+    game.components.misc
+    [game.components.render :refer [image-render-component]]
+    [game.components.glittering :refer [glittering-component]]
+    [game.components.pressable :refer [pressable-component]]
+    [game.utils.msg-to-player :refer [show-msg-to-player]]))
 
 (def- defitem-prefix "item-")
 

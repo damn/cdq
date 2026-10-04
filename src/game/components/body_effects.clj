@@ -1,9 +1,10 @@
 (ns game.components.body-effects
-  (:use utils.core
-        (game.components core
-                         position
-                         [sleeping :only (wake-up)]
-                         [misc :only (delete-after-duration-component)])))
+  (:require
+    [game.components.sleeping :refer [wake-up]]
+    [game.components.misc :refer [delete-after-duration-component]]
+    [utils.core :refer [defnks runmap update-in!]]
+    [game.components.core :refer [add-component create-comp create-entity defcomponent destruct-entity get-component get-entity get-id get-position]]
+    [game.components.position :refer [position-component swap-position!]]))
 
 (defn get-sub-entities [entity]
   (when-let [subids (:ids (get-component entity :sub-entities))]

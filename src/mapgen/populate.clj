@@ -1,9 +1,9 @@
 (ns mapgen.populate
-  (:use
-    game.utils.random
-    (mapgen cellular
-            [utils :only (wall-at?)]
-            [findpath :only (find-path)])))
+  (:require
+    [mapgen.utils :refer [wall-at?]]
+    [mapgen.findpath :refer [find-path]]
+    [game.utils.random :refer [high-weighted-rand-nth]]
+    [mapgen.cellular :refer [flood-fill]]))
 
 
 (defn get-rand-end-posi [grid start]

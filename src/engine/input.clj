@@ -1,6 +1,6 @@
 (ns engine.input
   "In order to use include engine.input/update-mousebutton-state and engine.core/init-all in your game."
-  (:use [engine.core :only (app-game-container defpreload)])
+  (:require [engine.core :refer [app-game-container defpreload]])
   (:import org.newdawn.slick.Input))
 
 (defpreload ^:private input

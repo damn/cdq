@@ -1,8 +1,8 @@
 (ns game.blocks
-  (:use
-    [game.test.utils :only (with-private-fns)]
-    clojure.test
-    game.components.active))
+  (:require
+    [game.test.utils :refer [with-private-fns]]
+    [clojure.test :refer [deftest is]]
+    [game.components.active :refer [add-block not-blocked? remove-block switch-state]]))
 
 (deftest test-not-blocked
   (is (= (not-blocked? {:abc 4}) true))

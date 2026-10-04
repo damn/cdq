@@ -1,11 +1,12 @@
 (ns engine.tests.render
-  (:use
-    (engine core render))
+  (:require
+    [engine.core :refer [start-slick-basicgame]]
+    [engine.render :refer [create-image fill-rect render-readable-text]])
   (:import (org.newdawn.slick Image Color)))
 
 (def image)
 
-(use 'utils.selection-image)
+(require '[utils.selection-image :refer [create-selection-image]])
 
 (defn render [container g]
   (.draw image 50 50)

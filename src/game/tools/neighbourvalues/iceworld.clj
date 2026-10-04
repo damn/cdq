@@ -1,9 +1,12 @@
 (ns game.tools.neighbourvalues.iceworld
-  (:use data.grid2d
-        utils.core
-        (engine core render)
-        game.utils.random
-        (game.tools transitiontilemaker tiledmap-grid-convert)))
+  (:require
+    data.grid2d
+    [utils.core :refer [def-]]
+    [engine.core :refer [defpreload]]
+    [engine.render :refer [spritesheet]]
+    game.utils.random
+    [game.tools.transitiontilemaker :refer [get-transition-tile-value]]
+    [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi make-tiledmap-file resource]]))
 
 ; needs a grid scaled x2 at least and nil cells behind other walls; also remove NADS & single cells
 
@@ -56,7 +59,7 @@
    :wall #{:ground}
    :ground #{}})
 
-(use '(mapgen nad cave utils))
+(require '[mapgen.nad :refer [fix-not-allowed-diagonals]] '[mapgen.cave :refer [cave-gridgen]] '[mapgen.utils :refer [fill-single-cells scalegrid undefined-value-behind-walls]])
 
 (comment
   (make-tiledmap-file 48

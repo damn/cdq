@@ -1,14 +1,17 @@
 (ns game.item.cells ; more than cells
-  (:require [engine.render :as color])
-  (:use
-    utils.core
-    (engine core input render)
-    (game settings mouse-cursor ingame-gui)
-    data.grid2d
-    (game.components core
-      [render :only (rendering)]
-      [ingame-loop :only (ingame-loop-comp)])
-    game.components.skills.core))
+  (:require
+    [engine.render :as color :refer [create-image defcolor draw-grid draw-image fill-rect get-scaled-copy render-readable-text rgbcolor set-color]]
+    [game.components.render :refer [rendering]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [utils.core :refer [def- defnks find-first runmap thread-through]]
+    [engine.core :refer [defpreload initialize set-mouse-cursor]]
+    [engine.input :refer [get-mouse-pos]]
+    [game.settings :refer [screen-height screen-scale screen-width]]
+    [game.mouse-cursor :refer [reset-default-mouse-cursor]]
+    [game.ingame-gui :refer [background-color foreground-color frame-screenborder-distance ingamestate-display inventory-hotkey is-visible? make-frame]]
+    [data.grid2d :refer [cells create-grid height width]]
+    [game.components.core :refer [get-component player-body]]
+    [game.components.skills.core :refer [get-active-skill is-attacking?]]))
 
 ; diablo 2 gold:  144 136 88
 ; blue:           72 80 184

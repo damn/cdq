@@ -1,7 +1,8 @@
 (ns game.components.item-boni
-  (:use
-    (game.components core body-effects-impl)
-    game.utils.random))
+  (:require
+    [game.components.core :refer [defcomponent get-component player-body]]
+    [game.components.body-effects-impl :refer [create-armor-reduce-effect slowdown stun]]
+    [game.utils.random :refer [when-chance]]))
 
 ; use integers because floating point arithmetic is not precise.
 ; So when using floats and adding/subtracting some bonis it may be 0.999 instead of 1

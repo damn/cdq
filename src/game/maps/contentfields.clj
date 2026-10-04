@@ -1,9 +1,10 @@
 (ns game.maps.contentfields
-  (:require [data.grid2d :as grid])
-  (:use utils.core
-        game.settings
-        game.maps.data
-        game.components.core))
+  (:require
+    [data.grid2d :as grid]
+    [utils.core :refer [assoc-in!]]
+    game.settings
+    [game.maps.data :refer [get-current-map-data]]
+    [game.components.core :refer [get-component get-position player-body]]))
 
 ; Contentfield Entities
 ; -> :position sollten sie haben

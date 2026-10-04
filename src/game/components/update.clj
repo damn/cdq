@@ -1,10 +1,9 @@
 (ns game.components.update
-  (:use
-    [utils.core :only (runmap)]
-    game.session
-    (game.components
-      [core :only (get-id get-components)]
-      [active :only (not-blocked? try-slowdown-delta)])))
+  (:require
+    [utils.core :refer [runmap]]
+    [game.components.core :refer [get-components get-id]]
+    [game.components.active :refer [not-blocked? try-slowdown-delta]]
+    [game.session :refer [atom-session]]))
 
 ; only change @player-death and switch-debug
 (def running (atom true))

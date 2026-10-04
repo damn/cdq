@@ -1,11 +1,12 @@
 (ns game.maps.mapchange  ; TODO just change
-  (:use
-    utils.core
-    game.utils.msg-to-player
-    (game.components core body)
-    game.components.skills.core
-    game.maps.data
-    [game.player.session-data :only (save-game)]))
+  (:require
+    [game.player.session-data :refer [save-game]]
+    [utils.core :refer [def-]]
+    [game.utils.msg-to-player :refer [show-msg-to-player]]
+    [game.components.core :refer [get-component player-body]]
+    [game.components.body :refer [teleport]]
+    [game.components.skills.core :refer [is-attacking?]]
+    [game.maps.data :refer [get-pretty-name set-map!]]))
 
 (def- queued (atom nil))
 

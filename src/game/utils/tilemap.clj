@@ -1,9 +1,9 @@
 (ns game.utils.tilemap
-  (:use
-    utils.core
-    [engine.input :only (get-mouse-pos)]
-    game.settings
-    [game.maps.camera :only (get-camera-position)]))
+  (:require
+    [engine.input :refer [get-mouse-pos]]
+    [game.maps.camera :refer [get-camera-position]]
+    [utils.core :refer [int-posi]]
+    [game.settings :refer [half-screen-h half-screen-w tile-height tile-width]]))
 
 (defn tilepos-of-screenpos [[x y]]
   (let [[middlex middley] (get-camera-position)

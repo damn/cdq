@@ -1,10 +1,12 @@
 (ns game.components.shield
-  (:require [engine.core :refer [make-counter update-finally-merge]])
-  (:use
-    utils.core
-    engine.render
-    (game.components core render body-effects)
-    game.utils.geom))
+  (:require
+    [engine.core :refer [make-counter update-finally-merge]]
+    [utils.core :refer [assoc-in! def-]]
+    [engine.render :refer [create-image render-rotated-centered-image rgbcolor]]
+    [game.components.core :refer [active defcomponent get-component]]
+    [game.components.render :refer [circle-around-body-render-comp render-on-map]]
+    [game.components.body-effects :refer [defeffectentity]]
+    [game.utils.geom :refer [degree-add]]))
 
 (def- rotation-speed (/ 360 2000)) ; 360 degrees in 2 seconds = 2000 ms
 

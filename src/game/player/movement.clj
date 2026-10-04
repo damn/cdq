@@ -1,11 +1,18 @@
 (ns game.player.movement
-  (:use
-    utils.core
-    (engine input render)
-    (game mouseoverbody settings [debug-settings :as debug])
-    game.utils.geom
-    (game.components core body movement ingame-loop render)
-    (game.player settings)))
+  (:require
+    [utils.core :refer [assoc-in!]]
+    [engine.input :refer [is-key-down? is-leftbutton-down? is-leftm-consumed?]]
+    [engine.render :refer [render-readable-text]]
+    [game.mouseoverbody :refer [saved-mouseover-body]]
+    game.settings
+    [game.debug-settings :as debug]
+    [game.utils.geom :refer [add entity-direction-vector get-vector-to-mouse-coords normalise vector2f]]
+    [game.components.core :refer [player-body]]
+    [game.components.body :refer [colliding-with-other-solid-bodies?]]
+    [game.components.movement :refer [movement-component]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [game.components.render :refer [rendering]]
+    [game.player.settings :refer [player-move-speed]]))
 
 (defn- add-vs [vs]
   (normalise (reduce add (vector2f [0 0]) vs)))

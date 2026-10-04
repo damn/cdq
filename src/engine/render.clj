@@ -1,8 +1,9 @@
 (ns engine.render
-  (:require [utils.core :as utils :refer [defnks when-seq get-jar-entries]])
-  (:use [game.utils.geom :as geom]
-        (engine [core :as core]
-                [settings :only (jar-file?)]))
+  (:require
+    [utils.core :as utils :refer [defnks get-jar-entries when-seq]]
+    [engine.settings :refer [jar-file?]]
+    [game.utils.geom :as geom]
+    [engine.core :as core :refer [Updateable allowed-characters get-defaultfont get-screen-height get-screen-width get-text-height get-text-width reset-font]])
   (:import java.io.File
            (org.newdawn.slick Graphics Color Image SpriteSheet)
            org.newdawn.slick.geom.Shape))
@@ -86,7 +87,7 @@
 ; because they will be counted in the height and not rendered anything in it anyway
 ; only problem: "Test\n\n" will be converted to "Test" with split-lines ...
 ; (partition-by #(= \newline %) "abc\n\n") also doesnt work...
-(use '[clojure.string :only (split-lines)])
+(require '[clojure.string :refer [split-lines]])
 
 (defn- seperate-newline-strings [coll]
   (reduce #(if (coll? %2) (vec (concat %1 %2)) (conj %1 %2))

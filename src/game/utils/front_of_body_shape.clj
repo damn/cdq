@@ -1,7 +1,9 @@
 (ns game.utils.front-of-body-shape
-  (:require [game.utils.geom :as geom])
-  (:use utils.core
-        (game.components core body)))
+  (:require
+    [game.utils.geom :as geom]
+    utils.core
+    [game.components.core :refer [get-component get-half-width get-position]]
+    game.components.body))
 
 (defn in-front-of-body-shape
   ([body height]

@@ -1,16 +1,19 @@
 (ns game.player.skill.learnable
-  (:require clojure.set)
-  (:use
-    utils.core
-    (engine
-      [core :only (initialize)]
-      render)
-    (game settings media ingame-gui session)
-    game.player.skill.skillmanager
-    (game.components core
-                     [render :only (rendering)]
-                     [ingame-loop :only (ingame-loop-comp)])
-    (game.components.skills core melee)))
+  (:require
+    clojure.set
+    [engine.core :refer [initialize]]
+    [game.components.render :refer [rendering]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [utils.core :refer [assoc-in! def- log readable-number runmap split-key-val-and-maps update-in! variance-val-str]]
+    [engine.render :refer [create-image defcolor fill-rect render-readable-text rgbcolor]]
+    [game.settings :refer [screen-height]]
+    game.media
+    [game.ingame-gui :refer [buttonscale buttonx-start frame-screenborder-distance get-bounds ingamestate-display is-visible? make-frame make-imgbutton mouseover? set-visible skillmenu-hotkey switch-visible x-dist]]
+    game.session
+    [game.player.skill.skillmanager :refer [add-player-skill assign-unused-hotkey-and-open-skillslist create-skill-icon]]
+    [game.components.core :refer [active get-component player-body]]
+    [game.components.skills.core :refer [skillmanager-skill]]
+    game.components.skills.melee))
 
 ; This ns is skillmenu & learnable-skills
 

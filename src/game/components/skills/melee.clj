@@ -1,14 +1,19 @@
 (ns game.components.skills.melee
-  (:use
-    utils.core
-    [engine.core :only (create-sound)]
-    (game mouseoverbody
-      [settings :only (in-tiles)])
-    (game.utils random front-of-body-shape geom)
-    (game.components core body destructible [update :only (max-delta)])
-    (game.components.skills core)
-    [game.item.cells :only (get-equiped-hands-item)]
-    game.maps.cell-grid))
+  (:require
+    [engine.core :refer [create-sound]]
+    [game.settings :refer [in-tiles]]
+    [game.components.update :refer [max-delta]]
+    [game.item.cells :refer [get-equiped-hands-item]]
+    [utils.core :refer [assoc-in! def- defnks find-first runmap]]
+    [game.mouseoverbody :refer [get-mouseover-body]]
+    game.utils.random
+    [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
+    [game.utils.geom :refer [collides?]]
+    [game.components.core :refer [get-component get-entity get-half-width get-id get-position is-player? player-body]]
+    [game.components.body :refer [calc-touched-cells circle-collides? is-affectable? rect-shape]]
+    [game.components.destructible :refer [attackable-by-player? calc-effective-melee-dmg deal-dmg]]
+    [game.components.skills.core :refer [get-active-skill get-skill-use-mouse-button standalone-skill]]
+    [game.maps.cell-grid :refer [get-bodies-from-cells]]))
 
 ; TODO unabh von tiles machen ->in pixels?
 (def melee-puffer 0.8)

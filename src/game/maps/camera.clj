@@ -1,6 +1,5 @@
 (ns game.maps.camera
-  (:use
-    [game.components.core :only (get-position player-body)]))
+  (:require [game.components.core :refer [get-position player-body]]))
 
 (defn get-camera-position
   "returns the current center-of-screen-map-tile-position.

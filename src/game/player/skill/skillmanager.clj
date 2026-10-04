@@ -1,10 +1,18 @@
 (ns game.player.skill.skillmanager
-  (:use
-    utils.core
-    (engine input [render :only (create-image get-scaled-copy)])
-    (game settings mouseoverbody)
-    (game.components.skills core melee)
-    (game.components core active body destructible misc body-effects)
+  (:require
+    [engine.render :refer [create-image get-scaled-copy]]
+    [utils.core :refer [assoc-in!]]
+    [engine.input :refer [is-leftbutton-down? is-rightbutton-down? is-rightm-consumed? mousebutton]]
+    game.settings
+    [game.mouseoverbody :refer [get-mouseover-body saved-mouseover-body]]
+    [game.components.skills.core :refer [enough-mana? skillmanager-component skillmanager-skill]]
+    [game.components.skills.melee :refer [player-melee-props]]
+    [game.components.core :refer [active add-to-removelist create-comp get-component player-body]]
+    [game.components.active :refer [add-block blocks-component remove-block]]
+    game.components.body
+    [game.components.destructible :refer [attackable-by-player?]]
+    [game.components.misc :refer [rotate-to-body rotate-to-mouse]]
+    [game.components.body-effects :refer [defeffectentity get-certain-effect-entities]]
     game.utils.geom))
 
 (defn get-player-skills []

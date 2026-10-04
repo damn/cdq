@@ -1,10 +1,14 @@
 (ns game.tests.circle-collides
-  (:require [engine.render :as color]
-            [game.utils.geom :as geom])
-  (:use
-    game.settings
-    (game.components ingame-loop render core destructible)
-    (game.utils tilemap raycast)))
+  (:require
+    [engine.render :as color]
+    [game.utils.geom :as geom]
+    [game.settings :refer [tile-width]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [game.components.render :refer [rendering]]
+    [game.components.core :refer [get-entity get-position]]
+    [game.components.destructible :refer [get-destructible-bodies]]
+    [game.utils.tilemap :refer [screenpos-of-tilepos]]
+    [game.utils.raycast :refer [ray-blocked?]]))
 ; monsters live in game.start
 
 (def opponent (atom nil))

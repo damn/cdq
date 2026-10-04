@@ -1,8 +1,9 @@
 (ns game.components.misc
-  (:require [engine.core :refer [make-counter]])
-  (:use utils.core
-        game.utils.geom
-        game.components.core))
+  (:require
+    [engine.core :refer [make-counter]]
+    [utils.core :refer [assoc-in! increase-min-max-val update-in!]]
+    [game.utils.geom :refer [entity-direction-vector get-angle-from-vector get-vector-to-mouse-coords]]
+    [game.components.core :refer [active add-to-removelist create-comp defcomponent get-half-height get-half-width player-body update-counter!]]))
 
 (defcomponent delete-after-duration [duration & {:keys [duration-over]}]
   (active [delta c entity]

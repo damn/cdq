@@ -1,9 +1,10 @@
 (ns mapgen.cellular
-  (:require [engine.render :as color])
-  (:use data.grid2d
-        utils.core
-        game.utils.random
-        mapgen.utils))
+  (:require
+    [engine.render :as color]
+    [data.grid2d :refer [create-grid get-4-neighbour-positions get-8-neighbour-positions posis transform]]
+    [utils.core :refer [assoc-ks defnks]]
+    [game.utils.random :refer [percent-chance]]
+    [mapgen.utils :refer [border-position? create-borders-positions]]))
 
 (comment
 "The basic idea is to fill the first map randomly, then repeatedly create new maps using the 4-5 rule:
@@ -101,7 +102,7 @@ and the amount of overall 'noise' is gradually reduced: ")
         (for [y (range y1 y2 step)]
           [x2 y]))))
 
-(use 'game.utils.geom)
+(require '[game.utils.geom :refer [get-distance]])
 
 (defn- make-path [grid [a b] color]
   (assoc-ks grid (calc-path a b) color))

@@ -1,13 +1,18 @@
 (ns game.utils.lightning
-  (:require [engine.render :as color]
-            game.maps.data)
-  (:use utils.core
-        (game.utils [geom :only (get-distance tiles-inside-rect)]
-                    [raycast :only (ray-blocked?)])
-        (game session settings)
-        (game.components core position
-                         [ingame-loop :only (ingame-loop-comp)])
-        (game.maps contentfields cell-grid [minimap :only (update-minimap)]))
+  (:require
+    [engine.render :as color]
+    game.maps.data
+    [game.utils.geom :refer [get-distance tiles-inside-rect]]
+    [game.utils.raycast :refer [ray-blocked?]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [game.maps.minimap :refer [update-minimap]]
+    [utils.core :refer [assoc-in! compare-times def- defnks genmap int-posi runmap]]
+    [game.session :refer [atom-session]]
+    [game.settings :refer [debug-mode in-pixel]]
+    [game.components.core :refer [active create-comp create-entity create-entity-no-init defentity get-component get-position player-body]]
+    [game.components.position :refer [position-component]]
+    [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
+    [game.maps.cell-grid :refer [add-cell-blocks-changed-listener inside-map?]])
   (:import org.newdawn.slick.tiled.LightManager
            (org.newdawn.slick Color Image)))
 

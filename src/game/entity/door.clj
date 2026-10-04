@@ -1,10 +1,15 @@
 (ns game.entity.door
-  (:require [engine.render :as color])
-  (:use
-    [engine.core :only (play-sound)]
-    utils.core
-    (game.components core position body pressable render)
-    (game.maps cell-grid [minimap :only (show-on-minimap)])))
+  (:require
+    [engine.render :as color]
+    [engine.core :refer [play-sound]]
+    [game.maps.minimap :refer [show-on-minimap]]
+    [utils.core :refer [assoc-in!]]
+    [game.components.core :refer [add-to-removelist create-comp create-entity create-entity-no-init defentity get-component]]
+    [game.components.position :refer [position-component]]
+    [game.components.body :refer [create-body]]
+    [game.components.pressable :refer [pressable-component]]
+    [game.components.render :refer [image-render-component]]
+    [game.maps.cell-grid :refer [cell-blocks-changed-update-listeners change-cell-blocks get-cell]]))
 
 ; another way of handling the open door was to change the image&mouseover-outline to false&remove component :pressable
 ; but it had still a :body component which blocks mouseoverentities that lie below it because there is always only 1 mouseoverbody at each position

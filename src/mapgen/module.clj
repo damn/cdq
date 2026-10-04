@@ -1,8 +1,9 @@
 (ns mapgen.module
-  (:use data.grid2d
-        game.maps.tiledmaps
-        [game.tools.tiledmap-grid-convert :only (get-spriteidx)]
-        [mapgen.utils :only (border-position?)]))
+  (:require
+    [game.tools.tiledmap-grid-convert :refer [get-spriteidx]]
+    [mapgen.utils :refer [border-position?]]
+    [data.grid2d :refer [height mapgrid->vectorgrid posis width]]
+    [game.maps.tiledmaps :refer [construct-tiledmap create-grid-from-tiled-map get-layer-index get-player-entity-start-position get-tile-property-value get-tileproperties]]))
 
 (defn- print-cell [celltype]
   (print (case celltype

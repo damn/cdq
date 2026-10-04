@@ -1,13 +1,16 @@
 (ns game.components.render
-  (:require  (engine [core :refer [make-counter update ratio]]
-                     [render :as color])
-            [game.utils.geom :as geom])
-  (:use
-    utils.core
-    engine.render
-    (game settings)
-    (game.components core misc position ingame-loop)
-    (game.utils geom tilemap lightning))
+  (:require
+    [engine.core :refer [make-counter ratio update]]
+    [engine.render :as color :refer [draw-line fill-centered-circle get-dimensions get-frame is-stopped? render-centered-image render-centered-shape render-readable-text render-rotated-centered-image restart rgbcolor set-color]]
+    [game.utils.geom :as geom]
+    [utils.core :refer [define-order int-posi make-fn order-contains? readable-number update-in!]]
+    [game.settings :refer [in-pixel tile-height tile-width]]
+    [game.components.core :refer [active add-to-removelist create-comp create-entity create-entity-no-init defcomponent defentity get-component get-half-pxh get-half-pxw get-position update-counter!]]
+    [game.components.misc :refer [delete-after-duration-component]]
+    [game.components.position :refer [position-component]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [game.utils.tilemap :refer [screenpos-of-tilepos]]
+    [game.utils.lightning :refer [set-brightness set-cached-brightness]])
   (:import org.newdawn.slick.Color))
 
 (defn- make-rendering-props [order fnargs]

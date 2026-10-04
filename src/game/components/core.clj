@@ -1,10 +1,10 @@
 (ns game.components.core
-  (:require [utils.core :as utils]
-            [engine.core :refer [update]]
-            [game.session :as session]
-            [clojure.tools.macro :refer (name-with-attributes)])
-  (:use utils.core
-        game.components.active))
+  (:require
+    [utils.core :as utils :refer [assoc-in! condition-map-and-rest defnks distinct-seq? filter-map get-unique-number is-condition-map? keywords-to-hash-map make-fn runmap safe-merge update-in! when-apply]]
+    [engine.core :refer [update]]
+    [game.session :as session]
+    [clojure.tools.macro :refer [name-with-attributes]]
+    [game.components.active :refer [add-blocks remove-blocks]]))
 
 (def ^:private id-entity-map (atom {}))
 

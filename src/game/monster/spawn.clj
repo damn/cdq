@@ -1,12 +1,15 @@
 (ns game.monster.spawn
-  (:use data.grid2d
-        utils.core
-        engine.render
-        (game.monster defmonster)
-        (game.components core body render)
-        game.maps.data
-        [game.item.instance :only (create-item-body)]
-        (game.utils random random)))
+  (:require
+    [game.item.instance :refer [create-item-body]]
+    [data.grid2d :refer [posis]]
+    [utils.core :refer [inc-or-dec-max log translate-to-tile-middle update-in!]]
+    [engine.render :refer [folder-animation]]
+    [game.monster.defmonster :refer [get-monster-properties]]
+    [game.components.core :refer [add-component create-comp get-position]]
+    [game.components.body :refer [blocked-location?]]
+    [game.components.render :refer [single-animation-component]]
+    [game.maps.data :refer [get-current-map-data]]
+    [game.utils.random :refer [get-rand-weighted-items rand-int-between when-chance]]))
 
 (defn try-spawn [posi monster-type & {debug :debug}]
   {:pre [(get-monster-properties monster-type)]}
@@ -19,7 +22,7 @@
 
 (comment
 
-  (use 'game.components.ingame-loop)
+  (require '[game.components.ingame-loop :refer [do-in-game-loop]])
   (do-in-game-loop
       (try-spawn [12.5 5.5] :first-boss))
   )
@@ -86,8 +89,8 @@
       (remove nil?
               (map #(try-spawn %1 %2) posis monstertypes)))))
 
-(use '[mapgen.spawn-spaces :only (get-spawn-positions-groups)])
-(use '[game.maps.cell-grid :only (get-cell-grid)])
+(require '[mapgen.spawn-spaces :refer [get-spawn-positions-groups]])
+(require '[game.maps.cell-grid :refer [get-cell-grid]])
 
 ; + verteilt etwas am boden (schau ob net auf blocked gegend?!)
 (let [dropweights {"Mana-Potion" 7

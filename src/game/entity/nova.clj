@@ -1,13 +1,15 @@
 (ns game.entity.nova
-  (:require [engine.core :refer [make-counter ratio]]
-            [game.utils.geom :as geom])
-  (:use clojure.set
-        utils.core
-        engine.render
-        game.settings
-        (game.components core render
-                         [position :only (position-component)]
-                         [destructible :only (deal-dmg get-destructible-bodies)])))
+  (:require
+    [engine.core :refer [make-counter ratio]]
+    [game.utils.geom :as geom]
+    [game.components.position :refer [position-component]]
+    [game.components.destructible :refer [deal-dmg get-destructible-bodies]]
+    [clojure.set :refer [union]]
+    [utils.core :refer [runmap update-in!]]
+    [engine.render :refer [render-centered-shape rgbcolor]]
+    [game.settings :refer [in-pixel]]
+    [game.components.core :refer [active add-to-removelist create-comp create-entity create-entity-no-init defentity get-component update-counter!]]
+    [game.components.render :refer [render-on-map single-animation-component]]))
 
 (defn- circle-debug-comp []
   (let [color (rgbcolor :r 0.6 :a 0.6)]

@@ -1,14 +1,22 @@
 (ns game.components.body-render
-  (:require [game.debug-settings :as debug]
-            [game.utils.geom :as geom]
-            [engine.render :as color])
-  (:use utils.core
-        [game.utils.tilemap :only (screenpos-of-tilepos)]
-        (engine core input render)
-        (game settings mouseoverbody)
-        (game.components core body destructible render ingame-loop)
-        (game.components.skills core melee)
-        game.utils.lightning)
+  (:require
+    [game.debug-settings :as debug]
+    [game.utils.geom :as geom]
+    [engine.render :as color :refer [create-image draw-image draw-rect draw-shape fill-rect get-frame render-readable-text rgbcolor set-color]]
+    [game.utils.tilemap :refer [screenpos-of-tilepos]]
+    [utils.core :refer [def- find-first get-ratio]]
+    [engine.core :refer [defpreload ratio]]
+    engine.input
+    [game.settings :refer [debug-mode in-pixel]]
+    [game.mouseoverbody :refer [get-mouseover-body]]
+    [game.components.core :refer [get-component get-components get-entity get-half-pxh get-half-pxw get-half-width get-position is-player?]]
+    game.components.body
+    [game.components.destructible :refer [destructible? get-hp]]
+    [game.components.render :refer [current-animation rendering]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [game.components.skills.core :refer [get-active-skill get-skill is-attacking?]]
+    [game.components.skills.melee :refer [body-in-melee-range? melee-puffer start-melee-puffer]]
+    [game.utils.lightning :refer [active-lightning]])
   (:import (org.newdawn.slick Color Image)))
 
 (defn- melee-debug-info [g p body]

@@ -1,5 +1,5 @@
 (ns mapgen.utils
-  (:use data.grid2d))
+  (:require [data.grid2d :refer [create-grid get-4-neighbour-positions get-8-neighbour-positions height transform width]]))
 
 (defn scalegrid [grid factor]
   (create-grid (* (width grid) factor)

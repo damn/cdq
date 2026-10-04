@@ -1,9 +1,12 @@
 (ns game.tools.neighbourvalues.greenwalls
-  (:use data.grid2d
-        utils.core
-        (engine core render)
-        game.utils.random
-        (game.tools transitiontilemaker tiledmap-grid-convert)))
+  (:require
+    data.grid2d
+    [utils.core :refer [def-]]
+    [engine.core :refer [defpreload]]
+    [engine.render :refer [spritesheet]]
+    [game.utils.random :refer [if-chance]]
+    [game.tools.transitiontilemaker :refer [get-transition-tile-value]]
+    [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi]]))
 
 ; needs a grid scaled x2 at least and nil cells behind other walls; also remove NADS & single cells
 

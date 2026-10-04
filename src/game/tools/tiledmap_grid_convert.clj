@@ -1,6 +1,7 @@
 (ns game.tools.tiledmap-grid-convert
-  (:use data.grid2d
-        utils.prxml)
+  (:require
+    [data.grid2d :refer [height width]]
+    [utils.prxml :refer [xml-str]])
   (:import (org.newdawn.slick.tiled TiledMap TileSet)))
 
 (defn convert-to-localid [[x y] sheetw]

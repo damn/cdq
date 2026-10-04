@@ -1,16 +1,16 @@
 (ns game.ingame-gui
-  (:require [engine.render :as color]
-            game.state.ids)
-  (:use utils.core
-        (engine input
-                core
-                [statebasedgame :only (enter-state)]
-                render)
-        [game.utils.geom :only (point-in-rect?)]
-        game.settings
-        (game.components [ingame-loop :only (ingame-loop-comp)]
-                         [render :only (rendering)]
-                         [core :only (active)])))
+  (:require
+    [engine.render :as color :refer [create-image draw-image draw-rect fill-rect get-dimensions render-readable-text rgbcolor]]
+    game.state.ids
+    [engine.statebasedgame :refer [enter-state]]
+    [game.utils.geom :refer [point-in-rect?]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [game.components.render :refer [rendering]]
+    [game.components.core :refer [active]]
+    [utils.core :refer [def- deflazygetter]]
+    [engine.input :refer [get-mouse-pos is-key-pressed? is-leftm-consumed? try-consume-leftm-pressed]]
+    [engine.core :refer [defpreload get-defaultfont get-text-height get-text-width initialize update]]
+    [game.settings :refer [get-setting screen-height]]))
 
 (def- controls-hotkey :H)
 (def skillmenu-hotkey :S)

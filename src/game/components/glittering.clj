@@ -1,9 +1,10 @@
 (ns game.components.glittering
-  (:require [engine.core :refer [make-counter update update-finally-merge]])
-  (:use
-    utils.core
-    engine.render
-    (game.components core render)))
+  (:require
+    [engine.core :refer [make-counter update update-finally-merge]]
+    [utils.core :refer [assoc-in!]]
+    [engine.render :refer [folder-animation is-stopped? render-centered-animation restart]]
+    [game.components.core :refer [active defcomponent]]
+    [game.components.render :refer [render-on-map]]))
 
 (defcomponent glittering []
   {:counter (make-counter 2000)

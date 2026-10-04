@@ -1,10 +1,17 @@
 (ns mapgen.test
-  (:require [engine.render :as color])
-  (:use data.grid2d
-        utils.core
-        (engine core input render)
-        game.utils.random
-        (mapgen cave spawn-spaces cellular nad utils populate))
+  (:require
+    [engine.render :as color :refer [create-empty-image draw-grid draw-string fill-rect rgbcolor set-color]]
+    [data.grid2d :refer [height posis width]]
+    [utils.core :refer [assoc-ks def-]]
+    [engine.core :refer [start-slick-basicgame]]
+    [engine.input :refer [get-mouse-pos is-key-pressed?]]
+    [game.utils.random :refer [create-seed]]
+    [mapgen.cave :refer [cave-gridgen]]
+    mapgen.spawn-spaces
+    [mapgen.cellular :refer [calculate-regions cellular-automata-gridgen connect-regions flood-fill]]
+    [mapgen.nad :refer [fix-not-allowed-diagonals get-nads mark-nads]]
+    [mapgen.utils :refer [fill-single-cells wall-at?]]
+    [mapgen.populate :refer [get-populated-grid-posis get-rand-end-posi]])
   (:import java.util.Random))
 
 (def- grid-colors {:wall      (rgbcolor :r 0.2 :g 0.2)
@@ -105,7 +112,7 @@
 (defn- flood-fill-distances-heatmap []
   (color-flood-fill-heatmap @current-grid (get-mouse-tile-pos)))
 
-(use '[mapgen.findpath :only (find-path)])
+(require '[mapgen.findpath :refer [find-path]])
 
 (defn- flood-fill-from-start-to-end-path []
   (let [start-posi (get-mouse-tile-pos)
@@ -119,7 +126,7 @@
       (assoc-ks path-posis color/white)
       (assoc-ks stuff-posis color/red))))
 
-(use 'mapgen.prebuilt-placement)
+(require '[mapgen.prebuilt-placement :refer [is-5x5-walls-entrance?]])
 
 (defn- show-possible-room-locations []
   (let [[room entrance] (rand-nth

@@ -1,10 +1,10 @@
 (ns game.skills-core
-  (:use
-    [game.test.utils :only (with-private-fns)]
-    (clojure test)
-    [utils.core :only (mapvals)]
-    (game.components.skills core)
-    [engine.core :only (make-counter)]))
+  (:require
+    [game.test.utils :refer [with-private-fns]]
+    [utils.core :refer [mapvals]]
+    [engine.core :refer [make-counter]]
+    [clojure.test :refer [deftest is]]
+    game.components.skills.core))
 
 (with-private-fns [game.components.skills.core [update-cooldown
                                                 update-cooldowns]]

@@ -1,11 +1,12 @@
 (ns game.tests.target-in-front
-  (:require [engine.render :as color])
-  (:use
-    (engine render)
-    game.settings
-    (game.components core body render)
-    (game.utils front-of-body-shape)
-    game.components.skills.melee))
+  (:require
+    [engine.render :as color :refer [draw-shape set-color]]
+    [game.settings :refer [tile-width]]
+    [game.components.core :refer [defcomponent get-component get-half-pxw get-position]]
+    game.components.body
+    [game.components.render :refer [render-on-map translate-position]]
+    [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
+    [game.components.skills.melee :refer [get-attackable-target-in-front melee-puffer]]))
 
 (defn- make-render-shape [body]
   (let [posi (-> body get-position translate-position)

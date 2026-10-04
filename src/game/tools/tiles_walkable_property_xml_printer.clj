@@ -1,5 +1,5 @@
 (ns game.tools.tiles-walkable-property-xml-printer
-  (:use utils.prxml))
+  (:require [utils.prxml :refer [xml-str]]))
 
 (defn tiletoxml [id walkable]
   {:pre [(#{:air :ground :unwalkable} walkable)]}
@@ -10,7 +10,7 @@
 (println (apply str (interpose "\n" (map #(tiletoxml % :ground) (range 37)))))
 
 ; stelle image dar
-; mit einem bestimmten grid drübergezeichnet
-; selektiere 1 oder mehrere tiles und ermögliche deselektieren
-; wähle ground/air/nix als icons und visualisiere auch über jedem
-; speichern möglich als *.tsx
+; mit einem bestimmten grid drï¿½bergezeichnet
+; selektiere 1 oder mehrere tiles und ermï¿½gliche deselektieren
+; wï¿½hle ground/air/nix als icons und visualisiere auch ï¿½ber jedem
+; speichern mï¿½glich als *.tsx

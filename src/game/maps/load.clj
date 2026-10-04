@@ -1,11 +1,12 @@
 (ns game.maps.load
-  (:require [game.maps.data :as data]
-            game.player.core
-            game.utils.lightning)
-  (:use [utils.core :only (log translate-to-tile-middle)]
-        game.session
-        game.maps.tiledmaps
-        [game.monster.spawn :only (try-spawn)]))
+  (:require
+    [game.maps.data :as data]
+    game.player.core
+    game.utils.lightning
+    [utils.core :refer [log translate-to-tile-middle]]
+    [game.monster.spawn :refer [try-spawn]]
+    game.session
+    [game.maps.tiledmaps :refer [get-tileproperties]]))
 
 (defn- place-entities [tiled-map]
   ; looping through all tiles of the map 3 times. but dont do it in 1 loop because player needs to be initialized before all monsters!

@@ -1,5 +1,5 @@
 (ns mapgen.findpath
-  (:use [data.grid2d :only (width height)])
+  (:require [data.grid2d :refer [height width]])
   (:import (org.newdawn.slick.util.pathfinding TileBasedMap AStarPathFinder Mover Path)))
 
 (defn- get-pathposi-seq [^Path thepath]

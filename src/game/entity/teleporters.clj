@@ -1,14 +1,20 @@
 (ns game.entity.teleporters
-  (:require [engine.render :as color])
-  (:use
+  (:require
+    [engine.render :as color :refer [create-animation get-dimensions get-frame spritesheet-frames]]
+    [game.maps.data :refer [current-map do-in-map get-pretty-name]]
     utils.core
-    (engine core render)
-    (game media settings)
-    (game.utils lightning)
-    (game.maps
-      [data :only (do-in-map current-map get-pretty-name)]
-      minimap mapchange)
-    (game.components core position body render misc pressable)))
+    [engine.core :refer [play-sound]]
+    game.media
+    game.settings
+    game.utils.lightning
+    [game.maps.minimap :refer [show-on-minimap]]
+    [game.maps.mapchange :refer [queue-map-change]]
+    [game.components.core :refer [create-comp create-entity create-entity-no-init defentity]]
+    [game.components.position :refer [position-component]]
+    [game.components.body :refer [create-body]]
+    [game.components.render :refer [single-animation-component]]
+    game.components.misc
+    [game.components.pressable :refer [pressable-component]]))
 
 (defentity create-teleporter
   [:position :target-map :target-posi :animation

@@ -1,11 +1,15 @@
 (ns game.maps.add
-  (:require [game.maps.data :as data]
-            [game.settings :refer [get-setting]]
-            game.utils.lightning)
-  (:use utils.core
-        game.session
-        (game.maps cell-grid contentfields minimap tiledmaps)
-        data.grid2d))
+  (:require
+    [game.maps.data :as data]
+    [game.settings :refer [get-setting]]
+    game.utils.lightning
+    [utils.core :refer [def- defnks log translate-to-tile-middle xor]]
+    game.session
+    [game.maps.cell-grid :refer [create-grid-from-gen-grid create-jcell-grid]]
+    [game.maps.contentfields :refer [create-mapcontentfields]]
+    [game.maps.minimap :refer [create-minimap-image]]
+    [game.maps.tiledmaps :refer [construct-tiledmap create-cell-grid-from-tiled-map get-player-entity-start-position]]
+    [data.grid2d :refer [create-grid height width]]))
 
 (defnks add-maps-data
   [:map-key :cell-grid :load-content :pretty-name :rand-item-max-lvl :start-position

@@ -1,10 +1,13 @@
 (ns game.player.animation
-  (:use
-    [utils.core :only (assoc-in!)]
-    engine.render
-    (game.components core render destructible)
-    (game.components.skills core melee)
-    game.player.skill.skillmanager))
+  (:require
+    [utils.core :refer [assoc-in!]]
+    [engine.render :refer [create-animation create-image folder-animation]]
+    [game.components.core :refer [get-component player-body]]
+    [game.components.render :refer [animation-component]]
+    [game.components.destructible :refer [is-dead?]]
+    [game.components.skills.core :refer [is-attacking?]]
+    [game.components.skills.melee :refer [get-player-skill-animation-key]]
+    [game.player.skill.skillmanager :refer [get-current-standard-skill]]))
 
 (defn- control [body]
   (let [is-moving (:play-move-animation (get-component body :movement))

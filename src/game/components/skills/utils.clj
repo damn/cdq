@@ -1,15 +1,16 @@
 (ns game.components.skills.utils
-  (:require [engine.render :as color])
-  (:use
+  (:require
+    [engine.render :as color :refer [create-image render-centered-image]]
+    [game.components.position :refer [position-component]]
+    [game.utils.msg-to-player :refer [show-msg-to-player]]
+    [game.utils.raycast :refer [ray-blocked?]]
     utils.core
-    [engine.render :only (render-centered-image create-image)]
-    game.mouseoverbody
-    (game.components core render misc
-                     [position :only (position-component)])
-    (game.utils geom
-      [msg-to-player :only (show-msg-to-player)]
-      [raycast :only (ray-blocked?)])
-    game.components.skills.core))
+    [game.mouseoverbody :refer [saved-mouseover-body]]
+    [game.components.core :refer [add-to-removelist create-comp create-entity create-entity-no-init defentity exists? get-position player-body]]
+    [game.components.render :refer [render-on-map]]
+    [game.components.misc :refer [delete-after-duration-component]]
+    [game.utils.geom :refer [entity-direction-vector get-vector-to-mouse-coords]]
+    [game.components.skills.core :refer [get-skill-use-mouse-pos get-skill-use-mouse-tile-pos]]))
 
 (defentity ^:private cross [position image]
   (position-component position)

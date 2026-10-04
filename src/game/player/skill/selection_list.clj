@@ -1,14 +1,17 @@
 (ns game.player.skill.selection-list
-  (:use utils.core
-        [engine.core :only (initialize)]
-        engine.render
-        (game settings ingame-gui session)
-        (game.components core
-                         [render :only (rendering)]
-                         [ingame-loop :only (ingame-loop-comp)])
-        game.components.skills.core
-        (game.player.skill skillmanager
-                           [learnable :only (render-skillbutton-tooltip)])))
+  (:require
+    [engine.core :refer [initialize]]
+    [game.components.render :refer [rendering]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [game.player.skill.learnable :refer [render-skillbutton-tooltip]]
+    [utils.core :refer [def- find-first runmap]]
+    [engine.render :refer [fill-rect render-readable-text rgbcolor]]
+    [game.settings :refer [screen-height]]
+    [game.ingame-gui :refer [get-absolute-posi get-bounds ingamestate-display is-visible? make-imgbutton mouseover? remove-guicomponent set-visible]]
+    [game.session :refer [atom-session]]
+    [game.components.core :refer [active]]
+    [game.components.skills.core :refer [is-cooling-down?]]
+    [game.player.skill.skillmanager :refer [create-skill-icon get-selected-skill get-skills-for-mousebutton mousebuttons set-selected-skill]]))
 
 (declare selected-skill-buttons skill-selection-hotkeys)
 

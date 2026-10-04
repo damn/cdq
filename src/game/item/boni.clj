@@ -1,9 +1,11 @@
 (ns game.item.boni
-  (:use
-    utils.core
-    game.utils.random
-    (game.components body-effects-impl movement destructible)
-    game.player.speed))
+  (:require
+    [utils.core :refer [def- find-prefixed-var inc-or-dec-max readable-number]]
+    [game.utils.random :refer [rand-int-between]]
+    game.components.body-effects-impl
+    game.components.movement
+    [game.components.destructible :refer [get-player-armor]]
+    [game.player.speed :refer [incr-attack-speed incr-casting-speed incr-move-speed]]))
 
 ; lvl-stats mit count 3 hier �berall explizit -> mach von variable abh�ngig
 

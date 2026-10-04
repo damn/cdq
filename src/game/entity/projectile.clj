@@ -1,8 +1,13 @@
 (ns game.entity.projectile
-  (:use
-    [utils.core :only (xor)]
-    (engine core render)
-    (game.components core position [body :only (create-body)] render misc)))
+  (:require
+    [utils.core :refer [xor]]
+    [game.components.body :refer [create-body]]
+    [engine.core :refer [defpreload play-sound]]
+    [engine.render :refer [create-animation folder-frames]]
+    [game.components.core :refer [create-comp create-entity create-entity-no-init defentity get-position]]
+    [game.components.position :refer [position-component]]
+    [game.components.render :refer [animation-entity single-animation-component]]
+    [game.components.misc :refer [delete-after-duration-component]]))
 
 (defpreload ^:private projectile-hits-wall-frames (folder-frames "effects/ember/"))
 

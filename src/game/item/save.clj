@@ -1,9 +1,12 @@
 (ns game.item.save
-  (:require [game.session :as session])
-  (:use utils.core
-        [engine.render :only (rgbcolor)]
-        (game.item cells instance boni)
-        data.grid2d))
+  (:require
+    [game.session :as session]
+    [engine.render :refer [rgbcolor]]
+    [utils.core :refer [def-]]
+    [game.item.cells :refer [add-item-to-cell empty-all-item-grids get-item item-grids item-in-hand set-item-in-hand]]
+    [game.item.instance :refer [create-item-instance]]
+    [game.item.boni :refer [create-equip-boni-save load-equip-boni-save]]
+    [data.grid2d :refer [cells]]))
 
 ; maybe have this information in the items
 (def- item-save-keys [:name :sprite-idx :count :lvl :base-armor :base-dmg

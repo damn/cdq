@@ -1,20 +1,36 @@
 (ns game.maps.impl
-  (:require [game.tools.transitiontilemaker16 :as gauntletly]
-            (game.maps add data))
-  (:use data.grid2d
-        utils.core
-        (engine core render)
-        (game settings media)
-        (game.components core position)
-        (game.entity chest teleporters door)
-        game.player.core
-        game.player.skill.selection-list
-        (game.monster spawn)
-        (game.maps cell-grid tiledmaps)
-        (game.item instance)
-        (game.utils random lightning)
-        game.tools.tiledmap-grid-convert
-        (mapgen utils cave spawn-spaces populate nad cellular prebuilt-placement module))
+  (:require
+    [game.tools.transitiontilemaker16 :as gauntletly]
+    game.maps.add
+    game.maps.data
+    [data.grid2d :refer [mapgrid->vectorgrid posis transform]]
+    [utils.core :refer [def- defnks log translate-to-tile-middle]]
+    engine.core
+    [engine.render :refer [get-sprite spritesheet]]
+    game.settings
+    game.media
+    game.components.core
+    game.components.position
+    [game.entity.chest :refer [create-chest]]
+    [game.entity.teleporters :refer [static-teleporter]]
+    [game.entity.door :refer [make-door]]
+    game.player.core
+    game.player.skill.selection-list
+    [game.monster.spawn :refer [bloodcaves-groups spawn-monsters tech-groups techgy-groups try-spawn]]
+    game.maps.cell-grid
+    [game.maps.tiledmaps :refer [construct-tiledmap create-grid-from-tiled-map]]
+    game.item.instance
+    [game.utils.random :refer [rand-int-between]]
+    game.utils.lightning
+    [game.tools.tiledmap-grid-convert :refer [get-spriteidx]]
+    [mapgen.utils :refer [fill-single-cells scalegrid undefined-value-behind-walls]]
+    [mapgen.cave :refer [cave-gridgen]]
+    mapgen.spawn-spaces
+    [mapgen.populate :refer [get-populated-grid-posis]]
+    [mapgen.nad :refer [fix-not-allowed-diagonals]]
+    [mapgen.cellular :refer [cellular-automata-gridgen connect-regions]]
+    [mapgen.prebuilt-placement :refer [is-5x5-walls-entrance?]]
+    [mapgen.module :refer [make-module-based-grid]])
   (:import java.util.Random))
 
 ; created&loaded in the order defined here

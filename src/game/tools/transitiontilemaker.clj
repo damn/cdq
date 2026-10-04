@@ -1,7 +1,7 @@
 (ns game.tools.transitiontilemaker
-  (:use
-    utils.core
-    data.grid2d))
+  (:require
+    [utils.core :refer [+perm def- defnks safe-merge]]
+    [data.grid2d :refer [get-8-neighbour-positions]]))
 
 ; this transitiontilemaker works with scaledx2 maps and utilizes just 12 different tiles (else 256 different tiles would be needed)
 ; so for each of these 12 tiles correspond to a number of the 256 combinations

@@ -1,12 +1,14 @@
 (ns game.utils.raycast
-  (:require [engine.render :as color])
-  (:use
+  (:require
+    [engine.render :as color :refer [draw-line set-color]]
     utils.core
-    (engine input render)
-    (game settings)
-    (game.components core)
-    (game.utils geom tilemap)
-    (game.maps cell-grid data))
+    [engine.input :refer [get-mouse-pos]]
+    [game.settings :refer [half-screen-h half-screen-w]]
+    [game.components.core :refer [get-position player-body]]
+    [game.utils.geom :refer [add direction-vector get-normal-vectors scale vec-posi vector2f]]
+    [game.utils.tilemap :refer [get-mouse-tile-pos screenpos-of-tilepos]]
+    [game.maps.cell-grid :refer [get-jcell-grid get-map-h get-map-w]]
+    game.maps.data)
   (:import game.utils.RayCaster))
 
 ; mit jcell-grid weil performanter als andere probierte l�sung: tilebasedmap zugriff auf get-cell bei jedem call to blocked.

@@ -1,7 +1,7 @@
 (ns game.utils-misc
-  (:use
-    (clojure test)
-    (utils core)))
+  (:require
+    [clojure.test :refer [deftest is]]
+    [utils.core :refer [define-order order-contains? sort-by-order]]))
 
 (deftest test-order
   (is

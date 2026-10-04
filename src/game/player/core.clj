@@ -1,17 +1,33 @@
 (ns game.player.core
-  (:require [engine.render :as color]
-            game.components.update
-            game.maps.data)
-  (:use utils.core
-        (engine core input)
-        (game.maps contentfields [minimap :only (show-on-minimap)])
-        (game.components core active position movement misc render destructible body body-effects item-boni)
-        game.item.cells
-        game.components.movement.ai.potential-field
-        [game.components.skills.core :only (reset-skills)]
-        (game.player movement animation)
-        (game.player.skill skillmanager learnable)
-        (game.utils geom msg-to-player [lightning :only (light-component)])))
+  (:require
+    [engine.render :as color]
+    game.components.update
+    game.maps.data
+    [game.maps.minimap :refer [show-on-minimap]]
+    [game.components.skills.core :refer [reset-skills]]
+    [game.utils.lightning :refer [light-component]]
+    [utils.core :refer [->! assoc-in! set-to-max when-seq]]
+    [engine.core :refer [play-sound]]
+    engine.input
+    game.maps.contentfields
+    [game.components.core :refer [add-to-removelist create-entity create-entity-no-init defentity get-component player-body]]
+    [game.components.active :refer [switch-state]]
+    [game.components.position :refer [position-component]]
+    game.components.movement
+    [game.components.misc :refer [mana-regen-component rotation-component set-rotation-angle]]
+    game.components.render
+    [game.components.destructible :refer [destructible-component player-start-hp]]
+    [game.components.body :refer [create-body teleport]]
+    [game.components.body-effects :refer [get-sub-entities]]
+    [game.components.item-boni :refer [item-boni-component]]
+    [game.item.cells :refer [get-inventory-cells-with-item-name remove-item-from-cell]]
+    [game.components.movement.ai.potential-field :refer [potential-field-component]]
+    [game.player.movement :refer [player-movement-component]]
+    [game.player.animation :refer [player-animation]]
+    [game.player.skill.skillmanager :refer [create-player-skillmanager]]
+    game.player.skill.learnable
+    game.utils.geom
+    [game.utils.msg-to-player :refer [show-msg-to-player]]))
 
 ; use require and remove the -player prefixes or suffixes here
 

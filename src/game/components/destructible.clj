@@ -1,10 +1,18 @@
 (ns game.components.destructible
-  (:use
-    utils.core
-    (engine core render)
-    game.screenshake
-    (game.components core position misc body render [shield :only (shield-try-consume-damage)] body-effects sleeping)
-    (game.utils random)
+  (:require
+    [game.components.shield :refer [shield-try-consume-damage]]
+    [utils.core :refer [assoc-in! increase-min-max-val lower-than-max? min-max-val rest-to-max set-to-max update-in! variance-val variance-val-str]]
+    [engine.core :refer [defpreload play-sound]]
+    [engine.render :refer [create-animation create-image rgbcolor spritesheet-frames]]
+    [game.screenshake :refer [shake-screen]]
+    [game.components.core :refer [add-to-removelist defcomponent get-component get-position get-side is-player? player-body]]
+    game.components.position
+    game.components.misc
+    [game.components.body :refer [get-touched-bodies is-affectable?]]
+    [game.components.render :refer [animation-entity image-render-component show-gains-hp-effect show-gains-mana-effect show-string-effect]]
+    [game.components.body-effects :refer [defeffectentity]]
+    [game.components.sleeping :refer [wake-up]]
+    [game.utils.random :refer [percent-chance rand-float-between rand-int-between]]
     game.components.skills.core))
 
 (defeffectentity create-leech-visuals [body img]
@@ -120,7 +128,7 @@
       (variance-val (* hp-multiplier player-standard-dmg) 0.5))
     (get-monster-armor armor-perc-reduce)))
 
-(defpreload ^:private explosion-frames (spritesheet-frames "effects/expsmall.png" 20 20))
+(defpreload explosion-frames (spritesheet-frames "effects/expsmall.png" 20 20))
 (defpreload ^:private blood-frames (spritesheet-frames "effects/blood.png" 20 20))
 
 (defn- create-hit-effect [body]

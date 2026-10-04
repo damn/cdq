@@ -1,10 +1,14 @@
 (ns game.components.movement
-  (:use
-    utils.core
-    (game [settings :only (tile-width)])
-    (game.components core body position [update :only (max-delta)])
-    (game.maps cell-grid)
-    (game.utils geom raycast)))
+  (:require
+    [game.settings :refer [tile-width]]
+    [game.components.update :refer [max-delta]]
+    [utils.core :refer [assoc-in! find-first runmap update-in!]]
+    [game.components.core :refer [active add-to-removelist defcomponent get-component get-half-height get-half-width get-id get-movement-type get-position get-side is-player?]]
+    [game.components.body :refer [calc-touched-cells get-body-bounds get-other-solid-bodies get-to-check-tiles min-solid-pxsize update-occupied-cell update-touched-cells]]
+    [game.components.position :refer [swap-position!]]
+    [game.maps.cell-grid :refer [cell-blocked? get-cells]]
+    [game.utils.geom :refer [get-touched-tiles length normalise normalised? vec-posi vector2f]]
+    game.utils.raycast))
 
 (defn- create-new-position
   [delta [vx vy] [old-x old-y] speed]
@@ -52,14 +56,14 @@
       ; checks if colliding with other solid bodies -> rename?
       (seq (get-other-solid-bodies position body touched-cells)))))
 
-(use 'clojure.set)
+(require '[clojure.set :refer [difference]])
 
 (comment
   ; f�r testen wie oft try-moved/update-posi-def average ist. -> so 1.4 ca.
   (def try-moved (atom 0))
   (def update-posi-def (atom 0))
-  (use 'game.components.ingame-loop)
-  (use 'game.components.render)
+  (require '[game.components.ingame-loop :refer [ingame-loop-comp]])
+  (require '[game.components.render :refer [rendering]])
   (ingame-loop-comp :debug-infos
     (rendering :above-gui [g c]
       (render-readable-text g 50 90 (str "try-moved  " @try-moved))

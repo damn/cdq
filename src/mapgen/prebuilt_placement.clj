@@ -1,7 +1,8 @@
 (ns mapgen.prebuilt-placement
-  (:require [data.grid2d :as grid])
-  (:use [game.utils.geom :only (tiles-inside-rect)]
-        [mapgen.utils :only (wall-at?)])
+  (:require
+    [data.grid2d :as grid]
+    [game.utils.geom :refer [tiles-inside-rect]]
+    [mapgen.utils :refer [wall-at?]])
   (:import data.grid2d.VectorGrid))
 
 (defn- is-5x5-walls-space? [center grid]

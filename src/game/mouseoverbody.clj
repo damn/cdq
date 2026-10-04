@@ -1,11 +1,19 @@
 (ns game.mouseoverbody
-  (:use
-    utils.core
-    (engine input render)
-    (game settings session [ingame-gui :only (mouse-inside-some-gui-component?)])
-    (game.components core body destructible render ingame-loop)
+  (:require
+    [game.ingame-gui :refer [mouse-inside-some-gui-component?]]
+    [utils.core :refer [find-first sort-by-order]]
+    [engine.input :refer [is-leftbutton-down?]]
+    engine.render
+    [game.settings :refer [debug-mode]]
+    [game.session :refer [atom-session]]
+    [game.components.core :refer [active exists? get-components is-player?]]
+    [game.components.body :refer [get-bodies-at-position on-screen-and-in-sight?]]
+    [game.components.destructible :refer [attackable-by-player?]]
+    [game.components.render :refer [render-on-map-order]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
     game.maps.cell-grid
-    (game.utils geom tilemap)))
+    game.utils.geom
+    [game.utils.tilemap :refer [get-mouse-tile-pos]]))
 
 (defn- get-current-mouseover-body []
   (when-not (mouse-inside-some-gui-component?)

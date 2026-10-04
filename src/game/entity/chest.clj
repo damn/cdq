@@ -1,11 +1,18 @@
 (ns game.entity.chest
-  (:require [engine.render :as color]
-            game.utils.lightning)
-  (:use (engine core render)
-        game.media
-        (game.components core position body pressable render)
-        (game.item instance instance-impl)
-        (game.maps data minimap)))
+  (:require
+    [engine.render :as color]
+    game.utils.lightning
+    [engine.core :refer [play-sound]]
+    [game.media :refer [get-itemsprite]]
+    [game.components.core :refer [add-to-removelist create-comp create-entity create-entity-no-init defentity]]
+    [game.components.position :refer [position-component]]
+    [game.components.body :refer [create-body]]
+    [game.components.pressable :refer [pressable-component]]
+    [game.components.render :refer [image-render-component]]
+    [game.item.instance :refer [create-item-body]]
+    [game.item.instance-impl :refer [create-rand-item]]
+    [game.maps.data :refer [get-current-map-data]]
+    [game.maps.minimap :refer [show-on-minimap]]))
 
 (defentity ^:private create-chest* [position item-name]
   (position-component position)

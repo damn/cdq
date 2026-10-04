@@ -2,16 +2,17 @@
   "Assumption: The map contains no not-allowed diagonal cells, diagonal wall cells where both
   adjacent cells are walls and blocked.
   (important for wavefront-expansion and field-following)"
-  (:require [engine.render :as color])
-  (:use data.grid2d
-        utils.core
-        engine.render
-        game.settings
-        (game.components core body
-                         [position :only (get-tile)]
-                         [movement :only (movement-component)])
-        game.maps.cell-grid
-        game.utils.geom))
+  (:require
+    [engine.render :as color :refer [defcolor draw-string fill-rect rgbcolor set-color]]
+    [game.components.position :refer [get-tile]]
+    [game.components.movement :refer [movement-component]]
+    [data.grid2d :refer [cells get-8-neighbour-positions]]
+    [utils.core :refer [assoc-in! def- diagonal-direction? genmap positions runmap when-seq]]
+    [game.settings :refer [tile-height tile-width]]
+    [game.components.core :refer [defcomponent get-component get-position player-body]]
+    [game.components.body :refer [inside-cell?]]
+    [game.maps.cell-grid :refer [add-cell-blocks-changed-listener cached-get-adjacent-cells cell-blocked? get-cell get-cell-grid is-diagonal? occupied-by-other?]]
+    [game.utils.geom :refer [direction-vector get-distance get-vector-to-player]]))
 
 ;; Standart Potential Field algorithm (brute force)
 

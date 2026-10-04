@@ -6,45 +6,70 @@
            (org.newdawn.slick.gui TextField)
            (org.newdawn.slick.loading LoadingList DeferredResource)
            org.newdawn.slick.tiled.TiledMap)
-  (:require [engine.input :as input]
-            [engine.render :as g]
-            [engine.statebasedgame :as state]
-            [game.debug-settings :as debug]
-            [game.session :as sess]
-            [game.state.ids :as ids]
-            [game.components.update :as cupd]
-            game.components.body-render
-            game.components.burrow
-            game.maps.add)
-  (:use
-    [utils.core :as utils]
-    [engine.settings :refer (jar-file?)]
-    (engine core input render statebasedgame)
-    data.grid2d
-    (game settings screenshake media mouseoverbody ingame-gui
-          [status-options :only (status-check-boxes get-text get-state set-state)]
-          [mouse-cursor :only (reset-default-mouse-cursor)])
-    [game.maps.minimap :only (render-minimap show-on-minimap)]
-    (game.maps contentfields cell-grid camera tiledmaps
-               [data :only (iterating-map-dependent-comps get-current-map-data)]
-               [mapchange :only (check-change-map)])
-    (game.components core position body misc render destructible body-effects body-effects-impl
-                     movement ingame-loop active
-                     [sleeping :only (wake-up)]
-                     [shield :only (shield-component)])
-    game.components.movement.ai.potential-field
-    (game.entity nova projectile teleporters)
-    (game.components.skills core melee utils)
-    (game.item cells instance instance-impl)
-    (game.monster defmonster [spawn :only (try-spawn)])
-    game.player.skill.learnable
-    game.player.skill.selection-list
-    game.player.skill.skillmanager
-    game.player.core
-    [game.player.session-data :only (current-character-name get-session-file-character-names)]
-    (game.utils raycast random geom
-      [lightning :only (light-component image-corners set-cached-brightness)]
-      [tilemap :only (get-mouse-tile-pos mouse-int-tile-pos)]))
+  (:require
+    [engine.input :as input :refer [get-mouse-pos is-key-pressed? is-rightm-consumed? try-consume-leftm-pressed try-consume-rightm-pressed update-mousebutton-state]]
+    [engine.render :as g :refer [black create-animation create-image draw-grid draw-image fill-rect folder-animation folder-frames get-dimensions get-scaled-copy get-sprite get-sub-image green orange red render-readable-text reset-transform set-color spritesheet-frames translate white yellow]]
+    [engine.statebasedgame :as state :refer [defgamestate enter-state init-state-based-game state-based-game]]
+    [game.debug-settings :as debug]
+    [game.session :as sess]
+    [game.state.ids :as ids]
+    [game.components.update :as cupd]
+    game.components.body-render
+    game.components.burrow
+    game.maps.add
+    [engine.settings :refer [jar-file?]]
+    [game.status-options :refer [get-state get-text set-state status-check-boxes]]
+    [game.mouse-cursor :refer [reset-default-mouse-cursor]]
+    [game.maps.minimap :refer [render-minimap show-on-minimap]]
+    [game.maps.data :refer [get-current-map-data iterating-map-dependent-comps]]
+    [game.maps.mapchange :refer [check-change-map]]
+    [game.components.sleeping :refer [wake-up]]
+    [game.components.shield :refer [shield-component]]
+    [game.monster.spawn :refer [try-spawn]]
+    [game.player.session-data :refer [current-character-name get-session-file-character-names]]
+    [game.utils.lightning :refer [image-corners light-component set-cached-brightness]]
+    [game.utils.tilemap :refer [get-mouse-tile-pos mouse-int-tile-pos]]
+    [utils.core :as utils :refer [assoc-in! def- defnks get-ratio int-posi lower-than-max? readable-number runmap sort-by-order translate-to-tile-middle update-in! variance-val-str]]
+    [engine.core :refer [app-game-container create-and-start-app-game-container create-sound defpreload fullscreen-supported? get-defaultfont get-line-height get-screen-height get-screen-width init-all initialize make-counter play-sound update]]
+    [data.grid2d :refer [cells height posis width]]
+    [game.settings :refer [debug-mode display-height-in-tiles display-width-in-tiles get-setting half-display-h-in-tiles half-display-w-in-tiles half-screen-h half-screen-w in-tiles init-config! left-offset-in-tiles screen-height screen-scale screen-width tile-height tile-width top-offset-in-tiles version]]
+    [game.screenshake :refer [translate-shake-after-render translate-shake-before-render update-shake]]
+    game.media
+    [game.mouseoverbody :refer [get-mouseover-body]]
+    [game.ingame-gui :refer [char-hotkey close-all-frames frame-screenborder-distance ingamestate-display is-visible? make-checkbox make-frame make-guidisplay make-label make-textbutton mouse-inside-some-gui-component? options-hotkey remove-guicomponent render-guicomponent set-visible some-visible-frame? update-guicomponent]]
+    [game.maps.contentfields :refer [get-entities-in-active-content-fields get-player-content-field-idx]]
+    [game.maps.cell-grid :refer [cell-blocked? get-body-ids get-cell get-cell-grid get-map-h get-map-w]]
+    [game.maps.camera :refer [get-camera-position]]
+    [game.maps.tiledmaps :refer [get-layer-index]]
+    [game.components.core :refer [active add-to-removelist create-comp defcomponent exists? get-component get-components get-id get-position is-player? player-body update-counter! update-removelist]]
+    game.components.position
+    [game.components.body :refer [blocked-location? bodies-in-range? circle-collides? get-bodies-at-position get-dist-to-player on-screen-and-in-sight? teleport]]
+    [game.components.misc :refer [hp-regen-component rotate-to-player rotation-component]]
+    [game.components.render :refer [animation-component animation-entity create-line-render-effect create-lines-render-effect image-render-component render-map-indep-order render-on-map-order rendering single-animation-component translate-position]]
+    [game.components.destructible :refer [calc-effective-spell-dmg deal-dmg explosion-frames get-armor get-armor-reduce-info get-destructible-bodies get-hp is-dead? set-hp-to-max]]
+    game.components.body-effects
+    [game.components.body-effects-impl :refer [add-psi-charge aoe-armor-reducer consume-psi-charges create-bullettime-effects current-psi-charges dmg-effect max-psi-charges slowdown-effect stun stun-collision-effect]]
+    [game.components.movement :refer [movement-component projectile-movement-component]]
+    [game.components.ingame-loop :refer [get-ingame-loop-entities ingame-loop-comp]]
+    [game.components.active :refer [blocks-component]]
+    [game.components.movement.ai.potential-field :refer [calculate-mouseover-body-colors path-to-player-movement potential-field-player-following render-potential-field-following-mouseover-info render-potential-field-info]]
+    [game.entity.nova :refer [nova-effect]]
+    [game.entity.projectile :refer [fire-projectile]]
+    game.entity.teleporters
+    [game.components.skills.core :refer [enough-mana? get-mana get-skill get-skill-use-mouse-tile-pos is-attacking? is-ready? is-usable? skillmanager-component skillmanager-skill standalone-skill]]
+    [game.components.skills.melee :refer [get-current-player-melee-dmg melee-weapon monster-melee-component monster-melee-props player-melee-props]]
+    [game.components.skills.utils :refer [check-line-of-sight get-player-ranged-vector]]
+    [game.item.cells :refer [add-item-to-cell cell-empty-and-allows-item? cell-filled-and-allows-item? empty-item-in-hand get-item get-mouseover-item-cell hks-cells inc-count-of-item? inventory-height inventoryry is-item-in-hand? item-grids item-in-hand item-not-in-use? mouse-over-an-item-cell? remove-item-from-cell remove-one-item set-item-in-hand]]
+    [game.item.instance :refer [create-item-body put-item-on-ground]]
+    [game.item.instance-impl :refer [create-rand-item]]
+    [game.monster.defmonster :refer [defmonster get-monster-properties monsterimage monsterresrc]]
+    [game.player.skill.learnable :refer [deflearnable-skill learnable-skills]]
+    [game.player.skill.selection-list :refer [close-skill-selection-lists some-skill-selection-list-visible?]]
+    [game.player.skill.skillmanager :refer [get-selected-skill]]
+    [game.player.core :refer [player-death try-revive-player]]
+    [game.utils.raycast :refer [is-path-blocked? ray-blocked?]]
+    [game.utils.random :refer [get-rand-weighted-item if-chance percent-chance rand-int-between]]
+    [game.utils.geom :refer [get-angle-to-position get-touched-tiles get-vector-away-from-player get-vector-to-player in-range? normalise rotate-angle-to-angle scale vector-from-angle vector2f]])
   (:gen-class))
 
 ;;; serialization (was game.serialization)
@@ -1699,7 +1724,7 @@ PSI-Explosion
         (monsterteleport-animation target)
         (create-line-render-effect position target 70 :color white)))))
 
-(use 'game.components.ingame-loop)
+(require '[game.components.ingame-loop :refer [ingame-loop-comp]])
 
 (comment
   (let [mlist [:littlespider :xploding-drone :mine :skull-chainsaw :armored-skull :armored-skull2 :ranged :shield-turret :mage-skull :healer :nova-melee :slowdown-caster]]

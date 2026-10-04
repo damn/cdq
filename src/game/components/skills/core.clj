@@ -1,10 +1,14 @@
 (ns game.components.skills.core
-  (:require [engine.core :refer [make-counter update-finally-merge reset]])
-  (:use
-    utils.core
-    (engine core render [input :only (get-mouse-pos is-rightbutton-down? is-leftbutton-down?)])
-    (game.utils tilemap msg-to-player)
-    (game.components core active render)))
+  (:require
+    [engine.core :refer [create-sound make-counter play-sound playonce reset update update-finally-merge]]
+    [engine.input :refer [get-mouse-pos is-leftbutton-down? is-rightbutton-down?]]
+    [utils.core :refer [->! assoc-in! def- defnks lower-than-max? mapvals min-max-val rest-to-max set-to-max split-key-val-and-maps update-in!]]
+    [engine.render :refer [is-stopped?]]
+    [game.utils.tilemap :refer [get-mouse-tile-pos]]
+    [game.utils.msg-to-player :refer [show-msg-to-player]]
+    [game.components.core :refer [active create-comp get-component is-player? update-counter!]]
+    [game.components.active :refer [blocks-component switch-state]]
+    [game.components.render :refer [current-animation show-gains-mana-effect]]))
 
 (defn is-ready?        [{state :state}] (= state :ready))
 (defn is-attacking?    [{state :state}] (= state :attacking))

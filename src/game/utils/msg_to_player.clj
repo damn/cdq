@@ -1,11 +1,12 @@
 (ns game.utils.msg-to-player
-  (:use
-    utils.core
-    [engine.render :only (render-readable-text)]
-    (game session [settings :only (half-screen-w half-screen-h)])
-    (game.components core
-      [render :only (rendering)]
-      ingame-loop)))
+  (:require
+    [engine.render :refer [render-readable-text]]
+    [game.settings :refer [half-screen-h half-screen-w]]
+    [game.components.render :refer [rendering]]
+    [utils.core :refer [create-counter reset-counter! update-counter]]
+    [game.session :refer [atom-session]]
+    [game.components.core :refer [active]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]))
 
 (def ^:private message (atom nil))
 (def message-session (atom-session message :save-session false))

@@ -1,10 +1,15 @@
 (ns game.components.pressable
-  (:require [engine.render :as color])
-  (:use
-    (engine render input)
-    (game settings mouseoverbody)
-    (game.utils tilemap)
-    (game.components core body ingame-loop render [body-render :only (body-outline-height)])))
+  (:require
+    [engine.render :as color :refer [render-readable-text]]
+    [game.components.body-render :refer [body-outline-height]]
+    [engine.input :refer [try-consume-leftm-pressed]]
+    game.settings
+    [game.mouseoverbody :refer [get-mouseover-body]]
+    [game.utils.tilemap :refer [screenpos-of-tilepos]]
+    [game.components.core :refer [active defcomponent get-component get-half-pxh get-position player-body]]
+    [game.components.body :refer [bodies-in-range?]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [game.components.render :refer [rendering]]))
 
 (defcomponent pressable [:mouseover-text :pressed & {color :color}]
   {:color color})

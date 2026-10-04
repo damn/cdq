@@ -1,19 +1,29 @@
 (ns game.item.instance-impl
-  (:use
-    utils.core
-    (engine core render)
-    (game media mouseoverbody)
-    (game.maps [data :only (current-map)])
-    (game.entity nova projectile)
-    (game.utils geom random msg-to-player)
-    (game.components render
-      [movement :only (projectile-movement-component)]
-      [body-effects-impl :only (battle-drugs dmg-effect)]
-      [core :only (get-id player-body get-component)]
-      destructible)
-    (game.components.skills core utils [melee :only (melee-weapon)])
-    (game.item cells boni instance)
-    (game.player.skill skillmanager learnable)))
+  (:require
+    [game.maps.data :refer [current-map]]
+    [game.components.movement :refer [projectile-movement-component]]
+    [game.components.body-effects-impl :refer [battle-drugs dmg-effect]]
+    [game.components.core :refer [get-component get-id player-body]]
+    [game.components.skills.melee :refer [melee-weapon]]
+    [utils.core :refer [defnks increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals update-in! variance-val-str]]
+    [engine.core :refer [create-sound defpreload]]
+    [engine.render :refer [create-animation create-image folder-frames get-duration]]
+    [game.media :refer [get-itemsprite]]
+    game.mouseoverbody
+    [game.entity.nova :refer [nova-effect]]
+    [game.entity.projectile :refer [fire-projectile]]
+    game.utils.geom
+    [game.utils.random :refer [get-rand-weighted-item rand-int-between]]
+    [game.utils.msg-to-player :refer [show-msg-to-player]]
+    [game.components.render :refer [show-gains-hp-effect show-gains-mana-effect]]
+    [game.components.destructible :refer [get-hp get-player-armor]]
+    [game.components.skills.core :refer [get-mana get-skill-use-mouse-tile-pos skillmanager-skill]]
+    [game.components.skills.utils :refer [check-line-of-sight get-player-ranged-vector]]
+    [game.item.cells :refer [equip-boni-item-color get-cells-from get-item item-in-hand remove-one-item-from try-pickup-item]]
+    [game.item.boni :refer [create-item-bonus create-random-boni]]
+    [game.item.instance :refer [create-item-body create-item-instance def-usable-item defitem]]
+    [game.player.skill.skillmanager :refer [add-player-skill change-standard-attack-skill remove-player-skill reset-standard-attack-skill set-selected-skill]]
+    [game.player.skill.learnable :refer [learn-skill learnable-skills]]))
 
 ;; Random Items
 
@@ -273,7 +283,7 @@
 (comment
 
 
-  (use 'clojure.pprint)
+  (require 'clojure.pprint)
   (swap! item-in-hand assoc :equip-boni
     [(create-item-bonus 2 :move-speed)
      (create-item-bonus 2 :mana-leech)
@@ -292,7 +302,7 @@
     (try-pickup-item
       (create-item-instance "Grenade")))
 
-  (use 'game.components.ingame-loop)
+  (require '[game.components.ingame-loop :refer [do-in-game-loop]])
   (do-in-game-loop
     (try-pickup-item
       (create-item-instance "Battle-Drugs")))

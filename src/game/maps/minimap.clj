@@ -1,13 +1,16 @@
 (ns game.maps.minimap
-  (:require [engine.render :as color]
-            [game.utils.geom :as geom])
-  (:use clojure.set
-        data.grid2d
-        utils.core
-        (engine core render)
-        game.settings
-        game.components.core
-        (game.maps data cell-grid camera))
+  (:require
+    [engine.render :as color :refer [draw-image draw-rect fill-rect get-dimensions get-scaled-copy get-sub-image rgbcolor]]
+    [game.utils.geom :as geom]
+    [clojure.set :refer [select union]]
+    data.grid2d
+    [utils.core :refer [def- int-posi mapvals]]
+    engine.core
+    [game.settings :refer [half-screen-h half-screen-w]]
+    [game.components.core :refer [create-comp exists? get-component get-position]]
+    [game.maps.data :refer [get-current-map-data]]
+    [game.maps.cell-grid :refer [get-bodies-from-cells get-cells]]
+    [game.maps.camera :refer [get-camera-position]])
   (:import (org.newdawn.slick Graphics Image)))
 
 (defn- get-image  [] (:minimap-image  (get-current-map-data)))

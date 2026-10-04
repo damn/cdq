@@ -1,11 +1,18 @@
 (ns game.components.sleeping
-  (:require [game.utils.geom :as geom])
-  (:use
-   engine.render
-   utils.core
-   (game session settings)
-   (game.components core active render ingame-loop body)
-   (game.maps camera contentfields cell-grid)))
+  (:require
+    [game.utils.geom :as geom]
+    [engine.render :refer [render-centered-shape render-readable-text]]
+    [utils.core :refer [->! create-counter def- runmap update-counter]]
+    [game.session :refer [atom-session]]
+    [game.settings :refer [in-pixel screen-height screen-width]]
+    [game.components.core :refer [active block-active-components defcomponent get-component unblock-active-components]]
+    game.components.active
+    [game.components.render :refer [rendering]]
+    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [game.components.body :refer [get-body-bounds get-other-bodies-in-adjacent-cells]]
+    [game.maps.camera :refer [get-camera-position]]
+    [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
+    game.maps.cell-grid))
 
 (def- half-aggro-width-tiles 11)
 (def- half-aggro-height-tiles 8.5)

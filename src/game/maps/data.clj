@@ -1,5 +1,5 @@
 (ns game.maps.data
-  (:use game.session))
+  (:require game.session))
 
 ; Tempor�r hier- setze genau da wo geloopt wird hin!
 (def iterating-map-dependent-comps (atom false))

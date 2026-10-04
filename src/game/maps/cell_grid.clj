@@ -1,9 +1,10 @@
 (ns game.maps.cell-grid
-  (:require [data.grid2d :as grid])
-  (:use utils.core
-        game.session
-        game.components.core
-        game.maps.data))
+  (:require
+    [data.grid2d :as grid]
+    [utils.core :refer [def- diagonal-direction? int-posi runmap translate-to-tile-middle]]
+    [game.session :refer [atom-session]]
+    [game.components.core :refer [get-entity get-id is-solid?]]
+    [game.maps.data :refer [get-current-map-data]]))
 
 (defn get-cell-grid [] (:cell-grid (get-current-map-data)))
 (defn get-jcell-grid [] (force (:j-cell-grid (get-current-map-data))))

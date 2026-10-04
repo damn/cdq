@@ -52,7 +52,7 @@
 
 (comment
 
-  (use 'game.components.core)
+  (require '[game.components.core :refer [get-components player-body]])
   (map
     (fn [c] [(:type c) (:blocks c)])
     (filter :updatefn (get-components player-body)))

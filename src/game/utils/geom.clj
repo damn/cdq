@@ -1,9 +1,9 @@
 (ns game.utils.geom
-  (:use
-    [utils.core :only (approx-numbers)]
-    [engine.input :only (get-mouse-pos)]
-    [game.settings :only (half-screen-w half-screen-h)]
-    game.components.core)
+  (:require
+    [utils.core :refer [approx-numbers]]
+    [engine.input :refer [get-mouse-pos]]
+    [game.settings :refer [half-screen-h half-screen-w]]
+    [game.components.core :refer [get-position player-body]])
   (:import
     (org.newdawn.slick.geom Shape Vector2f Rectangle Circle Transform)))
 

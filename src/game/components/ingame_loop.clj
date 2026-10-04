@@ -1,7 +1,7 @@
 (ns game.components.ingame-loop
-  (:use
-    [utils.core :only (find-first)]
-    game.components.core))
+  (:require
+    [utils.core :refer [find-first]]
+    [game.components.core :refer [active add-to-removelist create-comp create-entity create-entity-no-init defentity get-component get-entity get-id]]))
 
 (def ^:private ids (atom #{}))
 

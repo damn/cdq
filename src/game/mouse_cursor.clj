@@ -1,7 +1,7 @@
 (ns game.mouse-cursor
-  (:use
-    [engine.core :only (set-mouse-cursor initialize)]
-    [utils.core :only (deflazygetter)])
+  (:require
+    [engine.core :refer [initialize set-mouse-cursor]]
+    [utils.core :refer [deflazygetter]])
   (:import org.newdawn.slick.opengl.CursorLoader))
 
 (let [hotspotx 0

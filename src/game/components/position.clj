@@ -1,7 +1,8 @@
 (ns game.components.position
-  (:use utils.core
-        game.components.core
-        game.maps.contentfields))
+  (:require
+    [utils.core :refer [assoc-in! int-posi when-apply]]
+    [game.components.core :refer [defcomponent get-components get-position]]
+    [game.maps.contentfields :refer [put-entity-in-correct-content-field remove-entity-from-content-field]]))
 
 (defcomponent :position [p]
   {:value p

@@ -1,9 +1,10 @@
 (ns game.status-options
-  (:use
-    [utils.core :only (find-first)]
-    [engine.core :only (app-game-container fullscreen-supported?)]
-    (game [settings :only (get-setting)] session)
-    [game.utils.lightning :only (active-lightning)]))
+  (:require
+    [utils.core :refer [find-first]]
+    [engine.core :refer [app-game-container fullscreen-supported?]]
+    [game.settings :refer [get-setting]]
+    [game.utils.lightning :refer [active-lightning]]
+    game.session))
 
 (defprotocol StatusCheckBox
   (get-text [this])

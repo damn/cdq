@@ -1,11 +1,21 @@
 (ns game.components.body-effects-impl
-  (:use utils.core
-        (engine core render)
-        (game settings)
-        (game.components core misc body body-effects render destructible movement active)
-        (game.utils random geom)
-        game.item.instance
-        game.player.speed))
+  (:require
+    [utils.core :refer [->! approx-numbers def- mapvals runmap update-in!]]
+    [engine.core :refer [defpreload reset update]]
+    [engine.render :refer [create-animation create-image folder-animation folder-frames get-scaled-copy render-centered-animation render-readable-text rgbcolor]]
+    game.settings
+    [game.components.core :refer [active add-to-removelist create-comp defcomponent get-component get-components get-id is-player? player-body reset-component-state-after-blocked]]
+    game.components.misc
+    game.components.body
+    [game.components.body-effects :refer [defeffectentity get-certain-effect-entities get-sub-entities]]
+    [game.components.render :refer [circle-around-body-render-comp render-above-body render-on-map single-animation-component]]
+    [game.components.destructible :refer [deal-dmg get-armor get-destructible-bodies]]
+    game.components.movement
+    [game.components.active :refer [add-blocks mark-slowed remove-blocks unmark-slowed]]
+    [game.utils.random :refer [if-chance]]
+    [game.utils.geom :refer [degree-add degree-minus degrees? scale vec-posi vector-from-angle]]
+    game.item.instance
+    [game.player.speed :refer [incr-attack-speed incr-casting-speed incr-move-speed]]))
 
 (defeffectentity ^:private battle-drugs-entity [seconds speedup]
   :target player-body

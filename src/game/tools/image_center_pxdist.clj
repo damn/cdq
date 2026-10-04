@@ -1,6 +1,9 @@
 (ns game.tools.image-center-pxdist
-  (:require [game.utils.geom :as geom])
-  (:use (engine core input render)))
+  (:require
+    [game.utils.geom :as geom]
+    [engine.core :refer [start-slick-basicgame]]
+    [engine.input :refer [get-mouse-pos is-leftm-pressed? update-mousebutton-state]]
+    [engine.render :refer [create-image render-centered-shape render-readable-text]]))
 
 (def posis (atom []))
 

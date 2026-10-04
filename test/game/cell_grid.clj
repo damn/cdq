@@ -1,9 +1,9 @@
 (ns game.cell-grid
-  (:use
-    (clojure test)
-    [game.test.utils :only (with-private-fns)]
-    (game.maps [cell-grid :only (create-cell add-body remove-body)])
-    (game.components [core :only (create-comp create-entity get-id)])))
+  (:require
+    [game.test.utils :refer [with-private-fns]]
+    [game.maps.cell-grid :refer [add-body create-cell remove-body]]
+    [game.components.core :refer [create-comp create-entity get-id]]
+    [clojure.test :refer [deftest is]]))
 
 
 (let [mycell (create-cell [3 4] #{})
