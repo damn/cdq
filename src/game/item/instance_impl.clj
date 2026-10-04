@@ -5,7 +5,7 @@
     [game.components.body-effects-impl :refer [battle-drugs dmg-effect]]
     [game.components.core :refer [get-component get-id player-body]]
     [game.components.skills.melee :refer [melee-weapon]]
-    [utils.core :refer [defnks increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals update-in! variance-val-str]]
+    [utils.core :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals update-in! variance-val-str]]
     [engine.core :refer [create-sound defpreload]]
     [engine.render :refer [create-animation create-image folder-frames get-duration]]
     [game.media :refer [get-itemsprite]]
@@ -30,7 +30,7 @@
 (let [item-names {"Cyber-Implant" 1, "Sword" 1, "Armor" 1}
       boni-counts {1 80, 2 15, 3 5}]
 
-  (defnks create-rand-item [position :max-lvl]
+  (defn create-rand-item [position & {:keys [max-lvl]}]
     (create-item-body position
                       (let [itemname (get-rand-weighted-item item-names)]
                         (assoc (create-item-instance itemname {:lvl (rand-int max-lvl)})

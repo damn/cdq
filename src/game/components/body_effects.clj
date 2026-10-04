@@ -2,7 +2,7 @@
   (:require
     [game.components.sleeping :refer [wake-up]]
     [game.components.misc :refer [delete-after-duration-component]]
-    [utils.core :refer [defnks runmap update-in!]]
+    [utils.core :refer [runmap split-kvs-and-more update-in!]]
     [game.components.core :refer [add-component create-comp create-entity defcomponent destruct-entity get-component get-entity get-id get-position]]
     [game.components.position :refer [position-component swap-position!]]))
 
@@ -19,33 +19,35 @@
                    (let [p (get-position entity)]
                      (runmap #(swap-position! % p) (get-sub-entities entity))))})
 
-(defnks body-effect-entity
+(defn body-effect-entity
   "Effect-entities are deleted when target entity is deleted.
   They have a position component that is getting updated when the target position changes.
   They also call 'wake-up' on the target."
-  [:target
-   :opt :duration
-   :opt-def :type :no-type :undofn (fn []) :dofn (fn [])
-   & additional-components]
-  (wake-up target)
-  (apply create-entity
-         (position-component (get-position target))
-         (create-comp :body-effect
-           {:target target
-            :effect-type type
-            :init (fn [this]
-                    (dofn)
-                    (when-not (get-component target :sub-entities)
-                      (add-component target (sub-entities-component)))
-                    (update-in! target [:sub-entities :ids] conj (get-id this)))
-            ; first disj id before undofn is called!
-            ; undofn may access get-effect-entities and this one is already not existing!
-            :destruct (fn [this]
-                        (update-in! target [:sub-entities :ids] disj (get-id this))
-                        (undofn))})
-         (when duration
-           (delete-after-duration-component duration))
-         additional-components))
+  [& args]
+  (let [[{:keys [target duration type undofn dofn]
+          :or {type :no-type
+               undofn (fn [])
+               dofn (fn [])}}
+         additional-components] (split-kvs-and-more args)]
+    (wake-up target)
+    (apply create-entity
+           (position-component (get-position target))
+           (create-comp :body-effect
+             {:target target
+              :effect-type type
+              :init (fn [this]
+                      (dofn)
+                      (when-not (get-component target :sub-entities)
+                        (add-component target (sub-entities-component)))
+                      (update-in! target [:sub-entities :ids] conj (get-id this)))
+              ; first disj id before undofn is called!
+              ; undofn may access get-effect-entities and this one is already not existing!
+              :destruct (fn [this]
+                          (update-in! target [:sub-entities :ids] disj (get-id this))
+                          (undofn))})
+           (when duration
+             (delete-after-duration-component duration))
+           additional-components)))
 ; -> could move delete-after-duration/wake-up(as obligatory-key)/undo/do to implementation
 
 ; fix psi-charger set-durations @ undo -> remove this 'first disj' comment

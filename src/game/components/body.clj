@@ -3,7 +3,7 @@
     [game.debug-settings :as debug]
     [game.utils.geom :as geom]
     [game.maps.camera :refer [get-camera-position]]
-    [utils.core :refer [assoc-in! defnks runmap]]
+    [utils.core :refer [assoc-in! runmap]]
     [game.settings :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
     [game.components.core :refer [defcomponent get-cached-touched-cells get-component get-entity get-half-height get-half-width get-id get-movement-type get-occupied-cell get-position is-solid? player-body]]
     [game.components.render :refer [render-on-map]]
@@ -110,8 +110,9 @@
                        (update-touched-cells entity)
                        (update-occupied-cell entity)))}))
 
-(defnks create-body
-  [:solid :opt :pxw :pxh :dimensions :mouseover-outline :opt-def :side :no-side ]
+(defn create-body
+  [& {:keys [solid pxw pxh dimensions mouseover-outline side]
+      :or {side :no-side}}]
   (let [pxw (or pxw (dimensions 0))
         pxh (or pxh (dimensions 1))]
     (assert (and pxw pxh))

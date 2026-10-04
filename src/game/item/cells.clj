@@ -3,7 +3,7 @@
     [engine.render :as color :refer [create-image defcolor draw-grid draw-image fill-rect get-scaled-copy render-readable-text rgbcolor set-color]]
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
-    [utils.core :refer [defnks runmap thread-through]]
+    [utils.core :refer [runmap thread-through]]
     [engine.core :refer [defpreload initialize set-mouse-cursor]]
     [engine.input :refer [get-mouse-pos]]
     [game.settings :refer [screen-height screen-scale screen-width]]
@@ -166,7 +166,8 @@
 
 (def item-grids {})
 
-(defnks add-item-grid [:w :h :rx :ry :allows-type :grid-type :is-equipment-cell :visible-check]
+(defn add-item-grid [& {:keys [w h rx ry allows-type grid-type is-equipment-cell visible-check]
+                        :as argsmap}]
   {:pre [(not-any? #{grid-type} (keys item-grids))]}
   (alter-var-root #'item-grids assoc grid-type
                   (ItemGrid. (create-grid w h #(create-empty-item-cell % allows-type grid-type is-equipment-cell))

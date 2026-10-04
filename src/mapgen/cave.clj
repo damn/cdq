@@ -68,7 +68,6 @@
 ; besser 150x150 anstatt 100x100 w h
 ; TODO glaubich einziger unterschied noch: openpaths wird bei jeder cell neu berechnet?
 ; TODO max-tries wenn er nie �ber min-cells kommt? -> im let dazu definieren vlt max 30 sekunden -> in tries umgerechnet??
-; use defnks
 (defn cave-gridgen [random min-cells max-cells adjnum-type]
   (reset! current-order (create-order random))
   (let [start-posi [0 0]

@@ -3,7 +3,7 @@
     [game.maps.data :as data]
     [game.settings :refer [get-setting]]
     game.utils.lightning
-    [utils.core :refer [defnks log translate-to-tile-middle xor]]
+    [utils.core :refer [log translate-to-tile-middle xor]]
     game.session
     [game.maps.cell-grid :refer [create-grid-from-gen-grid create-jcell-grid]]
     [game.maps.contentfields :refer [create-mapcontentfields]]
@@ -11,9 +11,10 @@
     [game.maps.tiledmaps :refer [construct-tiledmap create-cell-grid-from-tiled-map get-player-entity-start-position]]
     [data.grid2d :refer [create-grid height width]]))
 
-(defnks add-maps-data
-  [:map-key :cell-grid :load-content :pretty-name :rand-item-max-lvl :start-position
-   :opt :tiled-map :sprite-sheet :details-sprite-sheet :spawn-monsters]
+(defn add-maps-data
+  [& {:keys [map-key cell-grid load-content pretty-name rand-item-max-lvl start-position
+             tiled-map sprite-sheet details-sprite-sheet spawn-monsters]
+      :as argsmap}]
   {:pre [(xor tiled-map sprite-sheet)
          (not-any? #{map-key} (data/get-map-keys))]}
   (let [w (width cell-grid)

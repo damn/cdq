@@ -1,6 +1,6 @@
 (ns game.components.core
   (:require
-    [utils.core :as utils :refer [assoc-in! condition-map-and-rest defnks distinct-seq? filter-map get-unique-number is-condition-map? keywords-to-hash-map make-fn runmap safe-merge update-in! when-apply]]
+    [utils.core :as utils :refer [assoc-in! condition-map-and-rest distinct-seq? filter-map get-unique-number is-condition-map? keywords-to-hash-map make-fn runmap safe-merge update-in! when-apply]]
     [engine.core :refer [update]]
     [game.session :as session]
     [clojure.tools.macro :refer [name-with-attributes]]
@@ -96,26 +96,53 @@
 (defn- dont-insert [form]
   (remove nil? [form]))
 
+(defn- keyword-argvec->map-destructure
+  "Turns [:a :b :opt :c :opt-def :d 1] into {:keys [a b c d] :or {d 1} :as argsmap}."
+  [argvec]
+  (loop [args (seq argvec)
+         mode :obligatory
+         obligatory []
+         opt []
+         opt-def []]
+    (if-not args
+      (let [or-map (apply hash-map opt-def)
+            ks (mapv (comp symbol name)
+                     (concat obligatory opt (keys or-map)))]
+        {:keys ks
+         :or (into {} (for [[k v] or-map]
+                        [(symbol (name k)) v]))
+         :as 'argsmap})
+      (let [x (first args)]
+        (case x
+          :opt (recur (next args) :opt obligatory opt opt-def)
+          :opt-def (recur (next args) :opt-def obligatory opt opt-def)
+          (case mode
+            :obligatory (recur (next args) mode (conj obligatory x) opt opt-def)
+            :opt (recur (next args) mode obligatory (conj opt x) opt-def)
+            :opt-def (recur (nnext args) mode obligatory opt (conj opt-def x (second args)))))))))
+
 (defmacro defentity
   "Namesym can be followed by docstring and metadata map.
   Metadata can contain :save-session, if the entity should have a :session component."
   [namesym & more]
   (let [[namesym [argvec & more]] (name-with-attributes namesym more)
         [condition-map components] (condition-map-and-rest more)
-        defsym (if (some keyword? argvec) `defnks 'defn)
+        keyword-style? (some keyword? argvec)
+        params (if keyword-style?
+                 `[& ~(keyword-argvec->map-destructure argvec)]
+                 argvec)
         defform (fn [nm create-fn]
-                  `(~defsym ~nm ~argvec
+                  `(defn ~nm ~params
                      ~@(dont-insert condition-map)
                      (~create-fn
                        ~@(dont-insert
                            (when (-> namesym meta :save-session)
                              `(create-comp :session
                                            {:constructor ~(str *ns* "/" namesym "*")
-                                            :args ~(if (= defsym 'defn)
-                                                     argvec
-                                                     `(apply concat ~'argsmap))})))
+                                            :args ~(if keyword-style?
+                                                     `(apply concat ~'argsmap)
+                                                     argvec)})))
                        ~@components)))]
-    (assert (every? (if (= defsym 'defn) symbol? keyword?) argvec))
     (list 'do
           (defform namesym                   'create-entity)
           (defform (symbol (str namesym \*)) 'create-entity-no-init))))

@@ -6,7 +6,6 @@
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
     [utils.core :refer [get-ratio]]
     [engine.core :refer [defpreload ratio]]
-    engine.input
     [game.settings :refer [debug-mode in-pixel]]
     [game.mouseoverbody :refer [get-mouseover-body]]
     [game.components.core :refer [get-component get-components get-entity get-half-pxh get-half-pxw get-half-width get-position is-player?]]

@@ -1,6 +1,6 @@
 (ns engine.render
   (:require
-    [utils.core :as utils :refer [defnks get-jar-entries when-seq]]
+    [utils.core :as utils :refer [get-jar-entries split-kvs-and-more when-seq]]
     [engine.settings :refer [jar-file?]]
     [game.utils.geom :as geom]
     [engine.core :as core :refer [Updateable allowed-characters get-defaultfont get-screen-height get-screen-width get-text-height get-text-width reset-font]])
@@ -28,7 +28,8 @@
   orange
   magenta)
 
-(defnks rgbcolor [:opt-def :r 0 :g 0 :b 0 :a 1 :darker 0 :brighter 0]
+(defn rgbcolor [& {:keys [r g b a darker brighter]
+                   :or {r 0 g 0 b 0 a 1 darker 0 brighter 0}}]
   (-> (Color. (float r) (float g) (float b) (float a))
       (.darker darker)
       (.brighter brighter)))
@@ -125,13 +126,13 @@
     (if (<= ypuffer 0) (- y (- ypuffer)) y)))
 
 ; TODO shift and background set default to false because is not expected when programming gui texts...
-(defnks render-readable-text
+(defn render-readable-text
   "textcolorseq consists of colors and the rest is str-ed. dont use keywords because of destructuring!"
-  [g x y
-   :opt :centerx :centery :bigfont :above
-   :opt-def :shift true :background true
-   & textcolorseq]
-  (let [whole-text (->> textcolorseq
+  [g x y & args]
+  (let [[{:keys [centerx centery bigfont above shift background]
+          :or {shift true background true}}
+         textcolorseq] (split-kvs-and-more args)
+        whole-text (->> textcolorseq
                      (remove #(instance? Color %))
                      (remove nil?) ; so there will be no "\n" interposed between empty lines... (render-colored-text does not increse lineh with empty lines)
                      (map str)
@@ -229,7 +230,8 @@
 
 (def default-frame-duration 33)
 
-(defnks create-animation [frames :opt-def :frame-duration default-frame-duration :looping false]
+(defn create-animation [frames & {:keys [frame-duration looping]
+                                  :or {frame-duration default-frame-duration looping false}}]
   (map->ImmutableAnimation
     {:frames (vec frames)
      :frame-duration frame-duration
@@ -310,15 +312,15 @@ assert lastindexOf slash is the same for names in a folder?
 (def get-pngs (if jar-file? get-sorted-pngs-in-jar get-sorted-pngs))
 
 ; TODO use & more for image arguments like :transparent , so for example :scale also becomes possible
-(defnks folder-frames [folder :opt :transparent :prefix]
+(defn folder-frames [folder & {:keys [transparent prefix]}]
   (doall ; for pre-loading
     (map
       #(create-image (str folder %) :transparent transparent)
       (get-pngs folder :prefix prefix))))
 
-(defnks folder-animation
+(defn folder-animation
   "duration is duration of all frames together, will be split evenly across frames."
-  [:folder :looping :opt :duration :transparent :prefix]
+  [& {:keys [folder looping duration transparent prefix]}]
   (let [frames (folder-frames folder :transparent transparent :prefix prefix)]
     (create-animation frames
                       :frame-duration (if duration

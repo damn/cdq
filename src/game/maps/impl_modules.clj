@@ -17,7 +17,7 @@
 ; TODO instead docells when :monster value
 ; => assoc at grided  {:width :height :data :monsters :player-posi :teleporter-posi}
 ; => quicker!? ... 10 ms for docells ...
-(defnks makemodulebasedmap [:modules :next-map :spritesheet :pretty-name :rand-item-max-lvl]
+(defn makemodulebasedmap [& {:keys [modules next-map spritesheet pretty-name rand-item-max-lvl]}]
   (let [mapgrid (repeatedly-until-no-error
                   (fn []
                     (make-module-based-grid (map #(str "maps/" %) modules) door-sprite-indizes)))

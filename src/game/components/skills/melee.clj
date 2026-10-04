@@ -4,7 +4,7 @@
     [game.settings :refer [in-tiles]]
     [game.components.update :refer [max-delta]]
     [game.item.cells :refer [get-equiped-hands-item]]
-    [utils.core :refer [assoc-in! defnks runmap]]
+    [utils.core :refer [assoc-in! runmap]]
     [game.mouseoverbody :refer [get-mouseover-body]]
     game.utils.random
     [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
@@ -135,8 +135,8 @@ so the entity can get in melee range.")
 (defn get-current-player-melee-dmg []
   (-> (get-current-player-melee-weapon) :base-dmg (calc-effective-melee-dmg (get-component player-body :item-boni))))
 
-(defnks monster-melee-component
-  [:cooldown :hit-sound :target-id :opt :attacktime]
+(defn monster-melee-component
+  [& {:keys [cooldown hit-sound target-id attacktime]}]
   (standalone-skill
     :stype :melee
     :cooldown cooldown

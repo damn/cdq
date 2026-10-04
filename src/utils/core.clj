@@ -1,7 +1,5 @@
 (ns utils.core
-  (:require (clojure [pprint :refer (pprint)]
-                     set)
-            [clojure.tools.macro :refer (name-with-attributes)])
+  (:require [clojure.pprint :refer (pprint)])
   (:import java.util.zip.ZipInputStream))
 
 (defn indexed ; from clojure.contrib.seq-utils (discontinued in 1.3)
@@ -26,104 +24,11 @@
     [(first args) (rest args)]
     [nil args]))
 
-(defn- split-args
-  "(split-args [:a :b :c :opt :d :e :f :opt-def :g 3 :h 4 :i 5])
-   => {:opt-def {:g 3, :i 5, :h 4}, :opt [:d :e :f], :obligatory [:a :b :c]}"
-  [args]
-  (loop [args args
-         current :obligatory
-         result {:obligatory [] :opt [] :opt-def []}]
-    (if (empty? args)
-      (assoc
-        (select-keys result [:obligatory :opt])
-        :opt-def (apply hash-map (:opt-def result)))
-      (let [curr (first args)
-            state (case curr
-                    :opt :opt
-                    :opt-def :opt-def
-                    current)]
-        (recur
-          (rest args)
-          state
-          (if (not= state current)
-            result
-            (update-in result [state] conj curr)))))))
-
-(defn- destructure-args-and-assert [keyword-params]
-  (let [{:keys [obligatory opt opt-def]} (split-args keyword-params)
-        sym-vals (into {} (for [[k v] opt-def]
-                            [(symbol (name k)) v]))
-        all-ks (vec (concat obligatory opt (keys opt-def)))
-        all-ks-as-symbols (map (comp symbol name) all-ks)
-        argsmap-sym 'argsmap
-        kset (gensym "keyset")]
-    [`{:keys [~@all-ks-as-symbols] :or ~sym-vals :as ~argsmap-sym}
-     `(let [~kset (if ~argsmap-sym
-                    (.keySet ~(vary-meta argsmap-sym assoc :tag 'java.util.Map))
-                    #{})]
-        (assert (and
-                  (clojure.set/subset?   ~(set obligatory) ~kset)
-                  (clojure.set/superset? ~(set all-ks)     ~kset))
-                (str "Incorrect keys: " ~kset)))]))
-
-(defn- split-params [parameters]
-  (let [rest-param (when (some #{'&} parameters) ; TODO use the vector trick here?
-                     (last parameters))
-        [positional keyword-params] (split-with symbol?
-                                                (if rest-param (drop-last 2 parameters) parameters))]
-    [positional keyword-params rest-param]))
-
 (defn split-kvs-and-more [args]
   (let [pairs (partition-all 2 args)
         [kvpairs restpairs] (split-with #(keyword? (first %)) pairs)
         key-vals-map (apply hash-map (apply concat kvpairs))]
     [key-vals-map (apply concat restpairs)]))
-
-; TODO performance of assert ks? deactivate assertions for production?
-; quicker if we let over the defn with obligatory and all-ks? they are created anew every time?
-; also nice argslist for defnks with clojure style [positional? keywords-args? & more?]
-; TODO in many cases {:pre [a b c]} is good enough to check if key is there AND not nil?
-; TODO it is possible to supply a key multiple times
-; TODO make 'fn' version
-; TODO make macro version?
-(defmacro defnks
-  "Warning: Binds \"argsmap\" to the args-map.
-  First positional args and then ks-args as keywords.
-  ks-args are obligatory keys until a :opt or :opt-def; then optional keys as an
-  alternating sequence of keywords and defaults values are expected.
-  Asserts the obligatory keys are there and all keys are obligatory/optional in the arg-map.
-  Allows a docstring and attrs-map after the fn-name and a condition-map with :pre
-  (:post not yet implemented)."
-  [fn-name & more]
-  (let [[fn-name [parameters & more]] (name-with-attributes fn-name more)
-        [condition-map fnbody] (condition-map-and-rest more)
-        [positional keyword-params rest-param] (split-params parameters)
-        [argmap arg-assert] (destructure-args-and-assert keyword-params)
-        fnrest_param (gensym "fnrest_param")
-        let-bindings (if rest-param
-                       `[[~argmap ~rest-param] (split-kvs-and-more ~fnrest_param)]
-                       `[~argmap                                   ~fnrest_param])]
-    `(do
-       (defn ~fn-name [~@positional & ~fnrest_param]
-         (let ~let-bindings
-           ~arg-assert
-           ~@(map #(list 'assert %) (:pre condition-map))
-           ~@fnbody))
-       (alter-meta! #'~fn-name assoc :arglists '(~parameters))
-       #'~fn-name)))
-
-(comment
-  (pexpand-1
-    '(defnks foo
-       "My foo function!"
-       {:fooey true}
-       [a b :c :opt :d :opt-def :e 123 & f]
-       {:pre [(> a b c d)]}
-       [a b c d e f]))
-  (foo 1 2)
-  (foo 1 2 :c 3 :o 5)
-  (foo 100 11 :c 1.2 :d 0.1)
-  (meta #'foo))
 
 (defn runmap [& more] (dorun (apply map more)))
 
@@ -276,7 +181,7 @@
 
 ;;
 
-(defn split-key-val-and-maps ; use defnks and apply merge manually? is nicer than defn and a manual defnks...?
+(defn split-key-val-and-maps
   "For a args-seq of key-vals and maps -> creates a key-vals-map and a map that is all maps merged.
   for example [:a 1 :b 2 :c 3 {:d 4} {:e 5}] results in [{:a 1 :b 2 :c 3} {:d 4 :e 5}].
   When no values are supplied for key-vals and/or maps returns [{} {}]"

@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [create-sound make-counter play-sound playonce reset update update-finally-merge]]
     [engine.input :refer [get-mouse-pos is-leftbutton-down? is-rightbutton-down?]]
-    [utils.core :refer [->! assoc-in! defnks lower-than-max? mapvals min-max-val rest-to-max set-to-max split-key-val-and-maps update-in!]]
+    [utils.core :refer [->! assoc-in! lower-than-max? mapvals min-max-val rest-to-max set-to-max split-key-val-and-maps update-in!]]
     [engine.render :refer [is-stopped?]]
     [game.utils.tilemap :refer [get-mouse-tile-pos]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
@@ -182,8 +182,8 @@
     (when attacktime
       {:attack-counter (make-counter attacktime)})))
 
-(defnks standalone-skill
-  [:stype :cooldown :props :opt :attacktime :state-blocks]
+(defn standalone-skill
+  [& {:keys [stype cooldown props attacktime state-blocks]}]
   (create-comp stype
     (active update-component-skill)
     (if state-blocks (blocks-component state-blocks) {})    ; TODO allow nil and remove nil? @ create-comp?

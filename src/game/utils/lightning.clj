@@ -6,7 +6,7 @@
     [game.utils.raycast :refer [ray-blocked?]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.maps.minimap :refer [update-minimap]]
-    [utils.core :refer [assoc-in! compare-times defnks genmap int-posi runmap]]
+    [utils.core :refer [assoc-in! compare-times genmap int-posi runmap]]
     [game.session :refer [atom-session]]
     [game.settings :refer [debug-mode in-pixel]]
     [game.components.core :refer [active create-comp create-entity create-entity-no-init defentity get-component get-position player-body]]
@@ -224,7 +224,8 @@
                          (setBrightness [this image x y]
                            (set-cached-brightness image [x y]))))
 
-(defnks light-component [:intensity :radius :opt :falloff :opt-def :color color/white]
+(defn light-component [& {:keys [intensity radius falloff color]
+                          :or {color color/white}}]
   (create-comp :light
     {:color color
      :i intensity

@@ -29,7 +29,7 @@
     [game.player.session-data :refer [current-character-name get-session-file-character-names]]
     [game.utils.lightning :refer [image-corners light-component set-cached-brightness]]
     [game.utils.tilemap :refer [get-mouse-tile-pos mouse-int-tile-pos]]
-    [utils.core :as utils :refer [assoc-in! defnks get-ratio int-posi lower-than-max? readable-number runmap sort-by-order translate-to-tile-middle update-in! variance-val-str]]
+    [utils.core :as utils :refer [assoc-in! get-ratio int-posi lower-than-max? readable-number runmap sort-by-order translate-to-tile-middle update-in! variance-val-str]]
     [engine.core :refer [app-game-container create-and-start-app-game-container create-sound defpreload fullscreen-supported? get-defaultfont get-line-height get-screen-height get-screen-width init-all initialize make-counter play-sound update]]
     [data.grid2d :refer [cells height posis width]]
     [game.settings :refer [debug-mode display-height-in-tiles display-width-in-tiles get-setting half-display-h-in-tiles half-display-w-in-tiles half-screen-h half-screen-w in-tiles init-config! left-offset-in-tiles screen-height screen-scale screen-width tile-height tile-width top-offset-in-tiles version]]
@@ -1181,8 +1181,9 @@ PSI-Explosion
                                  (stun-collision-effect 10 150)]
                    :maxrange maxrange))}))
 
-(defnks ranged-component
-  [:cooldown :opt :attacktime :opt-def :state-blocks {:attacking :movement}]
+(defn ranged-component
+  [& {:keys [cooldown attacktime state-blocks]
+      :or {state-blocks {:attacking :movement}}}]
   (standalone-skill
     :stype :ranged
     :cooldown cooldown
@@ -1794,7 +1795,7 @@ PSI-Explosion
                                       (doall
                                         (map #(fire-boss-ranged-projectile entity speed % rotation-speed effects)
                                              [0 90 180 270])))))})
-  (movement-component ; TODO komische args ... mach mit defnks?!
+  (movement-component ; TODO komische args ...
     {:control-update (fn [body _ _] (get-vector-to-player body))}
     12
     :ground)

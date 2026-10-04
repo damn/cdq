@@ -1,5 +1,5 @@
 (ns engine.core
-  (:require [utils.core :refer (defnks deflazygetter)])
+  (:require [utils.core :refer (deflazygetter)])
   (:import
     org.lwjgl.opengl.Display
     (org.newdawn.slick ScalableGame AppGameContainer BasicGame Sound Font Graphics GameContainer
@@ -38,8 +38,8 @@
 ;The implementation will use the supplied ByteBuffers with image data in RGBA and perform any conversions nescesarry for the specific platform.
 (def ^:private icon-strings (into-array ["icon16.tga" "icon32.tga"]))
 
-(defnks create-and-start-app-game-container
-  [:game :width :height :opt :show-fps :lock-framerate :full-screen :scale]
+(defn create-and-start-app-game-container
+  [& {:keys [game width height show-fps lock-framerate full-screen scale]}]
   (defn get-screen-width [] width)
   (defn get-screen-height [] height)
   (let [scale (if (= 1 scale) nil scale)
@@ -58,9 +58,12 @@
     (.start (Thread.
               #(.start container)))))
 
-(defnks start-slick-basicgame
-  [:opt :full-screen
-   :opt-def :title "test" :width 800 :height 600 :init (fn [container]) :update (fn [container delta]) :render (fn [container g])]
+(defn start-slick-basicgame
+  [& {:keys [full-screen title width height init update render]
+      :or {title "test" width 800 height 600
+           init (fn [container])
+           update (fn [container delta])
+           render (fn [container g])}}]
   (create-and-start-app-game-container
     :game (proxy [BasicGame] [title]
             (init [container]

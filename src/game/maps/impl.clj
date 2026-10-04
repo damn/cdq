@@ -4,7 +4,7 @@
     game.maps.add
     game.maps.data
     [data.grid2d :refer [mapgrid->vectorgrid posis transform]]
-    [utils.core :refer [defnks log translate-to-tile-middle]]
+    [utils.core :refer [log translate-to-tile-middle]]
     engine.core
     [engine.render :refer [get-sprite spritesheet]]
     game.settings

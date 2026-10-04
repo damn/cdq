@@ -2,7 +2,7 @@
   (:require
     [engine.render :as color]
     [data.grid2d :refer [create-grid get-4-neighbour-positions get-8-neighbour-positions posis transform]]
-    [utils.core :refer [assoc-ks defnks]]
+    [utils.core :refer [assoc-ks]]
     [game.utils.random :refer [percent-chance]]
     [mapgen.utils :refer [border-position? create-borders-positions]]))
 
@@ -45,8 +45,9 @@ and the amount of overall 'noise' is gradually reduced: ")
 ; a lot of islands: 70/3
 ; bigger islands 65/4
 ; even bigger islands 62/4
-(defnks cellular-automata-gridgen
-  [w h :fillprob :generations :opt :wall-borders :opt-def :random (java.util.Random.)]
+(defn cellular-automata-gridgen
+  [w h & {:keys [fillprob generations wall-borders random]
+          :or {random (java.util.Random.)}}]
   (let [randmap (make-randmap w h fillprob random)
         grid (if wall-borders
                (assoc-ks randmap (create-borders-positions randmap) :wall)
@@ -63,7 +64,7 @@ and the amount of overall 'noise' is gradually reduced: ")
 
 ;; regions/connecting
 
-(defnks flood-fill [grid start :opt :steps :opt-def :label nil]
+(defn flood-fill [grid start & {:keys [steps label]}]
   (loop [next-positions (if (coll? (first start)) start (list start)) ; collection of posis or just a posi
          labeled []
          labeled-ordered []
