@@ -7,7 +7,7 @@
     [game.components.position :refer [get-tile]]
     [game.components.movement :refer [movement-component]]
     [data.grid2d :refer [cells get-8-neighbour-positions]]
-    [utils.core :refer [assoc-in! def- diagonal-direction? genmap positions runmap when-seq]]
+    [utils.core :refer [assoc-in! diagonal-direction? genmap positions runmap when-seq]]
     [game.settings :refer [tile-height tile-width]]
     [game.components.core :refer [defcomponent get-component get-position player-body]]
     [game.components.body :refer [inside-cell?]]
@@ -41,9 +41,9 @@
 
 ;;
 
-(def- max-iterations 15)
+(def ^:private max-iterations 15)
 
-(def- sqrt-of-2 14)
+(def ^:private sqrt-of-2 14)
 
 (defn- get-dist [cell] (:dist-to-player @cell))
 
@@ -132,7 +132,7 @@
                 cell))
             adjacent-cells)))
 
-(def- movement-type :ground)
+(def ^:private movement-type :ground)
 
 ; not using filter because nil cells considered @ remove-not-allowed-diagonals
 (defn- filter-viable-cells [body adjacent-cells]
@@ -225,7 +225,7 @@
   (defcolor transp-orange :r 1 :g 0.34 :a a)
   (defcolor transp-yellow :r 1 :g 1 :a a))
 
-(def- adjacent-cells-colors (atom nil))
+(def ^:private adjacent-cells-colors (atom nil))
 
 (defn calculate-mouseover-body-colors [mouseoverbody]
   (when-let [body mouseoverbody]

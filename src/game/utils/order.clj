@@ -39,6 +39,6 @@
   ([a-seq iterations-left]
     (if (zero? iterations-left)
       (throw (Error. "May be a cyclic order! Should be finished after (count a-seq) iterations."))
-      (if-let [incorrect (find-first #(not (has-correct-order? % a-seq)) a-seq)]
+      (if-let [incorrect (first (filter #(not (has-correct-order? % a-seq)) a-seq))]
         (order-maps (fix incorrect a-seq) (dec iterations-left))
         a-seq))))

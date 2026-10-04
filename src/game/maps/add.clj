@@ -3,7 +3,7 @@
     [game.maps.data :as data]
     [game.settings :refer [get-setting]]
     game.utils.lightning
-    [utils.core :refer [def- defnks log translate-to-tile-middle xor]]
+    [utils.core :refer [defnks log translate-to-tile-middle xor]]
     game.session
     [game.maps.cell-grid :refer [create-grid-from-gen-grid create-jcell-grid]]
     [game.maps.contentfields :refer [create-mapcontentfields]]
@@ -30,7 +30,7 @@
   ;(check-not-allowed-diagonals cell-grid)
   )
 
-(def- map-create-fns [])
+(def ^:private map-create-fns [])
 
 (defmacro create-map-fn [& args]
   `(alter-var-root #'game.maps.add/map-create-fns conj (fn [] ~@args)))

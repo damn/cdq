@@ -1,6 +1,5 @@
 (ns game.status-options
   (:require
-    [utils.core :refer [find-first]]
     [engine.core :refer [app-game-container fullscreen-supported?]]
     [game.settings :refer [get-setting]]
     [game.utils.lightning :refer [active-lightning]]
@@ -51,7 +50,7 @@
                  (when data
                    (doseq [[text state] data]
                      (set-state
-                       (find-first #(= text (get-text %)) @status-check-boxes)
+                       (first (filter #(= text (get-text %)) @status-check-boxes))
                        state))))
                (save-session [_]
                  (for [status @status-check-boxes]

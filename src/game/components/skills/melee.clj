@@ -4,7 +4,7 @@
     [game.settings :refer [in-tiles]]
     [game.components.update :refer [max-delta]]
     [game.item.cells :refer [get-equiped-hands-item]]
-    [utils.core :refer [assoc-in! def- defnks find-first runmap]]
+    [utils.core :refer [assoc-in! defnks runmap]]
     [game.mouseoverbody :refer [get-mouseover-body]]
     game.utils.random
     [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
@@ -65,7 +65,7 @@ so the entity can get in melee range.")
   ([base-dmg hit-sound animation]
     (assoc (melee-weapon base-dmg hit-sound) :animation animation)))
 
-(def- fist-weapon
+(def ^:private fist-weapon
   (melee-weapon [1 2] (create-sound "bfxr_fisthit.wav") :fist))
 
 (defn- get-current-player-melee-weapon []
@@ -103,10 +103,10 @@ so the entity can get in melee range.")
   (let [half-w-max (+ (get-half-width body) melee-puffer)
         posi (get-position body)
         cshape (in-front-of-body-shape body melee-puffer)]
-    (find-first #(and (attackable-by-player? %)
+    (first (filter #(and (attackable-by-player? %)
                       (collides? cshape (rect-shape %)))
                 (get-bodies-from-cells
-                  (calc-touched-cells posi half-w-max half-w-max)))))
+                  (calc-touched-cells posi half-w-max half-w-max))))))
 
 (defn- do-skill-melee-player [entity {:keys [target-body-id] :as meleecomp}]
   (let [mouse (get-skill-use-mouse-button)]

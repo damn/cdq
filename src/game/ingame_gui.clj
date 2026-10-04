@@ -7,12 +7,12 @@
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]
     [game.components.core :refer [active]]
-    [utils.core :refer [def- deflazygetter]]
+    [utils.core :refer [deflazygetter]]
     [engine.input :refer [get-mouse-pos is-key-pressed? is-leftm-consumed? try-consume-leftm-pressed]]
     [engine.core :refer [defpreload get-defaultfont get-text-height get-text-width initialize update]]
     [game.settings :refer [get-setting screen-height]]))
 
-(def- controls-hotkey :H)
+(def ^:private controls-hotkey :H)
 (def skillmenu-hotkey :S)
 (def char-hotkey :C)
 (def inventory-hotkey :I)
@@ -33,8 +33,8 @@
 
 ;;;;;;;;;;;
 
-(def- mouseover-darkgray (rgbcolor :r 0.3 :g 0.3 :b 0.3 :a 0.5))
-(def- mouseover-lightgray (rgbcolor :r 0.7 :g 0.7 :b 0.7 :a 0.5))
+(def ^:private mouseover-darkgray (rgbcolor :r 0.3 :g 0.3 :b 0.3 :a 0.5))
+(def ^:private mouseover-lightgray (rgbcolor :r 0.7 :g 0.7 :b 0.7 :a 0.5))
 
 (defn- render-label [g {:keys [text bounds]}]
   (let [[x y w h] bounds]
@@ -63,8 +63,8 @@
     (draw-image image x y))
   (render-pressable-rect g component))
 
-(def- framebg (rgbcolor :r 0.05 :g 0.05 :b 0.05 :a 1))
-(def- frameborder (rgbcolor :r 0.2 :g 0.2 :b 0.2 :a 1))
+(def ^:private framebg (rgbcolor :r 0.05 :g 0.05 :b 0.05 :a 1))
+(def ^:private frameborder (rgbcolor :r 0.2 :g 0.2 :b 0.2 :a 1))
 
 (defn- render-frame [g {:keys [bounds] :as component}]
   (fill-rect g bounds framebg)
@@ -236,7 +236,7 @@ over a skill at the bottom left selection lists.
 * Minimap: TAB")
 
 (initialize
-  (def- controlsframe (let [w ;(+ 10 (get-text-width controls)) TODO FIXME
+  (def ^:private controlsframe (let [w ;(+ 10 (get-text-width controls)) TODO FIXME
                             320]
                         (make-frame :name :controls
                                     :bounds [frame-screenborder-distance

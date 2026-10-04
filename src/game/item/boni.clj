@@ -1,6 +1,6 @@
 (ns game.item.boni
   (:require
-    [utils.core :refer [def- find-prefixed-var inc-or-dec-max readable-number]]
+    [utils.core :refer [find-prefixed-var inc-or-dec-max readable-number]]
     [game.utils.random :refer [rand-int-between]]
     game.components.body-effects-impl
     game.components.movement
@@ -9,7 +9,7 @@
 
 ; lvl-stats mit count 3 hier �berall explizit -> mach von variable abh�ngig
 
-(def- defbonus-prefix "bonus-")
+(def ^:private defbonus-prefix "bonus-")
 
 (defn get-item-bonus [type]
   (find-prefixed-var
@@ -22,7 +22,7 @@
      {:create ~f
       :lvl-stats ~lvl-stats}))
 
-(def- item-type-boni
+(def ^:private item-type-boni
   {"Armor" [:mana :hp :move-speed :cast-speed :spell-crit :perc-dmg-spell]
    "Sword" [:perc-dmg :min-dmg :max-dmg :attack-speed :hp-leech :mana-leech :melee-crit :spell-crit
             :melee-chance-reduce-armor :melee-chance-slow :melee-chance-stun :perc-dmg-spell]

@@ -29,7 +29,7 @@
     [game.player.session-data :refer [current-character-name get-session-file-character-names]]
     [game.utils.lightning :refer [image-corners light-component set-cached-brightness]]
     [game.utils.tilemap :refer [get-mouse-tile-pos mouse-int-tile-pos]]
-    [utils.core :as utils :refer [assoc-in! def- defnks get-ratio int-posi lower-than-max? readable-number runmap sort-by-order translate-to-tile-middle update-in! variance-val-str]]
+    [utils.core :as utils :refer [assoc-in! defnks get-ratio int-posi lower-than-max? readable-number runmap sort-by-order translate-to-tile-middle update-in! variance-val-str]]
     [engine.core :refer [app-game-container create-and-start-app-game-container create-sound defpreload fullscreen-supported? get-defaultfont get-line-height get-screen-height get-screen-width init-all initialize make-counter play-sound update]]
     [data.grid2d :refer [cells height posis width]]
     [game.settings :refer [debug-mode display-height-in-tiles display-width-in-tiles get-setting half-display-h-in-tiles half-display-w-in-tiles half-screen-h half-screen-w in-tiles init-config! left-offset-in-tiles screen-height screen-scale screen-width tile-height tile-width top-offset-in-tiles version]]
@@ -277,7 +277,7 @@ finisher-skills.
                  :is-player-spell true
                  :animation (create-animation nova-frames)))})
 
-(def- curse-infostr "Curse\nOnly one curse is active at a time\n")
+(def ^:private curse-infostr "Curse\nOnly one curse is active at a time\n")
 
 (defpreload ^:private curse-frames (map #(get-scaled-copy % 0.3) (folder-frames "effects/curse/")))
 
@@ -357,7 +357,7 @@ Stuns and deals damage
                  (runmap #(stun % duration) hits)
                  (runmap #(deal-dmg dmg %) hits)))})
 
-(def- psi-bolt-pxradius 17)
+(def ^:private psi-bolt-pxradius 17)
 (defpreload ^:private psi-bolt-frames (folder-frames "effects/psibolt/"))
 
 (defn- do-skill-psi-bolt [entity component]
@@ -560,11 +560,11 @@ PSI-Explosion
                         infostr))
 
 (initialize
-  (def- rahmen (create-image "gui/rahmen.png"))
-  (def- rahmenw (first (get-dimensions rahmen)))
-  (def- rahmenh (second (get-dimensions rahmen)))
-  (def- hpcontent (create-image "gui/hp.png"))
-  (def- manacontent (create-image "gui/mana.png")))
+  (def ^:private rahmen (create-image "gui/rahmen.png"))
+  (def ^:private rahmenw (first (get-dimensions rahmen)))
+  (def ^:private rahmenh (second (get-dimensions rahmen)))
+  (def ^:private hpcontent (create-image "gui/hp.png"))
+  (def ^:private manacontent (create-image "gui/mana.png")))
 
 (defn- render-hpmana-bar [g x y contentimg minmaxval name]
   (draw-image rahmen x y)
@@ -590,7 +590,7 @@ PSI-Explosion
                               (str (readable-number armor) " Armor\n" (get-armor-reduce-info armor)))))))
 
 (initialize
-  (def- character-frame (make-frame :name :character
+  (def ^:private character-frame (make-frame :name :character
                                     :bounds [(- screen-width frame-screenborder-distance 160) (+ inventoryry inventory-height 5) 160 30]
                                     :hotkey char-hotkey
                                     :visible false
@@ -636,8 +636,8 @@ PSI-Explosion
     (when details-sprite-sheet
       (render-generated-grid x y cells details-sprite-sheet :details-sprite-posi))))
 
-(def- marker-size 12)
-(def- pathfnd-marker-size 8)
+(def ^:private marker-size 12)
+(def ^:private pathfnd-marker-size 8)
 
 (defn- render-debug-map-info
   [g render-tile-start-x render-tile-start-y render-start-x render-start-y]
@@ -798,7 +798,7 @@ PSI-Explosion
     (reset! loading-render-once true)
     (g/render-readable-text g (/ (get-screen-width) 2) (/ (get-screen-height) 2) :centerx true "Loading...")))
 
-(def- creditstxt
+(def ^:private creditstxt
   "Created by Michael Sappler
   Devlog: http://resatori.com
 
@@ -815,13 +815,13 @@ PSI-Explosion
   from http://modarchive.org/
   by Gammis of Lemonride ")
 
-(def- menu-buttons-x 5)
-(def- menu-second-column-x (+ menu-buttons-x 100))
-(def- menu-buttons-y 20)
+(def ^:private menu-buttons-x 5)
+(def ^:private menu-second-column-x (+ menu-buttons-x 100))
+(def ^:private menu-buttons-y 20)
 
 (defn- init-textfield []
-  (def- textfield (TextField. app-game-container (get-defaultfont) menu-second-column-x menu-buttons-y (* (+ 15 3) 6) 10))
-  (def- textfield-visible (atom false))
+  (def ^:private textfield (TextField. app-game-container (get-defaultfont) menu-second-column-x menu-buttons-y (* (+ 15 3) 6) 10))
+  (def ^:private textfield-visible (atom false))
   (.setConsumeEvents textfield false)
   (.setFocus textfield false)
   (.setMaxLength textfield 15))
@@ -836,7 +836,7 @@ PSI-Explosion
   (when-let [char-name (seq (.getText textfield))]
     (start-loading-game (apply str char-name) :new-character true)))
 
-(def- menu-display (make-guidisplay))
+(def ^:private menu-display (make-guidisplay))
 
 (declare load-saved-game-components)
 
@@ -942,8 +942,8 @@ PSI-Explosion
     (render-readable-text g half-screen-w 0 :centerx true :background false :bigfont true "Cyber Dungeon Quest")
     (render-readable-text g half-screen-w (- screen-height (get-line-height)) :centerx true :background false version)))
 
-(def- next-resource (atom nil))
-(def- loaded-resources (atom []))
+(def ^:private next-resource (atom nil))
+(def ^:private loaded-resources (atom []))
 
 (defgamestate deferred-preload
   (init [container statebasedgame]
@@ -1000,12 +1000,12 @@ PSI-Explosion
   (render [container statebasedgame g]
     (render-minimap g)))
 
-(def- options-bx 5)
-(def- options-by 20)
-(def- options-ypuffer 12)
+(def ^:private options-bx 5)
+(def ^:private options-by 20)
+(def ^:private options-ypuffer 12)
 
 (initialize
-  (def- options-display (make-guidisplay))
+  (def ^:private options-display (make-guidisplay))
   (make-textbutton
     :text "Exit"
     :location [options-bx options-by]
@@ -1199,7 +1199,7 @@ PSI-Explosion
     :animation (create-animation monsterdie-frames)
     :position (get-position body)))
 
-(def- monster-drop-table
+(def ^:private monster-drop-table
   {{"Grenade" 1
     "Battle-Drugs" 1} 2
    {
@@ -1476,7 +1476,7 @@ PSI-Explosion
 
 ;; Healer
 
-(def- heal-radius 6)
+(def ^:private heal-radius 6)
 
 (defn- get-healable-monsters-around [healer]
   (remove #(= % healer)

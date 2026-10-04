@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [create-sound make-counter play-sound playonce reset update update-finally-merge]]
     [engine.input :refer [get-mouse-pos is-leftbutton-down? is-rightbutton-down?]]
-    [utils.core :refer [->! assoc-in! def- defnks lower-than-max? mapvals min-max-val rest-to-max set-to-max split-key-val-and-maps update-in!]]
+    [utils.core :refer [->! assoc-in! defnks lower-than-max? mapvals min-max-val rest-to-max set-to-max split-key-val-and-maps update-in!]]
     [engine.render :refer [is-stopped?]]
     [game.utils.tilemap :refer [get-mouse-tile-pos]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
@@ -103,7 +103,7 @@
     (assoc-in skillmanager [:skills active-type :state] :cooldown)
     skillmanager))
 
-(def- deniedsound (create-sound "bfxr_denied.wav"))
+(def ^:private deniedsound (create-sound "bfxr_denied.wav"))
 
 ; skillmanager:        READY <-> ATTACKING
 ; skillmanager skills: READY <-> COOLDOWN

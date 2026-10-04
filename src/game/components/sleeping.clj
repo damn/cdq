@@ -2,7 +2,7 @@
   (:require
     [game.utils.geom :as geom]
     [engine.render :refer [render-centered-shape render-readable-text]]
-    [utils.core :refer [->! create-counter def- runmap update-counter]]
+    [utils.core :refer [->! create-counter runmap update-counter]]
     [game.session :refer [atom-session]]
     [game.settings :refer [in-pixel screen-height screen-width]]
     [game.components.core :refer [active block-active-components defcomponent get-component unblock-active-components]]
@@ -14,8 +14,8 @@
     [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
     game.maps.cell-grid))
 
-(def- half-aggro-width-tiles 11)
-(def- half-aggro-height-tiles 8.5)
+(def ^:private half-aggro-width-tiles 11)
+(def ^:private half-aggro-height-tiles 8.5)
 
 ; > wakeup-range-rectangle
 ; (because wakeup checks with rectangle collision..
@@ -51,7 +51,7 @@
 (def ^:private counter (create-counter 1000))
 (def session (atom-session counter :save-session false))
 
-(def- show-range false)
+(def ^:private show-range false)
 
 (ingame-loop-comp :wakeup
 

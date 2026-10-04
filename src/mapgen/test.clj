@@ -2,7 +2,7 @@
   (:require
     [engine.render :as color :refer [create-empty-image draw-grid draw-string fill-rect rgbcolor set-color]]
     [data.grid2d :refer [height posis width]]
-    [utils.core :refer [assoc-ks def-]]
+    [utils.core :refer [assoc-ks]]
     [engine.core :refer [start-slick-basicgame]]
     [engine.input :refer [get-mouse-pos is-key-pressed?]]
     [game.utils.random :refer [create-seed]]
@@ -14,7 +14,7 @@
     [mapgen.populate :refer [get-populated-grid-posis get-rand-end-posi]])
   (:import java.util.Random))
 
-(def- grid-colors {:wall      (rgbcolor :r 0.2 :g 0.2)
+(def ^:private grid-colors {:wall      (rgbcolor :r 0.2 :g 0.2)
                    :ground    (rgbcolor :r 0.5 :g 0.5)
                    :room      color/white
                    :undefined color/black})
@@ -29,24 +29,24 @@
     (.flush g)
     image))
 
-(def- current-grid (atom nil))
+(def ^:private current-grid (atom nil))
 
 (defn- colorize-nads []
   (let [nads (get-nads @current-grid)]
     (println "found " (count nads) " NADs." )
     (mark-nads @current-grid nads color/red)))
 
-(def- gridw 50)
-(def- gridh 50)
-(def- scale 6) ; cell pixel-width/height
+(def ^:private gridw 50)
+(def ^:private gridh 50)
+(def ^:private scale 6) ; cell pixel-width/height
 
-(def- imagew (* scale gridw))
-(def- imageh (* scale gridh))
-(def- border 25)
-(def- screenw 1000)
-(def- screenh 800)
+(def ^:private imagew (* scale gridw))
+(def ^:private imageh (* scale gridh))
+(def ^:private border 25)
+(def ^:private screenw 1000)
+(def ^:private screenh 800)
 
-(def- current-seed (atom (create-seed)))
+(def ^:private current-seed (atom (create-seed)))
 
 (defn- generate-cellular []
   (let [randseed (reset! current-seed (create-seed))]
@@ -60,7 +60,7 @@
   (let [randseed (reset! current-seed (create-seed))]
     (:grid (cave-gridgen (Random. randseed) 25 1000 :wide))))
 
-(def- current-image (atom nil))
+(def ^:private current-image (atom nil))
 
 (defn- update-grid [grid]
   (when @current-image
@@ -165,7 +165,7 @@
     ))
 ;    mark-spawn-spaces
 
-(def- key-commands
+(def ^:private key-commands
   `{:A generate-cave
     :B populate
     :C show-possible-room-locations

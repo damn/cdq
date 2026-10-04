@@ -1,5 +1,4 @@
 (ns game.utils.random
-  (:require [utils.core :refer [find-first]])
   (:import java.util.Random))
 
 ;; Seed

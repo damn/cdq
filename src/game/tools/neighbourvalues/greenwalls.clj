@@ -1,7 +1,6 @@
 (ns game.tools.neighbourvalues.greenwalls
   (:require
     data.grid2d
-    [utils.core :refer [def-]]
     [engine.core :refer [defpreload]]
     [engine.render :refer [spritesheet]]
     [game.utils.random :refer [if-chance]]
@@ -10,9 +9,9 @@
 
 ; needs a grid scaled x2 at least and nil cells behind other walls; also remove NADS & single cells
 
-(def- greenwalls-firstgid 1)
+(def ^:private greenwalls-firstgid 1)
 
-(def- neighbourvalues
+(def ^:private neighbourvalues
   {:topandleft 0
    :top 1
    :topandright 2
@@ -26,8 +25,8 @@
    :leftandbottom 12
    :rightandbottom 14})
 
-(def- walkable-lid 16)
-(def- walkableopt-lids [5 11 15 17])
+(def ^:private walkable-lid 16)
+(def ^:private walkableopt-lids [5 11 15 17])
 
 (defn- calc-localid [grid posi value]
   (case value

@@ -4,7 +4,7 @@
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.player.skill.learnable :refer [render-skillbutton-tooltip]]
-    [utils.core :refer [def- find-first runmap]]
+    [utils.core :refer [runmap]]
     [engine.render :refer [fill-rect render-readable-text rgbcolor]]
     [game.settings :refer [screen-height]]
     [game.ingame-gui :refer [get-absolute-posi get-bounds ingamestate-display is-visible? make-imgbutton mouseover? remove-guicomponent set-visible]]
@@ -20,12 +20,12 @@
   (fn [mousebutton new-icon]
     (swap! (get selected-skill-buttons mousebutton) assoc :image new-icon)))
 
-(def- select-skills-list {})
+(def ^:private select-skills-list {})
 
 (declare create-skills-list button-y)
 
-(def- xleftselectedskillbutton 2)
-(def- xrightselectedskillbutton 20)
+(def ^:private xleftselectedskillbutton 2)
+(def ^:private xrightselectedskillbutton 20)
 
 (defn- set-visible-skills-list [mousebutton bool]
   (when bool
@@ -81,8 +81,8 @@
                                :tooltip (str "Select " (name mousebutton) "-mouse skill")
                                :parent ingamestate-display)
         [x y w h] (get-bounds button)]
-    (def- button-height h)
-    (def- button-y y)
+    (def ^:private button-height h)
+    (def ^:private button-y y)
     button))
 
 (initialize
@@ -117,9 +117,9 @@
 (def hotkeys-session (atom-session skill-selection-hotkeys :save-session true))
 
 (defn- get-skilltype-with-hotkey [digit]
-  (find-first
+  (first (filter
     #(= (:digit (get @skill-selection-hotkeys %)) digit)
-    (keys @skill-selection-hotkeys)))
+    (keys @skill-selection-hotkeys))))
 
 (defn- set-skill-hotkey [skilltype digit mousebutton]
   {:pre [(not (get-skilltype-with-hotkey digit))]}
@@ -127,7 +127,7 @@
 
 (defn- try-set-skill-hotkey [mousebutton digit]
   (when (is-visible-skills-list? mousebutton)
-    (when-let [selected-skill-button (find-first #(mouseover? @(:button %)) (mousebutton select-skills-list))]
+    (when-let [selected-skill-button (first (filter #(mouseover? @(:button %)) (mousebutton select-skills-list)))]
       (when-let [same-digit-hotkeyed-skilltype (get-skilltype-with-hotkey digit)]
         (swap! skill-selection-hotkeys dissoc same-digit-hotkeyed-skilltype))
       (set-skill-hotkey (:type (:skill selected-skill-button)) digit mousebutton))))
@@ -139,12 +139,12 @@
     :else
     (when-let [skilltype (get-skilltype-with-hotkey digit)]
       (let [mousebutton (:mouse (get @skill-selection-hotkeys skilltype))]
-        (when-let [skill (find-first #(= (:type %) skilltype)
-                                     (get-skills-for-mousebutton mousebutton))]
+        (when-let [skill (first (filter #(= (:type %) skilltype)
+                                     (get-skills-for-mousebutton mousebutton)))]
           (set-selected-skill mousebutton skill)
           (set-visible-skills-list mousebutton false))))))
 
-(def- numberkeys (map #(keyword (str %)) (range 10)))
+(def ^:private numberkeys (map #(keyword (str %)) (range 10)))
 
 (ingame-loop-comp :up-skill-hotkeys
     (active [delta c _]
@@ -154,7 +154,7 @@
 
 (intern 'game.player.skill.skillmanager 'assign-unused-hotkey-and-open-skillslist
   (fn [skilltype]
-    (let [unused-hotkey (find-first #(not (get-skilltype-with-hotkey %)) [1,2,3,4,5,6,7,8,9,0])
+    (let [unused-hotkey (first (filter #(not (get-skilltype-with-hotkey %)) [1,2,3,4,5,6,7,8,9,0]))
           mousebutton (if (= skilltype :psi-charger) :left :right)]
       (set-skill-hotkey skilltype unused-hotkey mousebutton)
       (set-visible-skills-list mousebutton true))))

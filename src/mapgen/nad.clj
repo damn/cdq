@@ -4,7 +4,7 @@
  - potential field generation must check for it; following must cut it
  - light shines through the edges"
   (:require
-    [utils.core :refer [assoc-ks def-]]
+    [utils.core :refer [assoc-ks]]
     [data.grid2d :refer [posis]]
     [mapgen.utils :refer [wall-at?]]))
 
@@ -14,7 +14,7 @@
     (wall-at? grid [tox fromy])
     (wall-at? grid [fromx toy])))
 
-(def- diagonal-steps [[-1 -1] [-1 1] [1 -1] [1 1]])
+(def ^:private diagonal-steps [[-1 -1] [-1 1] [1 -1] [1 1]])
 
 ; TODO could be made faster because accessing the same posis oftentimes at nad-corner? check
 (defn get-nads [grid]

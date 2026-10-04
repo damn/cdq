@@ -1,7 +1,7 @@
 (ns game.mouseoverbody
   (:require
     [game.ingame-gui :refer [mouse-inside-some-gui-component?]]
-    [utils.core :refer [find-first sort-by-order]]
+    [utils.core :refer [sort-by-order]]
     [engine.input :refer [is-leftbutton-down?]]
     engine.render
     [game.settings :refer [debug-mode]]
@@ -25,7 +25,7 @@
               hits (filter on-screen-and-in-sight?
                            (reverse
                              (sort-by-order hits
-                                            #(:order (find-first :rendering (get-components %)))
+                                            #(:order (first (filter :rendering (get-components %))))
                                             render-on-map-order)))
               ;_ (println "hits: " (map #(map :type (get-components %)) hits))
               hits (if (> (count hits) 1) (remove is-player? hits) hits)]

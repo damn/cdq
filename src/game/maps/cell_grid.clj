@@ -1,7 +1,7 @@
 (ns game.maps.cell-grid
   (:require
     [data.grid2d :as grid]
-    [utils.core :refer [def- diagonal-direction? int-posi runmap translate-to-tile-middle]]
+    [utils.core :refer [diagonal-direction? int-posi runmap translate-to-tile-middle]]
     [game.session :refer [atom-session]]
     [game.components.core :refer [get-entity get-id is-solid?]]
     [game.maps.data :refer [get-current-map-data]]))
@@ -49,7 +49,7 @@
       (swap! cell assoc :adjacent-cells result)
       result)))
 
-(def- jcell-grid-movement-type :air)
+(def ^:private jcell-grid-movement-type :air)
 
 (defn create-jcell-grid [grid]
   (let [j-cell-grid (make-array Boolean/TYPE (grid/width grid) (grid/height grid))]

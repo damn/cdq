@@ -18,20 +18,6 @@
   [pred coll]
   (for [[idx elt] (indexed coll) :when (pred elt)] idx))
 
-(defn find-first ; from clojure.contrib.seq-utils (discontinued in 1.3)
-  "Returns the first item of coll for which (pred item) returns logical true.
-  Consumes sequences up to the first match, will consume the entire sequence
-  and return nil if no match is found."
-  [pred coll]
-  (first (filter pred coll)))
-
-(defmacro def- ; from clojure.contrib.def (discontinued in 1.3)
-  "Same as def but yields a private definition"
-  [name value]
-  (list 'def (with-meta name (assoc (meta name) :private true)) value))
-
-;;
-
 (defn is-condition-map? [form]
   (and (map? form) (or (:pre form) (:post form))))
 

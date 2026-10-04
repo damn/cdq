@@ -1,7 +1,7 @@
 (ns game.item.instance  ; TODO refactor dependencies wg. instance-impl abkapselung
   (:require
     [game.settings :refer [tile-width]]
-    [utils.core :refer [def- find-prefixed-var]]
+    [utils.core :refer [find-prefixed-var]]
     [engine.core :refer [play-sound]]
     [engine.render :refer [get-scaled-copy]]
     game.maps.data
@@ -15,7 +15,7 @@
     [game.components.pressable :refer [pressable-component]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]))
 
-(def- defitem-prefix "item-")
+(def ^:private defitem-prefix "item-")
 
 (defn create-fn [type]
   (find-prefixed-var
@@ -69,7 +69,7 @@
   (game.components.ingame-loop/do-in-game-loop
     (create-item-body [42 22] "Cyber-Implant")))
 
-(def- item-body-dimensions [8 8])
+(def ^:private item-body-dimensions [8 8])
 
 (defentity ^:private item-entity [position item-instance]
   (position-component position)

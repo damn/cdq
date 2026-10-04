@@ -3,7 +3,7 @@
     [game.debug-settings :as debug]
     [game.utils.geom :as geom]
     [game.maps.camera :refer [get-camera-position]]
-    [utils.core :refer [assoc-in! defnks find-first runmap]]
+    [utils.core :refer [assoc-in! defnks runmap]]
     [game.settings :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
     [game.components.core :refer [defcomponent get-cached-touched-cells get-component get-entity get-half-height get-half-width get-id get-movement-type get-occupied-cell get-position is-solid? player-body]]
     [game.components.render :refer [render-on-map]]
@@ -182,8 +182,8 @@
 
 ; TODO adjacent-cells could be nil -> :middle @cell -> NPE
 (defn find-nearby-valid-location [body posi]
-  (when-let [cell (find-first #(not (blocked-location? (:middle @%) body))
-                              (cached-get-adjacent-cells (get-cell posi)))]
+  (when-let [cell (first (filter #(not (blocked-location? (:middle @%) body))
+                              (cached-get-adjacent-cells (get-cell posi))))]
     (:middle @cell)))
 
 (defn teleport

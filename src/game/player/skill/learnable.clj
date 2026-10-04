@@ -4,7 +4,7 @@
     [engine.core :refer [initialize]]
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
-    [utils.core :refer [assoc-in! def- log readable-number runmap split-key-val-and-maps update-in! variance-val-str]]
+    [utils.core :refer [assoc-in! log readable-number runmap split-key-val-and-maps update-in! variance-val-str]]
     [engine.render :refer [create-image defcolor fill-rect render-readable-text rgbcolor]]
     [game.settings :refer [screen-height]]
     game.media
@@ -17,8 +17,8 @@
 
 ; This ns is skillmenu & learnable-skills
 
-(def- skillmenu-x frame-screenborder-distance)
-(def- skillmenu-y frame-screenborder-distance)
+(def ^:private skillmenu-x frame-screenborder-distance)
+(def ^:private skillmenu-y frame-screenborder-distance)
 
 (defn learn-skill [skill]
   ; TODO assert not learned yet?
@@ -46,7 +46,7 @@
        :info info}
       props)))
 
-(def- init-fns (atom []))
+(def ^:private init-fns (atom []))
 
 (defmacro deflearnable-skill [skill-type & more]
   `(swap! (deref #'game.player.skill.learnable/init-fns)
@@ -59,7 +59,7 @@
                [(:type skill) skill]))))
 
 (initialize
-  (def- skillmenu-frame (make-frame :name :skillmenu
+  (def ^:private skillmenu-frame (make-frame :name :skillmenu
                                     :bounds [skillmenu-x skillmenu-y 100 95]
                                     :hotkey skillmenu-hotkey
                                     :visible false
@@ -69,7 +69,7 @@
   (let [x 5
         y 20 ; 30 == fontheight?! wg. free-sk-pt str
         puffer 2]
-    (def- skillmenu-buttons
+    (def ^:private skillmenu-buttons
       (for [{[menux menuy] :menu-posi :as skill} (vals learnable-skills)]
           {:skill skill
            :button (make-imgbutton :image (:icon skill)
@@ -146,7 +146,7 @@
                              [skilltype false])})))
 
 (initialize
-  (def- freeskillpointsbutton
+  (def ^:private freeskillpointsbutton
     (make-imgbutton
       :image (create-image "icons/skills_free.png" :scale buttonscale)
       :location [(+ buttonx-start (* x-dist -1)) (- screen-height 18)]

@@ -4,7 +4,7 @@
     [game.utils.geom :as geom]
     [clojure.set :refer [select union]]
     data.grid2d
-    [utils.core :refer [def- int-posi mapvals]]
+    [utils.core :refer [int-posi mapvals]]
     engine.core
     [game.settings :refer [half-screen-h half-screen-w]]
     [game.components.core :refer [create-comp exists? get-component get-position]]
@@ -17,7 +17,7 @@
 (defn- get-bodies [] (:minimap-bodies (get-current-map-data)))
 
 (let [alpha 0.9]
-  (def- colors
+  (def ^:private colors
     (mapvals
       {:wall   [:r 1 :g 1 :b 1 :a 1]
        :ground [:r 0.5 :g 0.5 :b 0.5 :a alpha]
@@ -39,7 +39,7 @@
                {:color color
                 :depends [:body]}))
 
-(def- scale 1)
+(def ^:private scale 1)
 
 (defn- render-bodies [g x y start-leftx start-topy width-in-tiles height-in-tiles]
   (doseq [body (reset! (get-bodies) (select exists? @(get-bodies))) ; swap?

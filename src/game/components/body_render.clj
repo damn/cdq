@@ -4,7 +4,7 @@
     [game.utils.geom :as geom]
     [engine.render :as color :refer [create-image draw-image draw-rect draw-shape fill-rect get-frame render-readable-text rgbcolor set-color]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
-    [utils.core :refer [def- find-first get-ratio]]
+    [utils.core :refer [get-ratio]]
     [engine.core :refer [defpreload ratio]]
     engine.input
     [game.settings :refer [debug-mode in-pixel]]
@@ -45,7 +45,7 @@
         y (- y h-height)]
     (draw-rect g x y (* 2 h-width) (* 2 h-height) color)))
 
-(def- hpbar-colors
+(def ^:private hpbar-colors
   {:green     (rgbcolor :g 1 :darker 0.2)
    :darkgreen (rgbcolor :g 1 :darker 0.5)
    :yellow    (rgbcolor :r 1 :g 1 :darker 0.5)
@@ -67,7 +67,7 @@
   ([g x y w h current-val max-val color]
     (render-bar g x y w h (get-ratio current-val max-val) color)))
 
-(def- body-info-bars-h 3)
+(def ^:private body-info-bars-h 3)
 
 (defn- render-body-info-bar [g body [x y] ratio color ybuffer]
   (let [half-w (int (get-half-pxw body))
@@ -108,7 +108,7 @@
                    (#{:healing :monster-nova} active-type)
                    (is-attacking? skillmanager))
           (render-attacking-bar g body (get-active-skill skillmanager) render-position)))
-      (when-let [component (find-first #(and (:show-cast-bar %) (is-attacking? %)) (get-components body))]
+      (when-let [component (first (filter #(and (:show-cast-bar %) (is-attacking? %)) (get-components body)))]
         (render-attacking-bar g body component render-position)))))
 
 (intern 'game.components.body 'body-info-renderfn body-renderfn)

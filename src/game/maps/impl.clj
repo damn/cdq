@@ -4,7 +4,7 @@
     game.maps.add
     game.maps.data
     [data.grid2d :refer [mapgrid->vectorgrid posis transform]]
-    [utils.core :refer [def- defnks log translate-to-tile-middle]]
+    [utils.core :refer [defnks log translate-to-tile-middle]]
     engine.core
     [engine.render :refer [get-sprite spritesheet]]
     game.settings
@@ -37,7 +37,7 @@
 ; map with player is first (items need player dependency and maybe more dependencies; also start the game in that map!)
 ; -> assert?
 
-(def- dungeon-blockprops
+(def ^:private dungeon-blockprops
   {:undefined nil
    :airwalkable #{:ground}
    :wall #{:ground :air}

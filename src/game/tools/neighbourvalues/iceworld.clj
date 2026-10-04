@@ -1,7 +1,6 @@
 (ns game.tools.neighbourvalues.iceworld
   (:require
     data.grid2d
-    [utils.core :refer [def-]]
     [engine.core :refer [defpreload]]
     [engine.render :refer [spritesheet]]
     game.utils.random
@@ -14,9 +13,9 @@
 ; -> they just stand there and can be killed easily
 ; even if they have a path to player they are likely to lose against teleport&ranged island hopping
 
-(def- iceworld-firstgid 1)
+(def ^:private iceworld-firstgid 1)
 
-(def- neighbourvalues
+(def ^:private neighbourvalues
   {:topandleft 3
    :top 11
    :topandright 4
@@ -30,8 +29,8 @@
    :leftandbottom 8
    :rightandbottom 9})
 
-(def- fullwall-localid 13)
-(def- walkable-localid 6)
+(def ^:private fullwall-localid 13)
+(def ^:private walkable-localid 6)
 
 (defn- calc-localid [grid posi value]
   (case value

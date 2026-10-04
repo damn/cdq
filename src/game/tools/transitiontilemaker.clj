@@ -1,6 +1,6 @@
 (ns game.tools.transitiontilemaker
   (:require
-    [utils.core :refer [+perm def- defnks safe-merge]]
+    [utils.core :refer [+perm defnks safe-merge]]
     [data.grid2d :refer [get-8-neighbour-positions]]))
 
 ; this transitiontilemaker works with scaledx2 maps and utilizes just 12 different tiles (else 256 different tiles would be needed)
@@ -15,7 +15,7 @@
     (zipmap (map #(apply + % obligatory) (apply +perm optional))
             (repeat k))))
 
-(def- idxvalues [1 128 64 2 32 4 8 16])
+(def ^:private idxvalues [1 128 64 2 32 4 8 16])
 
 (let [idxvalues-order [[-1 -1] [-1 0] [-1 1] [0 -1] [0 1] [1 -1] [1 0] [1 1]]]
   (assert (= (get-8-neighbour-positions [0 0]) idxvalues-order)))
@@ -30,7 +30,7 @@
    128 _  8
    64  32 16])
 
-(def- neighbour-idxvalue-to-transitiontile-key
+(def ^:private neighbour-idxvalue-to-transitiontile-key
   (apply safe-merge
          (map #(apply transitiontile %)
               [[:topleft        [1]]
@@ -46,7 +46,7 @@
                [:leftandbottom  [128 32] [1 64 16]]
                [:rightandbottom [8 32]   [16 4 64]]])))
 
-(def- transitiontile-keys
+(def ^:private transitiontile-keys
   (set (vals neighbour-idxvalue-to-transitiontile-key)))
 
 (defn- get-transition-tile-idxvalue [count-neighbour? grid posi]

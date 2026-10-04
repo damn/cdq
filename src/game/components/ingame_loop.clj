@@ -1,6 +1,5 @@
 (ns game.components.ingame-loop
   (:require
-    [utils.core :refer [find-first]]
     [game.components.core :refer [active add-to-removelist create-comp create-entity create-entity-no-init defentity get-component get-entity get-id]]))
 
 (def ^:private ids (atom #{}))
@@ -23,5 +22,5 @@
 (defn remove-entity [ctype]
   (->>
     (get-ingame-loop-entities)
-    (find-first #(get-component % ctype))
+    (first (filter #(get-component % ctype)))
     add-to-removelist))

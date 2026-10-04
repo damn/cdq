@@ -1,7 +1,6 @@
 (ns game.tools.transitiontilemaker16
   (:require
     [data.grid2d :refer [get-4-neighbour-positions]]
-    [utils.core :refer [def-]]
     engine.core
     engine.render
     game.utils.random
@@ -17,7 +16,7 @@
              [0 1] 4 })
 
 ; so the idxvalues-order corresponds to the following values for a neighbour tile:
-(def- idxvalues [2 8 4 1])
+(def ^:private idxvalues [2 8 4 1])
 
 (defn- get-transition-tile-idxvalue [count-neighbour? grid posi]
   (apply +
@@ -30,7 +29,7 @@
 ; => sprite-idx for every value is defined in a map
 ; => count :walls
 
-(def- idxvalue-localids
+(def ^:private idxvalue-localids
   {0 0,
    1 22,
    2 7,
@@ -64,7 +63,7 @@
 
 ;;
 
-(def- firstgid 1)
+(def ^:private firstgid 1)
 
 (defn- calc-gid [grid posi value]
   (when-let [localid (calc-localid grid posi value)]

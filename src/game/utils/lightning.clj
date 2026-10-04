@@ -6,7 +6,7 @@
     [game.utils.raycast :refer [ray-blocked?]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.maps.minimap :refer [update-minimap]]
-    [utils.core :refer [assoc-in! compare-times def- defnks genmap int-posi runmap]]
+    [utils.core :refer [assoc-in! compare-times defnks genmap int-posi runmap]]
     [game.session :refer [atom-session]]
     [game.settings :refer [debug-mode in-pixel]]
     [game.components.core :refer [active create-comp create-entity create-entity-no-init defentity get-component get-position player-body]]
@@ -103,7 +103,7 @@
         light (get-component player-body :light)]
     (compare-times 100 (create-lightmap posi light))))
 
-(def- px-dist-dirty 5)
+(def ^:private px-dist-dirty 5)
 
 (def ^:private light-sources (atom #{}))
 (def session (atom-session light-sources :save-session false))

@@ -1,7 +1,6 @@
 (ns game.tools.dirtpath
   (:require
     [data.grid2d :refer [get-8-neighbour-positions]]
-    [utils.core :refer [def-]]
     [engine.core :refer [start-slick-basicgame]]
     [game.utils.random :refer [if-chance]]
     [mapgen.findpath :refer [find-path]]
@@ -9,10 +8,10 @@
     [game.tools.transitiontilemaker :refer [get-transition-tile-value]]
     [game.tools.tiledmap-grid-convert :refer [make-tiledmap-file resource]]))
 
-(def- ground-firstgid 1)
-(def- circle-tiles-firstgid 91)
+(def ^:private ground-firstgid 1)
+(def ^:private circle-tiles-firstgid 91)
 
-(def- neighbourvalues {:topandleft 11
+(def ^:private neighbourvalues {:topandleft 11
                        :top 9
                        :topandright 10
                        :bottomright 24

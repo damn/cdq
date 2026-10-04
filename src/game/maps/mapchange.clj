@@ -1,14 +1,13 @@
 (ns game.maps.mapchange  ; TODO just change
   (:require
     [game.player.session-data :refer [save-game]]
-    [utils.core :refer [def-]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
     [game.components.core :refer [get-component player-body]]
     [game.components.body :refer [teleport]]
     [game.components.skills.core :refer [is-attacking?]]
     [game.maps.data :refer [get-pretty-name set-map!]]))
 
-(def- queued (atom nil))
+(def ^:private queued (atom nil))
 
 (defn queue-map-change
   "for calling @ update-components loop."

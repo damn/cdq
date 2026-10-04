@@ -2,7 +2,7 @@
   (:require
     [game.settings :refer [tile-width]]
     [game.components.update :refer [max-delta]]
-    [utils.core :refer [assoc-in! find-first runmap update-in!]]
+    [utils.core :refer [assoc-in! runmap update-in!]]
     [game.components.core :refer [active add-to-removelist defcomponent get-component get-half-height get-half-width get-id get-movement-type get-position get-side is-player?]]
     [game.components.body :refer [calc-touched-cells get-body-bounds get-other-solid-bodies get-to-check-tiles min-solid-pxsize update-occupied-cell update-touched-cells]]
     [game.components.position :refer [swap-position!]]
@@ -23,9 +23,9 @@
         half-h (get-half-height projectile)
         {:keys [hit-effects hits-side already-hit-bodies piercing hits-wall-effect]} (get-component projectile :projectile-collision)
         touched-cells (calc-touched-cells new-posi half-w half-h)
-        hit-body (find-first #(and (not (contains? already-hit-bodies %))
+        hit-body (first (filter #(and (not (contains? already-hit-bodies %))
                                    (= hits-side (get-side %)))
-                             (get-other-solid-bodies new-posi half-w half-h id touched-cells))
+                             (get-other-solid-bodies new-posi half-w half-h id touched-cells)))
         movement-type (get-movement-type projectile)
         ; TODO PROJECTILE COLLISION to entityPROJECTILE and out of movement logic?
         blocked (cond hit-body

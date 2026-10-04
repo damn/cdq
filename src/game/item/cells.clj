@@ -3,7 +3,7 @@
     [engine.render :as color :refer [create-image defcolor draw-grid draw-image fill-rect get-scaled-copy render-readable-text rgbcolor set-color]]
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
-    [utils.core :refer [def- defnks find-first runmap thread-through]]
+    [utils.core :refer [defnks runmap thread-through]]
     [engine.core :refer [defpreload initialize set-mouse-cursor]]
     [engine.input :refer [get-mouse-pos]]
     [game.settings :refer [screen-height screen-scale screen-width]]
@@ -105,9 +105,9 @@
            (map #(:name (get-item %))
              (get-cells-from :belt)))]}
   (remove-one-item
-    (find-first
+    (first (filter
       #(= item-name (:name (get-item %)))
-      (get-cells-from :belt))))
+      (get-cells-from :belt)))))
 
 (defn- get-item-textseq [cell]
   (let [item (get-item cell)
@@ -172,20 +172,20 @@
                   (ItemGrid. (create-grid w h #(create-empty-item-cell % allows-type grid-type is-equipment-cell))
                              (select-keys argsmap [:visible-check :grid-type :rx :ry :allows-type]))))
 
-(def- inventory-cells-x 6)
-(def- inventory-cells-y 4)
+(def ^:private inventory-cells-x 6)
+(def ^:private inventory-cells-y 4)
 
-(def- cell-w 17) ; cells = item-size+1 so items fit inside grid lines, else top and left pixel line of items not visible
-(def- cell-h 17)
+(def ^:private cell-w 17) ; cells = item-size+1 so items fit inside grid lines, else top and left pixel line of items not visible
+(def ^:private cell-h 17)
 
-(def- borderpx 2)
-(def- inventory-width (+ (* 2 borderpx)
+(def ^:private borderpx 2)
+(def ^:private inventory-width (+ (* 2 borderpx)
                          (* inventory-cells-x cell-w)))
 (def inventory-height (+ (* 2 borderpx)
                           (* 2 cell-h)
                           (* inventory-cells-y cell-h)))
 
-(def- inventoryrx (- screen-width inventory-width frame-screenborder-distance))
+(def ^:private inventoryrx (- screen-width inventory-width frame-screenborder-distance))
 (def inventoryry frame-screenborder-distance)
 
 (initialize
@@ -307,11 +307,11 @@
   (rendering :tooltips [g c]
     (render-item-tooltip g)))
 
-(def- item-cells-bg-color (.darker background-color 0.5))
-(def- item-cells-fg-color foreground-color)
+(def ^:private item-cells-bg-color (.darker background-color 0.5))
+(def ^:private item-cells-fg-color foreground-color)
 
-(def- droppable-color (rgbcolor :g 0.6 :a 0.8))
-(def- not-allowed-color (rgbcolor :r 0.6 :a 0.8))
+(def ^:private droppable-color (rgbcolor :g 0.6 :a 0.8))
+(def ^:private not-allowed-color (rgbcolor :r 0.6 :a 0.8))
 
 (defn- render-cell-droppable-indicator [g cell rx ry]
   (fill-rect g rx ry cell-w cell-h
@@ -387,7 +387,7 @@
                       cell-with-same-item
                       (:count (get-item cell-with-same-item)))
                     (swap! (:item cell-with-same-item) update-in [:count] + (:count picked-item))
-                    (if-let [free-cell (find-first empty-item-cell? item-cells)]
+                    (if-let [free-cell (first (filter empty-item-cell? item-cells))]
                       (do
                         (add-item-to-cell picked-item free-cell)
                         true)
@@ -397,8 +397,8 @@
 (defn try-pickup-item [item]
   (or
     (when-let [grid-type (:grid-type
-                           (find-first #(= (:allows-type %) (:type item))
-                             (vals item-grids)))]
+                           (first (filter #(= (:allows-type %) (:type item))
+                             (vals item-grids))))]
       (try-put-item-in item grid-type)) ; 1. try
     (try-put-item-in item :inventory))) ; 2. try
 

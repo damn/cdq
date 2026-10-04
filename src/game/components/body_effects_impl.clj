@@ -1,6 +1,6 @@
 (ns game.components.body-effects-impl
   (:require
-    [utils.core :refer [->! approx-numbers def- mapvals runmap update-in!]]
+    [utils.core :refer [->! approx-numbers mapvals runmap update-in!]]
     [engine.core :refer [defpreload reset update]]
     [engine.render :refer [create-animation create-image folder-animation folder-frames get-scaled-copy render-centered-animation render-readable-text rgbcolor]]
     game.settings
@@ -126,7 +126,7 @@
        (incr-move-speed (- move-speedup))))
 
 (def max-psi-charges 3)
-(def- duration (* 20 1000))
+(def ^:private duration (* 20 1000))
 
 (defn current-psi-charges [body]
   (count (get-certain-effect-entities body :psi-charge)))
@@ -154,7 +154,7 @@
 ; case 2: zwei P1 und P2 mit ca. 120� abstand; gesucht P3 im abstand 120� von P1 und P2
 ; falls P2 im UZS rechts von P1 (durch addition) ist P3 dann entgegen den UZS von P1 ansonsten ist P3 im UZS rechts von P1
 
-(def- charge-body-distance 10)
+(def ^:private charge-body-distance 10)
 
 (defpreload ^:private psicharge-frames (map #(get-scaled-copy % 7 7) (folder-frames "effects/psicharges/")))
 
