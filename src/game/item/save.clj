@@ -2,7 +2,8 @@
   (:require
     [game.session :as session]
     [engine.render :refer [rgbcolor]]
-    [game.item.cells :refer [add-item-to-cell empty-all-item-grids get-item item-grids item-in-hand set-item-in-hand]]
+    [game.item.cells :refer [add-item-to-cell empty-all-item-grids get-item item-grids]]
+    [game.item.in-hand :refer [item-in-hand set-item-in-hand]]
     [game.item.instance :refer [create-item-instance]]
     [game.item.boni :refer [create-equip-boni-save load-equip-boni-save]]
     [data.grid2d :refer [cells]]))

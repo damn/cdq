@@ -1,36 +1,18 @@
 (ns game.item.cells ; more than cells
   (:require
-    [engine.render :as color :refer [create-image defcolor draw-grid draw-image fill-rect get-scaled-copy render-readable-text rgbcolor set-color]]
+    [engine.render :as color :refer [create-image draw-grid draw-image fill-rect render-readable-text rgbcolor set-color]]
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [utils.core :refer [runmap thread-through]]
-    [engine.core :refer [defpreload initialize set-mouse-cursor]]
+    [engine.core :refer [defpreload initialize]]
     [engine.input :refer [get-mouse-pos]]
-    [game.settings :refer [screen-height screen-scale screen-width]]
-    [game.mouse-cursor :refer [reset-default-mouse-cursor]]
+    [game.settings :refer [screen-height screen-width]]
     [game.ingame-gui :refer [background-color foreground-color frame-screenborder-distance ingamestate-display inventory-hotkey is-visible? make-frame]]
     [data.grid2d :refer [cells create-grid height width]]
     [game.components.core :refer [get-component player-body]]
-    [game.components.skills.core :refer [get-active-skill is-attacking?]]))
-
-; diablo 2 gold:  144 136 88
-; blue:           72 80 184
-(defcolor equip-boni-item-color :r 0.28 :g 0.31 :b 0.72 :brighter 0.5)
-(defcolor gold-item-color :r 0.56 :g 0.53 :b 0.34 :brighter 0.5)
-
-;;
-
-(def item-in-hand (atom nil))
-
-(defn is-item-in-hand? [] @item-in-hand)
-
-(defn set-item-in-hand [item]
-  (reset! item-in-hand item)
-  (set-mouse-cursor (get-scaled-copy (:image item) screen-scale) (* 8 screen-scale) (* 8 screen-scale)))
-
-(defn empty-item-in-hand []
-  (reset! item-in-hand nil)
-  (reset-default-mouse-cursor))
+    [game.components.skills.core :refer [get-active-skill is-attacking?]]
+    [game.item.colors :refer [equip-boni-item-color]]
+    [game.item.in-hand :refer [is-item-in-hand? item-in-hand]]))
 
 ;;
 

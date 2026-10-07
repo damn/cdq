@@ -4,7 +4,8 @@
     [engine.core :refer [play-sound]]
     [engine.render :refer [get-scaled-copy]]
     game.maps.data
-    [game.item.cells :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand showing-player-inventory? try-pickup-item]]
+    [game.item.cells :refer [showing-player-inventory? try-pickup-item]]
+    [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
     [game.components.core :refer [add-to-removelist create-entity create-entity-no-init defentity get-position player-body]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [blocked-location? create-body]]
