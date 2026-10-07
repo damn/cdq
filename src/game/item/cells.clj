@@ -18,14 +18,8 @@
 
 (declare item-grids) ; used either with :keyword or vals -> encapsulate vals somehow?
 
-(defn get-cells-from [grid-type] ; really strange name ...
-  (cells (grid-type item-grids)))
-
 (defn get-equiped-hands-item []
   @(:item (get (:hands item-grids) [0 0]))) ; (-> item-grids :hands [0 0])
-
-(defn empty-item-cell? [cell]
-  (nil? @(:item cell)))
 
 (defn cell-allows-item? [{allows :allows-type :as cell} item]
   (or
@@ -34,7 +28,7 @@
 
 (defn cell-empty-and-allows-item? [cell item]
   (and
-    (empty-item-cell? cell)
+    (nil? @(:item cell))
     (cell-allows-item? cell item)))
 	
 (defn cell-filled-and-allows-item? [cell item]
@@ -82,11 +76,11 @@
 (defn remove-one-item-from [grid-type item-name]
   {:pre [(some #{item-name}
            (map #(:name @(:item %))
-             (get-cells-from :belt)))]}
+             (cells (:belt item-grids))))]}
   (remove-one-item
     (first (filter
       #(= item-name (:name @(:item %)))
-      (get-cells-from :belt)))))
+      (cells (:belt item-grids))))))
 
 (defn- get-item-textseq [cell]
   (let [item @(:item cell)
@@ -354,12 +348,12 @@
     #(and
        @(:item %)
        (= (:name @(:item %)) item-name))
-    (get-cells-from grid-type)))
+    (cells (grid-type item-grids))))
 
 (defn- try-put-item-in
   "returns true when the item was picked up"
   [picked-item grid-type]
-  (let [item-cells (get-cells-from grid-type)
+  (let [item-cells (cells (grid-type item-grids))
         cell-with-same-item (first
                               (get-inventory-cells-with-item-name (:name picked-item) grid-type))
         picked-up (if
@@ -367,7 +361,7 @@
                       cell-with-same-item
                       (:count @(:item cell-with-same-item)))
                     (swap! (:item cell-with-same-item) update-in [:count] + (:count picked-item))
-                    (if-let [free-cell (first (filter empty-item-cell? item-cells))]
+                    (if-let [free-cell (first (filter #(nil? @(:item %)) item-cells))]
                       (do
                         (add-item-to-cell picked-item free-cell)
                         true)
