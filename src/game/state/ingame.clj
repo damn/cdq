@@ -25,7 +25,7 @@
     [game.maps.cell-grid :refer [cell-blocked? get-body-ids get-cell get-cell-grid get-map-h get-map-w]]
     [game.maps.camera :refer [get-camera-position]]
     [game.maps.tiledmaps :refer [get-layer-index]]
-    [game.components.core :refer [get-component get-components get-id get-position player-body update-removelist]]
+    [game.components.core :refer [get-components get-id get-position player-body update-removelist]]
     [game.components.body :refer [on-screen-and-in-sight?]]
     [game.components.render :refer [render-map-indep-order render-on-map-order rendering translate-position]]
     [game.components.destructible :refer [get-armor get-armor-reduce-info get-hp is-dead?]]

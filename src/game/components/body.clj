@@ -5,7 +5,7 @@
     [game.maps.camera :refer [get-camera-position]]
     [utils.core :refer [assoc-in! runmap]]
     [game.settings :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
-    [game.components.core :refer [defcomponent get-cached-touched-cells get-component get-entity get-half-height get-half-width get-id get-movement-type get-occupied-cell get-position is-solid? player-body]]
+    [game.components.core :refer [defcomponent get-cached-touched-cells get-entity get-half-height get-half-width get-id get-movement-type get-occupied-cell get-position is-solid? player-body]]
     [game.components.render :refer [render-on-map]]
     [game.components.position :refer [swap-position!]]
     game.components.misc
@@ -13,7 +13,7 @@
     game.maps.contentfields
     [game.utils.raycast :refer [ray-blocked?]]))
 
-(defn is-multiple-cell? [body] (:is-multiple-cell (get-component body :body)))
+(defn is-multiple-cell? [body] (:is-multiple-cell (:body @body)))
 
 (defn get-body-bounds [body]
   [(get-position body) (get-half-width body) (get-half-height body)])
@@ -42,7 +42,7 @@
 
 (defn- remove-from-occupied-cell [body]
   (if (is-multiple-cell? body)
-    (runmap #(swap! % update-in [:occupied] disj body) (:occupied-cells (get-component body :body)))
+    (runmap #(swap! % update-in [:occupied] disj body) (:occupied-cells (:body @body)))
     (swap! (get-occupied-cell body) update-in [:occupied] disj body)))
 
 (defn update-occupied-cell [body]
@@ -213,7 +213,7 @@
       (<= ydist (inc half-display-h-in-tiles)))))
 
 (defn is-burrowed? [entity]
-  (if-let [c (get-component entity :burrow)]
+  (if-let [c (:burrow @entity)]
     (:burrowed c)))
 
 (defn is-affectable? [entity]
@@ -226,7 +226,7 @@
 (defn- in-sight? [entity]
   (or
     (when @debug-mode debug/entities-always-in-los)
-    (get-component entity :always-in-sight)
+    (:always-in-sight @entity)
     (and (is-body-visible? entity)
          (not (ray-blocked? (get-position player-body) (get-position entity))))))
 

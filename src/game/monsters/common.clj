@@ -4,7 +4,7 @@
     [engine.render :refer [create-animation folder-frames spritesheet-frames]]
     [utils.core :refer [assoc-in! get-ratio translate-to-tile-middle update-in!]]
     [game.settings :refer [in-tiles tile-height tile-width]]
-    [game.components.core :refer [create-comp exists? get-component get-id get-position player-body update-counter!]]
+    [game.components.core :refer [create-comp exists? get-id get-position player-body update-counter!]]
     [game.components.body :refer [blocked-location? bodies-in-range? teleport]]
     [game.components.render :refer [animation-entity]]
     [game.components.destructible :refer [explosion-frames get-destructible-bodies get-hp set-hp-to-max]]
@@ -117,7 +117,7 @@
   (->> body get-hp get-ratio (- 1) (* 100) percent-chance))
 
 (defn lowhp-dealt-dmg-trigger [body lethal]
-  (let [move-comp (get-component body :movement)]
+  (let [move-comp (:movement @body)]
     (when (and (not lethal)
                (not (:running-away move-comp))
                (rand-when-low-hp body))

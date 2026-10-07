@@ -3,11 +3,11 @@
     [game.components.sleeping :refer [wake-up]]
     [game.components.misc :refer [delete-after-duration-component]]
     [utils.core :refer [runmap split-kvs-and-more update-in!]]
-    [game.components.core :refer [add-component create-comp create-entity defcomponent destruct-entity get-component get-entity get-id get-position]]
+    [game.components.core :refer [add-component create-comp create-entity defcomponent destruct-entity get-entity get-id get-position]]
     [game.components.position :refer [position-component swap-position!]]))
 
 (defn get-sub-entities [entity]
-  (when-let [subids (:ids (get-component entity :sub-entities))]
+  (when-let [subids (:ids (:sub-entities @entity))]
     (map get-entity subids)))
 
 (defcomponent sub-entities []
@@ -37,7 +37,7 @@
               :effect-type type
               :init (fn [this]
                       (dofn)
-                      (when-not (get-component target :sub-entities)
+                      (when-not (:sub-entities @target)
                         (add-component target (sub-entities-component)))
                       (update-in! target [:sub-entities :ids] conj (get-id this)))
               ; first disj id before undofn is called!
@@ -60,11 +60,11 @@
                          ~@more)))
 
 (defn get-certain-effect-entities [entity effect-type]
-  (filter #(= (:effect-type (get-component % :body-effect)) effect-type)
+  (filter #(= (:effect-type (:body-effect @%)) effect-type)
           (get-sub-entities entity)))
 
 (comment
-  (map #(:effect-type (get-component % :body-effect))
+  (map #(:effect-type (:body-effect @%))
        (get-sub-entities (get-entity 31))))
 
 (comment

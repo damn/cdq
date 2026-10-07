@@ -3,7 +3,7 @@
     [engine.core :refer [defpreload play-sound]]
     [engine.render :refer [create-animation folder-animation folder-frames white]]
     [utils.core :refer [runmap translate-to-tile-middle update-in!]]
-    [game.components.core :refer [add-to-removelist get-component get-position player-body]]
+    [game.components.core :refer [add-to-removelist get-position player-body]]
     [game.components.body :refer [blocked-location?]]
     [game.components.render :refer [animation-entity create-line-render-effect single-animation-component]]
     [game.components.body-effects-impl :refer [dmg-effect stun-collision-effect]]
@@ -54,7 +54,7 @@
                    ; no lvl after this => no need to spawn an item!
                    ; (create-rand-item (get-position body) :max-lvl (:rand-item-max-lvl (get-current-map-data)))
 
-                   (runmap add-to-removelist (:projectiles (get-component body :boss-ranged)))))
+                   (runmap add-to-removelist (:projectiles (:boss-ranged @body)))))
   (standalone-skill
     :stype :monster-spawner
     :cooldown 2000

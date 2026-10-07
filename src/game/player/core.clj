@@ -10,7 +10,7 @@
     [engine.core :refer [play-sound]]
     engine.input
     game.maps.contentfields
-    [game.components.core :refer [add-to-removelist create-entity create-entity-no-init defentity get-component player-body]]
+    [game.components.core :refer [add-to-removelist create-entity create-entity-no-init defentity player-body]]
     [game.components.active :refer [switch-state]]
     [game.components.position :refer [position-component]]
     game.components.movement
@@ -46,7 +46,7 @@
     (reset! game.components.update/running false)
     (play-sound "bfxr_playerdeath.wav")
     (dorun (map add-to-removelist (get-sub-entities body)))
-    (game.components.update/update-component 0 (get-component body :animation) body) ; set death animation
+    (game.components.update/update-component 0 (:animation @body) body) ; set death animation
     (assoc-in! player-body [:destructible :hp :current] 0)
     (set-rotation-angle body 0)))
 

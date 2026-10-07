@@ -9,7 +9,7 @@
     game.utils.random
     [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
     [game.utils.geom :refer [collides?]]
-    [game.components.core :refer [get-component get-entity get-half-width get-id get-position is-player? player-body]]
+    [game.components.core :refer [get-entity get-half-width get-id get-position is-player? player-body]]
     [game.components.body :refer [calc-touched-cells circle-collides? is-affectable? rect-shape]]
     [game.components.destructible :refer [attackable-by-player? calc-effective-melee-dmg deal-dmg]]
     [game.components.skills.core :refer [get-active-skill get-skill-use-mouse-button standalone-skill]]
@@ -133,7 +133,7 @@ so the entity can get in melee range.")
      :check-usable check-usable-melee-monster}))
 
 (defn get-current-player-melee-dmg []
-  (-> (get-current-player-melee-weapon) :base-dmg (calc-effective-melee-dmg (get-component player-body :item-boni))))
+  (-> (get-current-player-melee-weapon) :base-dmg (calc-effective-melee-dmg (:item-boni @player-body))))
 
 (defn monster-melee-component
   [& {:keys [cooldown hit-sound target-id attacktime]}]
@@ -146,7 +146,7 @@ so the entity can get in melee range.")
     :props (monster-melee-props target-id (melee-weapon [4 6] hit-sound))))
 
 (defn get-player-skill-animation-key []
-  (let [skill (get-active-skill (get-component player-body :skillmanager))]
+  (let [skill (get-active-skill (:skillmanager @player-body))]
     (:animation
       (if (:is-melee skill) (get-current-player-melee-weapon) skill))))
 

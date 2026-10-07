@@ -5,7 +5,7 @@
     [engine.render :refer [create-animation spritesheet-frames]]
     [game.session :refer [atom-session]]
     game.components.active
-    [game.components.core :refer [active block-active-components defcomponent get-component get-position is-solid? reset-component-state-after-blocked unblock-active-components]]
+    [game.components.core :refer [active block-active-components defcomponent get-position is-solid? reset-component-state-after-blocked unblock-active-components]]
     [game.components.render :refer [animation-entity]]
     [game.components.body :refer [colliding-with-other-solid-bodies? get-dist-to-player get-other-bodies-in-adjacent-cells is-burrowed? is-multiple-cell?]]
     game.components.position
@@ -70,7 +70,7 @@
     (active [delta _ _]
       (when (update-counter counter delta)
         (runmap check
-          (filter #(get-component % :burrow)
+          (filter #(:burrow @%)
                   (get-entities-in-active-content-fields))))))
 
 

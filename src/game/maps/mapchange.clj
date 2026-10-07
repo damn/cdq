@@ -2,7 +2,7 @@
   (:require
     [game.player.session-data :refer [save-game]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
-    [game.components.core :refer [get-component player-body]]
+    [game.components.core :refer [player-body]]
     [game.components.body :refer [teleport]]
     [game.components.skills.core :refer [is-attacking?]]
     [game.maps.data :refer [get-pretty-name set-map!]]))
@@ -15,7 +15,7 @@
   (when-not (or
               @queued
               ; teleport skill in new map can crash game with skill-use-tileposi of old-map
-              (is-attacking? (get-component player-body :skillmanager)))
+              (is-attacking? (:skillmanager @player-body)))
     (reset! queued [new-map-file position save-game?])))
 
 (defn change-map

@@ -3,7 +3,7 @@
     [game.settings :refer [tile-width]]
     [game.components.update :refer [max-delta]]
     [utils.core :refer [assoc-in! runmap update-in!]]
-    [game.components.core :refer [active add-to-removelist defcomponent get-component get-half-height get-half-width get-id get-movement-type get-position get-side is-player?]]
+    [game.components.core :refer [active add-to-removelist defcomponent get-half-height get-half-width get-id get-movement-type get-position get-side is-player?]]
     [game.components.body :refer [calc-touched-cells get-body-bounds get-other-solid-bodies get-to-check-tiles min-solid-pxsize update-occupied-cell update-touched-cells]]
     [game.components.position :refer [swap-position!]]
     [game.maps.cell-grid :refer [cell-blocked? get-cells]]
@@ -21,7 +21,7 @@
   (let [id (get-id projectile)
         half-w (get-half-width projectile)
         half-h (get-half-height projectile)
-        {:keys [hit-effects hits-side already-hit-bodies piercing hits-wall-effect]} (get-component projectile :projectile-collision)
+        {:keys [hit-effects hits-side already-hit-bodies piercing hits-wall-effect]} (:projectile-collision @projectile)
         touched-cells (calc-touched-cells new-posi half-w half-h)
         hit-body (first (filter #(and (not (contains? already-hit-bodies %))
                                    (= hits-side (get-side %)))
@@ -104,7 +104,7 @@
 (defn- update-position-solid [delta {vx 0 vy 1 :as v} xdir ydir speed body]
   (let [threshold (calc-threshold (get-half-width body))
         movement-type (get-movement-type body)
-        noclip (:noclip (get-component body :movement))
+        noclip (:noclip (:movement @body))
         success (or
                   (try-move body v xdir ydir delta speed movement-type noclip)
                   (when (or (is-player? body) (> (Math/abs (float vx)) threshold))
@@ -113,7 +113,7 @@
                     (try-move body [0 ydir] ydir ydir delta speed movement-type noclip)))]
     (when success
       ; hier nicht rotiert um bewegten vektor(success) sondern um gew�nschten vektor da sonst zittern die monster herum
-      (when-let [rotation (get-component body :rotation)]
+      (when-let [rotation (:rotation @body)]
         ((:moved rotation) body v))
       (when (is-player? body)
           (assoc-in! body [:movement :play-move-animation] true)))))
@@ -129,7 +129,7 @@
       (let [{vx 0 vy 1 :as v} (vec-posi v)
             xdir (Math/signum (float vx))
             ydir (Math/signum (float vy))
-            update-position (if (get-component body :projectile-collision)
+            update-position (if (:projectile-collision @body)
                               update-position-projectile
                               update-position-solid)]
         (update-position delta v xdir ydir speed body)))))
@@ -152,7 +152,7 @@
   {
 ;   :init (fn [entity]
 ;           ;  (not asserted becuz burrowed are burrowing @init... so not solid anymore)
-;           (assert (or (get-component entity :projectile-collision) ;update-position-projectile
+;           (assert (or (:projectile-collision @entity) ;update-position-projectile
 ;                       (is-solid? entity)))) ;update-position-solid
    :play-move-animation false
    :speed (in-tiles-per-ms speed)})

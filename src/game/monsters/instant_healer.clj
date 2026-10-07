@@ -3,7 +3,7 @@
     [engine.core :refer [create-sound make-counter]]
     [engine.render :refer [create-image green]]
     [utils.core :refer [assoc-in! lower-than-max?]]
-    [game.components.core :refer [active defcomponent exists? get-component get-id get-position player-body update-counter!]]
+    [game.components.core :refer [active defcomponent exists? get-id get-position player-body update-counter!]]
     [game.components.body :refer [bodies-in-range?]]
     [game.components.misc :refer [rotation-component]]
     [game.components.render :refer [create-line-render-effect image-render-component]]
@@ -48,7 +48,7 @@
       :attacktime 150
       :props {:shoot-sound "bfxr_instanthealer_heal.wav"
               :check-usable (fn [entity _]
-                              (when-let [cached (:nearby-monsters (get-component entity :cache-nearby-monsters))]
+                              (when-let [cached (:nearby-monsters (:cache-nearby-monsters @entity))]
                                 (when-let [needs-heal (first (sort-by #(:current (get-hp %))
                                                                       (filter #(healing-required-and-allowed? % entity healradius-squared)
                                                                               cached)))]

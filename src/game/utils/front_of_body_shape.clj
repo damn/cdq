@@ -2,7 +2,7 @@
   (:require
     [game.utils.geom :as geom]
     utils.core
-    [game.components.core :refer [get-component get-half-width get-position]]
+    [game.components.core :refer [get-half-width get-position]]
     game.components.body))
 
 (defn in-front-of-body-shape
@@ -10,7 +10,7 @@
    (in-front-of-body-shape (get-position body)
                            (get-half-width body)
                            height
-                           (:angle (get-component body :rotation))))
+                           (:angle (:rotation @body))))
   ([[x y] half-w height angle]
    (geom/rotate
     (geom/rectangle (- x half-w)

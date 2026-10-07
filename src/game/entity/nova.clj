@@ -8,7 +8,7 @@
     [utils.core :refer [runmap update-in!]]
     [engine.render :refer [render-centered-shape rgbcolor]]
     [game.settings :refer [in-pixel]]
-    [game.components.core :refer [active add-to-removelist create-comp create-entity create-entity-no-init defentity get-component update-counter!]]
+    [game.components.core :refer [active add-to-removelist create-comp create-entity create-entity-no-init defentity update-counter!]]
     [game.components.render :refer [render-on-map single-animation-component]]))
 
 (defn- circle-debug-comp []
@@ -19,7 +19,7 @@
       (active [delta c entity]
         (geom/set-radius (:shape c)
                          (in-pixel
-                          (:radius (get-component entity :nova-effect)))))
+                          (:radius (:nova-effect @entity)))))
       {:shape (geom/circle [-1 -1] 0)})))
 
 (defentity nova-effect [:position :duration :maxradius :affects-side :dmg :animation :opt :is-player-spell]

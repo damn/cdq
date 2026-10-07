@@ -9,7 +9,7 @@
     [game.settings :refer [screen-height screen-width]]
     [game.ingame-gui :refer [background-color foreground-color frame-screenborder-distance ingamestate-display inventory-hotkey is-visible? make-frame]]
     [data.grid2d :refer [cells create-grid height width]]
-    [game.components.core :refer [get-component player-body]]
+    [game.components.core :refer [player-body]]
     [game.components.skills.core :refer [get-active-skill is-attacking?]]
     [game.item.colors :refer [equip-boni-item-color]]
     [game.item.in-hand :refer [is-item-in-hand? item-in-hand]]))
@@ -105,7 +105,7 @@
 
 (defn item-not-in-use? [cell]
   (let [item @(:item cell)
-        skillmanager (get-component player-body :skillmanager)
+        skillmanager (:skillmanager @player-body)
         active-skill (get-active-skill skillmanager)
         in-use (and
                  (:is-equipment cell) item (is-attacking? skillmanager)

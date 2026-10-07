@@ -1,6 +1,6 @@
 (ns game.components.item-boni
   (:require
-    [game.components.core :refer [defcomponent get-component player-body]]
+    [game.components.core :refer [defcomponent player-body]]
     [game.components.body-effects-impl :refer [create-armor-reduce-effect slowdown stun]]
     [game.utils.random :refer [when-chance]]))
 
@@ -19,7 +19,7 @@
    :chance-slow 0
    :chance-reduce-armor 0
    :dealt-melee-dmg-effect (fn [target-body]
-                             (let [{:keys [chance-stun chance-slow chance-reduce-armor]} (get-component player-body :item-boni)]
+                             (let [{:keys [chance-stun chance-slow chance-reduce-armor]} (:item-boni @player-body)]
                                (when-chance chance-stun
                                  (stun target-body 1000))
                                (when-chance chance-slow

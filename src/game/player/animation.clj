@@ -2,7 +2,7 @@
   (:require
     [utils.core :refer [assoc-in!]]
     [engine.render :refer [create-animation create-image folder-animation]]
-    [game.components.core :refer [get-component player-body]]
+    [game.components.core :refer [player-body]]
     [game.components.render :refer [animation-component]]
     [game.components.destructible :refer [is-dead?]]
     [game.components.skills.core :refer [is-attacking?]]
@@ -10,13 +10,13 @@
     [game.player.skill.skillmanager :refer [get-current-standard-skill]]))
 
 (defn- control [body]
-  (let [is-moving (:play-move-animation (get-component body :movement))
+  (let [is-moving (:play-move-animation (:movement @body))
         holding-gun (= :gun (:type (get-current-standard-skill)))]
     (assoc-in! body [:movement :play-move-animation] false)
     (cond
       (is-dead? body)
         :death
-      (is-attacking? (get-component body :skillmanager))
+      (is-attacking? (:skillmanager @body))
         (get-player-skill-animation-key)
       is-moving
         (if holding-gun :with-gun :moving)
@@ -52,7 +52,7 @@
 
 (comment
   (clojure.pprint/pprint
-    (let [c (get-component player-body :animation)]
+    (let [c (:animation @player-body)]
       (for [[types values] animation-types]
         [types (for [atype values]
                  [atype (-> c atype :speed float)])]))))

@@ -2,7 +2,7 @@
   (:require
     [engine.render :as color :refer [draw-shape set-color]]
     [game.settings :refer [tile-width]]
-    [game.components.core :refer [defcomponent get-component get-half-pxw get-position]]
+    [game.components.core :refer [defcomponent get-half-pxw get-position]]
     game.components.body
     [game.components.render :refer [render-on-map translate-position]]
     [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
@@ -12,7 +12,7 @@
   (let [posi (-> body get-position translate-position)
         hbodyw (get-half-pxw body)
         height (* melee-puffer tile-width)]
-    (in-front-of-body-shape posi hbodyw height (:angle (get-component body :rotation)))))
+    (in-front-of-body-shape posi hbodyw height (:angle (:rotation @body)))))
 
 (defn- render-it [g body c]
   (set-color g (if (get-attackable-target-in-front body) color/red color/green))

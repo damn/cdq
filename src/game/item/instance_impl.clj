@@ -3,7 +3,7 @@
     [game.maps.data :refer [current-map]]
     [game.components.movement :refer [projectile-movement-component]]
     [game.components.body-effects-impl :refer [battle-drugs dmg-effect]]
-    [game.components.core :refer [get-component get-id player-body]]
+    [game.components.core :refer [get-id player-body]]
     [game.components.skills.melee :refer [melee-weapon]]
     [utils.core :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals update-in! variance-val-str]]
     [engine.core :refer [create-sound defpreload]]
@@ -186,7 +186,7 @@
   (round-n-decimals (/ (+ mi mx) 2 seconds) 2))
 
 (defn- get-sword-infostr [{:keys [animation base-dmg] :as weapon}]
-  (let [seconds (-> (get-component player-body :animation) animation get-duration in-seconds)]
+  (let [seconds (-> (:animation @player-body) animation get-duration in-seconds)]
     (str
       (variance-val-str base-dmg) " Damage\n"
       (case animation :sword-small "Fast" :sword "Normal" :sword-big "Slow") " Attack-Speed\n"

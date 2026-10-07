@@ -5,7 +5,7 @@
     [utils.core :refer [->! create-counter runmap update-counter]]
     [game.session :refer [atom-session]]
     [game.settings :refer [in-pixel screen-height screen-width]]
-    [game.components.core :refer [active block-active-components defcomponent get-component unblock-active-components]]
+    [game.components.core :refer [active block-active-components defcomponent unblock-active-components]]
     game.components.active
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
@@ -31,7 +31,7 @@
                          half-aggro-height-tiles]))
 ; TODO not camera but player ... if we seperate them at some point...
 
-(defn- is-sleeping? [entity] (:sleeping (get-component entity :sleeping)))
+(defn- is-sleeping? [entity] (:sleeping (:sleeping @entity)))
 
 (defcomponent sleeping []
   {:depends [:body]

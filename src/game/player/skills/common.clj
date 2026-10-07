@@ -4,7 +4,7 @@
     [engine.render :refer [create-animation folder-frames get-scaled-copy]]
     [utils.core :refer [variance-val-str]]
     [game.settings :refer [in-tiles]]
-    [game.components.core :refer [get-component get-position player-body]]
+    [game.components.core :refer [get-position player-body]]
     [game.components.render :refer [animation-entity]]
     [game.components.destructible :refer [calc-effective-spell-dmg]]))
 
@@ -12,7 +12,7 @@
   (variance-val-str
     (calc-effective-spell-dmg
       (:dmg skill)
-      (:percent-modify-spell (get-component player-body :item-boni)))))
+      (:percent-modify-spell (:item-boni @player-body)))))
 
 (def curse-infostr "Curse\nOnly one curse is active at a time\n")
 

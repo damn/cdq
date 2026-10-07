@@ -11,7 +11,7 @@
     [game.ingame-gui :refer [buttonscale buttonx-start frame-screenborder-distance get-bounds ingamestate-display is-visible? make-frame make-imgbutton mouseover? set-visible skillmenu-hotkey switch-visible x-dist]]
     game.session
     [game.player.skill.skillmanager :refer [add-player-skill assign-unused-hotkey-and-open-skillslist create-skill-icon]]
-    [game.components.core :refer [active get-component player-body]]
+    [game.components.core :refer [active player-body]]
     [game.components.skills.core :refer [skillmanager-skill]]
     game.components.skills.melee))
 
@@ -76,7 +76,7 @@
                                    :location [(+ x puffer (* menux 25))
                                               (+ y puffer (* menuy 25))]
                                    :pressed (fn []
-                                              (when (and (pos? (:free-skill-points (get-component player-body :skillmanager)))
+                                              (when (and (pos? (:free-skill-points (:skillmanager @player-body)))
                                                          (not @(:learned-this skill)))
                                                 (update-in! player-body [:skillmanager :free-skill-points] dec)
                                                 (learn-skill skill)
@@ -115,7 +115,7 @@
     (when (is-visible? skillmenu-frame)
       (let [x skillmenu-x
             y skillmenu-y]
-        (render-readable-text g (+ x 5) (+ y 5) :background false (str "Free points: " (:free-skill-points (get-component player-body :skillmanager))))
+        (render-readable-text g (+ x 5) (+ y 5) :background false (str "Free points: " (:free-skill-points (:skillmanager @player-body))))
         (doseq [{:keys [button skill]} skillmenu-buttons
                 :when (not @(:learned-this skill))]
           (fill-rect g (get-bounds button) (rgbcolor :r 0.5 :g 0.5 :b 0.5 :a 0.8)))))))
@@ -137,7 +137,7 @@
                        (learn-skill skill)
                        (reset! (:learned-this skill) false))))) ; new character session all set to false
                (save-session [_]
-                 {:free-points (:free-skill-points (get-component player-body :skillmanager))
+                 {:free-points (:free-skill-points (:skillmanager @player-body))
                   :learned (for [[skilltype skill] learnable-skills]
                              [skilltype @(:learned-this skill)])})
                (new-session-data [_]
@@ -157,4 +157,4 @@
 
 (ingame-loop-comp :update-button-visibility
   (active [delta c _]
-    (set-visible freeskillpointsbutton (pos? (:free-skill-points (get-component player-body :skillmanager))))))
+    (set-visible freeskillpointsbutton (pos? (:free-skill-points (:skillmanager @player-body))))))

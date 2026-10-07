@@ -6,7 +6,7 @@
     [engine.render :refer [is-stopped?]]
     [game.utils.tilemap :refer [get-mouse-tile-pos]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
-    [game.components.core :refer [active create-comp get-component is-player? update-counter!]]
+    [game.components.core :refer [active create-comp is-player? update-counter!]]
     [game.components.active :refer [blocks-component switch-state]]
     [game.components.render :refer [current-animation show-gains-mana-effect]]))
 
@@ -16,10 +16,10 @@
 
 (defn get-skill [body skilltype]
   (or
-    (get-component body skilltype)
-    (-> (get-component body :skillmanager) :skills skilltype)))
+    (skilltype @body)
+    (-> (:skillmanager @body) :skills skilltype)))
 
-(defn get-mana [entity] (:mana (get-component entity :skillmanager)))
+(defn get-mana [entity] (:mana (:skillmanager @entity)))
 
 (defn enough-mana? [{cost :cost :as skill} {mana :mana :as skillmanager}]
   (<= cost (:current mana)))
@@ -56,7 +56,7 @@
 ; and entities which attack through :attack-counter and have :animation component are ok because first :Attack-counter is checked
 (defn- attack-finished? [entity skill delta]
   (if (:attack-counter skill)
-    (if (get-component entity :skillmanager)
+    (if (:skillmanager @entity)
       (update-counter-skill! entity delta skill :attack-counter)
       (update-counter! entity delta skill :attack-counter))
     (is-stopped? (current-animation entity))))
@@ -111,7 +111,7 @@
   [delta {:keys [state choose-skill rotate-after-attack cast-sound] :as component} entity]
   (update-in! entity [:skillmanager] update-cooldowns delta)
   (let [is-player (is-player? entity)
-        skillmanager (get-component entity :skillmanager)] ; after update cooldowns.
+        skillmanager (:skillmanager @entity)] ; after update cooldowns.
     (case state
       :ready
       (let [active-type (choose-skill entity skillmanager delta)

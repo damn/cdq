@@ -4,7 +4,7 @@
     [engine.core :refer [defpreload reset update]]
     [engine.render :refer [create-animation create-image folder-animation folder-frames get-scaled-copy render-centered-animation render-readable-text rgbcolor]]
     game.settings
-    [game.components.core :refer [active add-to-removelist create-comp defcomponent get-component get-components get-id is-player? player-body reset-component-state-after-blocked]]
+    [game.components.core :refer [active add-to-removelist create-comp defcomponent get-components get-id is-player? player-body reset-component-state-after-blocked]]
     game.components.misc
     game.components.body
     [game.components.body-effects :refer [defeffectentity get-certain-effect-entities get-sub-entities]]
@@ -67,7 +67,7 @@
 
 (defn- remove-curses [body]
   (dorun (map add-to-removelist
-              (filter #(get-component % :is-curse)
+              (filter #(:is-curse @%)
                       (get-sub-entities body)))))
 
 ; only when active components!
@@ -142,7 +142,7 @@
 
 (defn get-psi-charge-degrees [body]
   {:post [(degrees? %)]}
-  (let [degrees (map #(:degree (get-component % :psi-charge-visuals)) (get-certain-effect-entities body :psi-charge))
+  (let [degrees (map #(:degree (:psi-charge-visuals @%)) (get-certain-effect-entities body :psi-charge))
         cnt (count degrees) p1 (first degrees) p2 (second degrees)]
     (case cnt
       0 0
@@ -195,13 +195,13 @@
     (count charges)))
 
 (comment
-  (.getSpeed (:casting (get-component player-body :animation)))
-  (.getSpeed (:sword (get-component player-body :animation)))
-  (:speed (get-component player-body :movement))
+  (.getSpeed (:casting (:animation @player-body)))
+  (.getSpeed (:sword (:animation @player-body)))
+  (:speed (:movement @player-body))
 
   (defn- get-durations []
     (clojure.string/join "\n"(map (fn [entity]
-                                    (let [counter (:counter (get-component entity :delete-after-duration))]
+                                    (let [counter (:counter (:delete-after-duration @entity))]
                                       [(str (:cnt counter) "/" (:maxcnt counter))
                                        (get-id entity)]))
                                   (get-certain-effect-entities player-body :psi-charge))))
@@ -215,7 +215,7 @@
     (render-on-map :air [g entity c [x y]]
       (render-readable-text g x (- y 20)
                             :shift false
-                                (get-in (get-component entity :delete-after-duration)
+                                (get-in (:delete-after-duration @entity)
                                         [:counter :cnt]))))
   )
 

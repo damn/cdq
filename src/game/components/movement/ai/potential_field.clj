@@ -9,7 +9,7 @@
     [data.grid2d :refer [cells get-8-neighbour-positions]]
     [utils.core :refer [assoc-in! diagonal-direction? genmap positions runmap when-seq]]
     [game.settings :refer [tile-height tile-width]]
-    [game.components.core :refer [defcomponent get-component get-position player-body]]
+    [game.components.core :refer [defcomponent get-position player-body]]
     [game.components.body :refer [inside-cell?]]
     [game.maps.cell-grid :refer [add-cell-blocks-changed-listener cached-get-adjacent-cells cell-blocked? get-cell get-cell-grid is-diagonal? occupied-by-other?]]
     [game.utils.geom :refer [direction-vector get-distance get-vector-to-player]]))
@@ -73,12 +73,12 @@
           (inc iterations))))))
 
 (defn- clear-cells [entity]
-  (when-let [cells (:marked-cells (get-component entity :potential-field))]
+  (when-let [cells (:marked-cells (:potential-field @entity))]
     (assoc-in! entity [:potential-field :marked-cells] nil)
     (runmap #(swap! % dissoc :dist-to-player) cells)))
 
 (defn- try-generate [entity]
-  (let [component (get-component entity :potential-field)
+  (let [component (:potential-field @entity)
         current-tile (get-tile entity)
         dirty (not= current-tile (:last-tile component))]
     (when dirty

@@ -4,7 +4,7 @@
     [engine.core :refer [play-sound]]
     [game.maps.minimap :refer [show-on-minimap]]
     [utils.core :refer [assoc-in!]]
-    [game.components.core :refer [add-to-removelist create-comp create-entity create-entity-no-init defentity get-component]]
+    [game.components.core :refer [add-to-removelist create-comp create-entity create-entity-no-init defentity]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [create-body]]
     [game.components.pressable :refer [pressable-component]]
@@ -30,7 +30,7 @@
   (create-comp :clicked {:is? false})
   (pressable-component ""
                        (fn [entity]
-                         (when-not (:is? (get-component entity :clicked))
+                         (when-not (:is? (:clicked @entity))
                            (assoc-in! entity [:clicked :is?] true)
                            (play-sound "ReversyH-Nick_Ros-105.wav")
                            (add-to-removelist entity)

@@ -5,7 +5,7 @@
     [game.utils.geom :as geom]
     [utils.core :refer [define-order int-posi make-fn order-contains? readable-number update-in!]]
     [game.settings :refer [in-pixel tile-height tile-width]]
-    [game.components.core :refer [active add-to-removelist create-comp create-entity create-entity-no-init defcomponent defentity get-component get-half-pxh get-half-pxw get-position update-counter!]]
+    [game.components.core :refer [active add-to-removelist create-comp create-entity create-entity-no-init defcomponent defentity get-half-pxh get-half-pxw get-position update-counter!]]
     [game.components.misc :refer [delete-after-duration-component]]
     [game.components.position :refer [position-component]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
@@ -61,10 +61,10 @@
 
 (defn- render-rotated-lighted-image [g entity render-posi image apply-light]
   (when apply-light
-    (if (get-component entity :always-in-sight)
+    (if (:always-in-sight @entity)
       (set-cached-brightness image (int-posi (get-position entity))) ; brightness like map tiles explored/unexplored
       (set-brightness image (get-position entity))))
-  (if-let [angle (:angle (get-component entity :rotation))]
+  (if-let [angle (:angle (:rotation @entity))]
     (render-rotated-centered-image g image angle render-posi)
     (render-centered-image image render-posi)))
 
@@ -90,7 +90,7 @@
                 new-akey new-animation)))
 
 (defn current-animation [entity]
-  (let [{:keys [akey] :as c} (get-component entity :animation)]
+  (let [{:keys [akey] :as c} (:animation @entity)]
     (akey c)))
 
 (defn- render-animation [g entity {:keys [apply-light] :as component} render-posi]
@@ -118,7 +118,7 @@
   (single-animation-component animation :order order :apply-light false)
   (create-comp :delete-after-stopped
     (active [_ _ entity]
-      (when (-> entity (get-component :animation) :default is-stopped?)
+      (when (-> (:animation @entity) :default is-stopped?)
         (add-to-removelist entity)))))
 
 ; FIXME animation that is passed to reload session args == initial one with cnt = 0 ....

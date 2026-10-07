@@ -10,9 +10,6 @@
 
 (defn get-components [entity] (vals @entity))
 
-(definline get-component [entity ctype]
-  (list ctype (list 'deref entity)))
-
 (defn get-id [entity] (:id (meta entity)))
 
 (defn get-entity [id]
@@ -172,12 +169,12 @@
 ;; Get-position here becaused is used a lot.
 
 (defn get-position [entity]
-  (:value (get-component entity :position)))
+  (:value (:position @entity)))
 
 (defmacro defbody-key-getter [& ks]
   (let [defs (for [k# ks]
                `(defn ~(symbol (str "get-" (name k#))) [body#]
-                  (~k# (get-component body# :body))))]
+                  (~k# (:body @body#))))]
     `(do ~@defs)))
 
 ; circular dependencies body<->render
@@ -191,10 +188,10 @@
   :occupied-cell)
 
 ; circular dependency body<->cell-grid
-(defn is-solid? [body] (:solid (get-component body :body)))
+(defn is-solid? [body] (:solid (:body @body)))
 
 ; circular dependencies movement<->body
-(defn get-movement-type [entity] (:movement-type (get-component entity :movement)))
+(defn get-movement-type [entity] (:movement-type (:movement @entity)))
 
 (declare player-body)
 
@@ -244,7 +241,7 @@
 ;;
 
 (defn save-single-entity-session [entity]
-  (when-let [{:keys [constructor args]} (get-component entity :session)]
+  (when-let [{:keys [constructor args]} (:session @entity)]
     {:constructor constructor
      :args args
      :components (for [{:keys [type serialize] :as component} (get-components entity)
@@ -283,6 +280,6 @@
                               (load-session [_ _]
                                 (reset! removelist #{})
                                 (swap! id-entity-map filter-map
-                                       #(get-component % :ingame-loop-entity)))
+                                       #(:ingame-loop-entity @%)))
                               (save-session [_])
                               (new-session-data [_])))

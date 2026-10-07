@@ -5,7 +5,7 @@
     [engine.core :refer [defpreload play-sound]]
     [engine.render :refer [create-animation create-image rgbcolor spritesheet-frames]]
     [game.screenshake :refer [shake-screen]]
-    [game.components.core :refer [add-to-removelist defcomponent get-component get-position get-side is-player? player-body]]
+    [game.components.core :refer [add-to-removelist defcomponent get-position get-side is-player? player-body]]
     game.components.position
     game.components.misc
     [game.components.body :refer [get-touched-bodies is-affectable?]]
@@ -35,7 +35,7 @@
      (int (* modifier (max new-min new-max)))]))
 
 (defn- try-leech [dmg-dealt]
-  (let [{:keys [hp-leech mana-leech]} (get-component player-body :item-boni)]
+  (let [{:keys [hp-leech mana-leech]} (:item-boni @player-body)]
 
     (when-not (zero? hp-leech)
       (let [value (* (/ hp-leech 100) dmg-dealt)]
@@ -90,10 +90,10 @@
    :init (fn [entity]
            ; hp-bar brightness corresponds to image corner brightness
            (assert (or
-                     (get-component entity :image-render)
-                     (get-component entity :animation))))})
+                     (:image-render @entity)
+                     (:animation @entity))))})
 
-(defn destructible? [body] (get-component body :destructible))
+(defn destructible? [body] (:destructible @body))
 
 (defn deal-dmg-allowed? [body affected-side] ; TODO also the same @ get-destructible-bodies... -> side always only 1 ??
   (and (destructible? body)
@@ -111,10 +111,10 @@
                   (is-affectable? %))
       (get-touched-bodies position radius))))
 
-(defn get-hp [body] (:hp (get-component body :destructible)))
-(defn get-armor [body] (:armor (get-component body :destructible)))
+(defn get-hp [body] (:hp (:destructible @body)))
+(defn get-armor [body] (:armor (:destructible @body)))
 
-(defn is-dead? [body] (:is-dead (get-component body :destructible)))
+(defn is-dead? [body] (:is-dead (:destructible @body)))
 
 ; TODO make 2 functions -> simpler? like this more complected
 (defn set-hp-to-max [body]
@@ -132,7 +132,7 @@
 (defpreload ^:private blood-frames (spritesheet-frames "effects/blood.png" 20 20))
 
 (defn- create-hit-effect [body]
-  (if-let [{trigger :trigger} (get-component body :hit-effect)]
+  (if-let [{trigger :trigger} (:hit-effect @body)]
     (trigger body)
     (animation-entity
       :position (get-position body)
@@ -147,11 +147,11 @@
 
   ; hit something else triggers
   (when is-player-melee
-    ((:dealt-melee-dmg-effect (get-component player-body :item-boni)) target-body)
+    ((:dealt-melee-dmg-effect (:item-boni @player-body)) target-body)
     (try-leech actual-dmg))
 
   ; being hit by something else triggers
-  (when-let [{trigger :do} (get-component target-body :dealt-dmg-trigger)]
+  (when-let [{trigger :do} (:dealt-dmg-trigger @target-body)]
     (trigger target-body lethal))
   (when-not lethal
     (when (is-player? target-body)
@@ -180,7 +180,7 @@
   (let [dmg (cond (dmg-data-ok? dmg) dmg
                   (number? dmg) [dmg dmg]
                   :else (println "Dmg-data notokay: " dmg))
-        {:keys [melee-crit spell-crit percent-modify-spell] :as item-boni} (get-component player-body :item-boni)
+        {:keys [melee-crit spell-crit percent-modify-spell] :as item-boni} (:item-boni @player-body)
         ; +percent% increases
         dmg (if is-player-spell (calc-effective-spell-dmg dmg percent-modify-spell) dmg)
         dmg (if is-player-melee (calc-effective-melee-dmg dmg item-boni) dmg)

@@ -7,7 +7,7 @@
     [game.mouseoverbody :refer [get-mouseover-body saved-mouseover-body]]
     [game.components.skills.core :refer [enough-mana? skillmanager-component skillmanager-skill]]
     [game.components.skills.melee :refer [player-melee-props]]
-    [game.components.core :refer [active add-to-removelist create-comp get-component player-body]]
+    [game.components.core :refer [active add-to-removelist create-comp player-body]]
     [game.components.active :refer [add-block blocks-component remove-block]]
     game.components.body
     [game.components.destructible :refer [attackable-by-player?]]
@@ -16,10 +16,10 @@
     game.utils.geom))
 
 (defn get-player-skills []
-  (:skills (get-component player-body :skillmanager)))
+  (:skills (:skillmanager @player-body)))
 
 (defn- current-selected-skill-type [mousebutton]
-  (mousebutton (:selected-type (get-component player-body :skillmanager))))
+  (mousebutton (:selected-type (:skillmanager @player-body))))
 
 (defn get-selected-skill [mousebutton]
   ((current-selected-skill-type mousebutton) (get-player-skills)))
@@ -52,7 +52,7 @@
         (add-to-removelist entity)))))
 
 (defn try-set-active-skill-player-skillmanager [new-skill]
-  (let [skillmanager (get-component player-body :skillmanager)]
+  (let [skillmanager (:skillmanager @player-body)]
     (if
       (and
         (:is-melee new-skill)

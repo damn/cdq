@@ -4,7 +4,7 @@
     [utils.core :refer [assoc-in!]]
     game.settings
     [game.maps.data :refer [get-current-map-data]]
-    [game.components.core :refer [get-component get-position player-body]]))
+    [game.components.core :refer [get-position player-body]]))
 
 ; Contentfield Entities
 ; -> :position sollten sie haben
@@ -25,7 +25,7 @@
 
 (defn- get-contentfields [] (:contentfields (get-current-map-data)))
 
-(defn get-content-field [entity] (:content-field (get-component entity :position)))
+(defn get-content-field [entity] (:content-field (:position @entity)))
 
 (defn remove-entity-from-content-field [entity] (swap! (:entities (get-content-field entity)) disj entity))
 

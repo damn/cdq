@@ -8,7 +8,7 @@
     [engine.core :refer [defpreload ratio]]
     [game.settings :refer [debug-mode in-pixel]]
     [game.mouseoverbody :refer [get-mouseover-body]]
-    [game.components.core :refer [get-component get-components get-entity get-half-pxh get-half-pxw get-half-width get-position is-player?]]
+    [game.components.core :refer [get-components get-entity get-half-pxh get-half-pxw get-half-width get-position is-player?]]
     game.components.body
     [game.components.destructible :refer [destructible? get-hp]]
     [game.components.render :refer [current-animation rendering]]
@@ -81,7 +81,7 @@
         color (if @active-lightning
                 (.darker ^Color color
                   (let [image (or
-                                (:image (get-component body :image-render))
+                                (:image (:image-render @body))
                                 (get-frame (current-animation body)))
                         intensity (let [color (.getCornerColor ^Image image Image/TOP_LEFT)]
                                     (/ (+ (.r color) (.g color) (.b color)) 3))]
@@ -101,7 +101,7 @@
     (when (not (is-player? body))
       (when (destructible? body)
         (render-hp-bar g body render-position))
-      (let [skillmanager (get-component body :skillmanager)
+      (let [skillmanager (:skillmanager @body)
             active-type (:active-type skillmanager)]
         (when (and skillmanager
                    (#{:healing :monster-nova} active-type)
@@ -145,7 +145,7 @@
 (ingame-loop-comp :body-outline
   (rendering :below-gui  [g c]
     (when-let [body (get-mouseover-body)]
-      (when (:mouseover-outline (get-component body :body))
+      (when (:mouseover-outline (:body @body))
         (let [p (screenpos-of-tilepos (get-position body))]
           (render-body-outline g body p
                                (if (and (not (is-player? body))

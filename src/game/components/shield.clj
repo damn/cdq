@@ -3,7 +3,7 @@
     [engine.core :refer [make-counter update-finally-merge]]
     [utils.core :refer [assoc-in!]]
     [engine.render :refer [create-image render-rotated-centered-image rgbcolor]]
-    [game.components.core :refer [active defcomponent get-component]]
+    [game.components.core :refer [active defcomponent]]
     [game.components.render :refer [circle-around-body-render-comp render-on-map]]
     [game.components.body-effects :refer [defeffectentity]]
     [game.utils.geom :refer [degree-add]]))
@@ -33,7 +33,7 @@
   (circle-around-body-render-comp body (rgbcolor :g 1 :r 0.5 :a 0.5) :air))
 
 (defn shield-try-consume-damage [body]
-  (when-let [shield (get-component body :shield)]
+  (when-let [shield (:shield @body)]
     (when (:is-active shield)
       (assoc-in! body [:shield :is-active] false)
       (shield-hit body)

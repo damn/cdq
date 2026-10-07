@@ -7,7 +7,7 @@
     [utils.core :refer [int-posi mapvals]]
     engine.core
     [game.settings :refer [half-screen-h half-screen-w]]
-    [game.components.core :refer [create-comp exists? get-component get-position]]
+    [game.components.core :refer [create-comp exists? get-position]]
     [game.maps.data :refer [get-current-map-data]]
     [game.maps.cell-grid :refer [get-bodies-from-cells get-cells]]
     [game.maps.camera :refer [get-camera-position]])
@@ -47,7 +47,7 @@
                 body-render-x (+ x (* scale (- bodyx start-leftx)))
                 body-render-y (+ y (* scale (- bodyy start-topy)))]
           :when (geom/point-in-rect? body-posi start-leftx start-topy width-in-tiles height-in-tiles)]
-    (fill-rect g (- body-render-x 0.5) (- body-render-y 0.5) 2 2 (:color (get-component body :minimap-icon)))))
+    (fill-rect g (- body-render-x 0.5) (- body-render-y 0.5) 2 2 (:color (:minimap-icon @body)))))
 
 (defn- cut-sub-image
   "out of image borders the image repeats itself, which shows on small maps, so dont create a sub-image which shows parts outside of image bounds"
@@ -91,7 +91,7 @@
 
 (defn update-minimap [sensed-tiles]
   (let [sensed-cells (get-cells sensed-tiles)]
-    (swap! (get-bodies) union (set (filter #(get-component % :minimap-icon) (get-bodies-from-cells sensed-cells))))
+    (swap! (get-bodies) union (set (filter #(:minimap-icon @%) (get-bodies-from-cells sensed-cells))))
     (draw-on-image (for [{:keys [posi blocks]} (map deref (remove nil? sensed-cells))]
                      [posi (case blocks
                              #{:air :ground} (:wall colors)

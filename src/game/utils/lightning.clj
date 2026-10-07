@@ -9,7 +9,7 @@
     [utils.core :refer [assoc-in! compare-times genmap int-posi runmap]]
     [game.session :refer [atom-session]]
     [game.settings :refer [debug-mode in-pixel]]
-    [game.components.core :refer [active create-comp create-entity create-entity-no-init defentity get-component get-position player-body]]
+    [game.components.core :refer [active create-comp create-entity create-entity-no-init defentity get-position player-body]]
     [game.components.position :refer [position-component]]
     [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
     [game.maps.cell-grid :refer [add-cell-blocks-changed-listener inside-map?]])
@@ -100,7 +100,7 @@
 
 (comment
   (let [posi (get-position player-body)
-        light (get-component player-body :light)]
+        light (:light @player-body)]
     (compare-times 100 (create-lightmap posi light))))
 
 (def ^:private px-dist-dirty 5)
@@ -110,10 +110,10 @@
 
 ; TODO map changed sets dirty
 (defn- update-light-sources []
-  (let [sources (filter #(get-component % :light) (get-entities-in-active-content-fields))]
+  (let [sources (filter #(:light @%) (get-entities-in-active-content-fields))]
     (doseq [entity sources
             :let [current-posi (get-position entity)
-                  light (get-component entity :light)
+                  light (:light @entity)
                   old-position (-> light :lightmap :posi)
                   dirty (or
                           (:dirty light)
@@ -157,7 +157,7 @@
 ; very small almost not noticeable, so only the color for the center is calculated which gives a performance boost and is simpler
 ; and also when rotation the corner positions are not correct anymore
 (defn- apply-lightsource [image position light-source]
-  (let [light (get-component light-source :light)
+  (let [light (:light @light-source)
         light-posi (get-position light-source)
         ; dont check if ray-blocked because
         ; already checked if entities are in-line-of-sight,
@@ -181,7 +181,7 @@
 
 (defn- apply-lightsource-cached [image position light-source]
   (when-let [cached-colors (get
-                             (:lightmap (get-component light-source :light))
+                             (:lightmap (:light @light-source))
                              (int-posi position))]
     (doseq [corner image-corners
             :let [cached-color (get cached-colors corner)]]
