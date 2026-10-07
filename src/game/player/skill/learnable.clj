@@ -51,7 +51,7 @@
 (defmacro deflearnable-skill [skill-type & more]
   `(swap! (deref #'game.player.skill.learnable/init-fns)
           conj
-          (fn [] (learnable-skill ~(keyword skill-type) ~@more))))
+          (fn [] (game.player.skill.learnable/learnable-skill ~(keyword skill-type) ~@more))))
 
 (defn- init-learnable-skills []
   (def learnable-skills
