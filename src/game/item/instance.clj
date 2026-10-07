@@ -1,7 +1,6 @@
 (ns game.item.instance  ; TODO refactor dependencies wg. instance-impl abkapselung
   (:require
     [game.settings :refer [tile-width]]
-    [utils.core :refer [find-prefixed-var]]
     [engine.core :refer [play-sound]]
     [engine.render :refer [get-scaled-copy]]
     game.maps.data
@@ -15,26 +14,22 @@
     [game.components.pressable :refer [pressable-component]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]))
 
-(def ^:private defitem-prefix "item-")
-
-(defn create-fn [type]
-  (find-prefixed-var
-    :namespace 'game.item.instance-impl
-    :prefix defitem-prefix
-    :prefixed-type type))
+(def item-create-fns {})
 
 (defmacro defitem [item-name & body]
   `(let [~'this-name ~item-name]
-     (defn ~(symbol (str defitem-prefix item-name))
-       ~@body)))
+     (alter-var-root #'item-create-fns assoc ~item-name
+       (fn ~@body))))
 
 (defn create-item-instance ; TODO & data -> besser? da dann net ne extra map
   ([item-name]
     (create-item-instance item-name nil))
   ([item-name data]
-    (with-meta
-      (assoc ((create-fn item-name) data) :name item-name)
-      {:pr :item})))
+    (let [create-fn (or (get item-create-fns item-name)
+                        (throw (Error. (str "Could not find item: " item-name))))]
+      (with-meta
+        (assoc (create-fn data) :name item-name)
+        {:pr :item}))))
 
 (defmacro def-usable-item [namestr & {:keys [effect info image use-sound]}]
   `(defitem ~namestr [{cnt# :count}]

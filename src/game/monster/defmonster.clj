@@ -1,7 +1,6 @@
 (ns game.monster.defmonster
   (:require
     [engine.render :refer [create-image]]
-    [utils.core :refer [find-prefixed-var]]
     [game.components.core :refer [create-entity]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [create-body]]
@@ -32,21 +31,16 @@
          (sleeping-component)
          components))
 
-; TODO mach doch einfach ne map wie bei skills von type zu den monster ...
-; dann auch distinct types wählen wichtig ...
-; find prefixed var irgendwie komisch ...
-(def ^:private defmonster-prefix "monster-")
+(def monsters {})
 
-(defn get-monster-properties [type] ; use ns-resolve 'game.monster.monsters (name monster-type) ? NO NEED FOR PREFIX CHECK? but then ...?
-  (find-prefixed-var
-    :namespace 'game.start
-    :prefix defmonster-prefix
-    :prefixed-type type))
+(defn get-monster-properties [type]
+  (or (get monsters type)
+      (throw (Error. (str "Could not find monster: " type)))))
 
 (defmacro defmonster [monster-type props & components]
   `(let [props# (assoc-w-and-h ~props)
          type# ~(keyword monster-type)]
-     (def ~(symbol (str defmonster-prefix monster-type))
+     (alter-var-root #'monsters assoc type#
        {:create (fn [position#] (create-monster position# type# props# ~@components))
         :half-w (/ (:pxw props#) tile-width 2)
         :half-h (/ (:pxh props#) tile-height 2)

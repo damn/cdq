@@ -125,16 +125,6 @@
     (first argseq)
     `(fn ~@argseq)))
 
-(defn find-prefixed-var
-  "Example: (find-prefixed-var :namespace 'user :prefix \"item-\" :prefixed-type :sword) tries to find user/item-sword."
-  [& {:keys [namespace prefix prefixed-type]}]
-  (if-let [v (find-var
-               (symbol
-                 (name namespace)
-                 (str prefix (name prefixed-type))))]
-    (deref v)
-    (throw (Error. (str "Could not find var for type: " prefixed-type)))))
-
 (defn print-n-return [data] (println data) data)
 
 (defn get-next-idx
