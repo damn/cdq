@@ -2,7 +2,8 @@
   (:require
     [utils.counter :refer [create-counter update-counter]]
     [engine.core :refer [defpreload play-sound]]
-    [engine.render :refer [create-animation spritesheet-frames]]
+    [engine.render.animation :refer [create-animation]]
+    [engine.render.assets :refer [spritesheet-frames]]
     [game.session :refer [atom-session]]
     game.components.active
     [game.components.core :refer [active block-active-components defcomponent get-position is-solid? reset-component-state-after-blocked unblock-active-components]]

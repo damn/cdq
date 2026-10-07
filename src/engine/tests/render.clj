@@ -1,7 +1,8 @@
 (ns engine.tests.render
   (:require
     [engine.core :refer [start-slick-basicgame]]
-    [engine.render :refer [create-image fill-rect render-readable-text]])
+    [engine.render.image :refer [create-image]]
+    [engine.render.graphics :refer [fill-rect render-readable-text]])
   (:import (org.newdawn.slick Image Color)))
 
 (def image)

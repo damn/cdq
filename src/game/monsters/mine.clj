@@ -1,7 +1,9 @@
 (ns game.monsters.mine
   (:require
     [engine.core :refer [defpreload play-sound]]
-    [engine.render :refer [create-animation create-image folder-frames spritesheet-frames]]
+    [engine.render.image :refer [create-image]]
+    [engine.render.animation :refer [create-animation]]
+    [engine.render.assets :refer [folder-frames spritesheet-frames]]
     [game.components.core :refer [get-position]]
     [game.components.render :refer [image-render-component single-animation-component]]
     [game.entity.nova :refer [nova-effect]]

@@ -1,6 +1,7 @@
 (ns game.monsters.big-teleporting-melee
   (:require
-    [engine.render :refer [folder-animation white]]
+    [engine.render.color :refer [white]]
+    [engine.render.assets :refer [folder-animation]]
     [game.components.core :refer [get-position player-body]]
     [game.components.body :refer [get-dist-to-player teleport]]
     [game.components.misc :refer [rotation-component]]

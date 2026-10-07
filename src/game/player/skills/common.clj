@@ -1,7 +1,9 @@
 (ns game.player.skills.common
   (:require
     [engine.core :refer [defpreload play-sound]]
-    [engine.render :refer [create-animation folder-frames get-scaled-copy]]
+    [engine.render.image :refer [get-scaled-copy]]
+    [engine.render.animation :refer [create-animation]]
+    [engine.render.assets :refer [folder-frames]]
     [utils.numbers :refer [variance-val-str]]
     [game.settings :refer [in-tiles]]
     [game.components.core :refer [get-position player-body]]

@@ -1,7 +1,7 @@
 (ns game.monsters.xploding-drone
   (:require
     [engine.core :refer [create-sound play-sound]]
-    [engine.render :refer [folder-animation]]
+    [engine.render.assets :refer [folder-animation]]
     [game.components.core :refer [get-id get-position player-body]]
     [game.components.misc :refer [rotation-component]]
     [game.components.render :refer [single-animation-component]]

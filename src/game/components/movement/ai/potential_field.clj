@@ -3,7 +3,8 @@
   adjacent cells are walls and blocked.
   (important for wavefront-expansion and field-following)"
   (:require
-    [engine.render :as color :refer [defcolor draw-string fill-rect rgbcolor set-color]]
+    [engine.render.color :as color :refer [defcolor rgbcolor set-color]]
+    [engine.render.graphics :refer [draw-string fill-rect]]
     [game.components.position :refer [get-tile]]
     [game.components.movement :refer [movement-component]]
     [data.grid2d :refer [cells get-8-neighbour-positions]]

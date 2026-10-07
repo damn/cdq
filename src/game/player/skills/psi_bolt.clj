@@ -1,7 +1,8 @@
 (ns game.player.skills.psi-bolt
   (:require
     [engine.core :refer [defpreload play-sound]]
-    [engine.render :refer [create-animation folder-frames]]
+    [engine.render.animation :refer [create-animation]]
+    [engine.render.assets :refer [folder-frames]]
     [utils.numbers :refer [variance-val-str]]
     [game.settings :refer [in-tiles]]
     [game.components.body-effects-impl :refer [consume-psi-charges current-psi-charges]]

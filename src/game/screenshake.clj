@@ -1,5 +1,5 @@
 (ns game.screenshake
-  (:require [engine.render :as g]))
+  (:require [engine.render.graphics :as g]))
 
 (def shake-delay 45) ; Delay in ms between each new shake.
 

@@ -6,7 +6,7 @@
     [data.grid2d :refer [mapgrid->vectorgrid posis transform]]
     [utils.core :refer [log translate-to-tile-middle]]
     engine.core
-    [engine.render :refer [get-sprite spritesheet]]
+    [engine.render.assets :refer [get-sprite spritesheet]]
     game.settings
     game.media
     game.components.core

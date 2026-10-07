@@ -1,7 +1,10 @@
 (ns game.components.render
   (:require
     [engine.core :refer [make-counter ratio update]]
-    [engine.render :as color :refer [draw-line fill-centered-circle get-dimensions get-frame is-stopped? render-centered-image render-centered-shape render-readable-text render-rotated-centered-image restart rgbcolor set-color]]
+    [engine.render.color :as color :refer [rgbcolor set-color]]
+    [engine.render.image :refer [get-dimensions render-centered-image render-rotated-centered-image]]
+    [engine.render.animation :refer [get-frame is-stopped? restart]]
+    [engine.render.graphics :refer [draw-line fill-centered-circle render-centered-shape render-readable-text]]
     [game.utils.geom :as geom]
     [utils.core :refer [define-order int-posi make-fn order-contains?]]
     [utils.numbers :refer [readable-number]]

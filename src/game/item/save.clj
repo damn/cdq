@@ -1,7 +1,7 @@
 (ns game.item.save
   (:require
     [game.session :as session]
-    [engine.render :refer [rgbcolor]]
+    [engine.render.color :refer [rgbcolor]]
     [game.item.cells :refer [add-item-to-cell empty-all-item-grids]]
     [game.item.grids :refer [item-grids]]
     [game.item.in-hand :refer [item-in-hand set-item-in-hand]]

@@ -5,7 +5,8 @@
     [game.components.position :refer [position-component]]
     [game.components.destructible :refer [deal-dmg get-destructible-bodies]]
     [clojure.set :refer [union]]
-        [engine.render :refer [render-centered-shape rgbcolor]]
+        [engine.render.color :refer [rgbcolor]]
+        [engine.render.graphics :refer [render-centered-shape]]
     [game.settings :refer [in-pixel]]
     [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init defentity update-counter!]]
     [game.components.render :refer [render-on-map single-animation-component]]))

@@ -1,7 +1,7 @@
 (ns game.player.movement
   (:require
         [engine.input :refer [is-key-down? is-leftbutton-down? is-leftm-consumed?]]
-    [engine.render :refer [render-readable-text]]
+    [engine.render.graphics :refer [render-readable-text]]
     [game.mouseoverbody :refer [saved-mouseover-body]]
     game.settings
     [game.debug-settings :as debug]

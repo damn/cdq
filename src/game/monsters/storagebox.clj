@@ -1,6 +1,6 @@
 (ns game.monsters.storagebox
   (:require
-    [engine.render :refer [create-image]]
+    [engine.render.image :refer [create-image]]
     [game.components.render :refer [image-render-component]]
     [game.monster.defmonster :refer [defmonster]]))
 

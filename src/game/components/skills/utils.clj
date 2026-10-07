@@ -1,6 +1,7 @@
 (ns game.components.skills.utils
   (:require
-    [engine.render :as color :refer [create-image render-centered-image]]
+    [engine.render.color :as color]
+    [engine.render.image :refer [create-image render-centered-image]]
     [game.components.position :refer [position-component]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
     [game.utils.raycast :refer [ray-blocked?]]

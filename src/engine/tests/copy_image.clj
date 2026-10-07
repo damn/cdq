@@ -1,7 +1,9 @@
 (ns engine.tests.copy-image
   (:require
     [engine.core :refer [defpreload start-slick-basicgame]]
-    [engine.render :refer [fill-rect get-scaled-copy spritesheet-frames]])
+    [engine.render.image :refer [get-scaled-copy]]
+    [engine.render.assets :refer [spritesheet-frames]]
+    [engine.render.graphics :refer [fill-rect]])
   (:import (org.newdawn.slick Image Color)))
 
 ; maybe compress the data so savegame is more readable? 1ASssF9g8aAgsGDGe

@@ -1,6 +1,7 @@
 (ns game.utils.raycast
   (:require
-    [engine.render :as color :refer [draw-line set-color]]
+    [engine.render.color :as color :refer [set-color]]
+    [engine.render.graphics :refer [draw-line]]
     utils.core
     [engine.input :refer [get-mouse-pos]]
     [game.settings :refer [half-screen-h half-screen-w]]

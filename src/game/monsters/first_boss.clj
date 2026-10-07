@@ -1,7 +1,9 @@
 (ns game.monsters.first-boss
   (:require
     [engine.core :refer [defpreload play-sound]]
-    [engine.render :refer [create-animation folder-animation folder-frames white]]
+    [engine.render.color :refer [white]]
+    [engine.render.animation :refer [create-animation]]
+    [engine.render.assets :refer [folder-animation folder-frames]]
     [utils.core :refer [translate-to-tile-middle]]
     [game.components.core :refer [add-to-removelist get-position player-body]]
     [game.components.body :refer [blocked-location?]]

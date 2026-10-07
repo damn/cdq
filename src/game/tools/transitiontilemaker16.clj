@@ -2,7 +2,6 @@
   (:require
     [data.grid2d :refer [get-4-neighbour-positions]]
     engine.core
-    engine.render
     game.utils.random
     [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi]]))
 

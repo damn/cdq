@@ -1,7 +1,9 @@
 (ns game.monsters.ray-shooter
   (:require
     [engine.core :refer [play-sound]]
-    [engine.render :refer [create-animation folder-animation red spritesheet-frames white]]
+    [engine.render.color :refer [red white]]
+    [engine.render.animation :refer [create-animation]]
+    [engine.render.assets :refer [folder-animation spritesheet-frames]]
     [game.components.core :refer [get-position is-player? player-body]]
     [game.components.body :refer [get-bodies-at-position]]
     [game.components.render :refer [animation-entity create-line-render-effect single-animation-component]]

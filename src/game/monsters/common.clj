@@ -1,7 +1,8 @@
 (ns game.monsters.common
   (:require
     [engine.core :refer [create-sound defpreload make-counter play-sound]]
-    [engine.render :refer [create-animation folder-frames spritesheet-frames]]
+    [engine.render.animation :refer [create-animation]]
+    [engine.render.assets :refer [folder-frames spritesheet-frames]]
     [utils.core :refer [translate-to-tile-middle]]
     [utils.numbers :refer [get-ratio]]
     [game.settings :refer [in-tiles tile-height tile-width]]

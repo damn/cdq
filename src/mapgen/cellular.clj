@@ -1,6 +1,6 @@
 (ns mapgen.cellular
   (:require
-    [engine.render :as color]
+    [engine.render.color :as color]
     [data.grid2d :refer [create-grid get-4-neighbour-positions get-8-neighbour-positions posis transform]]
     [utils.coll :refer [assoc-ks]]
     [game.utils.random :refer [percent-chance]]

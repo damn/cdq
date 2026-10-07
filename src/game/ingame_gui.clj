@@ -1,6 +1,7 @@
 (ns game.ingame-gui
   (:require
-    [engine.render :as color :refer [create-image]]
+    [engine.render.color :as color]
+    [engine.render.image :refer [create-image]]
     game.state.ids
     [engine.statebasedgame :refer [enter-state]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]

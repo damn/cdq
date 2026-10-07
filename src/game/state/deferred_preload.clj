@@ -2,7 +2,7 @@
   (:import (org.newdawn.slick.loading LoadingList))
   (:require
     [engine.core :refer [init-all]]
-    [engine.render :refer [render-readable-text]]
+    [engine.render.graphics :refer [render-readable-text]]
     [engine.statebasedgame :refer [defgamestate enter-state]]
     [game.state.mainmenu :refer [mainmenu-gamestate]]))
 

@@ -4,7 +4,8 @@
            (java.awt.event KeyEvent ActionListener)
            (org.newdawn.slick Image Color))
   (:require
-    [engine.render :as g]
+    [engine.render.image :as g]
+    [engine.render.color :as color]
     [engine.statebasedgame :refer [init-state-based-game state-based-game]]
     [game.session :as sess]
     [engine.settings :refer [jar-file?]]
@@ -112,7 +113,7 @@
              {:pr :color}))
 
 (defmethod sess/load-from-disk :color [[r g b a]]
-  (g/rgbcolor :r r :g g :b b :a a))
+  (color/rgbcolor :r r :g g :b b :a a))
 
 ;;; resolution setup (was game.resolutionsetup)
 

@@ -3,7 +3,10 @@
     [game.components.shield :refer [shield-try-consume-damage]]
     [utils.numbers :refer [increase-min-max-val lower-than-max? min-max-val rest-to-max set-to-max variance-val variance-val-str]]
     [engine.core :refer [defpreload play-sound]]
-    [engine.render :refer [create-animation create-image rgbcolor spritesheet-frames]]
+    [engine.render.color :refer [rgbcolor]]
+    [engine.render.image :refer [create-image]]
+    [engine.render.animation :refer [create-animation]]
+    [engine.render.assets :refer [spritesheet-frames]]
     [game.screenshake :refer [shake-screen]]
     [game.components.core :refer [add-to-removelist defcomponent get-position get-side is-player? player-body]]
     game.components.position

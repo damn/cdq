@@ -1,6 +1,6 @@
 (ns game.monsters.shield-turret
   (:require
-    [engine.render :refer [create-image]]
+    [engine.render.image :refer [create-image]]
     [game.components.misc :refer [rotation-component]]
     [game.components.render :refer [image-render-component]]
     [game.components.shield :refer [shield-component]]

@@ -1,7 +1,7 @@
 (ns game.components.sleeping
   (:require
     [game.utils.geom :as geom]
-    [engine.render :refer [render-centered-shape render-readable-text]]
+    [engine.render.graphics :refer [render-centered-shape render-readable-text]]
     [utils.counter :refer [create-counter update-counter]]
     [game.session :refer [atom-session]]
     [game.settings :refer [in-pixel screen-height screen-width]]

@@ -1,6 +1,6 @@
 (ns game.utils.lightning
   (:require
-    [engine.render :as color]
+    [engine.render.color :as color]
     game.maps.data
     [game.utils.geom :refer [get-distance tiles-inside-rect]]
     [game.utils.raycast :refer [ray-blocked?]]

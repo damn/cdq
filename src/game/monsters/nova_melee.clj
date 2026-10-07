@@ -1,7 +1,8 @@
 (ns game.monsters.nova-melee
   (:require
     [engine.core :refer [create-sound defpreload]]
-    [engine.render :refer [create-animation folder-animation folder-frames]]
+    [engine.render.animation :refer [create-animation]]
+    [engine.render.assets :refer [folder-animation folder-frames]]
     [game.components.core :refer [get-id get-position player-body]]
     [game.components.body :refer [circle-collides?]]
     [game.components.render :refer [single-animation-component]]

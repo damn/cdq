@@ -1,6 +1,8 @@
 (ns mapgen.test
   (:require
-    [engine.render :as color :refer [create-empty-image draw-grid draw-string fill-rect rgbcolor set-color]]
+    [engine.render.color :as color :refer [rgbcolor set-color]]
+    [engine.render.image :refer [create-empty-image]]
+    [engine.render.graphics :refer [draw-grid draw-string fill-rect]]
     [data.grid2d :refer [height posis width]]
     [utils.coll :refer [assoc-ks]]
     [engine.core :refer [start-slick-basicgame]]

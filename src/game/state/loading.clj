@@ -1,7 +1,7 @@
 (ns game.state.loading
   (:require
     [engine.core :refer [get-screen-height get-screen-width]]
-    [engine.render :as g]
+    [engine.render.graphics :as g]
     [engine.statebasedgame :as state :refer [defgamestate]]
     [utils.core :as utils]
     [game.state.ids :as ids]

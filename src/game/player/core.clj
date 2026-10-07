@@ -1,6 +1,6 @@
 (ns game.player.core
   (:require
-    [engine.render :as color]
+    [engine.render.color :as color]
     game.components.update
     game.maps.data
     [game.maps.minimap :refer [show-on-minimap]]

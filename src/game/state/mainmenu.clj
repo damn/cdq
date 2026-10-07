@@ -6,7 +6,7 @@
   (:require
     [engine.core :refer [app-game-container get-defaultfont get-line-height initialize]]
     [engine.input :refer [update-mousebutton-state]]
-    [engine.render :refer [render-readable-text]]
+    [engine.render.graphics :refer [render-readable-text]]
     [engine.statebasedgame :refer [defgamestate enter-state]]
     [game.gui :refer [make-guidisplay make-label make-textbutton remove-guicomponent render-guicomponent set-visible update-guicomponent]]
     [game.player.session-data :refer [current-character-name get-session-file-character-names]]

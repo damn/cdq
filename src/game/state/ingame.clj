@@ -4,7 +4,10 @@
     org.newdawn.slick.tiled.TiledMap)
   (:require
     [engine.input :as input :refer [get-mouse-pos is-key-pressed? is-rightm-consumed? try-consume-leftm-pressed try-consume-rightm-pressed]]
-    [engine.render :refer [black create-image draw-grid draw-image fill-rect get-dimensions get-sprite get-sub-image red render-readable-text reset-transform set-color translate white yellow]]
+    [engine.render.color :refer [black red set-color white yellow]]
+    [engine.render.image :refer [create-image draw-image get-dimensions get-sub-image]]
+    [engine.render.assets :refer [get-sprite]]
+    [engine.render.graphics :refer [draw-grid fill-rect render-readable-text reset-transform translate]]
     [engine.statebasedgame :as state :refer [defgamestate enter-state]]
     [game.debug-settings :as debug]
     [game.state.ids :as ids]

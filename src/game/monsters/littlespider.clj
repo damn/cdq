@@ -1,6 +1,6 @@
 (ns game.monsters.littlespider
   (:require
-    [engine.render :refer [folder-animation]]
+    [engine.render.assets :refer [folder-animation]]
     [game.components.misc :refer [rotation-component]]
     [game.components.render :refer [single-animation-component]]
     [game.components.movement.ai.potential-field :refer [path-to-player-movement]]

@@ -1,6 +1,7 @@
 (ns game.tests.target-in-front
   (:require
-    [engine.render :as color :refer [draw-shape set-color]]
+    [engine.render.color :as color :refer [set-color]]
+    [engine.render.graphics :refer [draw-shape]]
     [game.settings :refer [tile-width]]
     [game.components.core :refer [defcomponent get-half-pxw get-position]]
     game.components.body

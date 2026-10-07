@@ -1,7 +1,8 @@
 (ns game.player.skills.player-ranged
   (:require
     [engine.core :refer [defpreload]]
-    [engine.render :refer [create-animation folder-frames]]
+    [engine.render.animation :refer [create-animation]]
+    [engine.render.assets :refer [folder-frames]]
     [game.components.body-effects-impl :refer [dmg-effect stun-collision-effect]]
     [game.components.movement :refer [projectile-movement-component]]
     [game.components.skills.utils :refer [get-player-ranged-vector]]

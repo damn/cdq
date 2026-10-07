@@ -5,7 +5,7 @@
     [game.components.core :refer [create-entity get-component]]
     [game.components.position :refer [position-component]]
     [game.components.render :refer [animation-component current-animation]]
-    [engine.render :refer [create-animation]]))
+    [engine.render.animation :refer [create-animation]]))
 
 (with-private-fns [game.components.render [update-animation]]
   (deftest test-animation-component-update

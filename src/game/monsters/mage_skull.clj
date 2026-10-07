@@ -1,6 +1,6 @@
 (ns game.monsters.mage-skull
   (:require
-    [engine.render :refer [create-image]]
+    [engine.render.image :refer [create-image]]
     [game.components.misc :refer [hp-regen-component rotation-component]]
     [game.components.render :refer [image-render-component]]
     [game.utils.random :refer [rand-int-between]]

@@ -6,7 +6,9 @@
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [utils.core :refer [log split-key-val-and-maps]]
     [utils.numbers :refer [readable-number variance-val-str]]
-    [engine.render :refer [create-image defcolor fill-rect render-readable-text rgbcolor]]
+    [engine.render.color :refer [defcolor rgbcolor]]
+    [engine.render.image :refer [create-image]]
+    [engine.render.graphics :refer [fill-rect render-readable-text]]
     [game.settings :refer [screen-height]]
     game.media
     [game.gui :refer [get-bounds is-visible? make-frame make-imgbutton mouseover? set-visible switch-visible]]

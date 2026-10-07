@@ -1,6 +1,6 @@
 (ns game.tests.circle-collides
   (:require
-    [engine.render :as color]
+    [engine.render.color :as color]
     [game.utils.geom :as geom]
     [game.settings :refer [tile-width]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]

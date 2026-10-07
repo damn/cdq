@@ -2,7 +2,7 @@
   (:require
     [game.settings :refer [tile-width]]
     [engine.core :refer [play-sound]]
-    [engine.render :refer [get-scaled-copy]]
+    [engine.render.image :refer [get-scaled-copy]]
     game.maps.data
     [game.item.cells :refer [try-pickup-item]]
     [game.item.grids :refer [showing-player-inventory?]]

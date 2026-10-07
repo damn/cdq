@@ -1,7 +1,7 @@
 (ns game.monsters.little-bot
   (:require
     [engine.core :refer [create-sound play-sound]]
-    [engine.render :refer [create-image]]
+    [engine.render.image :refer [create-image]]
     [game.components.core :refer [get-id player-body]]
     [game.components.misc :refer [rotation-component]]
     [game.components.render :refer [image-render-component]]

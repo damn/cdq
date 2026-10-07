@@ -1,6 +1,6 @@
 (ns game.entity.door
   (:require
-    [engine.render :as color]
+    [engine.render.color :as color]
     [engine.core :refer [play-sound]]
     [game.maps.minimap :refer [show-on-minimap]]
         [game.components.core :refer [add-to-removelist create-entity create-entity-no-init defentity]]

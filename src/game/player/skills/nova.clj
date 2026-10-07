@@ -1,7 +1,8 @@
 (ns game.player.skills.nova
   (:require
     [engine.core :refer [defpreload]]
-    [engine.render :refer [create-animation folder-frames]]
+    [engine.render.animation :refer [create-animation]]
+    [engine.render.assets :refer [folder-frames]]
     [game.components.core :refer [get-position]]
     [game.entity.nova :refer [nova-effect]]
     [game.player.skill.learnable :refer [deflearnable-skill]]

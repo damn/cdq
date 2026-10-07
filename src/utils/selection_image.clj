@@ -1,6 +1,7 @@
 (ns utils.selection-image
   (:require
-    [engine.render :as color :refer [fill-rect]])
+    [engine.render.color :as color]
+    [engine.render.graphics :refer [fill-rect]])
   (:import org.newdawn.slick.Image))
 
 ; fillrect 2/2 weil beim rotieren von images sch�rfe verloren geht

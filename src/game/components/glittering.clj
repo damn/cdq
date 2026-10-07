@@ -1,7 +1,8 @@
 (ns game.components.glittering
   (:require
     [engine.core :refer [make-counter update update-finally-merge]]
-        [engine.render :refer [folder-animation is-stopped? render-centered-animation restart]]
+        [engine.render.animation :refer [is-stopped? render-centered-animation restart]]
+        [engine.render.assets :refer [folder-animation]]
     [game.components.core :refer [active defcomponent]]
     [game.components.render :refer [render-on-map]]))
 

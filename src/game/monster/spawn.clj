@@ -4,7 +4,7 @@
     [data.grid2d :refer [posis]]
     [utils.core :refer [log translate-to-tile-middle]]
     [utils.numbers :refer [inc-or-dec-max]]
-    [engine.render :refer [folder-animation]]
+    [engine.render.assets :refer [folder-animation]]
     [game.monster.defmonster :refer [get-monster-properties]]
     [game.components.core :refer [add-component get-position]]
     [game.components.body :refer [blocked-location?]]

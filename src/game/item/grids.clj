@@ -1,6 +1,6 @@
 (ns game.item.grids
   (:require
-    [engine.render :refer [create-image]]
+    [engine.render.image :refer [create-image]]
     [engine.core :refer [defpreload initialize]]
     [game.settings :refer [screen-height screen-width]]
     [game.gui :refer [is-visible? make-frame]]

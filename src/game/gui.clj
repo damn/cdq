@@ -1,6 +1,8 @@
 (ns game.gui
   (:require
-    [engine.render :as color :refer [create-image draw-image draw-rect fill-rect get-dimensions render-readable-text rgbcolor]]
+    [engine.render.color :as color :refer [rgbcolor]]
+    [engine.render.image :refer [create-image draw-image get-dimensions]]
+    [engine.render.graphics :refer [draw-rect fill-rect render-readable-text]]
     [game.utils.geom :refer [point-in-rect?]]
     [utils.core :refer [deflazygetter]]
     [engine.input :refer [get-mouse-pos is-key-pressed? is-leftm-consumed? try-consume-leftm-pressed]]

@@ -1,6 +1,8 @@
 (ns game.item.cells-ui
   (:require
-    [engine.render :as color :refer [draw-grid draw-image fill-rect render-readable-text rgbcolor set-color]]
+    [engine.render.color :as color :refer [rgbcolor set-color]]
+    [engine.render.image :refer [draw-image]]
+    [engine.render.graphics :refer [draw-grid fill-rect render-readable-text]]
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [engine.input :refer [get-mouse-pos]]

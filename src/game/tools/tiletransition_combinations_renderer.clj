@@ -1,6 +1,7 @@
 (ns game.tools.tiletransition-combinations-renderer
   (:require
-    [engine.render :as color :refer [fill-rect render-readable-text]]
+    [engine.render.color :as color]
+    [engine.render.graphics :refer [fill-rect render-readable-text]]
     [data.grid2d :refer [get-8-neighbour-positions]]
     [utils.core :refer [boolperm]]
     [utils.coll :refer [mapvals]]

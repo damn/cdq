@@ -1,6 +1,6 @@
 (ns game.monsters.slowdown-caster
   (:require
-    [engine.render :refer [folder-animation]]
+    [engine.render.assets :refer [folder-animation]]
     [game.components.core :refer [get-position player-body]]
     [game.components.render :refer [single-animation-component]]
     [game.components.body-effects-impl :refer [dmg-effect slowdown-effect]]

@@ -1,6 +1,8 @@
 (ns game.player.animation
   (:require
-        [engine.render :refer [create-animation create-image folder-animation]]
+        [engine.render.image :refer [create-image]]
+        [engine.render.animation :refer [create-animation]]
+        [engine.render.assets :refer [folder-animation]]
     [game.components.core :refer [player-body]]
     [game.components.render :refer [animation-component]]
     [game.components.destructible :refer [is-dead?]]

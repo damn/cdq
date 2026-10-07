@@ -1,7 +1,8 @@
 (ns game.monsters.instant-healer
   (:require
     [engine.core :refer [create-sound make-counter]]
-    [engine.render :refer [create-image green]]
+    [engine.render.color :refer [green]]
+    [engine.render.image :refer [create-image]]
     [utils.numbers :refer [lower-than-max?]]
     [game.components.core :refer [active defcomponent exists? get-id get-position player-body update-counter!]]
     [game.components.body :refer [bodies-in-range?]]

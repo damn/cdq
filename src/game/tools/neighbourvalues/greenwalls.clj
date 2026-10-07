@@ -2,7 +2,7 @@
   (:require
     data.grid2d
     [engine.core :refer [defpreload]]
-    [engine.render :refer [spritesheet]]
+    [engine.render.assets :refer [spritesheet]]
     [game.utils.random :refer [if-chance]]
     [game.tools.transitiontilemaker :refer [get-transition-tile-value]]
     [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi]]))

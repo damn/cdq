@@ -1,7 +1,8 @@
 (ns game.components.shield
   (:require
     [engine.core :refer [make-counter update-finally-merge]]
-        [engine.render :refer [create-image render-rotated-centered-image rgbcolor]]
+        [engine.render.color :refer [rgbcolor]]
+        [engine.render.image :refer [create-image render-rotated-centered-image]]
     [game.components.core :refer [active defcomponent]]
     [game.components.render :refer [circle-around-body-render-comp render-on-map]]
     [game.components.body-effects :refer [defeffectentity]]

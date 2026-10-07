@@ -1,6 +1,6 @@
 (ns game.monsters.skull-chainsaw
   (:require
-    [engine.render :refer [folder-animation]]
+    [engine.render.assets :refer [folder-animation]]
     [game.components.misc :refer [rotation-component]]
     [game.components.render :refer [single-animation-component]]
     [game.monster.defmonster :refer [defmonster]]

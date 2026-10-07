@@ -1,7 +1,8 @@
 (ns game.monsters.research-station
   (:require
     [engine.core :refer [play-sound]]
-    [engine.render :refer [folder-animation orange]]
+    [engine.render.color :refer [orange]]
+    [engine.render.assets :refer [folder-animation]]
     [game.components.render :refer [single-animation-component]]
     [game.maps.minimap :refer [show-on-minimap]]
     [game.monster.defmonster :refer [defmonster]]

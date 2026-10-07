@@ -1,7 +1,7 @@
 (ns game.monsters.healer
   (:require
     [engine.core :refer [make-counter]]
-    [engine.render :refer [folder-animation]]
+    [engine.render.assets :refer [folder-animation]]
     [game.components.core :refer [update-counter!]]
     [game.components.misc :refer [rotate-to-player rotation-component]]
     [game.components.render :refer [create-lines-render-effect single-animation-component]]

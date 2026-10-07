@@ -7,7 +7,9 @@
     [game.components.skills.melee :refer [melee-weapon]]
     [utils.numbers :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals variance-val-str]]
     [engine.core :refer [create-sound defpreload]]
-    [engine.render :refer [create-animation create-image folder-frames get-duration]]
+    [engine.render.image :refer [create-image]]
+    [engine.render.animation :refer [create-animation get-duration]]
+    [engine.render.assets :refer [folder-frames]]
     [game.media :refer [get-itemsprite]]
     game.mouseoverbody
     [game.entity.nova :refer [nova-effect]]

@@ -1,6 +1,8 @@
 (ns game.maps.minimap
   (:require
-    [engine.render :as color :refer [draw-image draw-rect fill-rect get-dimensions get-scaled-copy get-sub-image rgbcolor]]
+    [engine.render.color :as color :refer [rgbcolor]]
+    [engine.render.image :refer [draw-image get-dimensions get-scaled-copy get-sub-image]]
+    [engine.render.graphics :refer [draw-rect fill-rect]]
     [game.utils.geom :as geom]
     [clojure.set :refer [select union]]
     data.grid2d

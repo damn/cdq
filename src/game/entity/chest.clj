@@ -1,6 +1,6 @@
 (ns game.entity.chest
   (:require
-    [engine.render :as color]
+    [engine.render.color :as color]
     game.utils.lightning
     [engine.core :refer [play-sound]]
     [game.media :refer [get-itemsprite]]

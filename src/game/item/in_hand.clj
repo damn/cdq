@@ -1,7 +1,7 @@
 (ns game.item.in-hand
   (:require
     [engine.core :refer [set-mouse-cursor]]
-    [engine.render :refer [get-scaled-copy]]
+    [engine.render.image :refer [get-scaled-copy]]
     [game.settings :refer [screen-scale]]
     [game.mouse-cursor :refer [reset-default-mouse-cursor]]))
 

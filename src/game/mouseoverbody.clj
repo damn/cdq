@@ -3,7 +3,6 @@
     [game.ingame-gui :refer [mouse-inside-some-gui-component?]]
     [utils.core :refer [sort-by-order]]
     [engine.input :refer [is-leftbutton-down?]]
-    engine.render
     [game.settings :refer [debug-mode]]
     [game.session :refer [atom-session]]
     [game.components.core :refer [active exists? get-components is-player?]]

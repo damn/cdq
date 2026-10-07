@@ -3,7 +3,11 @@
     [utils.coll :refer [mapvals]]
     [utils.numbers :refer [approx-numbers]]
     [engine.core :refer [defpreload reset update]]
-    [engine.render :refer [create-animation create-image folder-animation folder-frames get-scaled-copy render-centered-animation render-readable-text rgbcolor]]
+    [engine.render.color :refer [rgbcolor]]
+    [engine.render.image :refer [create-image get-scaled-copy]]
+    [engine.render.animation :refer [create-animation render-centered-animation]]
+    [engine.render.assets :refer [folder-animation folder-frames]]
+    [engine.render.graphics :refer [render-readable-text]]
     game.settings
     [game.components.core :refer [active add-to-removelist defcomponent get-components get-id is-player? player-body reset-component-state-after-blocked]]
     game.components.misc

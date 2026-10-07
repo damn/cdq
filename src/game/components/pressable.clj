@@ -1,6 +1,7 @@
 (ns game.components.pressable
   (:require
-    [engine.render :as color :refer [render-readable-text]]
+    [engine.render.color :as color]
+    [engine.render.graphics :refer [render-readable-text]]
     [game.components.body-render :refer [body-outline-height]]
     [engine.input :refer [try-consume-leftm-pressed]]
     game.settings

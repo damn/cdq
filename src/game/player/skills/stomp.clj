@@ -1,7 +1,7 @@
 (ns game.player.skills.stomp
   (:require
     [engine.core :refer [play-sound]]
-    [engine.render :refer [folder-animation]]
+    [engine.render.assets :refer [folder-animation]]
     [utils.numbers :refer [variance-val-str]]
     [game.components.core :refer [get-position player-body]]
     [game.components.body-effects-impl :refer [consume-psi-charges current-psi-charges stun]]

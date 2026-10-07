@@ -1,6 +1,9 @@
 (ns game.entity.teleporters
   (:require
-    [engine.render :as color :refer [create-animation get-dimensions get-frame spritesheet-frames]]
+    [engine.render.color :as color]
+    [engine.render.image :refer [get-dimensions]]
+    [engine.render.animation :refer [create-animation get-frame]]
+    [engine.render.assets :refer [spritesheet-frames]]
     [game.maps.data :refer [current-map do-in-map get-pretty-name]]
     utils.core
     [engine.core :refer [play-sound]]

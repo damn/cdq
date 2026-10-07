@@ -2,7 +2,10 @@
   (:require
     [game.debug-settings :as debug]
     [game.utils.geom :as geom]
-    [engine.render :as color :refer [create-image draw-image draw-rect draw-shape fill-rect get-frame render-readable-text rgbcolor set-color]]
+    [engine.render.color :as color :refer [rgbcolor set-color]]
+    [engine.render.image :refer [create-image draw-image]]
+    [engine.render.animation :refer [get-frame]]
+    [engine.render.graphics :refer [draw-rect draw-shape fill-rect render-readable-text]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
     [utils.numbers :refer [get-ratio]]
     [engine.core :refer [defpreload ratio]]
