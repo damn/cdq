@@ -16,19 +16,16 @@
 
 ;;
 
-(defn get-item [cell] @(:item cell))
-
 (declare item-grids) ; used either with :keyword or vals -> encapsulate vals somehow?
 
 (defn get-cells-from [grid-type] ; really strange name ...
   (cells (grid-type item-grids)))
 
 (defn get-equiped-hands-item []
-  (get-item
-    (get (:hands item-grids) [0 0]))) ; (-> item-grids :hands [0 0])
+  @(:item (get (:hands item-grids) [0 0]))) ; (-> item-grids :hands [0 0])
 
 (defn empty-item-cell? [cell]
-  (nil? (get-item cell)))
+  (nil? @(:item cell)))
 
 (defn cell-allows-item? [{allows :allows-type :as cell} item]
   (or
@@ -42,7 +39,7 @@
 	
 (defn cell-filled-and-allows-item? [cell item]
   (and
-    (get-item cell)
+    @(:item cell)
     (cell-allows-item? cell item)))
 
 (defn inc-count-of-item? [item1 item2]
@@ -65,7 +62,7 @@
   (check-apply-boni item cell :equip))
 
 (defn remove-item-from-cell [cell]
-  (let [item (get-item cell)] ; get the item bevor setting it nil so that :unequip works!
+  (let [item @(:item cell)] ; get the item bevor setting it nil so that :unequip works!
     (reset! (:item cell) nil)
     (check-apply-boni item cell :unequip)))
 
@@ -75,7 +72,7 @@
       (remove-item-from-cell cell)))
 
 (defn remove-one-item [cell]
-  (let [item (get-item cell)]
+  (let [item @(:item cell)]
     (if-let [cnt (:count item)]
       (if (> cnt 1)
         (swap! (:item cell) update-in [:count] dec)
@@ -84,15 +81,15 @@
 
 (defn remove-one-item-from [grid-type item-name]
   {:pre [(some #{item-name}
-           (map #(:name (get-item %))
+           (map #(:name @(:item %))
              (get-cells-from :belt)))]}
   (remove-one-item
     (first (filter
-      #(= item-name (:name (get-item %)))
+      #(= item-name (:name @(:item %)))
       (get-cells-from :belt)))))
 
 (defn- get-item-textseq [cell]
-  (let [item (get-item cell)
+  (let [item @(:item cell)
         itemname (or (:pretty-name item) (:name item))
         color (or (:color item) color/lightGray)]
     (concat
@@ -107,7 +104,7 @@
         (map :info boni)))))
 
 (defn item-not-in-use? [cell]
-  (let [item (get-item cell)
+  (let [item @(:item cell)
         skillmanager (get-component player-body :skillmanager)
         active-skill (get-active-skill skillmanager)
         in-use (and
@@ -274,12 +271,12 @@
 (defn- item-droppable-in-cell? [item cell]
   (or
     (cell-empty-and-allows-item? cell item)
-    (inc-count-of-item? (get-item cell) item)
+    (inc-count-of-item? @(:item cell) item)
     (cell-filled-and-allows-item? cell item)))
 
 (defn- render-item-tooltip [g]
   (when-let [cell (get-mouseover-item-cell)]
-    (when (get-item cell)
+    (when @(:item cell)
       (let [[rx ry] (get-cell-renderposi cell)
             textseq (get-item-textseq cell)]
         (if (= :belt (:grid-type cell))
@@ -323,7 +320,7 @@
     (fill-rect g x y w h item-cells-bg-color)
     (doseq [[[cx cy] cell] grid]
       (let [[rx ry] (get-cell-renderposi x y cx cy)
-            item (get-item cell)]
+            item @(:item cell)]
         (when (and (is-item-in-hand?) (= cell mouseover-item-cell))
           (render-cell-droppable-indicator g cell rx ry))
         (when item
@@ -355,8 +352,8 @@
 (defn get-inventory-cells-with-item-name [item-name grid-type]
   (filter
     #(and
-       (get-item %)
-       (= (:name (get-item %)) item-name))
+       @(:item %)
+       (= (:name @(:item %)) item-name))
     (get-cells-from grid-type)))
 
 (defn- try-put-item-in
@@ -368,7 +365,7 @@
         picked-up (if
                     (and
                       cell-with-same-item
-                      (:count (get-item cell-with-same-item)))
+                      (:count @(:item cell-with-same-item)))
                     (swap! (:item cell-with-same-item) update-in [:count] + (:count picked-item))
                     (if-let [free-cell (first (filter empty-item-cell? item-cells))]
                       (do

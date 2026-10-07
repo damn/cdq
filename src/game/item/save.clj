@@ -2,7 +2,7 @@
   (:require
     [game.session :as session]
     [engine.render :refer [rgbcolor]]
-    [game.item.cells :refer [add-item-to-cell empty-all-item-grids get-item item-grids]]
+    [game.item.cells :refer [add-item-to-cell empty-all-item-grids item-grids]]
     [game.item.in-hand :refer [item-in-hand set-item-in-hand]]
     [game.item.instance :refer [create-item-instance]]
     [game.item.boni :refer [create-equip-boni-save load-equip-boni-save]]
@@ -37,14 +37,14 @@
                  (when-let [item (:item-in-hand data)]
                    (set-item-in-hand item)))
                (save-session [_]
-                 (let [item-cells-with-item (filter get-item
+                 (let [item-cells-with-item (filter (comp deref :item)
                                                     (mapcat cells (vals item-grids)))]
                    {:items (doall ; needed?
                              (map
                                (fn [cell]
                                  (merge
                                    (select-keys cell [:posi :grid-type])
-                                   {:item (get-item cell)}))
+                                   {:item @(:item cell)}))
                                item-cells-with-item))
                     :item-in-hand @item-in-hand}))
                (new-session-data [_]

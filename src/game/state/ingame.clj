@@ -33,7 +33,7 @@
     [game.components.movement.ai.potential-field :refer [calculate-mouseover-body-colors render-potential-field-following-mouseover-info render-potential-field-info]]
     [game.components.skills.core :refer [get-mana]]
     [game.components.skills.melee :refer [get-current-player-melee-dmg]]
-    [game.item.cells :refer [add-item-to-cell cell-empty-and-allows-item? cell-filled-and-allows-item? get-item get-mouseover-item-cell hks-cells inc-count-of-item? inventory-height inventoryry item-grids item-not-in-use? mouse-over-an-item-cell? remove-item-from-cell remove-one-item]]
+    [game.item.cells :refer [add-item-to-cell cell-empty-and-allows-item? cell-filled-and-allows-item? get-mouseover-item-cell hks-cells inc-count-of-item? inventory-height inventoryry item-grids item-not-in-use? mouse-over-an-item-cell? remove-item-from-cell remove-one-item]]
     [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
     [game.item.instance :refer [put-item-on-ground]]
     [game.player.skill.selection-list :refer [close-skill-selection-lists some-skill-selection-list-visible?]]
@@ -49,11 +49,11 @@
       (and
         (mouse-over-an-item-cell?)
         (not (is-item-in-hand?))
-        (get-item mouseover-cell)
+        @(:item mouseover-cell)
         (item-not-in-use? mouseover-cell))
       (do
         (play-sound "bfxr_takeit.wav")
-        (set-item-in-hand (get-item mouseover-cell))
+        (set-item-in-hand @(:item mouseover-cell))
         (remove-item-from-cell mouseover-cell))
 
       (and
@@ -66,14 +66,14 @@
           (add-item-to-cell @item-in-hand mouseover-cell)
           (empty-item-in-hand))
 
-        (inc-count-of-item? (get-item mouseover-cell) @item-in-hand)
+        (inc-count-of-item? @(:item mouseover-cell) @item-in-hand)
         (do
           (play-sound "bfxr_itemput.wav")
           (swap! (:item mouseover-cell) update-in [:count] + (:count @item-in-hand))
           (empty-item-in-hand))
 
         (cell-filled-and-allows-item? mouseover-cell @item-in-hand)
-        (let [cell-item (get-item mouseover-cell)]
+        (let [cell-item @(:item mouseover-cell)]
           (remove-item-from-cell mouseover-cell)
           (add-item-to-cell @item-in-hand mouseover-cell)
           (set-item-in-hand cell-item)
@@ -99,7 +99,7 @@
     (doseq [[hotkey cellposition] hks-cells]
       (when (is-key-pressed? hotkey)
         (let [cell (get belt-grid cellposition)
-              item (get-item cell)]
+              item @(:item cell)]
           (when item
             (try-usable-item-effect item cell)))))))
 
@@ -114,10 +114,10 @@
     (when
       (and mouseover-cell
            (and (not (is-rightm-consumed?)) (try-consume-rightm-pressed))
-           (get-item mouseover-cell)
-           (= (:type (get-item mouseover-cell)) :usable)
+           @(:item mouseover-cell)
+           (= (:type @(:item mouseover-cell)) :usable)
            (item-not-in-use? mouseover-cell))
-      (try-usable-item-effect (get-item mouseover-cell) mouseover-cell))))
+      (try-usable-item-effect @(:item mouseover-cell) mouseover-cell))))
 
 ;;; update-ingame (was game.update-ingame)
 

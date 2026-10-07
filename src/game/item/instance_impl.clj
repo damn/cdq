@@ -19,7 +19,7 @@
     [game.components.destructible :refer [get-hp get-player-armor]]
     [game.components.skills.core :refer [get-mana get-skill-use-mouse-tile-pos skillmanager-skill]]
     [game.components.skills.utils :refer [check-line-of-sight get-player-ranged-vector]]
-    [game.item.cells :refer [get-cells-from get-item remove-one-item-from try-pickup-item]]
+    [game.item.cells :refer [get-cells-from remove-one-item-from try-pickup-item]]
     [game.item.colors :refer [equip-boni-item-color]]
     [game.item.in-hand :refer [item-in-hand]]
     [game.item.boni :refer [create-item-bonus create-random-boni]]
@@ -78,7 +78,7 @@
                 (if
                   (not-any?
                     #{this-name}
-                    (map #(:name (get-item %)) (get-cells-from :belt)))
+                    (map #(:name @(:item %)) (get-cells-from :belt)))
                   (update-in components [:skillmanager :skills] remove-player-skill skill)
                   components))
      :equip (fn [components]
