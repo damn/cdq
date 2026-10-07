@@ -8,7 +8,8 @@
     [engine.render :refer [create-image defcolor fill-rect render-readable-text rgbcolor]]
     [game.settings :refer [screen-height]]
     game.media
-    [game.ingame-gui :refer [buttonscale buttonx-start frame-screenborder-distance get-bounds ingamestate-display is-visible? make-frame make-imgbutton mouseover? set-visible skillmenu-hotkey switch-visible x-dist]]
+    [game.gui :refer [get-bounds is-visible? make-frame make-imgbutton mouseover? set-visible switch-visible]]
+    [game.ingame-gui :refer [buttonscale buttonx-start frame-screenborder-distance ingamestate-display skillmenu-hotkey x-dist]]
     game.session
     [game.player.skill.skillmanager :refer [add-player-skill assign-unused-hotkey-and-open-skillslist create-skill-icon]]
     [game.components.core :refer [active player-body]]

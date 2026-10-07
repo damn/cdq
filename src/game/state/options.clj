@@ -3,7 +3,7 @@
     [engine.core :refer [fullscreen-supported? initialize]]
     [engine.input :refer [is-key-pressed? update-mousebutton-state]]
     [engine.statebasedgame :refer [defgamestate enter-state]]
-    [game.ingame-gui :refer [make-checkbox make-guidisplay make-label make-textbutton render-guicomponent update-guicomponent]]
+    [game.gui :refer [make-checkbox make-guidisplay make-label make-textbutton render-guicomponent update-guicomponent]]
     [game.state.ids :as ids]
     [game.state.mainmenu :refer [mainmenu-gamestate]]
     [game.status-options :refer [get-state get-text set-state status-check-boxes]]))

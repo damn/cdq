@@ -3,7 +3,8 @@
     [engine.render :refer [create-image]]
     [engine.core :refer [defpreload initialize]]
     [game.settings :refer [screen-height screen-width]]
-    [game.ingame-gui :refer [frame-screenborder-distance ingamestate-display inventory-hotkey is-visible? make-frame]]
+    [game.gui :refer [is-visible? make-frame]]
+    [game.ingame-gui :refer [frame-screenborder-distance ingamestate-display inventory-hotkey]]
     [data.grid2d :refer [cells create-grid height width]]))
 
 (defn- create-empty-item-cell [posi allows-type grid equipment]
