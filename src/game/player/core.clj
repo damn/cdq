@@ -6,7 +6,8 @@
     [game.maps.minimap :refer [show-on-minimap]]
     [game.components.skills.core :refer [reset-skills]]
     [game.utils.lightning :refer [light-component]]
-    [utils.core :refer [set-to-max when-seq]]
+    [utils.numbers :refer [set-to-max]]
+    [utils.coll :refer [when-seq]]
     [engine.core :refer [play-sound]]
     engine.input
     game.maps.contentfields

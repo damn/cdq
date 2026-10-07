@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [defpreload play-sound]]
     [engine.render :refer [create-animation folder-frames get-scaled-copy]]
-    [utils.core :refer [variance-val-str]]
+    [utils.numbers :refer [variance-val-str]]
     [game.settings :refer [in-tiles]]
     [game.components.core :refer [get-position player-body]]
     [game.components.render :refer [animation-entity]]

@@ -1,6 +1,6 @@
 (ns game.utils.geom
   (:require
-    [utils.core :refer [approx-numbers]]
+    [utils.numbers :refer [approx-numbers]]
     [engine.input :refer [get-mouse-pos]]
     [game.settings :refer [half-screen-h half-screen-w]]
     [game.components.core :refer [get-position player-body]])

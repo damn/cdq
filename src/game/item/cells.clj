@@ -1,6 +1,6 @@
 (ns game.item.cells
   (:require
-    [utils.core :refer [thread-through]]
+    [utils.coll :refer [thread-through]]
     [data.grid2d :refer [cells]]
     [game.components.core :refer [player-body]]
     [game.components.skills.core :refer [get-active-skill is-attacking?]]

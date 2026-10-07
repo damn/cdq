@@ -5,7 +5,7 @@
     [game.components.body-effects-impl :refer [battle-drugs dmg-effect]]
     [game.components.core :refer [get-id player-body]]
     [game.components.skills.melee :refer [melee-weapon]]
-    [utils.core :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals variance-val-str]]
+    [utils.numbers :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals variance-val-str]]
     [engine.core :refer [create-sound defpreload]]
     [engine.render :refer [create-animation create-image folder-frames get-duration]]
     [game.media :refer [get-itemsprite]]

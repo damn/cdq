@@ -4,7 +4,8 @@
     [engine.core :refer [initialize]]
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
-    [utils.core :refer [log readable-number split-key-val-and-maps variance-val-str]]
+    [utils.core :refer [log split-key-val-and-maps]]
+    [utils.numbers :refer [readable-number variance-val-str]]
     [engine.render :refer [create-image defcolor fill-rect render-readable-text rgbcolor]]
     [game.settings :refer [screen-height]]
     game.media

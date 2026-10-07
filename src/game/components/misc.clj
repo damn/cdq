@@ -1,7 +1,7 @@
 (ns game.components.misc
   (:require
     [engine.core :refer [make-counter]]
-    [utils.core :refer [increase-min-max-val]]
+    [utils.numbers :refer [increase-min-max-val]]
     [game.utils.geom :refer [entity-direction-vector get-angle-from-vector get-vector-to-mouse-coords]]
     [game.components.core :refer [active add-to-removelist defcomponent get-half-height get-half-width player-body update-counter!]]))
 

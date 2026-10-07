@@ -1,7 +1,7 @@
 (ns game.components.destructible
   (:require
     [game.components.shield :refer [shield-try-consume-damage]]
-    [utils.core :refer [increase-min-max-val lower-than-max? min-max-val rest-to-max set-to-max variance-val variance-val-str]]
+    [utils.numbers :refer [increase-min-max-val lower-than-max? min-max-val rest-to-max set-to-max variance-val variance-val-str]]
     [engine.core :refer [defpreload play-sound]]
     [engine.render :refer [create-animation create-image rgbcolor spritesheet-frames]]
     [game.screenshake :refer [shake-screen]]

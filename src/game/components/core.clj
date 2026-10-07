@@ -1,6 +1,7 @@
 (ns game.components.core
   (:require
-    [utils.core :as utils :refer [condition-map-and-rest distinct-seq? filter-map get-unique-number is-condition-map? keywords-to-hash-map make-fn safe-merge when-apply]]
+    [utils.core :as utils :refer [condition-map-and-rest get-unique-number is-condition-map? keywords-to-hash-map make-fn when-apply]]
+    [utils.coll :refer [distinct-seq? filter-map safe-merge]]
     [engine.core :refer [update]]
     [game.session :as session]
     [clojure.tools.macro :refer [name-with-attributes]]

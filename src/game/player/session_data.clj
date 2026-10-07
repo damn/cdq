@@ -16,7 +16,7 @@
     game.player.skill.selection-list
     game.utils.lightning
     game.utils.msg-to-player
-    [utils.core :as utils :refer [distinct-seq?]]
+    [utils.coll :refer [distinct-seq?]]
     [game.settings :refer [version]]
     [game.status-options :refer [session]]))
 

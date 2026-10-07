@@ -1,6 +1,6 @@
 (ns game.components.burrow
   (:require
-    [utils.core :refer [create-counter update-counter]]
+    [utils.counter :refer [create-counter update-counter]]
     [engine.core :refer [defpreload play-sound]]
     [engine.render :refer [create-animation spritesheet-frames]]
     [game.session :refer [atom-session]]

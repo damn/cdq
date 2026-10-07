@@ -2,7 +2,7 @@
   (:require
     [game.utils.geom :as geom]
     [engine.render :refer [render-centered-shape render-readable-text]]
-    [utils.core :refer [create-counter update-counter]]
+    [utils.counter :refer [create-counter update-counter]]
     [game.session :refer [atom-session]]
     [game.settings :refer [in-pixel screen-height screen-width]]
     [game.components.core :refer [active block-active-components defcomponent unblock-active-components]]

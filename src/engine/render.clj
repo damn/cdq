@@ -1,6 +1,7 @@
 (ns engine.render
   (:require
-    [utils.core :as utils :refer [get-jar-entries split-kvs-and-more when-seq]]
+    [utils.core :as utils :refer [get-jar-entries split-kvs-and-more]]
+    [utils.coll :refer [when-seq]]
     [engine.settings :refer [jar-file?]]
     [game.utils.geom :as geom]
     [engine.core :as core :refer [Updateable allowed-characters get-defaultfont get-screen-height get-screen-width get-text-height get-text-width reset-font]])

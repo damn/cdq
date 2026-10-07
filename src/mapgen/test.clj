@@ -2,7 +2,7 @@
   (:require
     [engine.render :as color :refer [create-empty-image draw-grid draw-string fill-rect rgbcolor set-color]]
     [data.grid2d :refer [height posis width]]
-    [utils.core :refer [assoc-ks]]
+    [utils.coll :refer [assoc-ks]]
     [engine.core :refer [start-slick-basicgame]]
     [engine.input :refer [get-mouse-pos is-key-pressed?]]
     [game.utils.random :refer [create-seed]]

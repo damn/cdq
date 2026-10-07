@@ -2,7 +2,8 @@
   (:require
     [engine.render :as color :refer [fill-rect render-readable-text]]
     [data.grid2d :refer [get-8-neighbour-positions]]
-    [utils.core :refer [boolperm mapvals]]
+    [utils.core :refer [boolperm]]
+    [utils.coll :refer [mapvals]]
     [engine.core :refer [start-slick-basicgame]]))
 
 (def posis (get-8-neighbour-positions [0 0]))

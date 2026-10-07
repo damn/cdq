@@ -2,7 +2,8 @@
   (:require
     [game.item.instance :refer [create-item-body]]
     [data.grid2d :refer [posis]]
-    [utils.core :refer [inc-or-dec-max log translate-to-tile-middle]]
+    [utils.core :refer [log translate-to-tile-middle]]
+    [utils.numbers :refer [inc-or-dec-max]]
     [engine.render :refer [folder-animation]]
     [game.monster.defmonster :refer [get-monster-properties]]
     [game.components.core :refer [add-component get-position]]

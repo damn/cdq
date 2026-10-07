@@ -4,7 +4,7 @@
     [game.utils.geom :as geom]
     [engine.render :as color :refer [create-image draw-image draw-rect draw-shape fill-rect get-frame render-readable-text rgbcolor set-color]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
-    [utils.core :refer [get-ratio]]
+    [utils.numbers :refer [get-ratio]]
     [engine.core :refer [defpreload ratio]]
     [game.settings :refer [debug-mode in-pixel]]
     [game.mouseoverbody :refer [get-mouseover-body]]

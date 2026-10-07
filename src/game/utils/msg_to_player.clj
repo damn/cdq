@@ -3,7 +3,7 @@
     [engine.render :refer [render-readable-text]]
     [game.settings :refer [half-screen-h half-screen-w]]
     [game.components.render :refer [rendering]]
-    [utils.core :refer [create-counter reset-counter! update-counter]]
+    [utils.counter :refer [create-counter reset-counter! update-counter]]
     [game.session :refer [atom-session]]
     [game.components.core :refer [active]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]))

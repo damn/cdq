@@ -1,7 +1,7 @@
 (ns game.skills-core
   (:require
     [game.test.utils :refer [with-private-fns]]
-    [utils.core :refer [mapvals]]
+    [utils.coll :refer [mapvals]]
     [engine.core :refer [make-counter]]
     [clojure.test :refer [deftest is]]
     game.components.skills.core))

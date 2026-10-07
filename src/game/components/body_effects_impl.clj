@@ -1,6 +1,7 @@
 (ns game.components.body-effects-impl
   (:require
-    [utils.core :refer [approx-numbers mapvals]]
+    [utils.coll :refer [mapvals]]
+    [utils.numbers :refer [approx-numbers]]
     [engine.core :refer [defpreload reset update]]
     [engine.render :refer [create-animation create-image folder-animation folder-frames get-scaled-copy render-centered-animation render-readable-text rgbcolor]]
     game.settings

@@ -2,7 +2,7 @@
   (:require
     [engine.render :as color]
     [data.grid2d :refer [create-grid get-4-neighbour-positions get-8-neighbour-positions posis transform]]
-    [utils.core :refer [assoc-ks]]
+    [utils.coll :refer [assoc-ks]]
     [game.utils.random :refer [percent-chance]]
     [mapgen.utils :refer [border-position? create-borders-positions]]))
 

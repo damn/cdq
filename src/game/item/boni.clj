@@ -1,6 +1,6 @@
 (ns game.item.boni
   (:require
-    [utils.core :refer [inc-or-dec-max readable-number]]
+    [utils.numbers :refer [inc-or-dec-max readable-number]]
     [game.utils.random :refer [rand-int-between]]
     game.components.body-effects-impl
     game.components.movement

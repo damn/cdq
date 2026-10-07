@@ -1,5 +1,5 @@
 (ns game.utils.order
-  (:require [utils.core :refer [positions]]))
+  (:require [utils.coll :refer [positions]]))
 
 (defn- position-of [elem coll]
   (first (positions #{elem} coll)))

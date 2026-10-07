@@ -2,7 +2,8 @@
   (:require
     [engine.core :refer [create-sound defpreload make-counter play-sound]]
     [engine.render :refer [create-animation folder-frames spritesheet-frames]]
-    [utils.core :refer [get-ratio translate-to-tile-middle]]
+    [utils.core :refer [translate-to-tile-middle]]
+    [utils.numbers :refer [get-ratio]]
     [game.settings :refer [in-tiles tile-height tile-width]]
     [game.components.core :refer [exists? get-id get-position player-body update-counter!]]
     [game.components.body :refer [blocked-location? bodies-in-range? teleport]]

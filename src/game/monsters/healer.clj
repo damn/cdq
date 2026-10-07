@@ -8,7 +8,7 @@
     [game.components.destructible :refer [get-hp set-hp-to-max]]
     [game.components.active :refer [blocks-component]]
     [game.components.skills.core :refer [enough-mana? is-ready? skillmanager-component skillmanager-skill]]
-    [utils.core :refer [lower-than-max?]]
+    [utils.numbers :refer [lower-than-max?]]
     [game.utils.random :refer [rand-int-between]]
     [game.monster.defmonster :refer [defmonster]]
     [game.monsters.common :refer [default-death-trigger get-healable-monsters-around redball-projectile-skill-props ranged-runaway-movement-comp]]))

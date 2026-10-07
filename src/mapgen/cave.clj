@@ -1,6 +1,6 @@
 (ns mapgen.cave
   (:require [data.grid2d :as grid]
-            [utils.core :refer (assoc-ks)]
+            [utils.coll :refer (assoc-ks)]
             [game.utils.random :as rand]))
 
 ;Cave Algorithmus.

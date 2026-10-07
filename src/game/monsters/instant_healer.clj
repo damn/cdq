@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [create-sound make-counter]]
     [engine.render :refer [create-image green]]
-    [utils.core :refer [lower-than-max?]]
+    [utils.numbers :refer [lower-than-max?]]
     [game.components.core :refer [active defcomponent exists? get-id get-position player-body update-counter!]]
     [game.components.body :refer [bodies-in-range?]]
     [game.components.misc :refer [rotation-component]]
