@@ -1,7 +1,7 @@
 (ns game.components.destructible
   (:require
     [game.components.shield :refer [shield-try-consume-damage]]
-    [utils.core :refer [assoc-in! increase-min-max-val lower-than-max? min-max-val rest-to-max set-to-max update-in! variance-val variance-val-str]]
+    [utils.core :refer [increase-min-max-val lower-than-max? min-max-val rest-to-max set-to-max variance-val variance-val-str]]
     [engine.core :refer [defpreload play-sound]]
     [engine.render :refer [create-animation create-image rgbcolor spritesheet-frames]]
     [game.screenshake :refer [shake-screen]]
@@ -40,13 +40,13 @@
     (when-not (zero? hp-leech)
       (let [value (* (/ hp-leech 100) dmg-dealt)]
         (show-gains-hp-effect player-body value)
-        (update-in! player-body [:destructible :hp] increase-min-max-val value)) ; same code as in hp pot
+        (swap! player-body update-in [:destructible :hp] increase-min-max-val value)) ; same code as in hp pot
       (create-leech-visuals player-body (create-image "effects/hp_leech.png")))
 
     (when-not (zero? mana-leech)
       (let [value (* (/ mana-leech 100) dmg-dealt)]
         (show-gains-mana-effect player-body value)
-        (update-in! player-body [:skillmanager :mana] increase-min-max-val value)) ; same code as in mana pot
+        (swap! player-body update-in [:skillmanager :mana] increase-min-max-val value)) ; same code as in mana pot
       (create-leech-visuals player-body (create-image "effects/mana_leech.png")))))
 
 ;;
@@ -120,7 +120,7 @@
 (defn set-hp-to-max [body]
   (when (lower-than-max? (get-hp body))
     (show-gains-hp-effect body (rest-to-max (get-hp body))))
-  (update-in! body [:destructible :hp] set-to-max))
+  (swap! body update-in [:destructible :hp] set-to-max))
 
 (defn monster-destructible [hp-multiplier armor-perc-reduce]
   (destructible-component
@@ -212,10 +212,10 @@
               lethal (<= new-hp 0)
               actual-dmg (if lethal current-hp dmg)]
           ; (show-dmg-effect target-body actual-dmg)
-          (assoc-in! target-body [:destructible :hp :current] (max 0 new-hp))
+          (swap! target-body assoc-in [:destructible :hp :current] (max 0 new-hp))
           (dealt-dmg-triggers target-body actual-dmg is-crit-hit? lethal is-player-melee)
           (when lethal
-            (assoc-in! target-body [:destructible :is-dead] true)
+            (swap! target-body assoc-in [:destructible :is-dead] true)
             (when-not (is-player? target-body)
               (add-to-removelist target-body))))))))
 

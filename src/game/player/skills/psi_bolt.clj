@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [defpreload play-sound]]
     [engine.render :refer [create-animation folder-frames]]
-    [utils.core :refer [runmap variance-val-str]]
+    [utils.core :refer [variance-val-str]]
     [game.settings :refer [in-tiles]]
     [game.components.body-effects-impl :refer [consume-psi-charges current-psi-charges]]
     [game.components.destructible :refer [deal-dmg get-destructible-bodies]]
@@ -28,7 +28,7 @@
     (animation-entity
       :animation (create-animation psi-bolt-frames)
       :position posi)
-    (runmap #(deal-dmg dmg %) hits)))
+    (dorun (map #(deal-dmg dmg %) hits))))
 
 (deflearnable-skill psi-bolt
   :manacost 15

@@ -4,8 +4,7 @@
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.player.skill.learnable :refer [render-skillbutton-tooltip]]
-    [utils.core :refer [runmap]]
-    [engine.render :refer [fill-rect render-readable-text rgbcolor]]
+        [engine.render :refer [fill-rect render-readable-text rgbcolor]]
     [game.settings :refer [screen-height]]
     [game.ingame-gui :refer [get-absolute-posi get-bounds ingamestate-display is-visible? make-imgbutton mouseover? remove-guicomponent set-visible]]
     [game.session :refer [atom-session]]
@@ -51,9 +50,9 @@
 
 (defn- render-button-tooltip [g mousebutton] ;TODO rename skillbutton...
   (when (is-visible-skills-list? mousebutton)
-    (runmap
+    (dorun (map
       #(render-skillbutton-tooltip g %)
-      (mousebutton select-skills-list))))
+      (mousebutton select-skills-list)))))
 
 (let [transparent-red (rgbcolor :r 0.9 :a 0.7)]
 
@@ -72,7 +71,7 @@
 
 (ingame-loop-comp :skill-selection-list-tooltips
   (rendering :tooltips [g c]
-    (runmap #(render-button-tooltip g %) mousebuttons)))
+    (dorun (map #(render-button-tooltip g %) mousebuttons))))
 
 (defn- create-selected-skill-button [mousebutton x]
   (let [button (make-imgbutton :image (create-skill-icon "icons/stomp.png") ; this icon will be replaced during create-player-skillmanager and the correct icon for each mouse

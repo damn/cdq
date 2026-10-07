@@ -2,7 +2,7 @@
   (:require
     [game.item.instance :refer [create-item-body]]
     [data.grid2d :refer [posis]]
-    [utils.core :refer [inc-or-dec-max log translate-to-tile-middle update-in!]]
+    [utils.core :refer [inc-or-dec-max log translate-to-tile-middle]]
     [engine.render :refer [folder-animation]]
     [game.monster.defmonster :refer [get-monster-properties]]
     [game.components.core :refer [add-component create-comp get-position]]
@@ -103,7 +103,7 @@
         (create-item-body p itemname)))))
 
 (defn championize-monster [monster]
-  (update-in! monster [:destructible :hp] inc-or-dec-max * 5) ; same code @ item-boni
+  (swap! monster update-in [:destructible :hp] inc-or-dec-max * 5) ; same code @ item-boni
   (add-component monster
                  (create-comp :extra-loot {:destruct champion-drop}))
   (add-component monster
@@ -118,7 +118,7 @@
       (when champions
         (when-chance 5
                      ;(log "monsters at posi " (first posis) "championized" " in map " @game.maps.data/current-map)
-                     ;(runmap championize-monster monsters)
+                     ;(dorun (map championize-monster monsters))
                      ; deactivated because problem with 'current-animation' in game.render and because
                      ; sleeping monsters with blocks fails because new components added dont have blocks
                      )))))

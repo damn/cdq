@@ -2,7 +2,7 @@
   (:require
     [game.components.sleeping :refer [wake-up]]
     [game.components.misc :refer [delete-after-duration-component]]
-    [utils.core :refer [runmap split-kvs-and-more update-in!]]
+    [utils.core :refer [split-kvs-and-more]]
     [game.components.core :refer [add-component create-comp create-entity defcomponent destruct-entity get-entity get-id get-position]]
     [game.components.position :refer [position-component swap-position!]]))
 
@@ -14,10 +14,10 @@
   {:depends [:position]
    :ids #{}
    :destruct (fn [entity]
-              (runmap destruct-entity (get-sub-entities entity)))
+              (dorun (map destruct-entity (get-sub-entities entity))))
    :posi-changed (fn [entity]
                    (let [p (get-position entity)]
-                     (runmap #(swap-position! % p) (get-sub-entities entity))))})
+                     (dorun (map #(swap-position! % p) (get-sub-entities entity)))))})
 
 (defn body-effect-entity
   "Effect-entities are deleted when target entity is deleted.
@@ -39,11 +39,11 @@
                       (dofn)
                       (when-not (:sub-entities @target)
                         (add-component target (sub-entities-component)))
-                      (update-in! target [:sub-entities :ids] conj (get-id this)))
+                      (swap! target update-in [:sub-entities :ids] conj (get-id this)))
               ; first disj id before undofn is called!
               ; undofn may access get-effect-entities and this one is already not existing!
               :destruct (fn [this]
-                          (update-in! target [:sub-entities :ids] disj (get-id this))
+                          (swap! target update-in [:sub-entities :ids] disj (get-id this))
                           (undofn))})
            (when duration
              (delete-after-duration-component duration))

@@ -6,7 +6,7 @@
     [game.utils.raycast :refer [ray-blocked?]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.maps.minimap :refer [update-minimap]]
-    [utils.core :refer [assoc-in! compare-times genmap int-posi runmap]]
+    [utils.core :refer [compare-times genmap int-posi]]
     [game.session :refer [atom-session]]
     [game.settings :refer [debug-mode in-pixel]]
     [game.components.core :refer [active create-comp create-entity create-entity-no-init defentity get-position player-body]]
@@ -124,8 +124,8 @@
                                 (get-distance old-position current-posi))
                               px-dist-dirty)))]]
       (when dirty
-        (assoc-in! entity [:light :dirty] false)
-        (assoc-in! entity [:light :lightmap] (create-lightmap current-posi light))))
+        (swap! entity assoc-in [:light :dirty] false)
+        (swap! entity assoc-in [:light :lightmap] (create-lightmap current-posi light))))
     (reset! light-sources (doall sources)))) ; doall here because entities might be removed later
 
 ; TODO als :posi-changed machen dann neue lightmap
@@ -201,7 +201,7 @@
   (if @active-lightning
     (do
       (set-corner-colors image entity-ambient)
-      (runmap #(apply-lightsource image position %) @light-sources))
+      (dorun (map #(apply-lightsource image position %) @light-sources)))
     (reset-brightness image)))
 
 (defn explored? [corner-tile-position]
@@ -217,7 +217,7 @@
       (doseq [corner image-corners
               :when (explored? (get-corner-posi position corner))]
         (apply-corner-color image corner explored-tile-color))
-      (runmap #(apply-lightsource-cached image position %) @light-sources))
+      (dorun (map #(apply-lightsource-cached image position %) @light-sources)))
     (reset-brightness image)))
 
 (def lightmanager (reify LightManager
@@ -235,7 +235,7 @@
      :dirty true
      :init (fn [entity]
              (add-cell-blocks-changed-listener
-               #(assoc-in! entity [:light :dirty] true)))}))
+               #(swap! entity assoc-in [:light :dirty] true)))}))
 
 (defentity map-lightsource [position]
   (position-component position)

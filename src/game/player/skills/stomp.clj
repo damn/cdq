@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [play-sound]]
     [engine.render :refer [folder-animation]]
-    [utils.core :refer [runmap variance-val-str]]
+    [utils.core :refer [variance-val-str]]
     [game.components.core :refer [get-position player-body]]
     [game.components.body-effects-impl :refer [consume-psi-charges current-psi-charges stun]]
     [game.components.destructible :refer [deal-dmg get-destructible-bodies]]
@@ -46,5 +46,5 @@ Stuns and deals damage
                  (animation-entity
                    :position posi
                    :animation (folder-animation :folder "effects/stomp/" :looping false))
-                 (runmap #(stun % duration) hits)
-                 (runmap #(deal-dmg dmg %) hits)))})
+                 (dorun (map #(stun % duration) hits))
+                 (dorun (map #(deal-dmg dmg %) hits))))})

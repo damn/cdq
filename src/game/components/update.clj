@@ -1,6 +1,5 @@
 (ns game.components.update
   (:require
-    [utils.core :refer [runmap]]
     [game.components.core :refer [get-components get-id]]
     [game.components.active :refer [not-blocked? try-slowdown-delta]]
     [game.session :refer [atom-session]]))

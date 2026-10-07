@@ -1,7 +1,6 @@
 (ns game.monsters.fly
   (:require
     [engine.render :refer [create-animation create-image folder-animation]]
-    [game.components.core :refer []]
     [game.components.render :refer [animation-component]]
     [game.components.skills.core :refer [is-attacking?]]
     [game.monster.defmonster :refer [defmonster]]

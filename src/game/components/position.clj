@@ -1,6 +1,6 @@
 (ns game.components.position
   (:require
-    [utils.core :refer [assoc-in! int-posi when-apply]]
+    [utils.core :refer [int-posi when-apply]]
     [game.components.core :refer [defcomponent get-components get-position]]
     [game.maps.contentfields :refer [put-entity-in-correct-content-field remove-entity-from-content-field]]))
 
@@ -14,7 +14,7 @@
 (def get-tile (comp int-posi get-position))
 
 (defn swap-position! [entity posi & {filter-body :filter-body}]
-  (assoc-in! entity [:position :value] posi)
+  (swap! entity assoc-in [:position :value] posi)
   (doseq [c (get-components entity)
           :when (not
                   (and

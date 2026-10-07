@@ -3,7 +3,7 @@
     [engine.core :refer [make-counter ratio update]]
     [engine.render :as color :refer [draw-line fill-centered-circle get-dimensions get-frame is-stopped? render-centered-image render-centered-shape render-readable-text render-rotated-centered-image restart rgbcolor set-color]]
     [game.utils.geom :as geom]
-    [utils.core :refer [define-order int-posi make-fn order-contains? readable-number update-in!]]
+    [utils.core :refer [define-order int-posi make-fn order-contains? readable-number]]
     [game.settings :refer [in-pixel tile-height tile-width]]
     [game.components.core :refer [active add-to-removelist create-comp create-entity create-entity-no-init defcomponent defentity get-half-pxh get-half-pxw get-position update-counter!]]
     [game.components.misc :refer [delete-after-duration-component]]
@@ -84,7 +84,7 @@
         new-animation (cond-> (new-akey component)
                         (not= last-akey new-akey) restart
                         :then                     (update delta))]
-    (update-in! entity [(:type component)]
+    (swap! entity update-in [(:type component)]
                 assoc
                 :akey    new-akey
                 new-akey new-animation)))

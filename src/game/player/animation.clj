@@ -1,7 +1,6 @@
 (ns game.player.animation
   (:require
-    [utils.core :refer [assoc-in!]]
-    [engine.render :refer [create-animation create-image folder-animation]]
+        [engine.render :refer [create-animation create-image folder-animation]]
     [game.components.core :refer [player-body]]
     [game.components.render :refer [animation-component]]
     [game.components.destructible :refer [is-dead?]]
@@ -12,7 +11,7 @@
 (defn- control [body]
   (let [is-moving (:play-move-animation (:movement @body))
         holding-gun (= :gun (:type (get-current-standard-skill)))]
-    (assoc-in! body [:movement :play-move-animation] false)
+    (swap! body assoc-in [:movement :play-move-animation] false)
     (cond
       (is-dead? body)
         :death

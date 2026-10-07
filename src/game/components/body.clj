@@ -3,8 +3,7 @@
     [game.debug-settings :as debug]
     [game.utils.geom :as geom]
     [game.maps.camera :refer [get-camera-position]]
-    [utils.core :refer [assoc-in! runmap]]
-    [game.settings :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
+        [game.settings :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
     [game.components.core :refer [defcomponent get-cached-touched-cells get-entity get-half-height get-half-width get-id get-movement-type get-occupied-cell get-position is-solid? player-body]]
     [game.components.render :refer [render-on-map]]
     [game.components.position :refer [swap-position!]]
@@ -33,16 +32,16 @@
 (defn- set-occupied-cell [body]
   (if (is-multiple-cell? body)
     (let [cells (calc-touched-cells body)]
-      (runmap #(swap! % update-in [:occupied] conj body) cells)
-      (assoc-in! body [:body :occupied-cells] cells))
+      (dorun (map #(swap! % update-in [:occupied] conj body) cells))
+      (swap! body assoc-in [:body :occupied-cells] cells))
     (let [cell (get-cell (get-position body))]
       (assert cell)
       (swap! cell update-in [:occupied] conj body)
-      (assoc-in! body [:body :occupied-cell] cell))))
+      (swap! body assoc-in [:body :occupied-cell] cell))))
 
 (defn- remove-from-occupied-cell [body]
   (if (is-multiple-cell? body)
-    (runmap #(swap! % update-in [:occupied] disj body) (:occupied-cells (:body @body)))
+    (dorun (map #(swap! % update-in [:occupied] disj body) (:occupied-cells (:body @body))))
     (swap! (get-occupied-cell body) update-in [:occupied] disj body)))
 
 (defn update-occupied-cell [body]
@@ -54,14 +53,14 @@
     (set-touched-cells body (calc-touched-cells body)))
   ([body new-cells]
     {:pre [(not-any? nil? new-cells)]}
-    (assoc-in! body [:body :cached-touched-cells] new-cells)
-    (runmap #(add-body % body) new-cells)))
+    (swap! body assoc-in [:body :cached-touched-cells] new-cells)
+    (dorun (map #(add-body % body) new-cells))))
 
 (defn- remove-from-touched-cells
   ([body]
     (remove-from-touched-cells body (get-cached-touched-cells body)))
   ([body cached-cells]
-    (runmap #(remove-body % body) cached-cells)))
+    (dorun (map #(remove-body % body) cached-cells))))
 
 (defn update-touched-cells
   ([body]

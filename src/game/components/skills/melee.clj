@@ -4,8 +4,7 @@
     [game.settings :refer [in-tiles]]
     [game.components.update :refer [max-delta]]
     [game.item.cells :refer [get-equiped-hands-item]]
-    [utils.core :refer [assoc-in! runmap]]
-    [game.mouseoverbody :refer [get-mouseover-body]]
+        [game.mouseoverbody :refer [get-mouseover-body]]
     game.utils.random
     [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
     [game.utils.geom :refer [collides?]]
@@ -48,11 +47,11 @@ so the entity can get in melee range.")
                                 (get-id body)))]
     (case (get-skill-use-mouse-button)
       :left (when mouseover-target-id
-              (assoc-in! entity [:skillmanager :skills (:type melee-comp) :target-body-id]
+              (swap! entity assoc-in [:skillmanager :skills (:type melee-comp) :target-body-id]
                          mouseover-target-id)
               (target-in-range? entity mouseover-target-id :attacked-already false))
       :right (do
-               (assoc-in! entity [:skillmanager :skills (:type melee-comp) :target-body-id]
+               (swap! entity assoc-in [:skillmanager :skills (:type melee-comp) :target-body-id]
                           (or mouseover-target-id nil))
                true))))
 
@@ -79,7 +78,7 @@ so the entity can get in melee range.")
 (defn- melee-hit [entity meleecomp targetbody]
   (let [{:keys [base-dmg hit-sound]} (get-melee-weapon entity meleecomp)]
     (deal-dmg base-dmg targetbody :is-player-melee (is-player? entity))
-    (runmap #(% targetbody) (:hit-effects meleecomp))
+    (dorun (map #(% targetbody) (:hit-effects meleecomp)))
     ;(play-sound hit-sound)
     ))
 

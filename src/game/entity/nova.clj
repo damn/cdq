@@ -5,8 +5,7 @@
     [game.components.position :refer [position-component]]
     [game.components.destructible :refer [deal-dmg get-destructible-bodies]]
     [clojure.set :refer [union]]
-    [utils.core :refer [runmap update-in!]]
-    [engine.render :refer [render-centered-shape rgbcolor]]
+        [engine.render :refer [render-centered-shape rgbcolor]]
     [game.settings :refer [in-pixel]]
     [game.components.core :refer [active add-to-removelist create-comp create-entity create-entity-no-init defentity update-counter!]]
     [game.components.render :refer [render-on-map single-animation-component]]))
@@ -32,8 +31,8 @@
             hits (remove
                    #(contains? already-hit %)
                    (get-destructible-bodies position radius affects-side))]
-        (runmap #(deal-dmg dmg % :is-player-spell is-player-spell) hits)
-        (update-in! entity [(:type c)]
+        (dorun (map #(deal-dmg dmg % :is-player-spell is-player-spell) hits))
+        (swap! entity update-in [(:type c)]
                     #(-> %
                          (assoc :radius radius)
                          (update-in [:already-hit] union (set hits))))

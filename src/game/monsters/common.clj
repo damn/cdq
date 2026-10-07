@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [create-sound defpreload make-counter play-sound]]
     [engine.render :refer [create-animation folder-frames spritesheet-frames]]
-    [utils.core :refer [assoc-in! get-ratio translate-to-tile-middle update-in!]]
+    [utils.core :refer [get-ratio translate-to-tile-middle]]
     [game.settings :refer [in-tiles tile-height tile-width]]
     [game.components.core :refer [create-comp exists? get-id get-position player-body update-counter!]]
     [game.components.body :refer [blocked-location? bodies-in-range? teleport]]
@@ -30,7 +30,7 @@
       current-angle
       (let [angle-to-target (get-angle-to-position (get-position projectile) (get-position target-body))
             adjusted-angle (rotate-angle-to-angle current-angle angle-to-target rotationspeed delta)]
-        (assoc-in! projectile [:movement :current-angle] adjusted-angle)
+        (swap! projectile assoc-in [:movement :current-angle] adjusted-angle)
         adjusted-angle))))
 
 (defn create-homing-movement [speed target-body start-angle rotationspeed move-type]
@@ -71,7 +71,7 @@
   (if (or (nil? current-movement-vector)
           (update-counter! body delta component))
     (let [v (create-vectorfn body component)]
-      (assoc-in! body [:movement :current-movement-vector] v)
+      (swap! body assoc-in [:movement :current-movement-vector] v)
       v)
     current-movement-vector))
 
@@ -101,7 +101,7 @@
 (defn- update-lowhp-runaway [body {:keys [running-away counter] :as c} delta]
   (let [finished (and running-away (update-counter! body delta c))]
     (when finished
-      (assoc-in! body [:movement :running-away] false))
+      (swap! body assoc-in [:movement :running-away] false))
     (if (and running-away (not finished))
       (get-vector-away-from-player body)
       (potential-field-player-following body))))
@@ -121,7 +121,7 @@
     (when (and (not lethal)
                (not (:running-away move-comp))
                (rand-when-low-hp body))
-      (update-in! body [:movement]
+      (swap! body update-in [:movement]
                   #(-> %
                        (assoc-in [:counter :maxcnt] (* (rand-int-between 3 10) 1000))
                        (assoc-in [:running-away] true))))))

@@ -2,7 +2,7 @@
   (:require
     [game.utils.geom :as geom]
     [engine.render :refer [render-centered-shape render-readable-text]]
-    [utils.core :refer [->! create-counter runmap update-counter]]
+    [utils.core :refer [create-counter update-counter]]
     [game.session :refer [atom-session]]
     [game.settings :refer [in-pixel screen-height screen-width]]
     [game.components.core :refer [active block-active-components defcomponent unblock-active-components]]
@@ -40,13 +40,14 @@
 
 (defn wake-up [entity]
   (when (is-sleeping? entity)
-    (->! entity
+    (swap! entity #(-> % 
          unblock-active-components
-         (assoc-in [:sleeping :sleeping] false))
+         (assoc-in [:sleeping :sleeping] false)))
     (->> entity
       get-other-bodies-in-adjacent-cells
       (filter is-sleeping?)
-      (runmap wake-up))))
+      (map wake-up)
+      dorun)))
 
 (def ^:private counter (create-counter 1000))
 (def session (atom-session counter :save-session false))
@@ -57,10 +58,10 @@
 
   (active [delta c _]
     (when (update-counter counter delta)
-      (runmap wake-up
+      (dorun (map wake-up
               (filter in-wakeup-range?
                       (filter is-sleeping?
-                              (get-entities-in-active-content-fields))))))
+                              (get-entities-in-active-content-fields)))))))
   (rendering :above-gui [g c]
     (when show-range
       (render-centered-shape

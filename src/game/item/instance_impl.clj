@@ -5,7 +5,7 @@
     [game.components.body-effects-impl :refer [battle-drugs dmg-effect]]
     [game.components.core :refer [get-id player-body]]
     [game.components.skills.melee :refer [melee-weapon]]
-    [utils.core :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals update-in! variance-val-str]]
+    [utils.core :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals variance-val-str]]
     [engine.core :refer [create-sound defpreload]]
     [engine.render :refer [create-animation create-image folder-frames get-duration]]
     [game.media :refer [get-itemsprite]]
@@ -101,7 +101,7 @@
   (def-usable-item "Heal-Potion"
     :effect #(when (lower-than-max? (get-hp player-body))
                (show-gains-hp-effect player-body (min adds-hp (rest-to-max (get-hp player-body))))
-               (update-in! player-body [:destructible :hp] increase-min-max-val adds-hp))
+               (swap! player-body update-in [:destructible :hp] increase-min-max-val adds-hp))
     :use-sound "bfxr_potionuse.wav"
     :info (str "Gives " adds-hp " hitpoints")
     :image (get-itemsprite [0 3])))
@@ -110,7 +110,7 @@
   (def-usable-item "Big-Heal-Potion"
     :effect #(when (lower-than-max? (get-hp player-body))
                (show-gains-hp-effect player-body (min adds-hp (rest-to-max (get-hp player-body))))
-               (update-in! player-body [:destructible :hp] increase-min-max-val adds-hp))
+               (swap! player-body update-in [:destructible :hp] increase-min-max-val adds-hp))
     :use-sound "bfxr_potionuse.wav"
     :info (str "Gives " adds-hp " hitpoints")
     :image (get-itemsprite [0 0])))
@@ -119,7 +119,7 @@
   (def-usable-item "Mana-Potion"
     :effect #(when (lower-than-max? (get-mana player-body))
                (show-gains-mana-effect player-body (min adds-mana (rest-to-max (get-mana player-body))))
-               (update-in! player-body [:skillmanager :mana] increase-min-max-val adds-mana))
+               (swap! player-body update-in [:skillmanager :mana] increase-min-max-val adds-mana))
     :use-sound "bfxr_potionuse.wav"
     :info (str "Gives " adds-mana " mana")
     :image (get-itemsprite [0 4])))
@@ -128,13 +128,13 @@
   (def-usable-item "Big-Mana-Potion"
     :effect #(when (lower-than-max? (get-mana player-body))
                (show-gains-mana-effect player-body (min adds-mana (rest-to-max (get-mana player-body))))
-               (update-in! player-body [:skillmanager :mana] increase-min-max-val adds-mana))
+               (swap! player-body update-in [:skillmanager :mana] increase-min-max-val adds-mana))
     :use-sound "bfxr_potionuse.wav"
     :info (str "Gives " adds-mana " mana")
     :image (get-itemsprite [0 1])))
 
 (def-usable-item "Cyborg Brain Booster"
-  :effect (fn [] (update-in! player-body [:skillmanager :free-skill-points] inc))
+  :effect (fn [] (swap! player-body update-in [:skillmanager :free-skill-points] inc))
   :use-sound "fanfare10.wav"
   :info ""
   :image (get-itemsprite [1 0]))

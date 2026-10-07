@@ -1,8 +1,7 @@
 (ns game.player.skill.skillmanager
   (:require
     [engine.render :refer [create-image get-scaled-copy]]
-    [utils.core :refer [assoc-in!]]
-    [engine.input :refer [is-leftbutton-down? is-rightbutton-down? is-rightm-consumed? mousebutton]]
+        [engine.input :refer [is-leftbutton-down? is-rightbutton-down? is-rightm-consumed? mousebutton]]
     game.settings
     [game.mouseoverbody :refer [get-mouseover-body saved-mouseover-body]]
     [game.components.skills.core :refer [enough-mana? skillmanager-component skillmanager-skill]]
@@ -32,7 +31,7 @@
 (defn set-selected-skill [mousebutton skill]
   {:pre [(mousebuttons mousebutton)]}
   (change-selected-skill-button-images mousebutton (:icon skill))
-  (assoc-in! player-body [:skillmanager :selected-type mousebutton] (:type skill)))
+  (swap! player-body assoc-in [:skillmanager :selected-type mousebutton] (:type skill)))
 
 (defn get-skills-for-mousebutton
   ([mousebutton]

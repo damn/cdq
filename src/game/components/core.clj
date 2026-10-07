@@ -1,6 +1,6 @@
 (ns game.components.core
   (:require
-    [utils.core :as utils :refer [assoc-in! condition-map-and-rest distinct-seq? filter-map get-unique-number is-condition-map? keywords-to-hash-map make-fn runmap safe-merge update-in! when-apply]]
+    [utils.core :as utils :refer [condition-map-and-rest distinct-seq? filter-map get-unique-number is-condition-map? keywords-to-hash-map make-fn safe-merge when-apply]]
     [engine.core :refer [update]]
     [game.session :as session]
     [clojure.tools.macro :refer [name-with-attributes]]
@@ -66,7 +66,7 @@
         types (map :type (get-components entity))]
     (assert (not-any? #{ctype} types))
     (assert (dependency-ok? component types))
-    (assoc-in! entity [ctype] component)
+    (swap! entity assoc-in [ctype] component)
     (when-apply (:init component) entity)
     entity))
 
@@ -160,10 +160,10 @@
   [entity]
   (when (and entity (exists? entity))
     (swap! id-entity-map dissoc (get-id entity))
-    (runmap #(when-apply (:destruct %) entity) (get-components entity))))
+    (dorun (map #(when-apply (:destruct %) entity) (get-components entity)))))
 
 (defn update-removelist []
-  (runmap #(destruct-entity (get-entity %)) @removelist)
+  (dorun (map #(destruct-entity (get-entity %)) @removelist))
   (reset! removelist #{}))
 
 ;; Get-position here becaused is used a lot.
@@ -235,7 +235,7 @@
 (defn update-counter! [entity delta c & [counterkey & _]]
   (let [k (or counterkey :counter)
         counter (update (k c) delta)]
-    (assoc-in! entity [(:type c) k] counter)
+    (swap! entity assoc-in [(:type c) k] counter)
     (:stopped? counter)))
 
 ;;
@@ -261,7 +261,7 @@
               :let [f (resolve (symbol constructor))
                     entity (apply f args)]]
         (doseq [[ctype m] components]
-          (update-in! entity [ctype] merge m))
+          (swap! entity update-in [ctype] merge m))
         (init! entity)))
 
     (new-session-data [_])))

@@ -3,8 +3,7 @@
     [engine.render :as color]
     [engine.core :refer [play-sound]]
     [game.maps.minimap :refer [show-on-minimap]]
-    [utils.core :refer [assoc-in!]]
-    [game.components.core :refer [add-to-removelist create-comp create-entity create-entity-no-init defentity]]
+        [game.components.core :refer [add-to-removelist create-comp create-entity create-entity-no-init defentity]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [create-body]]
     [game.components.pressable :refer [pressable-component]]
@@ -31,7 +30,7 @@
   (pressable-component ""
                        (fn [entity]
                          (when-not (:is? (:clicked @entity))
-                           (assoc-in! entity [:clicked :is?] true)
+                           (swap! entity assoc-in [:clicked :is?] true)
                            (play-sound "ReversyH-Nick_Ros-105.wav")
                            (add-to-removelist entity)
                            (make-open-door p open-image)

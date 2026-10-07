@@ -1,8 +1,7 @@
 (ns game.components.glittering
   (:require
     [engine.core :refer [make-counter update update-finally-merge]]
-    [utils.core :refer [assoc-in!]]
-    [engine.render :refer [folder-animation is-stopped? render-centered-animation restart]]
+        [engine.render :refer [folder-animation is-stopped? render-centered-animation restart]]
     [game.components.core :refer [active defcomponent]]
     [game.components.render :refer [render-on-map]]))
 
@@ -13,7 +12,7 @@
                                 :looping false
                                 :duration 300)}
   (active [delta {:keys [active counter animation] :as c} entity]
-    (assoc-in! entity [(:type c)]
+    (swap! entity assoc-in [(:type c)]
                (if active
                  (let [animation (update animation delta)]
                    (if (is-stopped? animation)

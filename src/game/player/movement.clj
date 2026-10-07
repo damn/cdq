@@ -1,7 +1,6 @@
 (ns game.player.movement
   (:require
-    [utils.core :refer [assoc-in!]]
-    [engine.input :refer [is-key-down? is-leftbutton-down? is-leftm-consumed?]]
+        [engine.input :refer [is-key-down? is-leftbutton-down? is-leftm-consumed?]]
     [engine.render :refer [render-readable-text]]
     [game.mouseoverbody :refer [saved-mouseover-body]]
     game.settings
@@ -45,7 +44,7 @@
 (defn player-movement-component []
   (movement-component
     {:control-update (fn [body _ delta]
-                       (assoc-in! body [:movement :noclip] (colliding-with-other-solid-bodies? body))
+                       (swap! body assoc-in [:movement :noclip] (colliding-with-other-solid-bodies? body))
                        (calc-movement-v body))}
     player-move-speed
     :ground))

@@ -1,8 +1,7 @@
 (ns game.maps.contentfields
   (:require
     [data.grid2d :as grid]
-    [utils.core :refer [assoc-in!]]
-    game.settings
+        game.settings
     [game.maps.data :refer [get-current-map-data]]
     [game.components.core :refer [get-position player-body]]))
 
@@ -35,7 +34,7 @@
                        (get-field-idx-of-position (get-position entity)))]
     (when-not (= old-field new-field)
       (swap! (:entities new-field) conj entity)
-      (assoc-in! entity [:position :content-field] new-field)
+      (swap! entity assoc-in [:position :content-field] new-field)
       (when old-field
         (swap! (:entities old-field) disj entity)))))
 

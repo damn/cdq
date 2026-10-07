@@ -7,7 +7,7 @@
     [game.components.position :refer [get-tile]]
     [game.components.movement :refer [movement-component]]
     [data.grid2d :refer [cells get-8-neighbour-positions]]
-    [utils.core :refer [assoc-in! diagonal-direction? genmap positions runmap when-seq]]
+    [utils.core :refer [diagonal-direction? genmap positions when-seq]]
     [game.settings :refer [tile-height tile-width]]
     [game.components.core :refer [defcomponent get-position player-body]]
     [game.components.body :refer [inside-cell?]]
@@ -74,17 +74,17 @@
 
 (defn- clear-cells [entity]
   (when-let [cells (:marked-cells (:potential-field @entity))]
-    (assoc-in! entity [:potential-field :marked-cells] nil)
-    (runmap #(swap! % dissoc :dist-to-player) cells)))
+    (swap! entity assoc-in [:potential-field :marked-cells] nil)
+    (dorun (map #(swap! % dissoc :dist-to-player) cells))))
 
 (defn- try-generate [entity]
   (let [component (:potential-field @entity)
         current-tile (get-tile entity)
         dirty (not= current-tile (:last-tile component))]
     (when dirty
-      (assoc-in! entity [:potential-field :last-tile] current-tile)
+      (swap! entity assoc-in [:potential-field :last-tile] current-tile)
       (clear-cells entity)
-      (assoc-in! entity [:potential-field :marked-cells]
+      (swap! entity assoc-in [:potential-field :marked-cells]
         (wavefront-expansion (get-cell current-tile))))))
 
 (defcomponent potential-field []
@@ -94,14 +94,14 @@
            (try-generate entity)
            (add-cell-blocks-changed-listener
              (fn []
-               (assoc-in! entity [:potential-field :last-tile] nil)
+               (swap! entity assoc-in [:potential-field :last-tile] nil)
                (try-generate entity))))})
 
 (comment
   (dotimes [_ 3]
     (time
       (dotimes [_ 10]
-        (assoc-in! player-body [:potential-field :last-tile] nil)
+        (swap! player-body assoc-in [:potential-field :last-tile] nil)
         (try-generate player-body)
         nil))))
 

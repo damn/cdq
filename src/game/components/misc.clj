@@ -1,7 +1,7 @@
 (ns game.components.misc
   (:require
     [engine.core :refer [make-counter]]
-    [utils.core :refer [assoc-in! increase-min-max-val update-in!]]
+    [utils.core :refer [increase-min-max-val]]
     [game.utils.geom :refer [entity-direction-vector get-angle-from-vector get-vector-to-mouse-coords]]
     [game.components.core :refer [active add-to-removelist create-comp defcomponent get-half-height get-half-width player-body update-counter!]]))
 
@@ -17,7 +17,7 @@
 ;;
 
 (defn set-rotation-angle [entity angle] ; TODO has rotation component
-  (assoc-in! entity [:rotation :angle] angle))
+  (swap! entity assoc-in [:rotation :angle] angle))
 
 (defn- rotate-to-vector [body v]
   (set-rotation-angle body (get-angle-from-vector v)))
@@ -52,7 +52,7 @@
 (defn regeneration-component [ctype ks percent-reg-per-second]
   (create-comp ctype
                (active [delta component entity]
-                 (update-in! entity ks regenerate delta (:reg-per-second component)))
+                 (swap! entity update-in ks regenerate delta (:reg-per-second component)))
                {:reg-per-second percent-reg-per-second}))
 
 (defn hp-regen-component [percent-reg-per-second]

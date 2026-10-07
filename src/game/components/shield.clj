@@ -1,8 +1,7 @@
 (ns game.components.shield
   (:require
     [engine.core :refer [make-counter update-finally-merge]]
-    [utils.core :refer [assoc-in!]]
-    [engine.render :refer [create-image render-rotated-centered-image rgbcolor]]
+        [engine.render :refer [create-image render-rotated-centered-image rgbcolor]]
     [game.components.core :refer [active defcomponent]]
     [game.components.render :refer [circle-around-body-render-comp render-on-map]]
     [game.components.body-effects :refer [defeffectentity]]
@@ -21,7 +20,7 @@
       (render-rotated-centered-image g image angle render-posi)))
 
   (active [delta {:keys [is-active counter] :as c} entity]
-    (assoc-in! entity [(:type c)]
+    (swap! entity assoc-in [(:type c)]
                (if is-active
                  (update-in c [:angle] degree-add (* delta rotation-speed))
                  (update-finally-merge c :counter delta
@@ -35,6 +34,6 @@
 (defn shield-try-consume-damage [body]
   (when-let [shield (:shield @body)]
     (when (:is-active shield)
-      (assoc-in! body [:shield :is-active] false)
+      (swap! body assoc-in [:shield :is-active] false)
       (shield-hit body)
       true)))

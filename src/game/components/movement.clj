@@ -2,8 +2,7 @@
   (:require
     [game.settings :refer [tile-width]]
     [game.components.update :refer [max-delta]]
-    [utils.core :refer [assoc-in! runmap update-in!]]
-    [game.components.core :refer [active add-to-removelist defcomponent get-half-height get-half-width get-id get-movement-type get-position get-side is-player?]]
+        [game.components.core :refer [active add-to-removelist defcomponent get-half-height get-half-width get-id get-movement-type get-position get-side is-player?]]
     [game.components.body :refer [calc-touched-cells get-body-bounds get-other-solid-bodies get-to-check-tiles min-solid-pxsize update-occupied-cell update-touched-cells]]
     [game.components.position :refer [swap-position!]]
     [game.maps.cell-grid :refer [cell-blocked? get-cells]]
@@ -30,8 +29,8 @@
         ; TODO PROJECTILE COLLISION to entityPROJECTILE and out of movement logic?
         blocked (cond hit-body
                       (do
-                        (update-in! projectile [:projectile-collision :already-hit-bodies] conj hit-body)
-                        (runmap #(% hit-body) hit-effects)
+                        (swap! projectile update-in [:projectile-collision :already-hit-bodies] conj hit-body)
+                        (dorun (map #(% hit-body) hit-effects))
                         (not piercing))
 
                       (some #(cell-blocked? % movement-type) touched-cells) ; TODO mit x-axis und y-axis -> 2-3 abfragen anstatt 4. Lohnt?
@@ -116,7 +115,7 @@
       (when-let [rotation (:rotation @body)]
         ((:moved rotation) body v))
       (when (is-player? body)
-          (assoc-in! body [:movement :play-move-animation] true)))))
+          (swap! body assoc-in [:movement :play-move-animation] true)))))
 
 (defn- update-component-movement
   [delta {:keys [control-update speed] :as c} body]

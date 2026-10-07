@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [create-sound make-counter]]
     [engine.render :refer [create-image green]]
-    [utils.core :refer [assoc-in! lower-than-max?]]
+    [utils.core :refer [lower-than-max?]]
     [game.components.core :refer [active defcomponent exists? get-id get-position player-body update-counter!]]
     [game.components.body :refer [bodies-in-range?]]
     [game.components.misc :refer [rotation-component]]
@@ -18,7 +18,7 @@
   {:counter (make-counter 1000)}
   (active [delta {:keys [counter] :as c} entity]
     (when (update-counter! entity delta c)
-      (assoc-in! entity [(:type c) :nearby-monsters]
+      (swap! entity assoc-in [(:type c) :nearby-monsters]
                  (doall (get-healable-monsters-around entity))))))
 
 ; TODO not checking if ray-blocked ---> can heal through walls like other healer
@@ -52,7 +52,7 @@
                                 (when-let [needs-heal (first (sort-by #(:current (get-hp %))
                                                                       (filter #(healing-required-and-allowed? % entity healradius-squared)
                                                                               cached)))]
-                                  (assoc-in! entity [:instantheal :needs-heal] needs-heal)
+                                  (swap! entity assoc-in [:instantheal :needs-heal] needs-heal)
                                   true)))
               :do-skill (fn [healer {needs-heal :needs-heal :as component}]
                           (when (healing-required-and-allowed? needs-heal healer healradius-squared)

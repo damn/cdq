@@ -4,7 +4,7 @@
     [engine.core :refer [initialize]]
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
-    [utils.core :refer [assoc-in! log readable-number runmap split-key-val-and-maps update-in! variance-val-str]]
+    [utils.core :refer [log readable-number split-key-val-and-maps variance-val-str]]
     [engine.render :refer [create-image defcolor fill-rect render-readable-text rgbcolor]]
     [game.settings :refer [screen-height]]
     game.media
@@ -23,7 +23,7 @@
 (defn learn-skill [skill]
   ; TODO assert not learned yet?
   (reset! (:learned-this skill) true)
-  (update-in! player-body [:skillmanager :skills] add-player-skill skill))
+  (swap! player-body update-in [:skillmanager :skills] add-player-skill skill))
 ; TODO add-player-skill doch net pure machen? da assoc in player-body egtl zu add-player-skill geh�rt?
 
 ; TODO jede menu-posi; skill-type nur 1x erlaubt?
@@ -78,7 +78,7 @@
                                    :pressed (fn []
                                               (when (and (pos? (:free-skill-points (:skillmanager @player-body)))
                                                          (not @(:learned-this skill)))
-                                                (update-in! player-body [:skillmanager :free-skill-points] dec)
+                                                (swap! player-body update-in [:skillmanager :free-skill-points] dec)
                                                 (learn-skill skill)
                                                 (assign-unused-hotkey-and-open-skillslist (:type skill))))
                                    :parent skillmenu-frame)}))))
@@ -124,11 +124,11 @@
 (ingame-loop-comp :skill-tooltips
   (rendering :tooltips [g c]
     (when (is-visible? skillmenu-frame)
-      (runmap #(render-skillbutton-tooltip g %) skillmenu-buttons))))
+      (dorun (map #(render-skillbutton-tooltip g %) skillmenu-buttons)))))
 
 (def session (reify game.session/Session
                (load-session [_ {:keys [free-points learned]}]
-                 (assoc-in! player-body [:skillmanager :free-skill-points] free-points)
+                 (swap! player-body assoc-in [:skillmanager :free-skill-points] free-points)
                  (doseq [[skilltype learned-this] learned
                          :let [skill (get learnable-skills skilltype)]]
                    (if-not skill

@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [create-sound make-counter play-sound playonce reset update update-finally-merge]]
     [engine.input :refer [get-mouse-pos is-leftbutton-down? is-rightbutton-down?]]
-    [utils.core :refer [->! assoc-in! lower-than-max? mapvals min-max-val rest-to-max set-to-max split-key-val-and-maps update-in!]]
+    [utils.core :refer [lower-than-max? mapvals min-max-val rest-to-max set-to-max split-key-val-and-maps]]
     [engine.render :refer [is-stopped?]]
     [game.utils.tilemap :refer [get-mouse-tile-pos]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
@@ -27,7 +27,7 @@
 (defn set-mana-to-max [body]
   (when (lower-than-max? (get-mana body))
     (show-gains-mana-effect body (rest-to-max (get-mana body))))
-  (update-in! body [:skillmanager :mana] set-to-max))
+  (swap! body update-in [:skillmanager :mana] set-to-max))
 
 (defn- update-cooldown [skill delta]
   (if (is-cooling-down? skill)
@@ -47,7 +47,7 @@
 (defn- update-counter-skill! [entity delta skill & [counterkey & _]]
   (let [k (or counterkey :counter)
         counter (update (k skill) delta)]
-    (assoc-in! entity [:skillmanager :skills (:type skill) k] counter)
+    (swap! entity assoc-in [:skillmanager :skills (:type skill) k] counter)
     (:stopped? counter)))
 
 ; Warning:
@@ -109,7 +109,7 @@
 ; skillmanager skills: READY <-> COOLDOWN
 (defn update-component-skillmanager
   [delta {:keys [state choose-skill rotate-after-attack cast-sound] :as component} entity]
-  (update-in! entity [:skillmanager] update-cooldowns delta)
+  (swap! entity update-in [:skillmanager] update-cooldowns delta)
   (let [is-player (is-player? entity)
         skillmanager (:skillmanager @entity)] ; after update cooldowns.
     (case state
@@ -130,17 +130,17 @@
               enough))
           (when (and cast-sound (not (:is-melee active-skill)))
             (play-sound cast-sound))
-          (->! entity
+          (swap! entity #(-> % 
             (assoc-in [:skillmanager :active-type] active-type)
             (update-in [:skillmanager] pay-cost (:cost active-skill))
-            (switch-state :skillmanager :attacking))
+            (switch-state :skillmanager :attacking)))
           (when rotate-after-attack
             (rotate-after-attack entity))))
       :attacking
       (when (try-attack entity (get-active-skill skillmanager) delta)
-        (->! entity
+        (swap! entity #(-> % 
           (update-in [:skillmanager] try-set-active-skill-cooldown)
-          (switch-state :skillmanager :ready))))))
+          (switch-state :skillmanager :ready)))))))
 
 (defn skillmanager-component
   "rotatefn may be nil"
@@ -158,10 +158,10 @@
        :block-effect-reset-state (fn [entity skillm]
                                    (when (is-attacking? skillm)
                                      (when (:attack-counter (get-active-skill skillm))
-                                       (update-in! entity [:skillmanager :skills (:active-type skillm) :attack-counter] reset))
-                                     (->! entity
+                                       (swap! entity update-in [:skillmanager :skills (:active-type skillm) :attack-counter] reset))
+                                     (swap! entity #(-> % 
                                           (assoc-in [:skillmanager :skills (:active-type skillm) :state] :cooldown)
-                                          (switch-state :skillmanager :ready))))}
+                                          (switch-state :skillmanager :ready)))))}
       props)))
 
 (defn update-component-skill
@@ -191,7 +191,7 @@
     {:block-effect-reset-state (fn [entity skill]
                                  (when (is-attacking? skill)
                                    (when (:attack-counter skill)
-                                     (update-in! entity [(:type skill) :attack-counter] reset))
+                                     (swap! entity update-in [(:type skill) :attack-counter] reset))
                                    (swap! entity switch-state (:type skill) :cooldown)))}
     props))
 

@@ -1,7 +1,7 @@
 (ns game.maps.cell-grid
   (:require
     [data.grid2d :as grid]
-    [utils.core :refer [diagonal-direction? int-posi runmap translate-to-tile-middle]]
+    [utils.core :refer [diagonal-direction? int-posi translate-to-tile-middle]]
     [game.session :refer [atom-session]]
     [game.components.core :refer [get-entity get-id is-solid?]]
     [game.maps.data :refer [get-current-map-data]]))
@@ -68,7 +68,7 @@
 
 (defn add-cell-blocks-changed-listener [f] (swap! listeners conj f))
 
-(defn cell-blocks-changed-update-listeners [] (runmap #(%) @listeners)) ; TODO runmap eval ? memfn invoke
+(defn cell-blocks-changed-update-listeners [] (dorun (map #(%) @listeners))) ; TODO dorun/map eval ? memfn invoke
 
 (defn change-cell-blocks
   "do not change to blocking while game running or bodies may be walled in.

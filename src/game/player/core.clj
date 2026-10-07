@@ -6,7 +6,7 @@
     [game.maps.minimap :refer [show-on-minimap]]
     [game.components.skills.core :refer [reset-skills]]
     [game.utils.lightning :refer [light-component]]
-    [utils.core :refer [->! assoc-in! set-to-max when-seq]]
+    [utils.core :refer [set-to-max when-seq]]
     [engine.core :refer [play-sound]]
     engine.input
     game.maps.contentfields
@@ -47,19 +47,19 @@
     (play-sound "bfxr_playerdeath.wav")
     (dorun (map add-to-removelist (get-sub-entities body)))
     (game.components.update/update-component 0 (:animation @body) body) ; set death animation
-    (assoc-in! player-body [:destructible :hp :current] 0)
+    (swap! player-body assoc-in [:destructible :hp :current] 0)
     (set-rotation-angle body 0)))
 
 (defn- revive-player []
   (show-msg-to-player "") ; removes the old msg
   (reset! game.components.update/running true)
   (teleport player-body (:start-position (game.maps.data/get-current-map-data)))
-  (->! player-body
+  (swap! player-body #(-> % 
     (assoc-in [:destructible :is-dead] false)
     (update-in [:destructible :hp] set-to-max)
     (update-in [:skillmanager :mana] set-to-max)
     (switch-state :skillmanager :ready)
-    (update-in [:skillmanager :skills] reset-skills)))
+    (update-in [:skillmanager :skills] reset-skills))))
 
 (defn try-revive-player []
   (when-seq [cells (get-inventory-cells-with-item-name "Restoration" :inventory)]

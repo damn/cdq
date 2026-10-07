@@ -1,6 +1,6 @@
 (ns game.components.burrow
   (:require
-    [utils.core :refer [->! create-counter runmap update-counter]]
+    [utils.core :refer [create-counter update-counter]]
     [engine.core :refer [defpreload play-sound]]
     [engine.render :refer [create-animation spritesheet-frames]]
     [game.session :refer [atom-session]]
@@ -22,10 +22,10 @@
     (animation-entity :position (get-position entity)
                       :animation (create-animation dust-frames :frame-duration 100)
                       :order :is-ground))
-  (->! entity
+  (swap! entity #(-> % 
        block-active-components
        (assoc-in [:body :solid] false)
-       (assoc-in [:burrow :burrowed] true))
+       (assoc-in [:burrow :burrowed] true)))
   (reset-component-state-after-blocked entity))
 
 (defn- try-unburrow [entity]
@@ -34,14 +34,15 @@
     (play-sound "bfxr_unburrow.wav")
     (animation-entity :position (get-position entity)
                       :animation (create-animation dark-dust-frames))
-    (->! entity
+    (swap! entity #(-> % 
          unblock-active-components
          (assoc-in [:body :solid] true)
-         (assoc-in [:burrow :burrowed] false))
+         (assoc-in [:burrow :burrowed] false)))
     (->> entity
       get-other-bodies-in-adjacent-cells
       (filter is-burrowed?)
-      (runmap try-unburrow))))
+      (map try-unburrow)
+      dorun)))
 
 (defcomponent burrow []
   {:burrowed false
@@ -69,8 +70,8 @@
 (ingame-loop-comp :burrow-check
     (active [delta _ _]
       (when (update-counter counter delta)
-        (runmap check
+        (dorun (map check
           (filter #(:burrow @%)
-                  (get-entities-in-active-content-fields))))))
+                  (get-entities-in-active-content-fields)))))))
 
 

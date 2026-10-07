@@ -3,7 +3,7 @@
     [engine.render :as color :refer [create-image draw-grid draw-image fill-rect render-readable-text rgbcolor set-color]]
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
-    [utils.core :refer [runmap thread-through]]
+    [utils.core :refer [thread-through]]
     [engine.core :refer [defpreload initialize]]
     [engine.input :refer [get-mouse-pos]]
     [game.settings :refer [screen-height screen-width]]
@@ -337,10 +337,10 @@
 
 (ingame-loop-comp :item-cells
   (rendering [g c]
-    (runmap
+    (dorun (map
       #(when ((:visible-check %))
          (render-item-grid g (:grid-type %))) ; give grid as argument ...
-      (vals item-grids))
+      (vals item-grids)))
     (render-belt-hotkeys g)))
 
 (defn get-inventory-cells-with-item-name [item-name grid-type]

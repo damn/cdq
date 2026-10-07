@@ -30,8 +30,6 @@
         key-vals-map (apply hash-map (apply concat kvpairs))]
     [key-vals-map (apply concat restpairs)]))
 
-(defn runmap [& more] (dorun (apply map more)))
-
 (let [cnt (atom 0)]
   (defn get-unique-number [] (swap! cnt inc)))
 
@@ -69,12 +67,6 @@
 (defn keywords-to-hash-map [keywords] ; other name
   (into {} (for [k keywords]
              [k (symbol (name k))])))
-
-(defn assoc-in!  [a & args] (apply swap! a assoc-in  args))
-(defn update-in! [a & args] (apply swap! a update-in args))
-
-(defmacro ->! [a & forms]
-  `(swap! ~a #(-> % ~@forms)))
 
 (defn mapvals [m f]
   (into {} (for [[k v] m]
@@ -198,13 +190,13 @@
   ([maxtime] (atom {:current 0,:max maxtime})))
 
 (defn reset-counter! [counter]
-  (assoc-in! counter [:current] 0))
+  (swap! counter assoc-in [:current] 0))
 
 (defn update-counter
   "updates counter. if maxtime reached, resets current to 0 and returns the last current value,
    else returns nil."
   [counter delta]
-  (update-in! counter [:current] + delta)
+  (swap! counter update-in [:current] + delta)
   (let [{current :current maxtime :max} @counter]
     (when (and maxtime (>= current maxtime))
       (let [last-current current]

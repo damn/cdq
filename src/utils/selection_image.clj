@@ -1,12 +1,11 @@
 (ns utils.selection-image
   (:require
-    [engine.render :as color :refer [fill-rect]]
-    [utils.core :refer [runmap]])
+    [engine.render :as color :refer [fill-rect]])
   (:import org.newdawn.slick.Image))
 
 ; fillrect 2/2 weil beim rotieren von images sch�rfe verloren geht
 (defn run-pixels-x [^Image image g xrange yrange]
-  (runmap
+  (dorun (map
     (fn [y] ;doseq
       (some
         (fn [x]
@@ -14,11 +13,11 @@
             (fill-rect g x y 2 2 color/white)
             true))
         xrange))
-    yrange))
+    yrange)))
 
 ; fillrect 2/2 weil beim rotieren von images sch�rfe verloren geht
 (defn run-pixels-y [^Image image g xrange yrange]
-  (runmap
+  (dorun (map
     (fn [x] ;doseq
       (some
         (fn [y]
@@ -26,7 +25,7 @@
             (fill-rect g x y 2 2 color/white)
             true))
         yrange))
-    xrange))
+    xrange)))
 
 (defn create-selection-image [^Image original]
   (let [w (.getWidth original)
