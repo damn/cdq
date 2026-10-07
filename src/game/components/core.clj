@@ -4,7 +4,6 @@
     [utils.coll :refer [distinct-seq? filter-map safe-merge]]
     [engine.core :refer [update]]
     [game.session :as session]
-    [clojure.tools.macro :refer [name-with-attributes]]
     [game.components.active :refer [add-blocks remove-blocks]]))
 
 (def ^:private id-entity-map (atom {}))
@@ -108,6 +107,19 @@
             :obligatory (recur (next args) mode (conj obligatory x) opt opt-def)
             :opt (recur (next args) mode obligatory (conj opt x) opt-def)
             :opt-def (recur (nnext args) mode obligatory opt (conj opt-def x (second args)))))))))
+
+(defn- name-with-attributes
+  "Optional docstring then attr-map after namesym; merge onto namesym meta."
+  [name macro-args]
+  (let [[docstring macro-args] (if (string? (first macro-args))
+                                 [(first macro-args) (next macro-args)]
+                                 [nil macro-args])
+        [attr macro-args] (if (map? (first macro-args))
+                            [(first macro-args) (next macro-args)]
+                            [{} macro-args])
+        attr (if docstring (assoc attr :doc docstring) attr)
+        attr (if (meta name) (conj (meta name) attr) attr)]
+    [(with-meta name attr) macro-args]))
 
 (defmacro defentity
   "Namesym can be followed by docstring and metadata map.
