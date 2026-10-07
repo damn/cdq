@@ -7,13 +7,8 @@
     [game.components.sleeping :refer [sleeping-component]]
     [game.settings :refer [tile-height tile-width]]))
 
-(defn assoc-w-and-h [props]
-  (if-let [pxsize (:pxsize props)]
-    (-> props (dissoc :pxsize) (assoc :pxw pxsize :pxh pxsize))
-    props))
-
 (defn create-monster
-  "use defmonster not this for defining monsters (defmonster calls assoc-w-and-h!)"
+  "use defmonster not this for defining monsters"
   [position monster-type {hp :hp armor :armor :as props} & components] ; monster-type not used?! TODO was used for (:is-boss) or something like that
   (apply create-entity
          (position-component position)
@@ -33,7 +28,7 @@
       (throw (Error. (str "Could not find monster: " type)))))
 
 (defmacro defmonster [monster-type props & components]
-  `(let [props# (assoc-w-and-h ~props)
+  `(let [props# ~props
          type# ~(keyword monster-type)]
      (alter-var-root #'monsters assoc type#
        {:create (fn [position#] (create-monster position# type# props# ~@components))

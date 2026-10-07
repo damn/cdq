@@ -1251,7 +1251,7 @@ PSI-Explosion
 
 ;;
 
-(defmonster little-bot {:hp 0.5 :armor 0 :pxsize 9}
+(defmonster little-bot {:hp 0.5 :armor 0 :pxw 9 :pxh 9}
   (death-trigger (fn [body]
                    (play-sound "bfxr_defaultmonsterdeath.wav")
                    (monster-die-effect body)))
@@ -1297,7 +1297,7 @@ PSI-Explosion
                            :hit-sound (create-sound "slash.wav")
                            :target-id (get-id player-body)))
 
-(defmonster littlespider {:hp 1 :armor 7 :pxsize 13}
+(defmonster littlespider {:hp 1 :armor 7 :pxw 13 :pxh 13}
   (default-death-trigger)
   (path-to-player-movement 47)
   (rotation-component)
@@ -1305,7 +1305,7 @@ PSI-Explosion
     (folder-animation :folder "opponents/littlespider/" :duration 300 :looping true))
   (normal-monster-melee))
 
-(defmonster xploding-drone {:hp 1.5 :armor 5 :pxsize 15}
+(defmonster xploding-drone {:hp 1.5 :armor 5 :pxw 15 :pxh 15}
   (death-trigger (fn [this-body]
                    (default-monster-death this-body :sound false) ; TODO this strange sound false and play-sound ... => default monster dead more than 1 thing...
                    (play-sound "bfxr_dronedeath.wav")
@@ -1334,7 +1334,7 @@ PSI-Explosion
     :target-id (get-id player-body)))
 
 (let [posis [[9 -11] [-1 -11] [-13 -7] [-9 2] [3 3] [3 15] [-5 14] [7 17] [-11 5] [-12 14]]]
-  (defmonster research-station {:hp 10 :armor 25 :pxsize 43}
+  (defmonster research-station {:hp 10 :armor 25 :pxw 43 :pxh 43}
     (big-body-hit-effect posis)
     (death-trigger (fn [body]
                      (play-sound "bfxr_stationdeath.wav")
@@ -1345,7 +1345,7 @@ PSI-Explosion
 
 (defpreload ^:private mine-explosion-frames (folder-frames "effects/mine/"))
 
-(defmonster mine {:hp 1 :armor 0 :pxsize 15}
+(defmonster mine {:hp 1 :armor 0 :pxw 15 :pxh 15}
   (death-trigger (fn [this-body]
                    (play-sound "bfxr_minedeath.wav")
                    (nova-effect
@@ -1369,7 +1369,7 @@ PSI-Explosion
                       :looping true)
     :order :on-ground))
 
-(defmonster skull-chainsaw {:hp 1.3 :armor 4 :pxsize 15}
+(defmonster skull-chainsaw {:hp 1.3 :armor 4 :pxw 15 :pxh 15}
   (default-death-trigger)
   (lowhp-runaway-movement 50)
   (create-comp :dealt-dmg-trigger {:do lowhp-dealt-dmg-trigger})
@@ -1378,11 +1378,11 @@ PSI-Explosion
     (folder-animation :folder "opponents/teleportraider/" :duration 500 :looping true))
   (normal-monster-melee))
 
-(defmonster storagebox {:hp 1 :armor 25 :pxsize 41}
+(defmonster storagebox {:hp 1 :armor 25 :pxw 41 :pxh 41}
   ;(default-death-trigger)
   (image-render-component (create-image "opponents/storage1.png")))
 
-(defmonster armored-skull {:hp 2 :armor 65 :pxsize 15}
+(defmonster armored-skull {:hp 2 :armor 65 :pxw 15 :pxh 15}
   (default-death-trigger)
   (path-to-player-movement 13)
   (rotation-component)
@@ -1390,7 +1390,7 @@ PSI-Explosion
   (image-render-component (create-image "opponents/coredemonhand.png"))
   (normal-monster-melee))
 
-(defmonster armored-skull2 {:hp 1 :armor 23 :pxsize 15}
+(defmonster armored-skull2 {:hp 1 :armor 23 :pxw 15 :pxh 15}
   (default-death-trigger)
   (path-to-player-movement 13)
   (rotation-component)
@@ -1398,7 +1398,7 @@ PSI-Explosion
   (image-render-component (create-image "opponents/vorticularcutlass.png"))
   (normal-monster-melee))
 
-(defmonster big-skull-chainsaw {:hp 3 :armor 25 :pxsize 15}
+(defmonster big-skull-chainsaw {:hp 3 :armor 25 :pxw 15 :pxh 15}
   (default-death-trigger)
   (path-to-player-movement 25)
   (rotation-component)
@@ -1406,7 +1406,7 @@ PSI-Explosion
   (image-render-component (create-image "opponents/vorticularcutlassiv.png"))
   (normal-monster-melee))
 
-(defmonster big-teleporting-melee {:hp 5 :armor 15 :pxsize 15}
+(defmonster big-teleporting-melee {:hp 5 :armor 15 :pxw 15 :pxh 15}
   (default-death-trigger)
   (path-to-player-movement 8)
   (rotation-component)
@@ -1433,7 +1433,7 @@ PSI-Explosion
 ; TODO shoot-sound?
 
 
-(defmonster burrower {:hp 2.5 :armor 20 :pxsize 15}
+(defmonster burrower {:hp 2.5 :armor 20 :pxw 15 :pxh 15}
   (default-death-trigger)
   (path-to-player-movement 30)
   (rotation-component)
@@ -1441,14 +1441,14 @@ PSI-Explosion
   (normal-monster-melee)
   (game.components.burrow/burrow-component))
 
-(defmonster ranged {:hp 0.6 :armor 5 :pxsize 15}
+(defmonster ranged {:hp 0.6 :armor 5 :pxw 15 :pxh 15}
   (default-death-trigger)
   (ranged-runaway-movement-comp 24 (rand-int-between 2 6) :ground)
   (rotation-component)
   (image-render-component (create-image "opponents/core_raider.png"))
   (ranged-component :cooldown (rand-int-between 2000 2500) :attacktime 500))
 
-(defmonster shield-turret {:hp 1.5 :armor 15 :pxsize 15}
+(defmonster shield-turret {:hp 1.5 :armor 15 :pxw 15 :pxh 15}
   (path-to-player-movement 13)
   (default-death-trigger)
   (shield-component 1500)
@@ -1456,7 +1456,7 @@ PSI-Explosion
   (image-render-component (create-image "opponents/counternegativeenergyturret.png"))
   (ranged-component :cooldown 4000 :attacktime 500))
 
-(defmonster mage-skull {:hp 4.8 :armor 0 :pxsize 15}
+(defmonster mage-skull {:hp 4.8 :armor 0 :pxw 15 :pxh 15}
   (default-death-trigger)
   (ranged-runaway-movement-comp 26 (rand-int-between 3 4) :ground)
   (hp-regen-component 5)
@@ -1466,7 +1466,7 @@ PSI-Explosion
 
 (let [attacktime 600
       folder "opponents/fly/"]
-  (defmonster fly {:hp 1 :armor 0 :pxsize 9}
+  (defmonster fly {:hp 1 :armor 0 :pxw 9 :pxh 9}
     (default-death-trigger)
     (ranged-randomly-moving-comp 32 1000 :ground)
     (animation-component (fn [body]
@@ -1533,7 +1533,7 @@ PSI-Explosion
       {:counter (make-counter 500)})))
 
 ; TODO also use cached-monsters-around ?
-(defmonster healer {:hp 3 :armor 0 :pxsize 15}
+(defmonster healer {:hp 3 :armor 0 :pxw 15 :pxh 15}
   (default-death-trigger)
   (ranged-runaway-movement-comp 30 (rand-int-between 1 3) :ground)
   (rotation-component)
@@ -1561,7 +1561,7 @@ PSI-Explosion
 ; TODO mehr hervorheben anstatt drawLine vlt so ein "beam" strahl... gr�n mit weiss als kontrast (not in prototype stage -> do another time!)
 ; rotating to which monster is healed?
 (let [healradius-squared (* heal-radius heal-radius)]
-  (defmonster instant-healer {:hp 2 :armor 20 :pxsize 14}
+  (defmonster instant-healer {:hp 2 :armor 20 :pxw 14 :pxh 14}
     (default-death-trigger)
     (path-to-player-movement 15)
     (rotation-component)
@@ -1639,7 +1639,7 @@ PSI-Explosion
       :skills [melee-weapon monster-nova]
       (blocks-component {:attacking :movement}))))
 
-(defmonster nova-melee {:hp 2.2 :armor 7 :pxsize 15}
+(defmonster nova-melee {:hp 2.2 :armor 7 :pxw 15 :pxh 15}
   (default-death-trigger)
   (path-to-player-movement 32)
   (single-animation-component
@@ -1649,7 +1649,7 @@ PSI-Explosion
 ;;
 
 
-(defmonster slowdown-caster {:hp 2 :armor 25 :pxsize 12}
+(defmonster slowdown-caster {:hp 2 :armor 25 :pxw 12 :pxh 12}
   (default-death-trigger)
   (path-to-player-movement 20)
   (single-animation-component
@@ -1678,7 +1678,7 @@ PSI-Explosion
 ;TODO do-skill spritesheet-frames expensive without preloading the frames?
 (let [maxrange-squared (* 10 10)
       attacktime 1000]
-  (defmonster ray-shooter {:hp 1 :armor 25 :pxsize 15}
+  (defmonster ray-shooter {:hp 1 :armor 25 :pxw 15 :pxh 15}
     (default-death-trigger)
     (path-to-player-movement 22)
     (create-comp :dealt-dmg-trigger {:do teleport-and-heal-when-low-hp})
@@ -1802,7 +1802,7 @@ PSI-Explosion
   (single-animation-component ; TODO gleich folder-animation auchnoch reinpacken in single-animation-component?
     (folder-animation :folder "opponents/boss/" :duration 300 :looping true)))
 
-(defmonster test-hunter {:hp 1.5 :armor 7 :pxsize 47}
+(defmonster test-hunter {:hp 1.5 :armor 7 :pxw 47 :pxh 47}
   (path-to-player-movement 72)
   (rotation-component)
   (image-render-component (create-image "opponents/coredemonhand.png")))
