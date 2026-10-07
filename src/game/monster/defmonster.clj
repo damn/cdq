@@ -1,16 +1,11 @@
 (ns game.monster.defmonster
   (:require
-    [engine.render :refer [create-image]]
     [game.components.core :refer [create-entity]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [create-body]]
     [game.components.destructible :refer [monster-destructible]]
     [game.components.sleeping :refer [sleeping-component]]
     [game.settings :refer [tile-height tile-width]]))
-
-(defn monsterresrc [path] (str "opponents/" path))
-
-(def monsterimage (comp create-image monsterresrc))
 
 (defn assoc-w-and-h [props]
   (if-let [pxsize (:pxsize props)]

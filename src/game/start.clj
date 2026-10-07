@@ -62,7 +62,7 @@
     [game.item.cells :refer [add-item-to-cell cell-empty-and-allows-item? cell-filled-and-allows-item? empty-item-in-hand get-item get-mouseover-item-cell hks-cells inc-count-of-item? inventory-height inventoryry is-item-in-hand? item-grids item-in-hand item-not-in-use? mouse-over-an-item-cell? remove-item-from-cell remove-one-item set-item-in-hand]]
     [game.item.instance :refer [create-item-body put-item-on-ground]]
     [game.item.instance-impl :refer [create-rand-item]]
-    [game.monster.defmonster :refer [defmonster get-monster-properties monsterimage monsterresrc]]
+    [game.monster.defmonster :refer [defmonster get-monster-properties]]
     [game.player.skill.learnable :refer [deflearnable-skill learnable-skills]]
     [game.player.skill.selection-list :refer [close-skill-selection-lists some-skill-selection-list-visible?]]
     [game.player.skill.skillmanager :refer [get-selected-skill]]
@@ -1257,7 +1257,7 @@ PSI-Explosion
                    (monster-die-effect body)))
   (path-to-player-movement 15)
   (rotation-component)
-  (image-render-component (monsterimage "littlebot.png"))
+  (image-render-component (create-image "opponents/littlebot.png"))
   (monster-melee-component
     :cooldown 1000
     :attacktime 100
@@ -1302,7 +1302,7 @@ PSI-Explosion
   (path-to-player-movement 47)
   (rotation-component)
   (single-animation-component
-    (folder-animation :folder (monsterresrc "littlespider/") :duration 300 :looping true))
+    (folder-animation :folder "opponents/littlespider/" :duration 300 :looping true))
   (normal-monster-melee))
 
 (defmonster xploding-drone {:hp 1.5 :armor 5 :pxsize 15}
@@ -1326,7 +1326,7 @@ PSI-Explosion
   (path-to-player-movement 13)
   (rotation-component)
   (single-animation-component
-    (folder-animation :folder (monsterresrc "xplodingdrone/") :duration 500 :looping true))
+    (folder-animation :folder "opponents/xplodingdrone/" :duration 500 :looping true))
   (monster-melee-component
     :cooldown 500
     :attacktime 500
@@ -1341,7 +1341,7 @@ PSI-Explosion
                      (rand-posis-hit-effect body posis :big-explosion true)))
     (show-on-minimap orange)
     (single-animation-component
-      (folder-animation :folder (monsterresrc "station/") :duration 500 :looping true))))
+      (folder-animation :folder "opponents/station/" :duration 500 :looping true))))
 
 (defpreload ^:private mine-explosion-frames (folder-frames "effects/mine/"))
 
@@ -1362,7 +1362,7 @@ PSI-Explosion
                      :affects-side [:monster]
                      :dmg [6 8]
                      :animation (create-animation mine-explosion-frames))))
-  (image-render-component (monsterimage "mine.png"))
+  (image-render-component (create-image "opponents/mine.png"))
   (single-animation-component
     (create-animation (spritesheet-frames "effects/red_glow.png" 32 32)
                       :frame-duration 150
@@ -1375,19 +1375,19 @@ PSI-Explosion
   (create-comp :dealt-dmg-trigger {:do lowhp-dealt-dmg-trigger})
   (rotation-component)
   (single-animation-component
-    (folder-animation :folder (monsterresrc "teleportraider/") :duration 500 :looping true))
+    (folder-animation :folder "opponents/teleportraider/" :duration 500 :looping true))
   (normal-monster-melee))
 
 (defmonster storagebox {:hp 1 :armor 25 :pxsize 41}
   ;(default-death-trigger)
-  (image-render-component (monsterimage "storage1.png")))
+  (image-render-component (create-image "opponents/storage1.png")))
 
 (defmonster armored-skull {:hp 2 :armor 65 :pxsize 15}
   (default-death-trigger)
   (path-to-player-movement 13)
   (rotation-component)
   (hp-regen-component 2)
-  (image-render-component (monsterimage "coredemonhand.png"))
+  (image-render-component (create-image "opponents/coredemonhand.png"))
   (normal-monster-melee))
 
 (defmonster armored-skull2 {:hp 1 :armor 23 :pxsize 15}
@@ -1395,7 +1395,7 @@ PSI-Explosion
   (path-to-player-movement 13)
   (rotation-component)
   (hp-regen-component 5)
-  (image-render-component (monsterimage "vorticularcutlass.png"))
+  (image-render-component (create-image "opponents/vorticularcutlass.png"))
   (normal-monster-melee))
 
 (defmonster big-skull-chainsaw {:hp 3 :armor 25 :pxsize 15}
@@ -1403,7 +1403,7 @@ PSI-Explosion
   (path-to-player-movement 25)
   (rotation-component)
   (hp-regen-component 1)
-  (image-render-component (monsterimage "vorticularcutlassiv.png"))
+  (image-render-component (create-image "opponents/vorticularcutlassiv.png"))
   (normal-monster-melee))
 
 (defmonster big-teleporting-melee {:hp 5 :armor 15 :pxsize 15}
@@ -1411,7 +1411,7 @@ PSI-Explosion
   (path-to-player-movement 8)
   (rotation-component)
   (single-animation-component
-    (folder-animation :folder (monsterresrc "corebomber/") :duration 300 :looping true))
+    (folder-animation :folder "opponents/corebomber/" :duration 300 :looping true))
   (normal-monster-melee)
   (standalone-skill
     :stype :teleporting
@@ -1437,7 +1437,7 @@ PSI-Explosion
   (default-death-trigger)
   (path-to-player-movement 30)
   (rotation-component)
-  (image-render-component (monsterimage "burrower.png"))
+  (image-render-component (create-image "opponents/burrower.png"))
   (normal-monster-melee)
   (game.components.burrow/burrow-component))
 
@@ -1445,7 +1445,7 @@ PSI-Explosion
   (default-death-trigger)
   (ranged-runaway-movement-comp 24 (rand-int-between 2 6) :ground)
   (rotation-component)
-  (image-render-component (monsterimage "core_raider.png"))
+  (image-render-component (create-image "opponents/core_raider.png"))
   (ranged-component :cooldown (rand-int-between 2000 2500) :attacktime 500))
 
 (defmonster shield-turret {:hp 1.5 :armor 15 :pxsize 15}
@@ -1453,7 +1453,7 @@ PSI-Explosion
   (default-death-trigger)
   (shield-component 1500)
   (rotation-component)
-  (image-render-component (monsterimage "counternegativeenergyturret.png"))
+  (image-render-component (create-image "opponents/counternegativeenergyturret.png"))
   (ranged-component :cooldown 4000 :attacktime 500))
 
 (defmonster mage-skull {:hp 4.8 :armor 0 :pxsize 15}
@@ -1461,11 +1461,11 @@ PSI-Explosion
   (ranged-runaway-movement-comp 26 (rand-int-between 3 4) :ground)
   (hp-regen-component 5)
   (rotation-component)
-  (image-render-component (monsterimage "core_predator.png"))
+  (image-render-component (create-image "opponents/core_predator.png"))
   (ranged-component :cooldown 3000 :attacktime 50))
 
 (let [attacktime 600
-      folder (monsterresrc "fly/")]
+      folder "opponents/fly/"]
   (defmonster fly {:hp 1 :armor 0 :pxsize 9}
     (default-death-trigger)
     (ranged-randomly-moving-comp 32 1000 :ground)
@@ -1538,7 +1538,7 @@ PSI-Explosion
   (ranged-runaway-movement-comp 30 (rand-int-between 1 3) :ground)
   (rotation-component)
   (single-animation-component
-    (folder-animation :folder (monsterresrc "healer/") :duration 1000 :looping true))
+    (folder-animation :folder "opponents/healer/" :duration 1000 :looping true))
   (create-healer-skillmanager))
 
 ;; Instant-Healer
@@ -1565,7 +1565,7 @@ PSI-Explosion
     (default-death-trigger)
     (path-to-player-movement 15)
     (rotation-component)
-    (image-render-component (monsterimage "coreturret.png"))
+    (image-render-component (create-image "opponents/coreturret.png"))
     (cache-nearby-monsters-component)
     (monster-melee-component :cooldown 500
                              :attacktime 100
@@ -1643,7 +1643,7 @@ PSI-Explosion
   (default-death-trigger)
   (path-to-player-movement 32)
   (single-animation-component
-    (folder-animation :folder (monsterresrc "gravturret/") :duration 1000 :looping true))
+    (folder-animation :folder "opponents/gravturret/" :duration 1000 :looping true))
   (create-nova-melee-skillmanager))
 
 ;;
@@ -1653,7 +1653,7 @@ PSI-Explosion
   (default-death-trigger)
   (path-to-player-movement 20)
   (single-animation-component
-    (folder-animation :folder (monsterresrc "slowdowncaster/") :duration 200 :looping true))
+    (folder-animation :folder "opponents/slowdowncaster/" :duration 200 :looping true))
   (standalone-skill        ; TODO f�r nen ranged skill mit custom hit-effects & movement sehr kompliziert!!
     :stype :slowdown-ranged
     :cooldown 2000
@@ -1683,7 +1683,7 @@ PSI-Explosion
     (path-to-player-movement 22)
     (create-comp :dealt-dmg-trigger {:do teleport-and-heal-when-low-hp})
     (single-animation-component
-      (folder-animation :folder (monsterresrc "harvesterexoshield/") :duration 200 :looping true))
+      (folder-animation :folder "opponents/harvesterexoshield/" :duration 200 :looping true))
     (standalone-skill
       :stype :rayshoot
       :cooldown (rand-int-between 1700 2300)
@@ -1800,12 +1800,12 @@ PSI-Explosion
     12
     :ground)
   (single-animation-component ; TODO gleich folder-animation auchnoch reinpacken in single-animation-component?
-    (folder-animation :folder (monsterresrc "boss/") :duration 300 :looping true)))
+    (folder-animation :folder "opponents/boss/" :duration 300 :looping true)))
 
 (defmonster test-hunter {:hp 1.5 :armor 7 :pxsize 47}
   (path-to-player-movement 72)
   (rotation-component)
-  (image-render-component (monsterimage "coredemonhand.png")))
+  (image-render-component (create-image "opponents/coredemonhand.png")))
 
 ;;; boot
 
