@@ -5,7 +5,7 @@
     [utils.core :refer [inc-or-dec-max log translate-to-tile-middle]]
     [engine.render :refer [folder-animation]]
     [game.monster.defmonster :refer [get-monster-properties]]
-    [game.components.core :refer [add-component create-comp get-position]]
+    [game.components.core :refer [add-component get-position]]
     [game.components.body :refer [blocked-location?]]
     [game.components.render :refer [single-animation-component]]
     [game.maps.data :refer [get-current-map-data]]
@@ -105,7 +105,7 @@
 (defn championize-monster [monster]
   (swap! monster update-in [:destructible :hp] inc-or-dec-max * 5) ; same code @ item-boni
   (add-component monster
-                 (create-comp :extra-loot {:destruct champion-drop}))
+                 {:type :extra-loot :destruct champion-drop})
   (add-component monster
                  (assoc (single-animation-component (folder-animation :folder "effects/champion/" :looping true)
                                              :order :on-ground)

@@ -18,19 +18,9 @@
 (defn exists? [entity] (get-entity (get-id entity)))
 
 ;; Component
-
-; TODO :type; :destruct, :init and :depends are METADATA and belong there -> information hiding.
-; (create-comp :type :image :depends :position :init fn :destruct fn {:a 123} {:b 345})
-(defn create-comp
-  "All components should be created with this function.
-  Special keys:
-  :depends [:a :b :c] -> entity checks at creation if :a :b and :c components exist.
-  :init, :destruct -> function with (fn [entity]) called at creation, removal of entity.
-  Uses safe-merge - asserts that no keys in props is overridden."
-  [ctype & maps]
-  {:pre [(keyword? ctype)
-         (every? map? maps)]}
-  (apply safe-merge {:type ctype} maps))
+; Component = map with :type. Special keys:
+; :depends [:a :b :c] -> entity checks at creation if those components exist.
+; :init, :destruct -> (fn [entity]) at creation / removal.
 
 (defmacro defcomponent
   "the first element of body may be {:pre :post}; the rest should be maps merged into the component-map.
@@ -44,8 +34,8 @@
         arg-vector (mapv #(if (keyword? %) (symbol (name %)) %) arg-vector)
         first-element (first body)
         body (if (is-condition-map? first-element)
-               `(~first-element (create-comp ~(keyword ctype) ~@(conj (rest body) keywords-map)))
-               `((create-comp ~(keyword ctype) ~@(conj body keywords-map))))]
+               `(~first-element (safe-merge {:type ~(keyword ctype)} ~@(conj (rest body) keywords-map)))
+               `((safe-merge {:type ~(keyword ctype)} ~@(conj body keywords-map))))]
     `(defn ~(symbol (str (name ctype) "-component")) ~arg-vector
        ~@body)))
 
@@ -134,11 +124,11 @@
                      (~create-fn
                        ~@(dont-insert
                            (when (-> namesym meta :save-session)
-                             `(create-comp :session
-                                           {:constructor ~(str *ns* "/" namesym "*")
-                                            :args ~(if keyword-style?
-                                                     `(apply concat ~'argsmap)
-                                                     argvec)})))
+                             `{:type :session
+                               :constructor ~(str *ns* "/" namesym "*")
+                               :args ~(if keyword-style?
+                                        `(apply concat ~'argsmap)
+                                        argvec)}))
                        ~@components)))]
     (list 'do
           (defform namesym                   'create-entity)
@@ -224,8 +214,8 @@
 ;;
 
 (comment
-  (let [a (create-entity (create-comp :a {:updatefn 1})
-                         (create-comp :b {:updatefn 1}))]
+  (let [a (create-entity {:type :a :updatefn 1}
+                         {:type :b :updatefn 1})]
     (println @a)
     (unblock-active-components
       (block-active-components @a))))

@@ -2,13 +2,13 @@
   (:require
     [game.test.utils :refer [with-private-fns]]
     [game.maps.cell-grid :refer [add-body create-cell remove-body]]
-    [game.components.core :refer [create-comp create-entity get-id]]
+    [game.components.core :refer [create-entity get-id]]
     [clojure.test :refer [deftest is]]))
 
 
 (let [mycell (create-cell [3 4] #{})
       myentity (create-entity
-                 (create-comp :a))] ; TODO because entity without comp no id
+                 {:type :a})] ; TODO because entity without comp no id
 
   (with-private-fns [game.maps.cell-grid [in-cell?]]
     (deftest test-cell-body-ids

@@ -5,7 +5,7 @@
     [game.utils.geom :as geom]
     [utils.core :refer [define-order int-posi make-fn order-contains? readable-number]]
     [game.settings :refer [in-pixel tile-height tile-width]]
-    [game.components.core :refer [active add-to-removelist create-comp create-entity create-entity-no-init defcomponent defentity get-half-pxh get-half-pxw get-position update-counter!]]
+    [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init defcomponent defentity get-half-pxh get-half-pxw get-position update-counter!]]
     [game.components.misc :refer [delete-after-duration-component]]
     [game.components.position :refer [position-component]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
@@ -114,12 +114,12 @@
 
 (defentity animation-entity [:position :animation :opt :opt-def :order :air]
   (position-component position)
-  (create-comp :always-in-sight)
+  {:type :always-in-sight}
   (single-animation-component animation :order order :apply-light false)
-  (create-comp :delete-after-stopped
-    (active [_ _ entity]
-      (when (-> (:animation @entity) :default is-stopped?)
-        (add-to-removelist entity)))))
+  (merge {:type :delete-after-stopped}
+         (active [_ _ entity]
+           (when (-> (:animation @entity) :default is-stopped?)
+             (add-to-removelist entity)))))
 
 ; FIXME animation that is passed to reload session args == initial one with cnt = 0 ....
 ; animation component 'current' ?
@@ -132,9 +132,9 @@
   (position-component position)
   (delete-after-duration-component duration)
   (let [shape (geom/circle [-1 -1] (in-pixel radius))] ; TODO shape rendering component?
-    (create-comp :visual
-                 (render-on-map [g _ c render-posi]
-                                (render-centered-shape g shape render-posi color)))))
+    (merge {:type :visual}
+           (render-on-map [g _ c render-posi]
+                          (render-centered-shape g shape render-posi color)))))
 
 (defn- drawfatline [g [x y] [ex ey]]
   (doseq [x  [(dec x)  x  (inc x)]
@@ -146,23 +146,23 @@
 (defentity create-lines-render-effect [healer healed-bodies duration]
   (position-component (get-position healer))
   (delete-after-duration-component duration)
-  (create-comp :always-in-sight)
-  (create-comp :visual
-    (render-on-map :air [g _ component start]
-                   (set-color g color/green)
-                   (doseq [end (map #(translate-position (get-position %)) healed-bodies)]
-                     (drawfatline g start end)))))
+  {:type :always-in-sight}
+  (merge {:type :visual}
+         (render-on-map :air [g _ component start]
+                        (set-color g color/green)
+                        (doseq [end (map #(translate-position (get-position %)) healed-bodies)]
+                          (drawfatline g start end)))))
 
 (defentity ^:private create-line-render-effect* [start end duration color thin]
   (position-component start)
   (delete-after-duration-component duration)
-  (create-comp :always-in-sight)
-  (create-comp :visual
-    (render-on-map :air [g _ component start]
-                   (set-color g color)
-                   (if thin
-                     (draw-line   g start (translate-position end))
-                     (drawfatline g start (translate-position end))))))
+  {:type :always-in-sight}
+  (merge {:type :visual}
+         (render-on-map :air [g _ component start]
+                        (set-color g color)
+                        (if thin
+                          (draw-line   g start (translate-position end))
+                          (drawfatline g start (translate-position end))))))
 
 (defn create-line-render-effect [start end duration & {color :color thin :thin}]
   (create-line-render-effect* start end duration color thin))
@@ -199,7 +199,7 @@
 (defn circle-around-body-render-comp
   "target entity is not the entity of this component (used at sub-entities that only share position)"
   [target color order]
-  (create-comp :visuals
-    (render-on-map order [g _ c render-posi]
-      (let [radius (+ 2 (get-half-pxw target))]
-        (fill-centered-circle g radius render-posi color)))))
+  (merge {:type :visuals}
+         (render-on-map order [g _ c render-posi]
+           (let [radius (+ 2 (get-half-pxw target))]
+             (fill-centered-circle g radius render-posi color)))))

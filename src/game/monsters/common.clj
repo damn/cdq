@@ -4,7 +4,7 @@
     [engine.render :refer [create-animation folder-frames spritesheet-frames]]
     [utils.core :refer [get-ratio translate-to-tile-middle]]
     [game.settings :refer [in-tiles tile-height tile-width]]
-    [game.components.core :refer [create-comp exists? get-id get-position player-body update-counter!]]
+    [game.components.core :refer [exists? get-id get-position player-body update-counter!]]
     [game.components.body :refer [blocked-location? bodies-in-range? teleport]]
     [game.components.render :refer [animation-entity]]
     [game.components.destructible :refer [explosion-frames get-destructible-bodies get-hp set-hp-to-max]]
@@ -194,7 +194,7 @@
     (if-chance 6
       (create-rand-item position :max-lvl (:rand-item-max-lvl (get-current-map-data))))))
 
-(defn death-trigger [f] (create-comp :death-trigger {:destruct f}))
+(defn death-trigger [f] {:type :death-trigger :destruct f})
 
 (defn default-death-trigger [] (death-trigger default-monster-death))
 
@@ -219,9 +219,8 @@
 
 (defn big-body-hit-effect
   [hit-posis]
-  (create-comp :hit-effect
-    {:trigger (fn [body] (rand-posis-hit-effect body hit-posis))}))
-
+  {:type :hit-effect
+   :trigger (fn [body] (rand-posis-hit-effect body hit-posis))})
 (defn get-free-posis [body position half-w half-h]
   (remove #(blocked-location? % body)
           (map translate-to-tile-middle

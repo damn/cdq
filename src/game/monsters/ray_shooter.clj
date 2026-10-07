@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [play-sound]]
     [engine.render :refer [create-animation folder-animation red spritesheet-frames white]]
-    [game.components.core :refer [create-comp get-position is-player? player-body]]
+    [game.components.core :refer [get-position is-player? player-body]]
     [game.components.body :refer [get-bodies-at-position]]
     [game.components.render :refer [animation-entity create-line-render-effect single-animation-component]]
     [game.components.destructible :refer [deal-dmg]]
@@ -21,7 +21,7 @@
   (defmonster ray-shooter {:hp 1 :armor 25 :pxw 15 :pxh 15}
     (default-death-trigger)
     (path-to-player-movement 22)
-    (create-comp :dealt-dmg-trigger {:do teleport-and-heal-when-low-hp})
+    {:type :dealt-dmg-trigger :do teleport-and-heal-when-low-hp}
     (single-animation-component
       (folder-animation :folder "opponents/harvesterexoshield/" :duration 200 :looping true))
     (standalone-skill

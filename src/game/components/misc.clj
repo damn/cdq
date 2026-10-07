@@ -3,7 +3,7 @@
     [engine.core :refer [make-counter]]
     [utils.core :refer [increase-min-max-val]]
     [game.utils.geom :refer [entity-direction-vector get-angle-from-vector get-vector-to-mouse-coords]]
-    [game.components.core :refer [active add-to-removelist create-comp defcomponent get-half-height get-half-width player-body update-counter!]]))
+    [game.components.core :refer [active add-to-removelist defcomponent get-half-height get-half-width player-body update-counter!]]))
 
 (defcomponent delete-after-duration [duration & {:keys [duration-over]}]
   (active [delta c entity]
@@ -50,10 +50,10 @@
                           (* delta))))
 
 (defn regeneration-component [ctype ks percent-reg-per-second]
-  (create-comp ctype
-               (active [delta component entity]
-                 (swap! entity update-in ks regenerate delta (:reg-per-second component)))
-               {:reg-per-second percent-reg-per-second}))
+  (merge {:type ctype
+          :reg-per-second percent-reg-per-second}
+         (active [delta component entity]
+           (swap! entity update-in ks regenerate delta (:reg-per-second component)))))
 
 (defn hp-regen-component [percent-reg-per-second]
   (regeneration-component :hp-regen [:destructible :hp] percent-reg-per-second))

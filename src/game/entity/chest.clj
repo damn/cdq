@@ -4,7 +4,7 @@
     game.utils.lightning
     [engine.core :refer [play-sound]]
     [game.media :refer [get-itemsprite]]
-    [game.components.core :refer [add-to-removelist create-comp create-entity create-entity-no-init defentity]]
+    [game.components.core :refer [add-to-removelist create-entity create-entity-no-init defentity]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [create-body]]
     [game.components.pressable :refer [pressable-component]]
@@ -28,7 +28,7 @@
                            (create-item-body position item-name)
                            (create-rand-item position :max-lvl (:rand-item-max-lvl (get-current-map-data))))))
   (show-on-minimap color/magenta)
-  (create-comp :always-in-sight)
+  {:type :always-in-sight}
   (image-render-component (get-itemsprite [1 4])))
 
 (defn create-chest [position & {item-name :item-name}]

@@ -1,14 +1,14 @@
 (ns game.components.ingame-loop
   (:require
-    [game.components.core :refer [active add-to-removelist create-comp create-entity create-entity-no-init defentity get-entity get-id]]))
+    [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init defentity get-entity get-id]]))
 
 (def ^:private ids (atom #{}))
 
 (defentity ingame-loop-comp [& args]
-  (create-comp :ingame-loop-entity
-               {:init     #(swap! ids conj (get-id %))
-                :destruct #(swap! ids disj (get-id %))})
-  (apply create-comp args))
+  {:type :ingame-loop-entity
+   :init     #(swap! ids conj (get-id %))
+   :destruct #(swap! ids disj (get-id %))}
+  (apply merge {:type (first args)} (rest args)))
 
 (defn get-ingame-loop-entities []
   (map get-entity @ids))

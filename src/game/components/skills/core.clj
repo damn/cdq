@@ -6,7 +6,7 @@
     [engine.render :refer [is-stopped?]]
     [game.utils.tilemap :refer [get-mouse-tile-pos]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
-    [game.components.core :refer [active create-comp is-player? update-counter!]]
+    [game.components.core :refer [active is-player? update-counter!]]
     [game.components.active :refer [blocks-component switch-state]]
     [game.components.render :refer [current-animation show-gains-mana-effect]]))
 
@@ -146,23 +146,23 @@
   "rotatefn may be nil"
   [& args]
   (let [[{:keys [rotatefn choosefn mana skills cast-sound]} props] (split-key-val-and-maps args)]
-    (create-comp :skillmanager
-      (active update-component-skillmanager)
-      {:rotate-after-attack rotatefn
-       :choose-skill choosefn    ; must return not-nil if attack should be tried
-       :mana (min-max-val mana)
-       :skills (zipmap (map :type skills) skills)
-       :state :ready
-       :active-type nil
-       :cast-sound cast-sound
-       :block-effect-reset-state (fn [entity skillm]
-                                   (when (is-attacking? skillm)
-                                     (when (:attack-counter (get-active-skill skillm))
-                                       (swap! entity update-in [:skillmanager :skills (:active-type skillm) :attack-counter] reset))
-                                     (swap! entity #(-> % 
-                                          (assoc-in [:skillmanager :skills (:active-type skillm) :state] :cooldown)
-                                          (switch-state :skillmanager :ready)))))}
-      props)))
+    (merge {:type :skillmanager
+            :rotate-after-attack rotatefn
+            :choose-skill choosefn    ; must return not-nil if attack should be tried
+            :mana (min-max-val mana)
+            :skills (zipmap (map :type skills) skills)
+            :state :ready
+            :active-type nil
+            :cast-sound cast-sound
+            :block-effect-reset-state (fn [entity skillm]
+                                        (when (is-attacking? skillm)
+                                          (when (:attack-counter (get-active-skill skillm))
+                                            (swap! entity update-in [:skillmanager :skills (:active-type skillm) :attack-counter] reset))
+                                          (swap! entity #(-> %
+                                               (assoc-in [:skillmanager :skills (:active-type skillm) :state] :cooldown)
+                                               (switch-state :skillmanager :ready)))))}
+           (active update-component-skillmanager)
+           props)))
 
 (defn update-component-skill
   [delta {:keys [state] :as skill} entity]
@@ -184,16 +184,16 @@
 
 (defn standalone-skill
   [& {:keys [stype cooldown props attacktime state-blocks]}]
-  (create-comp stype
-    (active update-component-skill)
-    (if state-blocks (blocks-component state-blocks) {})    ; TODO allow nil and remove nil? @ create-comp?
-    (create-skill-props cooldown attacktime)
-    {:block-effect-reset-state (fn [entity skill]
-                                 (when (is-attacking? skill)
-                                   (when (:attack-counter skill)
-                                     (swap! entity update-in [(:type skill) :attack-counter] reset))
-                                   (swap! entity switch-state (:type skill) :cooldown)))}
-    props))
+  (merge {:type stype
+          :block-effect-reset-state (fn [entity skill]
+                                      (when (is-attacking? skill)
+                                        (when (:attack-counter skill)
+                                          (swap! entity update-in [(:type skill) :attack-counter] reset))
+                                        (swap! entity switch-state (:type skill) :cooldown)))}
+         (active update-component-skill)
+         (if state-blocks (blocks-component state-blocks) {})
+         (create-skill-props cooldown attacktime)
+         props))
 
 ; TODO player-skillmanager-skill mit : animation, mousebutton, icon
 ; (einfach das was ben�tigt WIRD und was optional ist bei allen item , skillmanager, learnable-skills)
@@ -201,7 +201,6 @@
   (let [[{:keys [stype cooldown cost attacktime]} props] (split-key-val-and-maps more)]
     ; assert has stype cooldown cost? obligatory keys
     ; assert all keys are stype cooldown cost or attacktime? all keys in obligatory or optional?
-    (create-comp stype
-      (create-skill-props cooldown attacktime)
-      {:cost cost}
-      props)))
+    (merge {:type stype :cost cost}
+           (create-skill-props cooldown attacktime)
+           props)))

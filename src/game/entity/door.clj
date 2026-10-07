@@ -3,7 +3,7 @@
     [engine.render :as color]
     [engine.core :refer [play-sound]]
     [game.maps.minimap :refer [show-on-minimap]]
-        [game.components.core :refer [add-to-removelist create-comp create-entity create-entity-no-init defentity]]
+        [game.components.core :refer [add-to-removelist create-entity create-entity-no-init defentity]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [create-body]]
     [game.components.pressable :refer [pressable-component]]
@@ -15,7 +15,7 @@
 ; ... or remove the :body component too?
 (defentity ^:private make-open-door [p image]
   (position-component p)
-  (create-comp :always-in-sight)
+  {:type :always-in-sight}
   (image-render-component image :order :air))
 
 (defentity make-door [p closed-image open-image] ; make-closed-door ?
@@ -23,10 +23,10 @@
   (create-body :solid false
                :dimensions [16 16]
                :mouseover-outline true)
-  (create-comp :always-in-sight)
+  {:type :always-in-sight}
   (show-on-minimap color/green)
   (image-render-component closed-image :order :air)
-  (create-comp :clicked {:is? false})
+  {:type :clicked :is? false}
   (pressable-component ""
                        (fn [entity]
                          (when-not (:is? (:clicked @entity))

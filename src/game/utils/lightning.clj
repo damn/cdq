@@ -9,7 +9,7 @@
     [utils.core :refer [compare-times genmap int-posi]]
     [game.session :refer [atom-session]]
     [game.settings :refer [debug-mode in-pixel]]
-    [game.components.core :refer [active create-comp create-entity create-entity-no-init defentity get-position player-body]]
+    [game.components.core :refer [active create-entity create-entity-no-init defentity get-position player-body]]
     [game.components.position :refer [position-component]]
     [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
     [game.maps.cell-grid :refer [add-cell-blocks-changed-listener inside-map?]])
@@ -226,16 +226,16 @@
 
 (defn light-component [& {:keys [intensity radius falloff color]
                           :or {color color/white}}]
-  (create-comp :light
-    {:color color
-     :i intensity
-     :radius radius
-     :falloff falloff
-     :depends [:position]
-     :dirty true
-     :init (fn [entity]
-             (add-cell-blocks-changed-listener
-               #(swap! entity assoc-in [:light :dirty] true)))}))
+  {:type :light
+   :color color
+   :i intensity
+   :radius radius
+   :falloff falloff
+   :depends [:position]
+   :dirty true
+   :init (fn [entity]
+           (add-cell-blocks-changed-listener
+             #(swap! entity assoc-in [:light :dirty] true)))})
 
 (defentity map-lightsource [position]
   (position-component position)

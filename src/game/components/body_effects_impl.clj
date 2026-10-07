@@ -4,7 +4,7 @@
     [engine.core :refer [defpreload reset update]]
     [engine.render :refer [create-animation create-image folder-animation folder-frames get-scaled-copy render-centered-animation render-readable-text rgbcolor]]
     game.settings
-    [game.components.core :refer [active add-to-removelist create-comp defcomponent get-components get-id is-player? player-body reset-component-state-after-blocked]]
+    [game.components.core :refer [active add-to-removelist defcomponent get-components get-id is-player? player-body reset-component-state-after-blocked]]
     game.components.misc
     game.components.body
     [game.components.body-effects :refer [defeffectentity get-certain-effect-entities get-sub-entities]]
@@ -48,12 +48,12 @@
   :duration milliseconds
   (let [stunned-comps (filter :updatefn (get-components body))
         stunned-comp-types (map :type stunned-comps)]
-    (create-comp :do-and-undo
-      {:init (fn [_]
-               (reset-component-state-after-blocked body)
-               (swap! body add-blocks stunned-comp-types))
-       :destruct (fn [_]
-                   (swap! body remove-blocks stunned-comp-types))}))
+    {:type :do-and-undo
+     :init (fn [_]
+             (reset-component-state-after-blocked body)
+             (swap! body add-blocks stunned-comp-types))
+     :destruct (fn [_]
+                 (swap! body remove-blocks stunned-comp-types))})
   (circle-around-body-render-comp body (rgbcolor :a 0.6) :on-ground))
 
 ;; Curses
@@ -61,9 +61,9 @@
 (defn- icon-over-body-render-comp
   "target entity is not the entity of this component (used at sub-entities that only share position)"
   [target image]
-  (create-comp :visuals
-    (render-on-map :air [g _ c render-posi]
-      (render-above-body g target render-posi image :ypuffer 2))))
+  (merge {:type :visuals}
+         (render-on-map :air [g _ c render-posi]
+           (render-above-body g target render-posi image :ypuffer 2))))
 
 (defn- remove-curses [body]
   (dorun (map add-to-removelist
@@ -79,7 +79,7 @@
           (remove-curses body)
           (swap! body mapvals mark-slowed))
   :undofn #(swap! body mapvals unmark-slowed)
-  (create-comp :is-curse)
+  {:type :is-curse}
   (icon-over-body-render-comp body (create-image "effects/bullettime.png")))
 
 (defn slowdown [body seconds]
@@ -99,7 +99,7 @@
           (remove-curses body)
           (swap! body update-in [:destructible :armor] - changed-armor))
   :undofn #(swap! body update-in [:destructible :armor] + changed-armor)
-  (create-comp :is-curse)
+  {:type :is-curse}
   (icon-over-body-render-comp body (create-image "effects/armorreduce.png")))
 
 (defn create-armor-reduce-effect [body percent seconds]
@@ -166,21 +166,21 @@
   :undofn (fn []
             (set-durations body)
             (unequip-psi-charge-bonus attackinc moveinc))
-  (create-comp :psi-charge-visuals
-    {:degree (get-psi-charge-degrees body)
-     :animation (create-animation psicharge-frames :looping true)}
-    (active [delta c entity]
-      (swap! entity update-in [(:type c)]
-                  #(-> %
-                       (update-in [:animation] update delta)
-                       (update-in [:degree] degree-add (* delta (/ 360 1000))))))
-    (render-on-map :on-ground [g _ c [x y]]
-      (let [v (vector-from-angle (:degree c))
-            [vx vy] (vec-posi
-                      (scale v charge-body-distance))
-            render-position [(+ x vx)
-                             (+ y vy)]]
-        (render-centered-animation (:animation c) render-position)))))
+  (merge {:type :psi-charge-visuals
+          :degree (get-psi-charge-degrees body)
+          :animation (create-animation psicharge-frames :looping true)}
+         (active [delta c entity]
+           (swap! entity update-in [(:type c)]
+                       #(-> %
+                            (update-in [:animation] update delta)
+                            (update-in [:degree] degree-add (* delta (/ 360 1000))))))
+         (render-on-map :on-ground [g _ c [x y]]
+           (let [v (vector-from-angle (:degree c))
+                 [vx vy] (vec-posi
+                           (scale v charge-body-distance))
+                 render-position [(+ x vx)
+                                  (+ y vy)]]
+             (render-centered-animation (:animation c) render-position)))))
 
 (defn add-psi-charge [body attackinc moveinc]
   {:pre [(is-player? body)]}

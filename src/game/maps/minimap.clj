@@ -7,7 +7,7 @@
     [utils.core :refer [int-posi mapvals]]
     engine.core
     [game.settings :refer [half-screen-h half-screen-w]]
-    [game.components.core :refer [create-comp exists? get-position]]
+    [game.components.core :refer [exists? get-position]]
     [game.maps.data :refer [get-current-map-data]]
     [game.maps.cell-grid :refer [get-bodies-from-cells get-cells]]
     [game.maps.camera :refer [get-camera-position]])
@@ -35,9 +35,9 @@
     (.flush g)))
 
 (defn show-on-minimap [color] ; TODO defcomponent?
-  (create-comp :minimap-icon
-               {:color color
-                :depends [:body]}))
+  {:type :minimap-icon
+   :color color
+   :depends [:body]})
 
 (def ^:private scale 1)
 

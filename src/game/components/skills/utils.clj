@@ -6,7 +6,7 @@
     [game.utils.raycast :refer [ray-blocked?]]
     utils.core
     [game.mouseoverbody :refer [saved-mouseover-body]]
-    [game.components.core :refer [add-to-removelist create-comp create-entity create-entity-no-init defentity exists? get-position player-body]]
+    [game.components.core :refer [add-to-removelist create-entity create-entity-no-init defentity exists? get-position player-body]]
     [game.components.render :refer [render-on-map]]
     [game.components.misc :refer [delete-after-duration-component]]
     [game.utils.geom :refer [entity-direction-vector get-vector-to-mouse-coords]]
@@ -14,10 +14,10 @@
 
 (defentity ^:private cross [position image]
   (position-component position)
-  (create-comp :always-in-sight) ; because used where not in sight f.e.
-  (create-comp :render
-   (render-on-map :top-level [g _ c render-posi]
-    (render-centered-image image render-posi)))
+  {:type :always-in-sight} ; because used where not in sight f.e.
+  (merge {:type :render}
+         (render-on-map :top-level [g _ c render-posi]
+           (render-centered-image image render-posi)))
   (delete-after-duration-component 1000))
 
 (def ^:private old-cross (atom nil))

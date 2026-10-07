@@ -4,7 +4,7 @@
     [game.components.body :refer [create-body]]
     [engine.core :refer [defpreload play-sound]]
     [engine.render :refer [create-animation folder-frames]]
-    [game.components.core :refer [create-comp create-entity create-entity-no-init defentity get-position]]
+    [game.components.core :refer [create-entity create-entity-no-init defentity get-position]]
     [game.components.position :refer [position-component]]
     [game.components.render :refer [animation-entity single-animation-component]]
     [game.components.misc :refer [delete-after-duration-component]]))
@@ -27,14 +27,14 @@
                :pxw px-size
                :pxh px-size)
   movement
-  (create-comp :projectile-collision
-               {:piercing piercing
-                :hits-side hits-side
-                :hit-effects hit-effects
-                :already-hit-bodies #{}
-                :hits-wall-effect (fn [posi]
-                                    (play-sound "bfxr_projectile_wallhit.wav")
-                                    (plop posi))})
+  {:type :projectile-collision
+   :piercing piercing
+   :hits-side hits-side
+   :hit-effects hit-effects
+   :already-hit-bodies #{}
+   :hits-wall-effect (fn [posi]
+                       (play-sound "bfxr_projectile_wallhit.wav")
+                       (plop posi))}
   (single-animation-component animation :order :air :apply-light false)
   (delete-after-duration-component (or maxtime (/ maxrange (:speed movement)))
                                    ;:duration-over (comp plop get-position)

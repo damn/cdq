@@ -6,7 +6,7 @@
     [game.mouseoverbody :refer [get-mouseover-body saved-mouseover-body]]
     [game.components.skills.core :refer [enough-mana? skillmanager-component skillmanager-skill]]
     [game.components.skills.melee :refer [player-melee-props]]
-    [game.components.core :refer [active add-to-removelist create-comp player-body]]
+    [game.components.core :refer [active add-to-removelist player-body]]
     [game.components.active :refer [add-block blocks-component remove-block]]
     game.components.body
     [game.components.destructible :refer [attackable-by-player?]]
@@ -45,10 +45,10 @@
   :target body
   :dofn   #(swap! body add-block    :movement)
   :undofn #(swap! body remove-block :movement)
-  (create-comp :notype
-    (active [_ c entity]
-      (when-not (is-leftbutton-down?)
-        (add-to-removelist entity)))))
+  (merge {:type :notype}
+         (active [_ c entity]
+           (when-not (is-leftbutton-down?)
+             (add-to-removelist entity)))))
 
 (defn try-set-active-skill-player-skillmanager [new-skill]
   (let [skillmanager (:skillmanager @player-body)]
