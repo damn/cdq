@@ -1,24 +1,18 @@
 (ns game.item.boni
   (:require
-    [utils.core :refer [find-prefixed-var inc-or-dec-max readable-number]]
+    [utils.core :refer [inc-or-dec-max readable-number]]
     [game.utils.random :refer [rand-int-between]]
     game.components.body-effects-impl
     game.components.movement
     [game.components.destructible :refer [get-player-armor]]
     [game.player.speed :refer [incr-attack-speed incr-casting-speed incr-move-speed]]))
 
-; lvl-stats mit count 3 hier �berall explizit -> mach von variable abh�ngig
+; lvl-stats mit count 3 hier überall explizit -> mach von variable abhängig
 
-(def ^:private defbonus-prefix "bonus-")
-
-(defn get-item-bonus [type]
-  (find-prefixed-var
-    :namespace 'game.item.boni
-    :prefix defbonus-prefix
-    :prefixed-type type))
+(def item-bonuses {})
 
 (defmacro ^:private defbonus [k lvl-stats f]
-  `(def ~(symbol (str defbonus-prefix (name k)))
+  `(alter-var-root #'item-bonuses assoc ~k
      {:create ~f
       :lvl-stats ~lvl-stats}))
 
@@ -177,7 +171,8 @@
 ;;
 
 (defn create-item-bonus [lvl bonus-type & {value :value}]  ; TODO assert alles richtigem lvl ?
-  (let [{:keys [create lvl-stats]} (get-item-bonus bonus-type)
+  (let [{:keys [create lvl-stats]} (or (get item-bonuses bonus-type)
+                                       (throw (Error. (str "Could not find bonus for type: " bonus-type))))
         value (or value (rand-int-between (nth lvl-stats lvl)))]
     (merge (create value)
       {:type bonus-type :lvl lvl :value value})))
@@ -192,13 +187,3 @@
 
 (defn load-equip-boni-save [data]
   (map #(create-item-bonus (:lvl %) (:type %) :value (:value %)) data))
-
-
-
-
-
-
-
-
-
-
