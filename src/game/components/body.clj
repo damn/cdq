@@ -226,19 +226,16 @@
 (defn- is-body-visible? [entity]
   (not (is-burrowed? entity)))
 
-; in sight of player-body -> ray from player-body! ; not in sight of some light-source ..
-(defn- in-sight? [entity]
-  (or
-    (when @debug-mode debug/entities-always-in-los)
-    (:always-in-sight @entity)
-    (and (is-body-visible? entity)
-         (not (ray-blocked? (get-position player-body) (get-position entity))))))
-
 ; hier entity mit position component ben�tigt - kein body
 ; Has to work with entities who have :position aber kein :body!
+; in sight of player-body -> ray from player-body! ; not in sight of some light-source ..
 (defn on-screen-and-in-sight? [entity]
   (and (entity-on-screen? entity)
-       (in-sight? entity)))
+       (or
+         (when @debug-mode debug/entities-always-in-los)
+         (:always-in-sight @entity)
+         (and (is-body-visible? entity)
+              (not (ray-blocked? (get-position player-body) (get-position entity)))))))
 
 ; Assert: not jumping over tiles, so speed is <1 tile at max-delta
 
