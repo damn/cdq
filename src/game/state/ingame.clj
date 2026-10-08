@@ -30,7 +30,7 @@
     [game.maps.cell-grid :refer [cell-blocked? get-body-ids get-cell get-cell-grid get-map-h get-map-w]]
     [game.maps.camera :refer [get-camera-position]]
     [game.maps.tiledmaps :refer [get-layer-index]]
-    [game.components.core :refer [get-components get-id get-position player-body update-removelist]]
+    [game.components.core :refer [get-position player-body update-removelist]]
     [game.components.body :refer [on-screen-and-in-sight?]]
     [game.components.render :refer [render-map-indep-order render-on-map-order rendering translate-position]]
     [game.components.destructible :refer [get-armor get-armor-reduce-info get-hp is-dead?]]
@@ -364,7 +364,7 @@
 (defn- to-be-rendered-entities-from-map []
   (mapcat (fn [entity]
             (map #(vector entity %)
-                 (filter :rendering (get-components entity))))
+                 (filter :rendering (vals @entity))))
           (filter on-screen-and-in-sight?
                   (get-entities-in-active-content-fields))))
 
@@ -381,11 +381,11 @@
                  component
                  (translate-position (get-position entity)))
         (catch Throwable t
-          (println "Render error for entity " (get-id entity) " and component type " (:type component)))))
+          (println "Render error for entity " (:id (meta entity)) " and component type " (:type component)))))
     (reset-transform g)))
 
 (defn- get-map-independent-render-comps []
-  (filter :rendering (mapcat get-components (get-ingame-loop-entities))))
+  (filter :rendering (mapcat #(vals @%) (get-ingame-loop-entities))))
 
 (defn- render-gui [g]
   (doseq [{render :renderfn :as component} (sort-by-order (get-map-independent-render-comps)
@@ -408,7 +408,7 @@
     (when debug/show-contentfield
       (render-readable-text g x (+ starty (* lineh 1)) (str "player content field:"  (get-player-content-field-idx))))
     (when mouseover-body
-      (render-readable-text g x (+ starty (* lineh 2)) (str "maus-overbody id = "  (get-id mouseover-body))))
+      (render-readable-text g x (+ starty (* lineh 2)) (str "maus-overbody id = "  (:id (meta mouseover-body)))))
     (when debug/show-float-mouse-pos
       (render-readable-text g x (+ starty (* lineh 3)) (str "maus-tile x,y = "  (print-mouse-tile-position))))
     (when debug/show-tile-mouse-pos

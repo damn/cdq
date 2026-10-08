@@ -3,7 +3,7 @@
     [game.settings :refer [tile-width]]
     [game.components.update :refer [max-delta]]
         [utils.coll :refer [safe-merge]]
-        [game.components.core :refer [active add-to-removelist get-half-height get-half-width get-id get-movement-type get-position get-side is-player?]]
+        [game.components.core :refer [active add-to-removelist get-position is-player?]]
     [game.components.body :refer [calc-touched-cells get-body-bounds get-other-solid-bodies get-to-check-tiles min-solid-pxsize update-occupied-cell update-touched-cells]]
     [game.components.position :refer [swap-position!]]
     [game.maps.cell-grid :refer [cell-blocked? get-cells]]
@@ -18,15 +18,15 @@
 (defn try-move-projectile
   "returns true if blocked, nil if moved."
   [new-posi projectile]
-  (let [id (get-id projectile)
-        half-w (get-half-width projectile)
-        half-h (get-half-height projectile)
+  (let [id (:id (meta projectile))
+        half-w (:half-width (:body @projectile))
+        half-h (:half-height (:body @projectile))
         {:keys [hit-effects hits-side already-hit-bodies piercing hits-wall-effect]} (:projectile-collision @projectile)
         touched-cells (calc-touched-cells new-posi half-w half-h)
         hit-body (first (filter #(and (not (contains? already-hit-bodies %))
-                                   (= hits-side (get-side %)))
+                                   (= hits-side (:side (:body @%))))
                              (get-other-solid-bodies new-posi half-w half-h id touched-cells)))
-        movement-type (get-movement-type projectile)
+        movement-type (:movement-type (:movement @projectile))
         ; TODO PROJECTILE COLLISION to entityPROJECTILE and out of movement logic?
         blocked (cond hit-body
                       (do
@@ -102,8 +102,8 @@
                               (- 0.5 half-size))))))
 
 (defn- update-position-solid [delta {vx 0 vy 1 :as v} xdir ydir speed body]
-  (let [threshold (calc-threshold (get-half-width body))
-        movement-type (get-movement-type body)
+  (let [threshold (calc-threshold (:half-width (:body @body)))
+        movement-type (:movement-type (:movement @body))
         noclip (:noclip (:movement @body))
         success (or
                   (try-move body v xdir ydir delta speed movement-type noclip)

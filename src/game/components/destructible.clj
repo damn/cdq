@@ -8,7 +8,7 @@
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [spritesheet-frames]]
     [game.screenshake :refer [shake-screen]]
-    [game.components.core :refer [add-to-removelist get-position get-side is-player? player-body]]
+    [game.components.core :refer [add-to-removelist get-position is-player? player-body]]
     game.components.position
     game.components.misc
     [game.components.body :refer [get-touched-bodies is-affectable?]]
@@ -102,7 +102,7 @@
 
 (defn deal-dmg-allowed? [body affected-side] ; TODO also the same @ get-destructible-bodies... -> side always only 1 ??
   (and (destructible? body)
-       (= (get-side body) affected-side)
+       (= (:side (:body @body)) affected-side)
        (is-affectable? body)))
 
 (defn attackable-by-player? [body]
@@ -112,7 +112,7 @@
 (defn get-destructible-bodies [position radius side]
   (let [affects-side (if (keyword? side) #{side} (set side))]
     (filter #(and (destructible? %)
-                  (affects-side (get-side %))
+                  (affects-side (:side (:body @%)))
                   (is-affectable? %))
       (get-touched-bodies position radius))))
 

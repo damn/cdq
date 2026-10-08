@@ -5,7 +5,7 @@
     [game.settings :refer [tile-width]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]
-    [game.components.core :refer [get-entity get-position]]
+    [game.components.core :refer [get-position id-entity-map]]
     [game.components.destructible :refer [get-destructible-bodies]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
     [game.utils.raycast :refer [ray-blocked?]]))
@@ -13,7 +13,7 @@
 
 (def opponent (atom nil))
 
-(reset! opponent (get-entity 511))
+(reset! opponent (get @id-entity-map 511))
 
 (def circle-radius 5)
 

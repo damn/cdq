@@ -5,7 +5,7 @@
     [engine.render.image :refer [create-image]]
     [utils.numbers :refer [lower-than-max?]]
     [utils.coll :refer [safe-merge]]
-    [game.components.core :refer [active exists? get-id get-position player-body update-counter!]]
+    [game.components.core :refer [active get-position id-entity-map player-body update-counter!]]
     [game.components.body :refer [bodies-in-range?]]
     [game.components.misc :refer [rotation-component]]
     [game.components.render :refer [create-line-render-effect image-render-component]]
@@ -28,7 +28,7 @@
 ; TODO not checking if ray-blocked ---> can heal through walls like other healer
 ; navigation meshes would make ray-blocked much simpler if in the same polygon/area
 (defn- healing-required-and-allowed? [entity healer radius-squared]
-  (and (exists? entity)
+  (and (get @id-entity-map (:id (meta entity)))
        (not (is-dead? entity))
        (lower-than-max? (get-hp entity))
        (bodies-in-range? entity healer radius-squared)))
@@ -45,7 +45,7 @@
     (monster-melee-component :cooldown 500
                              :attacktime 100
                              :hit-sound (create-sound "slash.wav")
-                             :target-id (get-id player-body))
+                             :target-id (:id (meta player-body)))
     (standalone-skill
       :stype :instantheal
       :cooldown 1000

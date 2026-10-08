@@ -3,7 +3,7 @@
     [engine.core :refer [create-sound defpreload]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation folder-frames]]
-    [game.components.core :refer [get-id get-position player-body]]
+    [game.components.core :refer [get-position player-body]]
     [game.components.body :refer [circle-collides?]]
     [game.components.render :refer [single-animation-component]]
     [game.components.active :refer [blocks-component]]
@@ -43,7 +43,7 @@
                        :cooldown 1000
                        :attacktime 500
                        :cost 0
-                       (monster-melee-props (get-id player-body) (melee-weapon [3 8] (create-sound "slash.wav"))))
+                       (monster-melee-props (:id (meta player-body)) (melee-weapon [3 8] (create-sound "slash.wav"))))
         monster-nova (skillmanager-skill
                        :stype :monster-nova
                        :cooldown (rand-int-between 1000 2000)

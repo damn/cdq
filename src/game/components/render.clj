@@ -10,7 +10,7 @@
     [utils.coll :refer [safe-merge]]
     [utils.numbers :refer [readable-number]]
     [game.settings :refer [in-pixel tile-height tile-width]]
-    [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init get-half-pxh get-half-pxw get-position update-counter!]]
+    [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init get-position update-counter!]]
     [game.components.misc :refer [delete-after-duration-component]]
     [game.components.position :refer [position-component]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
@@ -192,7 +192,7 @@
 
 (defn render-above-body [g body [x y] image & {ypuffer :ypuffer :or {ypuffer 0}}]
   (let [posi [x
-              (- y (get-half-pxh body) (/ (second (get-dimensions image)) 2) ypuffer)]]
+              (- y (:half-pxh (:body @body)) (/ (second (get-dimensions image)) 2) ypuffer)]]
     (render-centered-image image posi)))
 
 (defn show-string-effect [body duration color string]
@@ -206,7 +206,7 @@
           (add-to-removelist entity)))
       (rendering :below-gui [g {:keys [color counter] :as c}]
         (let [[rx ry] (screenpos-of-tilepos tilepos)]
-          (render-readable-text g rx (- ry (get-half-pxh body) (* 50 (ratio counter)))
+          (render-readable-text g rx (- ry (:half-pxh (:body @body)) (* 50 (ratio counter)))
             :shift false
             :above true
             :centerx true
@@ -224,5 +224,5 @@
   [target color order]
   (merge {:type :visuals}
          (render-on-map order [g _ c render-posi]
-           (let [radius (+ 2 (get-half-pxw target))]
+           (let [radius (+ 2 (:half-pxw (:body @target)))]
              (fill-centered-circle g radius render-posi color)))))

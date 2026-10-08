@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [create-sound play-sound]]
     [engine.render.assets :refer [folder-animation]]
-    [game.components.core :refer [get-id get-position player-body]]
+    [game.components.core :refer [get-position player-body]]
     [game.components.misc :refer [rotation-component]]
     [game.components.render :refer [single-animation-component]]
     [game.components.skills.melee :refer [monster-melee-component]]
@@ -37,4 +37,4 @@
     :cooldown 500
     :attacktime 500
     :hit-sound (create-sound "slash.wav")
-    :target-id (get-id player-body)))
+    :target-id (:id (meta player-body))))

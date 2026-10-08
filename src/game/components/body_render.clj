@@ -11,7 +11,7 @@
     [engine.core :refer [defpreload ratio]]
     [game.settings :refer [debug-mode in-pixel]]
     [game.mouseoverbody :refer [get-mouseover-body]]
-    [game.components.core :refer [get-components get-entity get-half-pxh get-half-pxw get-half-width get-position is-player?]]
+    [game.components.core :refer [get-position id-entity-map is-player?]]
     game.components.body
     [game.components.destructible :refer [destructible? get-hp]]
     [game.components.render :refer [current-animation rendering]]
@@ -23,9 +23,9 @@
 
 (defn- melee-debug-info [g p body]
   (when-let [meleecomp (get-skill body :melee)]
-    (let [target-body (get-entity (:target-body-id meleecomp))
-          start-attack-puffer (in-pixel (+ start-melee-puffer (get-half-width body)))
-          hit-puffer (in-pixel (+ melee-puffer (get-half-width body)))]
+    (let [target-body (get @id-entity-map (:target-body-id meleecomp))
+          start-attack-puffer (in-pixel (+ start-melee-puffer (:half-width (:body @body))))
+          hit-puffer (in-pixel (+ melee-puffer (:half-width (:body @body))))]
       (when target-body
         (set-color g (if (body-in-melee-range? body target-body false) color/red color/green))
         (draw-shape g (geom/circle p start-attack-puffer))
@@ -41,8 +41,8 @@
       (render-readable-text g x y :shift false (str (:state rangedcomp))))))
 
 (defn- render-body-bounds [g body [x y] color]
-  (let [h-width (get-half-pxw body)
-        h-height (get-half-pxh body)
+  (let [h-width (:half-pxw (:body @body))
+        h-height (:half-pxh (:body @body))
         x (- x h-width)
         y (- y h-height)]
     (draw-rect g x y (* 2 h-width) (* 2 h-height) color)))
@@ -72,8 +72,8 @@
 (def ^:private body-info-bars-h 3)
 
 (defn- render-body-info-bar [g body [x y] ratio color ybuffer]
-  (let [half-w (int (get-half-pxw body))
-        half-h (int (get-half-pxh body))
+  (let [half-w (int (:half-pxw (:body @body)))
+        half-h (int (:half-pxh (:body @body)))
         h body-info-bars-h]
     (render-bar g (- x half-w) (- y half-h ybuffer) (* 2 half-w) h ratio color)))
 
@@ -110,7 +110,7 @@
                    (#{:healing :monster-nova} active-type)
                    (is-attacking? skillmanager))
           (render-attacking-bar g body (get-active-skill skillmanager) render-position)))
-      (when-let [component (first (filter #(and (:show-cast-bar %) (is-attacking? %)) (get-components body)))]
+      (when-let [component (first (filter #(and (:show-cast-bar %) (is-attacking? %)) (vals @body)))]
         (render-attacking-bar g body component render-position)))))
 
 (intern 'game.components.body 'body-info-renderfn body-renderfn)
@@ -134,8 +134,8 @@
   (draw-image image (- x 2) (- y 2)))
 
 (defn- render-body-outline [g body [x y] color]
-  (let [h-width (get-half-pxw body)
-        h-height (get-half-pxh body)
+  (let [h-width (:half-pxw (:body @body))
+        h-height (:half-pxh (:body @body))
         leftx (- x h-width)
         rightx (+ x h-width)
         topy (- y h-height)

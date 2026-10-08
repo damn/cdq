@@ -1,6 +1,5 @@
 (ns game.components.update
   (:require
-    [game.components.core :refer [get-components get-id]]
     [game.components.active :refer [not-blocked? try-slowdown-delta]]
     [game.session :refer [atom-session]]))
 
@@ -19,12 +18,12 @@
 ;-> und vielleicht auch mit blocks?
 (defn update-active-components [delta entities]
   (doseq [entity entities
-          component (get-components entity)
+          component (vals @entity)
           :when (and (:updatefn component)
                      (not-blocked? component))]
     (try
       (update-component (try-slowdown-delta delta component) component entity)
       (catch Throwable t
-        (println "Entity " (get-id entity) " with component " (:type component) " fails: " t)
+        (println "Entity " (:id (meta entity)) " with component " (:type component) " fails: " t)
         (reset! running false)
         (throw t)))))

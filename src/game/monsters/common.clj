@@ -6,7 +6,7 @@
     [utils.core :refer [translate-to-tile-middle]]
     [utils.numbers :refer [get-ratio]]
     [game.settings :refer [in-tiles tile-height tile-width]]
-    [game.components.core :refer [exists? get-id get-position player-body update-counter!]]
+    [game.components.core :refer [get-position id-entity-map player-body update-counter!]]
     [game.components.body :refer [blocked-location? bodies-in-range? teleport]]
     [game.components.render :refer [animation-entity]]
     [game.components.destructible :refer [explosion-frames get-destructible-bodies get-hp set-hp-to-max]]
@@ -28,7 +28,7 @@
 (defn- move-and-rotate-to-target-control
   [projectile {:keys [target-body current-angle rotationspeed]} delta]
   (vector-from-angle
-    (if-not (exists? target-body)
+    (if-not (get @id-entity-map (:id (meta target-body)))
       current-angle
       (let [angle-to-target (get-angle-to-position (get-position projectile) (get-position target-body))
             adjusted-angle (rotate-angle-to-angle current-angle angle-to-target rotationspeed delta)]
@@ -254,7 +254,7 @@
   (monster-melee-component :cooldown 500
                            :attacktime 250
                            :hit-sound (create-sound "slash.wav")
-                           :target-id (get-id player-body)))
+                           :target-id (:id (meta player-body))))
 
 (def heal-radius 6)
 

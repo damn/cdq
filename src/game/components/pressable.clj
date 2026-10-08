@@ -7,7 +7,7 @@
     game.settings
     [game.mouseoverbody :refer [get-mouseover-body]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
-    [game.components.core :refer [active get-half-pxh get-position player-body]]
+    [game.components.core :refer [active get-position player-body]]
     [game.components.body :refer [bodies-in-range?]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]))
@@ -26,7 +26,7 @@
           (let [[body-x body-y] (screenpos-of-tilepos (get-position mouseover-body))]
             (render-readable-text g
                                   body-x
-                                  (- body-y (get-half-pxh mouseover-body) body-outline-height)
+                                  (- body-y (:half-pxh (:body @mouseover-body)) body-outline-height)
                                   :centerx true
                                   :above true
                                   (or color color/white)

@@ -4,7 +4,7 @@
     [utils.coll :refer [safe-merge]]
     [utils.numbers :refer [increase-min-max-val]]
     [game.utils.geom :refer [entity-direction-vector get-angle-from-vector get-vector-to-mouse-coords]]
-    [game.components.core :refer [active add-to-removelist get-half-height get-half-width player-body update-counter!]]))
+    [game.components.core :refer [active add-to-removelist player-body update-counter!]]))
 
 (defn delete-after-duration-component [duration & {:keys [duration-over]}]
   (safe-merge
@@ -38,7 +38,7 @@
 ; also rotation nur bei bodies mit gleicher w/h da sie dann in ihrer collision shape drinbleiben
 (defn rotation-component []
   {:type :rotation
-   :init #(assert (= (get-half-width %) (get-half-height %)))
+   :init #(assert (= (:half-width (:body @%)) (:half-height (:body @%))))
    :moved rotate-to-vector
    :angle 0})
 

@@ -3,12 +3,12 @@
     [game.components.sleeping :refer [wake-up]]
     [game.components.misc :refer [delete-after-duration-component]]
     [utils.core :refer [split-kvs-and-more]]
-    [game.components.core :refer [add-component create-entity destruct-entity get-entity get-id get-position]]
+    [game.components.core :refer [add-component create-entity destruct-entity get-position id-entity-map]]
     [game.components.position :refer [position-component swap-position!]]))
 
 (defn get-sub-entities [entity]
   (when-let [subids (:ids (:sub-entities @entity))]
-    (map get-entity subids)))
+    (map #(get @id-entity-map %) subids)))
 
 (defn sub-entities-component []
   {:type :sub-entities
@@ -40,11 +40,11 @@
                     (dofn)
                     (when-not (:sub-entities @target)
                       (add-component target (sub-entities-component)))
-                    (swap! target update-in [:sub-entities :ids] conj (get-id this)))
+                    (swap! target update-in [:sub-entities :ids] conj (:id (meta this))))
             ; first disj id before undofn is called!
             ; undofn may access get-effect-entities and this one is already not existing!
             :destruct (fn [this]
-                        (swap! target update-in [:sub-entities :ids] disj (get-id this))
+                        (swap! target update-in [:sub-entities :ids] disj (:id (meta this)))
                         (undofn))}
            (when duration
              (delete-after-duration-component duration))
@@ -66,7 +66,7 @@
 
 (comment
   (map #(:effect-type (:body-effect @%))
-       (get-sub-entities (get-entity 31))))
+       (get-sub-entities (get @id-entity-map 31))))
 
 (comment
   (with-redefs [position-component (fn [p] {:type :position :p p})

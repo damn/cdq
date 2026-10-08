@@ -6,16 +6,7 @@
     [game.session :as session]
     [game.components.active :refer [add-blocks remove-blocks]]))
 
-(def ^:private id-entity-map (atom {}))
-
-(defn get-components [entity] (vals @entity))
-
-(defn get-id [entity] (:id (meta entity)))
-
-(defn get-entity [id]
-  (get @id-entity-map id))
-
-(defn exists? [entity] (get-entity (get-id entity)))
+(def id-entity-map (atom {}))
 
 ;; Component
 ; Component = map with :type. Special keys:
@@ -36,7 +27,7 @@
 (defn add-component [entity component]
   {:pre [component (:type component)]}
   (let [ctype (:type component)
-        types (map :type (get-components entity))]
+        types (map :type (vals @entity))]
     (assert (not-any? #{ctype} types))
     (assert (dependency-ok? component types))
     (swap! entity assoc-in [ctype] component)
@@ -44,8 +35,8 @@
     entity))
 
 (defn- init! [entity]
-  (swap! id-entity-map assoc (get-id entity) entity)
-  (doseq [c (get-components entity)]
+  (swap! id-entity-map assoc (:id (meta entity)) entity)
+  (doseq [c (vals @entity)]
     (when-let [init (:init c)]
       (init entity)))
   entity)
@@ -68,7 +59,7 @@
 (def ^:private removelist (atom nil))
 
 (defn- munge-id [entity]
-  (if (number? entity) entity (get-id entity)))
+  (if (number? entity) entity (:id (meta entity))))
 
 (defn add-to-removelist [entity]  ; arglist entity-or-id
   (swap! removelist conj (munge-id entity)))
@@ -77,12 +68,12 @@
   "do not call this while update-components is active - use add-to-removelist instead.
   because calling this while update-components is running could lead to NullPointerE"
   [entity]
-  (when (and entity (exists? entity))
-    (swap! id-entity-map dissoc (get-id entity))
-    (dorun (map #(when-apply (:destruct %) entity) (get-components entity)))))
+  (when (and entity (get @id-entity-map (:id (meta entity))))
+    (swap! id-entity-map dissoc (:id (meta entity)))
+    (dorun (map #(when-apply (:destruct %) entity) (vals @entity)))))
 
 (defn update-removelist []
-  (dorun (map #(destruct-entity (get-entity %)) @removelist))
+  (dorun (map #(destruct-entity (get @id-entity-map %)) @removelist))
   (reset! removelist #{}))
 
 ;; Get-position here becaused is used a lot.
@@ -90,25 +81,10 @@
 (defn get-position [entity]
   (:value (:position @entity)))
 
-; circular dependencies body<->render
-(defn get-half-pxw [body] (:half-pxw (:body @body)))
-(defn get-half-pxh [body] (:half-pxh (:body @body)))
-(defn get-half-width [body] (:half-width (:body @body)))
-(defn get-half-height [body] (:half-height (:body @body)))
-(defn get-side [body] (:side (:body @body)))
-(defn get-cached-touched-cells [body] (:cached-touched-cells (:body @body)))
-(defn get-occupied-cell [body] (:occupied-cell (:body @body)))
-
-; circular dependency body<->cell-grid
-(defn is-solid? [body] (:solid (:body @body)))
-
-; circular dependencies movement<->body
-(defn get-movement-type [entity] (:movement-type (:movement @entity)))
-
 (declare player-body)
 
 (defn is-player? [entity]
-  (= (get-id entity) (get-id player-body)))
+  (= (:id (meta entity)) (:id (meta player-body))))
 
 (defmacro active
   "Use: (active updatefn) or (active [delta component] fbody)
@@ -129,7 +105,7 @@
   (remove-blocks entity (get-active-component-types entity)))
 
 (defn reset-component-state-after-blocked [entity]
-  (doseq [{:keys [block-effect-reset-state] :as c} (get-components entity)
+  (doseq [{:keys [block-effect-reset-state] :as c} (vals @entity)
           :when block-effect-reset-state]
     (block-effect-reset-state entity c)))
 
@@ -156,7 +132,7 @@
   (when-let [{:keys [constructor args]} (:session @entity)]
     {:constructor constructor
      :args args
-     :components (for [{:keys [type serialize] :as component} (get-components entity)
+     :components (for [{:keys [type serialize] :as component} (vals @entity)
                        :when serialize]
                    [type (select-keys component serialize)])}))
 

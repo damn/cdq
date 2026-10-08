@@ -5,7 +5,7 @@
     [engine.input :refer [is-leftbutton-down?]]
     [game.settings :refer [debug-mode]]
     [game.session :refer [atom-session]]
-    [game.components.core :refer [active exists? get-components is-player?]]
+    [game.components.core :refer [active id-entity-map is-player?]]
     [game.components.body :refer [get-bodies-at-position on-screen-and-in-sight?]]
     [game.components.destructible :refer [attackable-by-player?]]
     [game.components.render :refer [render-on-map-order]]
@@ -24,7 +24,7 @@
               hits (filter on-screen-and-in-sight?
                            (reverse
                              (sort-by-order hits
-                                            #(:order (first (filter :rendering (get-components %))))
+                                            #(:order (first (filter :rendering (vals @%))))
                                             render-on-map-order)))
               ;_ (println "hits: " (map #(map :type (get-components %)) hits))
               hits (if (> (count hits) 1) (remove is-player? hits) hits)]
@@ -40,10 +40,10 @@
 
 (defn get-mouseover-body []
   (if-let [body @saved-mouseover-body]
-    (when (exists? body) body)
+    (when (get @id-entity-map (:id (meta body))) body)
     (if @debug-mode
       (get-current-mouseover-body)
-      (when (and @cache (exists? @cache)) @cache))))
+      (when (and @cache (get @id-entity-map (:id (meta @cache)))) @cache))))
 
 ; -> der map-indep-comp :check-pressable-mouseoverbody benutzt get-mouseover-body und k�nnte vor
 ; update-saved drankommen!
@@ -51,7 +51,7 @@
 
 (defn- keep-saved? [body]
   (and (is-leftbutton-down?)
-       (exists? body)
+       (get @id-entity-map (:id (meta body)))
        (on-screen-and-in-sight? body)))
 
 (ingame-loop-comp :update-saved-and-cache

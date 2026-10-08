@@ -4,7 +4,7 @@
     [engine.render.graphics :refer [draw-shape]]
     [game.settings :refer [tile-width]]
     [utils.coll :refer [safe-merge]]
-    [game.components.core :refer [get-half-pxw get-position]]
+    [game.components.core :refer [get-position]]
     game.components.body
     [game.components.render :refer [render-on-map translate-position]]
     [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
@@ -12,7 +12,7 @@
 
 (defn- make-render-shape [body]
   (let [posi (-> body get-position translate-position)
-        hbodyw (get-half-pxw body)
+        hbodyw (:half-pxw (:body @body))
         height (* melee-puffer tile-width)]
     (in-front-of-body-shape posi hbodyw height (:angle (:rotation @body)))))
 

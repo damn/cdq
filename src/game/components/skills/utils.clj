@@ -7,7 +7,7 @@
     [game.utils.raycast :refer [ray-blocked?]]
     utils.core
     [game.mouseoverbody :refer [saved-mouseover-body]]
-    [game.components.core :refer [add-to-removelist create-entity exists? get-position player-body]]
+    [game.components.core :refer [add-to-removelist create-entity get-position id-entity-map player-body]]
     [game.components.render :refer [render-on-map]]
     [game.components.misc :refer [delete-after-duration-component]]
     [game.utils.geom :refer [entity-direction-vector get-vector-to-mouse-coords]]
@@ -25,7 +25,7 @@
 (def ^:private old-cross (atom nil))
 
 (defn- not-allowed-position-effect [position]
-  (when (and @old-cross (exists? @old-cross))
+  (when (and @old-cross (get @id-entity-map (:id (meta @old-cross))))
     (add-to-removelist @old-cross))
   (reset! old-cross
           (cross position

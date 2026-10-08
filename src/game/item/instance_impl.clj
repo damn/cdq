@@ -3,7 +3,7 @@
     [game.maps.data :refer [current-map]]
     [game.components.movement :refer [projectile-movement-component]]
     [game.components.body-effects-impl :refer [battle-drugs dmg-effect]]
-    [game.components.core :refer [get-id player-body]]
+    [game.components.core :refer [player-body]]
     [game.components.skills.melee :refer [melee-weapon]]
     [utils.numbers :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals variance-val-str]]
     [engine.core :refer [create-sound defpreload]]

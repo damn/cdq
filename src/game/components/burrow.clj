@@ -6,7 +6,7 @@
     [engine.render.assets :refer [spritesheet-frames]]
     [game.session :refer [atom-session]]
     game.components.active
-    [game.components.core :refer [active block-active-components get-position is-solid? reset-component-state-after-blocked unblock-active-components]]
+    [game.components.core :refer [active block-active-components get-position reset-component-state-after-blocked unblock-active-components]]
     [game.components.render :refer [animation-entity]]
     [game.components.body :refer [colliding-with-other-solid-bodies? get-dist-to-player get-other-bodies-in-adjacent-cells is-burrowed?]]
     game.components.position
@@ -49,7 +49,7 @@
   {:type :burrow
    :burrowed false
    :init (fn [entity]
-           (assert (is-solid? entity)) ; must be solid because burrow/unburrow switches the solid flag
+           (assert (:solid (:body @entity))) ; must be solid because burrow/unburrow switches the solid flag
            (assert (not (:is-multiple-cell (:body @entity)))) ; also single cell body because using get-occupied-cell @ get-dist-to-player and not -cell (s)
            (burrow entity :audiovisual false))
    :depends [:body]})

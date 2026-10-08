@@ -8,7 +8,7 @@
     game.utils.random
     [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
     [game.utils.geom :refer [collides?]]
-    [game.components.core :refer [get-entity get-half-width get-id get-position is-player? player-body]]
+    [game.components.core :refer [get-position id-entity-map is-player? player-body]]
     [game.components.body :refer [calc-touched-cells circle-collides? is-affectable? rect-shape]]
     [game.components.destructible :refer [attackable-by-player? calc-effective-melee-dmg deal-dmg]]
     [game.components.skills.core :refer [get-active-skill get-skill-use-mouse-button standalone-skill]]
@@ -33,18 +33,18 @@ so the entity can get in melee range.")
     (body-in-melee-range? body target true))
   ([body target attacked-already] ; TODO als :attacked-already key machen
     (let [puffer (if attacked-already melee-puffer start-melee-puffer)
-          radius (+ puffer (get-half-width body))] ; TODO geht davon aus half-w = half-h von body (ansonsten komplizierter!)
+          radius (+ puffer (:half-width (:body @body)))] ; TODO geht davon aus half-w = half-h von body (ansonsten komplizierter!)
       (circle-collides? (get-position body) radius target))))
 ; TODO vlt schneller einfach distance und den bounding radius der beiden abziehen
 ; == abstand und mit start-melee-puffer vergleichen
 
 (defn- target-in-range? [entity target-id & {:keys [attacked-already]}]
-  (body-in-melee-range? entity (get-entity target-id) attacked-already))
+  (body-in-melee-range? entity (get @id-entity-map target-id) attacked-already))
 
 (defn- check-usable-melee-player [entity {:keys [target-body-id] :as melee-comp}]
   (let [mouseover-target-id (when-let [body (get-mouseover-body)]
                               (when (attackable-by-player? body)
-                                (get-id body)))]
+                                (:id (meta body))))]
     (case (get-skill-use-mouse-button)
       :left (when mouseover-target-id
               (swap! entity assoc-in [:skillmanager :skills (:type melee-comp) :target-body-id]
@@ -86,7 +86,7 @@ so the entity can get in melee range.")
   "returns nil when target not in range or does not exist anymore"
   [entity {:keys [target-body-id] :as meleecomp}]
   (when target-body-id
-    (let [targetbody (get-entity target-body-id)]
+    (let [targetbody (get @id-entity-map target-body-id)]
       (if (and targetbody
                (is-affectable? targetbody)
                (target-in-range? entity target-body-id :attacked-already true))
@@ -99,7 +99,7 @@ so the entity can get in melee range.")
    :do-skill try-hit-target})
 
 (defn get-attackable-target-in-front [body]
-  (let [half-w-max (+ (get-half-width body) melee-puffer)
+  (let [half-w-max (+ (:half-width (:body @body)) melee-puffer)
         posi (get-position body)
         cshape (in-front-of-body-shape body melee-puffer)]
     (first (filter #(and (attackable-by-player? %)

@@ -4,7 +4,7 @@
             [game.maps.camera :refer [get-camera-position]]
             [game.settings :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
             [utils.coll :refer [safe-merge]]
-            [game.components.core :refer [get-cached-touched-cells get-entity get-half-height get-half-width get-id get-movement-type get-occupied-cell get-position is-solid? player-body]]
+            [game.components.core :refer [get-position id-entity-map player-body]]
             [game.components.render :refer [render-on-map]]
             [game.components.position :refer [swap-position!]]
             game.components.misc
@@ -13,7 +13,7 @@
             [game.utils.raycast :refer [ray-blocked?]]))
 
 (defn get-body-bounds [body]
-  [(get-position body) (get-half-width body) (get-half-height body)])
+  [(get-position body) (:half-width (:body @body)) (:half-height (:body @body))])
 
 (defn calc-touched-cells
   ([body]
@@ -40,7 +40,7 @@
 (defn- remove-from-occupied-cell [body]
   (if (:is-multiple-cell (:body @body))
     (dorun (map #(swap! % update-in [:occupied] disj body) (:occupied-cells (:body @body))))
-    (swap! (get-occupied-cell body) update-in [:occupied] disj body)))
+    (swap! (:occupied-cell (:body @body)) update-in [:occupied] disj body)))
 
 (defn update-occupied-cell [body]
   (remove-from-occupied-cell body)
@@ -56,7 +56,7 @@
 
 (defn- remove-from-touched-cells
   ([body]
-    (remove-from-touched-cells body (get-cached-touched-cells body)))
+    (remove-from-touched-cells body (:cached-touched-cells (:body @body))))
   ([body cached-cells]
     (dorun (map #(remove-body % body) cached-cells))))
 
@@ -64,7 +64,7 @@
   ([body]
     (update-touched-cells body (calc-touched-cells body)))
   ([body new-cells]
-    (let [cached-cells (get-cached-touched-cells body)]
+    (let [cached-cells (:cached-touched-cells (:body @body))]
       (when-not (= new-cells cached-cells)
         (remove-from-touched-cells body cached-cells)
         (set-touched-cells body new-cells)))))
@@ -144,7 +144,7 @@
 (defn get-bodies-at-position [position]
   (when-let [cell (get-cell position)]
     (filter #(point-in-body? position %)
-            (map get-entity (get-body-ids cell)))))
+            (map #(get @id-entity-map %) (get-body-ids cell)))))
 
 (defn bodies-in-range? [b1 b2 range-sqr]
   (geom/in-range? (get-position b1) (get-position b2) range-sqr))
@@ -160,19 +160,19 @@
   ([position half-w half-h body-id touched-cells]
     (filter
       #(and
-         (not= (get-id %) body-id)
-         (is-solid? %)
+         (not= (:id (meta %)) body-id)
+         (:solid (:body @%))
          (geom/rect-collision? [position half-w half-h] (get-body-bounds %)))
       (get-bodies-from-cells touched-cells)))
   ([position half-w half-h touched-cells]
     (get-other-solid-bodies position half-w half-h -1 touched-cells))
   ([position body touched-cells]
-    (get-other-solid-bodies position (get-half-width body) (get-half-height body) (get-id body) touched-cells)))
+    (get-other-solid-bodies position (:half-width (:body @body)) (:half-height (:body @body)) (:id (meta body)) touched-cells)))
 
 (defn colliding-with-other-solid-bodies? [body]
   (boolean
     (not-empty
-      (get-other-solid-bodies (get-position body) body (get-cached-touched-cells body)))))
+      (get-other-solid-bodies (get-position body) body (:cached-touched-cells (:body @body))))))
 
 (defn blocked-location?
   ([posi half-w half-h movement-type]
@@ -181,9 +181,9 @@
         (some #(cell-blocked? % movement-type) touched-cells)
         (seq (get-other-solid-bodies posi half-w half-h touched-cells)))))
   ([posi body movement-type]
-    (blocked-location? posi (get-half-width body) (get-half-height body) movement-type))
+    (blocked-location? posi (:half-width (:body @body)) (:half-height (:body @body)) movement-type))
   ([posi body]
-    (blocked-location? posi body (get-movement-type body))))
+    (blocked-location? posi body (:movement-type (:movement @body)))))
 
 ; TODO adjacent-cells could be nil -> :middle @cell -> NPE
 (defn find-nearby-valid-location [body posi]
@@ -245,8 +245,8 @@
 (defn- get-direction-fn [d] (if (pos? d) + -))
 
 (defn- get-to-check-tiles-big [body [x y] xdir ydir]
-  (let [half-w (get-half-width body)
-        half-h (get-half-height body)
+  (let [half-w (:half-width (:body @body))
+        half-h (:half-height (:body @body))
         x (float x),y (float y),half-w (float half-w),half-h (float half-h)]
     (set
       (concat
@@ -264,8 +264,8 @@
               [x y])))))))
 
 (defn- get-to-check-tiles-small [body [x y] xdir ydir]
-  (let [half-w (get-half-width body)
-        half-h (get-half-height body)
+  (let [half-w (:half-width (:body @body))
+        half-h (:half-height (:body @body))
         x (float x),y (float y),half-w (float half-w),half-h (float half-h)]
     (set
       (concat
@@ -293,11 +293,11 @@
     get-cell
     cached-get-adjacent-cells
     get-bodies-from-cells
-    (remove #(= (get-id %) (get-id entity)))))
+    (remove #(= (:id (meta %)) (:id (meta entity))))))
 
 ;;
 
 (defn get-dist-to-player
   "only works for single cell bodies, may return nil when outside of potential-field"
   [entity]
-  (:dist-to-player @(get-occupied-cell entity)))
+  (:dist-to-player @(:occupied-cell (:body @entity))))

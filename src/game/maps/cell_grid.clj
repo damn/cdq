@@ -3,7 +3,7 @@
     [data.grid2d :as grid]
     [utils.core :refer [diagonal-direction? int-posi translate-to-tile-middle]]
     [game.session :refer [atom-session]]
-    [game.components.core :refer [get-entity get-id is-solid?]]
+    [game.components.core :refer [id-entity-map]]
     [game.maps.data :refer [get-current-map-data]]))
 
 (defn get-cell-grid [] (:cell-grid (get-current-map-data)))
@@ -24,7 +24,7 @@
   "returns true if there is some solid body with center-tile = this cell
    or a multiple-cell-size body which touches this cell."
   [cell body]
-  (seq (filter is-solid? (disj (:occupied @cell) body))))
+  (seq (filter #(:solid (:body @%)) (disj (:occupied @cell) body))))
 
 (defn cell-blocked? [cell movement-type] ; TODO cell-blocks?
   (or
@@ -85,20 +85,20 @@
   (distinct (mapcat get-body-ids cells)))
 
 (defn get-bodies-from-cells [cells]
-  (map get-entity (get-body-ids-from-cells cells)))
+  (map #(get @id-entity-map %) (get-body-ids-from-cells cells)))
 
 ;;
 
 (defn- in-cell? [cell body]
-  (get (get-body-ids cell) (get-id body)))
+  (get (get-body-ids cell) (:id (meta body))))
 
 (defn add-body [cell body]
   {:pre [(not (in-cell? cell body))]}
-  (swap! cell update-in [:body-ids] conj (get-id body)))
+  (swap! cell update-in [:body-ids] conj (:id (meta body))))
 
 (defn remove-body [cell body]
   {:pre [(in-cell? cell body)]}
-  (swap! cell update-in [:body-ids] disj (get-id body)))
+  (swap! cell update-in [:body-ids] disj (:id (meta body))))
 
 ;;
 

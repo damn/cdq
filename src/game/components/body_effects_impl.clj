@@ -9,7 +9,7 @@
     [engine.render.assets :refer [folder-animation folder-frames]]
     [engine.render.graphics :refer [render-readable-text]]
     game.settings
-    [game.components.core :refer [active add-to-removelist get-components get-id is-player? player-body reset-component-state-after-blocked]]
+    [game.components.core :refer [active add-to-removelist is-player? player-body reset-component-state-after-blocked]]
     game.components.misc
     game.components.body
     [game.components.body-effects :refer [defeffectentity get-certain-effect-entities get-sub-entities]]
@@ -51,7 +51,7 @@
 (defeffectentity stun [body milliseconds]
   :target body
   :duration milliseconds
-  (let [stunned-comps (filter :updatefn (get-components body))
+  (let [stunned-comps (filter :updatefn (vals @body))
         stunned-comp-types (map :type stunned-comps)]
     {:type :do-and-undo
      :init (fn [_]
@@ -208,7 +208,7 @@
     (clojure.string/join "\n"(map (fn [entity]
                                     (let [counter (:counter (:delete-after-duration @entity))]
                                       [(str (:cnt counter) "/" (:maxcnt counter))
-                                       (get-id entity)]))
+                                       (:id (meta entity))]))
                                   (get-certain-effect-entities player-body :psi-charge))))
   (defn test-component []
     (safe-merge

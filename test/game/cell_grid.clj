@@ -2,7 +2,7 @@
   (:require
     [game.test.utils :refer [with-private-fns]]
     [game.maps.cell-grid :refer [add-body create-cell remove-body]]
-    [game.components.core :refer [create-entity get-id]]
+    [game.components.core :refer [create-entity]]
     [clojure.test :refer [deftest is]]))
 
 
@@ -18,7 +18,7 @@
 
       (add-body mycell myentity)
       (is
-        (= (get-id myentity) (in-cell? mycell myentity)))
+        (= (:id (meta myentity)) (in-cell? mycell myentity)))
       (is
         (not= :bla (in-cell? mycell myentity)))
 
@@ -31,4 +31,4 @@
             (add-body mycell myentity)))
 
       (is
-        (= (get-id myentity) (in-cell? mycell myentity))))))
+        (= (:id (meta myentity)) (in-cell? mycell myentity))))))
