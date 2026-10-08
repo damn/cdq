@@ -138,12 +138,9 @@
   (geom/collides? (geom/circle p radius)
                   (rect-shape body)))
 
-(defn- point-in-body? [p body]
-  (geom/point-in-rect? p (body-rect body)))
-
 (defn get-bodies-at-position [position]
   (when-let [cell (get-cell position)]
-    (filter #(point-in-body? position %)
+    (filter #(geom/point-in-rect? position (body-rect %))
             (map #(get @id-entity-map %) (get-body-ids cell)))))
 
 (defn bodies-in-range? [b1 b2 range-sqr]
@@ -203,19 +200,6 @@
                       posi))))
 ;;
 
-(defn- entity-on-screen? [entity] ; TODO posi-in-rect hier? / does not take into account body size
-  (let [[x y] (get-position entity)
-        x (float x)
-        y (float y)
-        [cx cy] (get-camera-position)
-        px (float cx)
-        py (float cy)
-        xdist (Math/abs (- x px))
-        ydist (Math/abs (- y py))]
-    (and
-      (<= xdist (inc half-display-w-in-tiles))
-      (<= ydist (inc half-display-h-in-tiles)))))
-
 (defn is-burrowed? [entity]
   (if-let [c (:burrow @entity)]
     (:burrowed c)))
@@ -230,12 +214,24 @@
 ; Has to work with entities who have :position aber kein :body!
 ; in sight of player-body -> ray from player-body! ; not in sight of some light-source ..
 (defn on-screen-and-in-sight? [entity]
-  (and (entity-on-screen? entity)
-       (or
-         (when @debug-mode debug/entities-always-in-los)
-         (:always-in-sight @entity)
-         (and (is-body-visible? entity)
-              (not (ray-blocked? (get-position player-body) (get-position entity)))))))
+  (and
+    ; TODO posi-in-rect hier? / does not take into account body size
+    (let [[x y] (get-position entity)
+          x (float x)
+          y (float y)
+          [cx cy] (get-camera-position)
+          px (float cx)
+          py (float cy)
+          xdist (Math/abs (- x px))
+          ydist (Math/abs (- y py))]
+      (and
+        (<= xdist (inc half-display-w-in-tiles))
+        (<= ydist (inc half-display-h-in-tiles))))
+    (or
+      (when @debug-mode debug/entities-always-in-los)
+      (:always-in-sight @entity)
+      (and (is-body-visible? entity)
+           (not (ray-blocked? (get-position player-body) (get-position entity)))))))
 
 ; Assert: not jumping over tiles, so speed is <1 tile at max-delta
 
