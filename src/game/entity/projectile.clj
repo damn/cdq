@@ -5,7 +5,7 @@
     [engine.core :refer [defpreload play-sound]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-frames]]
-    [game.components.core :refer [create-entity create-entity-no-init defentity get-position]]
+    [game.components.core :refer [create-entity get-position]]
     [game.components.position :refer [position-component]]
     [game.components.render :refer [animation-entity single-animation-component]]
     [game.components.misc :refer [delete-after-duration-component]]))
@@ -18,26 +18,27 @@
     :animation (create-animation projectile-hits-wall-frames)))
 
 ; separate movement and projectile-collision ?
-(defentity fire-projectile
-  [:startbody :px-size :animation :side :hits-side :movement :hit-effects
-   :opt :piercing :maxrange :maxtime]
+(defn fire-projectile
+  [& {:keys [startbody px-size animation side hits-side movement hit-effects
+             piercing maxrange maxtime]}]
   {:pre [(xor maxrange maxtime)]}
-  (position-component (get-position startbody))
-  (create-body :solid false
-               :side side
-               :pxw px-size
-               :pxh px-size)
-  movement
-  {:type :projectile-collision
-   :piercing piercing
-   :hits-side hits-side
-   :hit-effects hit-effects
-   :already-hit-bodies #{}
-   :hits-wall-effect (fn [posi]
-                       (play-sound "bfxr_projectile_wallhit.wav")
-                       (plop posi))}
-  (single-animation-component animation :order :air :apply-light false)
-  (delete-after-duration-component (or maxtime (/ maxrange (:speed movement)))
-                                   ;:duration-over (comp plop get-position)
-                                   ))
+  (create-entity
+    (position-component (get-position startbody))
+    (create-body :solid false
+                 :side side
+                 :pxw px-size
+                 :pxh px-size)
+    movement
+    {:type :projectile-collision
+     :piercing piercing
+     :hits-side hits-side
+     :hit-effects hit-effects
+     :already-hit-bodies #{}
+     :hits-wall-effect (fn [posi]
+                         (play-sound "bfxr_projectile_wallhit.wav")
+                         (plop posi))}
+    (single-animation-component animation :order :air :apply-light false)
+    (delete-after-duration-component (or maxtime (/ maxrange (:speed movement)))
+                                     ;:duration-over (comp plop get-position)
+                                     )))
 

@@ -10,7 +10,7 @@
     [utils.coll :refer [genmap]]
     [game.session :refer [atom-session]]
     [game.settings :refer [debug-mode in-pixel]]
-    [game.components.core :refer [active create-entity create-entity-no-init defentity get-position player-body]]
+    [game.components.core :refer [active create-entity get-position player-body]]
     [game.components.position :refer [position-component]]
     [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
     [game.maps.cell-grid :refer [add-cell-blocks-changed-listener inside-map?]])
@@ -238,6 +238,7 @@
            (add-cell-blocks-changed-listener
              #(swap! entity assoc-in [:light :dirty] true)))})
 
-(defentity map-lightsource [position]
-  (position-component position)
-  (light-component :intensity 1 :radius 4))
+(defn map-lightsource [position]
+  (create-entity
+    (position-component position)
+    (light-component :intensity 1 :radius 4)))

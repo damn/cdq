@@ -7,7 +7,7 @@
     [game.item.cells :refer [try-pickup-item]]
     [game.item.grids :refer [showing-player-inventory?]]
     [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
-    [game.components.core :refer [add-to-removelist create-entity create-entity-no-init defentity get-position player-body]]
+    [game.components.core :refer [add-to-removelist create-entity get-position player-body]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [blocked-location? create-body]]
     game.components.misc
@@ -68,16 +68,17 @@
 
 (def ^:private item-body-dimensions [8 8])
 
-(defentity ^:private item-entity [position item-instance]
-  (position-component position)
-  (create-body :solid false
-               :dimensions item-body-dimensions
-               :mouseover-outline true)
-  (pressable item-instance)
-  (image-render-component (apply get-scaled-copy (:image item-instance)
-                                 item-body-dimensions)
-                          :order :on-ground :apply-light false)
-  (glittering-component))
+(defn- item-entity [position item-instance]
+  (create-entity
+    (position-component position)
+    (create-body :solid false
+                 :dimensions item-body-dimensions
+                 :mouseover-outline true)
+    (pressable item-instance)
+    (image-render-component (apply get-scaled-copy (:image item-instance)
+                                   item-body-dimensions)
+                            :order :on-ground :apply-light false)
+    (glittering-component)))
 
 (defn create-item-body [position item]
   (item-entity position

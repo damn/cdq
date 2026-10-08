@@ -12,30 +12,30 @@
     game.utils.lightning
     [game.maps.minimap :refer [show-on-minimap]]
     [game.maps.mapchange :refer [queue-map-change]]
-    [game.components.core :refer [create-entity create-entity-no-init defentity]]
+    [game.components.core :refer [create-entity]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [create-body]]
     [game.components.render :refer [single-animation-component]]
     game.components.misc
     [game.components.pressable :refer [pressable-component]]))
 
-(defentity create-teleporter
-  [:position :target-map :target-posi :animation
-   :opt :do-after-use :save-game]
-  (position-component position)
-  (create-body :solid false
-               :dimensions (get-dimensions (get-frame animation))
-               :mouseover-outline true)
-  ;(light-component :intensity 0.8 :radius 2)
-  {:type :always-in-sight}
-  (show-on-minimap color/blue)
-  (pressable-component
-    (str "Teleport to " (get-pretty-name target-map))
-    (fn [this-body]
-      (play-sound "bfxr_teleport.wav")
-      (queue-map-change target-posi target-map save-game)
-      (when do-after-use (do-after-use))))
-  (single-animation-component animation :order :is-ground))
+(defn create-teleporter
+  [& {:keys [position target-map target-posi animation do-after-use save-game]}]
+  (create-entity
+    (position-component position)
+    (create-body :solid false
+                 :dimensions (get-dimensions (get-frame animation))
+                 :mouseover-outline true)
+    ;(light-component :intensity 0.8 :radius 2)
+    {:type :always-in-sight}
+    (show-on-minimap color/blue)
+    (pressable-component
+      (str "Teleport to " (get-pretty-name target-map))
+      (fn [this-body]
+        (play-sound "bfxr_teleport.wav")
+        (queue-map-change target-posi target-map save-game)
+        (when do-after-use (do-after-use))))
+    (single-animation-component animation :order :is-ground)))
 
 (defn static-teleporter
   [& {[start-map start-posi] :from

@@ -1,6 +1,6 @@
 (ns game.components.core
   (:require
-    [utils.core :as utils :refer [condition-map-and-rest get-unique-number make-fn when-apply]]
+    [utils.core :refer [get-unique-number make-fn when-apply]]
     [utils.coll :refer [distinct-seq? filter-map]]
     [engine.core :refer [update]]
     [game.session :as session]
@@ -62,73 +62,6 @@
 (defn create-entity [& components]
   (init!
     (apply create-entity-no-init components)))
-
-(defn- dont-insert [form]
-  (remove nil? [form]))
-
-(defn- keyword-argvec->map-destructure
-  "Turns [:a :b :opt :c :opt-def :d 1] into {:keys [a b c d] :or {d 1} :as argsmap}."
-  [argvec]
-  (loop [args (seq argvec)
-         mode :obligatory
-         obligatory []
-         opt []
-         opt-def []]
-    (if-not args
-      (let [or-map (apply hash-map opt-def)
-            ks (mapv (comp symbol name)
-                     (concat obligatory opt (keys or-map)))]
-        {:keys ks
-         :or (into {} (for [[k v] or-map]
-                        [(symbol (name k)) v]))
-         :as 'argsmap})
-      (let [x (first args)]
-        (case x
-          :opt (recur (next args) :opt obligatory opt opt-def)
-          :opt-def (recur (next args) :opt-def obligatory opt opt-def)
-          (case mode
-            :obligatory (recur (next args) mode (conj obligatory x) opt opt-def)
-            :opt (recur (next args) mode obligatory (conj opt x) opt-def)
-            :opt-def (recur (nnext args) mode obligatory opt (conj opt-def x (second args)))))))))
-
-(defn- name-with-attributes
-  "Optional docstring then attr-map after namesym; merge onto namesym meta."
-  [name macro-args]
-  (let [[docstring macro-args] (if (string? (first macro-args))
-                                 [(first macro-args) (next macro-args)]
-                                 [nil macro-args])
-        [attr macro-args] (if (map? (first macro-args))
-                            [(first macro-args) (next macro-args)]
-                            [{} macro-args])
-        attr (if docstring (assoc attr :doc docstring) attr)
-        attr (if (meta name) (conj (meta name) attr) attr)]
-    [(with-meta name attr) macro-args]))
-
-(defmacro defentity
-  "Namesym can be followed by docstring and metadata map.
-  Metadata can contain :save-session, if the entity should have a :session component."
-  [namesym & more]
-  (let [[namesym [argvec & more]] (name-with-attributes namesym more)
-        [condition-map components] (condition-map-and-rest more)
-        keyword-style? (some keyword? argvec)
-        params (if keyword-style?
-                 `[& ~(keyword-argvec->map-destructure argvec)]
-                 argvec)
-        defform (fn [nm create-fn]
-                  `(defn ~nm ~params
-                     ~@(dont-insert condition-map)
-                     (~create-fn
-                       ~@(dont-insert
-                           (when (-> namesym meta :save-session)
-                             `{:type :session
-                               :constructor ~(str *ns* "/" namesym "*")
-                               :args ~(if keyword-style?
-                                        `(apply concat ~'argsmap)
-                                        argvec)}))
-                       ~@components)))]
-    (list 'do
-          (defform namesym                   'create-entity)
-          (defform (symbol (str namesym \*)) 'create-entity-no-init))))
 
 ;; Removelist
 

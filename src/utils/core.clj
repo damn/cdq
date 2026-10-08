@@ -2,14 +2,6 @@
   (:require [clojure.pprint :refer (pprint)])
   (:import java.util.zip.ZipInputStream))
 
-(defn is-condition-map? [form]
-  (and (map? form) (or (:pre form) (:post form))))
-
-(defn condition-map-and-rest [args]
-  (if (is-condition-map? (first args))
-    [(first args) (rest args)]
-    [nil args]))
-
 (defn split-kvs-and-more [args]
   (let [pairs (partition-all 2 args)
         [kvpairs restpairs] (split-with #(keyword? (first %)) pairs)

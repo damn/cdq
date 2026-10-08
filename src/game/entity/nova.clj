@@ -8,7 +8,7 @@
         [engine.render.color :refer [rgbcolor]]
         [engine.render.graphics :refer [render-centered-shape]]
     [game.settings :refer [in-pixel]]
-    [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init defentity update-counter!]]
+    [game.components.core :refer [active add-to-removelist create-entity update-counter!]]
     [game.components.render :refer [render-on-map single-animation-component]]))
 
 (defn- circle-debug-comp []
@@ -22,24 +22,26 @@
                               (in-pixel
                                (:radius (:nova-effect @entity))))))))
 
-(defentity nova-effect [:position :duration :maxradius :affects-side :dmg :animation :opt :is-player-spell]
-  ;(circle-debug-comp)
-  (position-component position)
-  {:type :always-in-sight} ; because affects entities behind walls
-  (merge {:type :nova-effect
-          :radius 0
-          :already-hit #{}
-          :counter (make-counter duration)}
-         (active [delta {:keys [counter already-hit] :as c} entity]
-           (let [radius (* (ratio counter) maxradius) ; erst ratio danach update-counter, sonst beim letzten update => ratio=0
-                 hits (remove
-                        #(contains? already-hit %)
-                        (get-destructible-bodies position radius affects-side))]
-             (dorun (map #(deal-dmg dmg % :is-player-spell is-player-spell) hits))
-             (swap! entity update-in [(:type c)]
-                         #(-> %
-                              (assoc :radius radius)
-                              (update-in [:already-hit] union (set hits))))
-             (when (update-counter! entity delta c)
-               (add-to-removelist entity)))))
-  (single-animation-component animation :order :air :apply-light false))
+(defn nova-effect
+  [& {:keys [position duration maxradius affects-side dmg animation is-player-spell]}]
+  (create-entity
+    ;(circle-debug-comp)
+    (position-component position)
+    {:type :always-in-sight} ; because affects entities behind walls
+    (merge {:type :nova-effect
+            :radius 0
+            :already-hit #{}
+            :counter (make-counter duration)}
+           (active [delta {:keys [counter already-hit] :as c} entity]
+             (let [radius (* (ratio counter) maxradius) ; erst ratio danach update-counter, sonst beim letzten update => ratio=0
+                   hits (remove
+                          #(contains? already-hit %)
+                          (get-destructible-bodies position radius affects-side))]
+               (dorun (map #(deal-dmg dmg % :is-player-spell is-player-spell) hits))
+               (swap! entity update-in [(:type c)]
+                           #(-> %
+                                (assoc :radius radius)
+                                (update-in [:already-hit] union (set hits))))
+               (when (update-counter! entity delta c)
+                 (add-to-removelist entity)))))
+    (single-animation-component animation :order :air :apply-light false)))

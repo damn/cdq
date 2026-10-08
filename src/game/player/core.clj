@@ -11,7 +11,7 @@
     [engine.core :refer [play-sound]]
     engine.input
     game.maps.contentfields
-    [game.components.core :refer [add-to-removelist create-entity create-entity-no-init defentity player-body]]
+    [game.components.core :refer [add-to-removelist create-entity player-body]]
     [game.components.active :refer [switch-state]]
     [game.components.position :refer [position-component]]
     game.components.movement
@@ -68,23 +68,24 @@
     (revive-player)
     true))
 
-(defentity ^:private create-player-body [position]
-  (position-component position)
-  (create-body :solid true
-               :side :player
-               :pxw 14
-               :pxh 14
-               :mouseover-outline true)
-  (create-player-skillmanager)
-  (player-movement-component)
-  (destructible-component player-start-hp 0)
-  (rotation-component)
-  (item-boni-component)
-  (mana-regen-component 5)
-  (light-component :intensity 1 :radius 12 :falloff 5) ; (/ screen-height 2 16) = 9
-  (player-animation)
-  (show-on-minimap color/red)
-  (potential-field-component))
+(defn- create-player-body [position]
+  (create-entity
+    (position-component position)
+    (create-body :solid true
+                 :side :player
+                 :pxw 14
+                 :pxh 14
+                 :mouseover-outline true)
+    (create-player-skillmanager)
+    (player-movement-component)
+    (destructible-component player-start-hp 0)
+    (rotation-component)
+    (item-boni-component)
+    (mana-regen-component 5)
+    (light-component :intensity 1 :radius 12 :falloff 5) ; (/ screen-height 2 16) = 9
+    (player-animation)
+    (show-on-minimap color/red)
+    (potential-field-component)))
 
 (defn init-player [position]
   (intern 'game.components.core 'player-body (create-player-body position)))

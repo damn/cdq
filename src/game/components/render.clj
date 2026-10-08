@@ -10,7 +10,7 @@
     [utils.coll :refer [safe-merge]]
     [utils.numbers :refer [readable-number]]
     [game.settings :refer [in-pixel tile-height tile-width]]
-    [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init defentity get-half-pxh get-half-pxw get-position update-counter!]]
+    [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init get-half-pxh get-half-pxw get-position update-counter!]]
     [game.components.misc :refer [delete-after-duration-component]]
     [game.components.position :refer [position-component]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
@@ -124,29 +124,38 @@
 (defn single-animation-component [animation & more]
   (apply animation-component (constantly :default) {:default animation} more))
 
-(defentity animation-entity [:position :animation :opt :opt-def :order :air]
-  (position-component position)
-  {:type :always-in-sight}
-  (single-animation-component animation :order order :apply-light false)
-  (merge {:type :delete-after-stopped}
-         (active [_ _ entity]
-           (when (-> (:animation @entity) :default is-stopped?)
-             (add-to-removelist entity)))))
+(defn animation-entity
+  [& {:keys [position animation order] :or {order :air}}]
+  (create-entity
+    (position-component position)
+    {:type :always-in-sight}
+    (single-animation-component animation :order order :apply-light false)
+    (merge {:type :delete-after-stopped}
+           (active [_ _ entity]
+             (when (-> (:animation @entity) :default is-stopped?)
+               (add-to-removelist entity))))))
 
 ; FIXME animation that is passed to reload session args == initial one with cnt = 0 ....
 ; animation component 'current' ?
 
 ;;;
 
-(defentity create-circle-render-effect
-  {:save-session true}
-  [position radius color duration]
-  (position-component position)
-  (delete-after-duration-component duration)
+(defn- circle-render-effect-components [position radius color duration]
   (let [shape (geom/circle [-1 -1] (in-pixel radius))] ; TODO shape rendering component?
-    (merge {:type :visual}
-           (render-on-map [g _ c render-posi]
-                          (render-centered-shape g shape render-posi color)))))
+    [{:type :session
+      :constructor "game.components.render/create-circle-render-effect*"
+      :args [position radius color duration]}
+     (position-component position)
+     (delete-after-duration-component duration)
+     (merge {:type :visual}
+            (render-on-map [g _ c render-posi]
+                           (render-centered-shape g shape render-posi color)))]))
+
+(defn create-circle-render-effect* [position radius color duration]
+  (apply create-entity-no-init (circle-render-effect-components position radius color duration)))
+
+(defn create-circle-render-effect [position radius color duration]
+  (apply create-entity (circle-render-effect-components position radius color duration)))
 
 (defn- drawfatline [g [x y] [ex ey]]
   (doseq [x  [(dec x)  x  (inc x)]
@@ -155,26 +164,28 @@
           ey [(dec ey) ey (inc ey)]]
     (draw-line g x y ex ey)))
 
-(defentity create-lines-render-effect [healer healed-bodies duration]
-  (position-component (get-position healer))
-  (delete-after-duration-component duration)
-  {:type :always-in-sight}
-  (merge {:type :visual}
-         (render-on-map :air [g _ component start]
-                        (set-color g color/green)
-                        (doseq [end (map #(translate-position (get-position %)) healed-bodies)]
-                          (drawfatline g start end)))))
+(defn create-lines-render-effect [healer healed-bodies duration]
+  (create-entity
+    (position-component (get-position healer))
+    (delete-after-duration-component duration)
+    {:type :always-in-sight}
+    (merge {:type :visual}
+           (render-on-map :air [g _ component start]
+                          (set-color g color/green)
+                          (doseq [end (map #(translate-position (get-position %)) healed-bodies)]
+                            (drawfatline g start end))))))
 
-(defentity ^:private create-line-render-effect* [start end duration color thin]
-  (position-component start)
-  (delete-after-duration-component duration)
-  {:type :always-in-sight}
-  (merge {:type :visual}
-         (render-on-map :air [g _ component start]
-                        (set-color g color)
-                        (if thin
-                          (draw-line   g start (translate-position end))
-                          (drawfatline g start (translate-position end))))))
+(defn- create-line-render-effect* [start end duration color thin]
+  (create-entity
+    (position-component start)
+    (delete-after-duration-component duration)
+    {:type :always-in-sight}
+    (merge {:type :visual}
+           (render-on-map :air [g _ component start]
+                          (set-color g color)
+                          (if thin
+                            (draw-line   g start (translate-position end))
+                            (drawfatline g start (translate-position end)))))))
 
 (defn create-line-render-effect [start end duration & {color :color thin :thin}]
   (create-line-render-effect* start end duration color thin))
