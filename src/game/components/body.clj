@@ -11,8 +11,6 @@
             game.maps.contentfields
             [game.utils.raycast :refer [ray-blocked?]]))
 
-(defn is-multiple-cell? [body] (:is-multiple-cell (:body @body)))
-
 (defn get-body-bounds [body]
   [(get-position body) (get-half-width body) (get-half-height body)])
 
@@ -29,7 +27,7 @@
          (= cell (first touched-cells)))))
 
 (defn- set-occupied-cell [body]
-  (if (is-multiple-cell? body)
+  (if (:is-multiple-cell (:body @body))
     (let [cells (calc-touched-cells body)]
       (dorun (map #(swap! % update-in [:occupied] conj body) cells))
       (swap! body assoc-in [:body :occupied-cells] cells))
@@ -39,7 +37,7 @@
       (swap! body assoc-in [:body :occupied-cell] cell))))
 
 (defn- remove-from-occupied-cell [body]
-  (if (is-multiple-cell? body)
+  (if (:is-multiple-cell (:body @body))
     (dorun (map #(swap! % update-in [:occupied] disj body) (:occupied-cells (:body @body))))
     (swap! (get-occupied-cell body) update-in [:occupied] disj body)))
 
@@ -275,7 +273,7 @@
             [[l y] [r y]]))))))
 
 (defn get-to-check-tiles [body new-posi xdir ydir]
-  (if (is-multiple-cell? body)
+  (if (:is-multiple-cell (:body @body))
     (get-to-check-tiles-big body new-posi xdir ydir)
     (get-to-check-tiles-small body new-posi xdir ydir)))
 

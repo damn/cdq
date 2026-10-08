@@ -174,21 +174,14 @@
 (defn get-position [entity]
   (:value (:position @entity)))
 
-(defmacro defbody-key-getter [& ks]
-  (let [defs (for [k# ks]
-               `(defn ~(symbol (str "get-" (name k#))) [body#]
-                  (~k# (:body @body#))))]
-    `(do ~@defs)))
-
 ; circular dependencies body<->render
-(defbody-key-getter
-  :half-pxw
-  :half-pxh
-  :half-width
-  :half-height
-  :side
-  :cached-touched-cells
-  :occupied-cell)
+(defn get-half-pxw [body] (:half-pxw (:body @body)))
+(defn get-half-pxh [body] (:half-pxh (:body @body)))
+(defn get-half-width [body] (:half-width (:body @body)))
+(defn get-half-height [body] (:half-height (:body @body)))
+(defn get-side [body] (:side (:body @body)))
+(defn get-cached-touched-cells [body] (:cached-touched-cells (:body @body)))
+(defn get-occupied-cell [body] (:occupied-cell (:body @body)))
 
 ; circular dependency body<->cell-grid
 (defn is-solid? [body] (:solid (:body @body)))

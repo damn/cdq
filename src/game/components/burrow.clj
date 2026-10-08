@@ -8,7 +8,7 @@
     game.components.active
     [game.components.core :refer [active block-active-components defcomponent get-position is-solid? reset-component-state-after-blocked unblock-active-components]]
     [game.components.render :refer [animation-entity]]
-    [game.components.body :refer [colliding-with-other-solid-bodies? get-dist-to-player get-other-bodies-in-adjacent-cells is-burrowed? is-multiple-cell?]]
+    [game.components.body :refer [colliding-with-other-solid-bodies? get-dist-to-player get-other-bodies-in-adjacent-cells is-burrowed?]]
     game.components.position
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
@@ -49,7 +49,7 @@
   {:burrowed false
    :init (fn [entity]
            (assert (is-solid? entity)) ; must be solid because burrow/unburrow switches the solid flag
-           (assert (not (is-multiple-cell? entity))) ; also single cell body because using get-occupied-cell @ get-dist-to-player and not -cell (s)
+           (assert (not (:is-multiple-cell (:body @entity)))) ; also single cell body because using get-occupied-cell @ get-dist-to-player and not -cell (s)
            (burrow entity :audiovisual false))
    :depends [:body]})
 
