@@ -1,16 +1,15 @@
 (ns game.components.body
-  (:require
-    [game.debug-settings :as debug]
-    [game.utils.geom :as geom]
-    [game.maps.camera :refer [get-camera-position]]
-        [game.settings :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
-    [game.components.core :refer [defcomponent get-cached-touched-cells get-entity get-half-height get-half-width get-id get-movement-type get-occupied-cell get-position is-solid? player-body]]
-    [game.components.render :refer [render-on-map]]
-    [game.components.position :refer [swap-position!]]
-    game.components.misc
-    [game.maps.cell-grid :refer [add-body cached-get-adjacent-cells cell-blocked? get-bodies-from-cells get-body-ids get-cell get-cells remove-body]]
-    game.maps.contentfields
-    [game.utils.raycast :refer [ray-blocked?]]))
+  (:require [game.debug-settings :as debug]
+            [game.utils.geom :as geom]
+            [game.maps.camera :refer [get-camera-position]]
+            [game.settings :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
+            [game.components.core :refer [defcomponent get-cached-touched-cells get-entity get-half-height get-half-width get-id get-movement-type get-occupied-cell get-position is-solid? player-body]]
+            [game.components.render :refer [render-on-map]]
+            [game.components.position :refer [swap-position!]]
+            game.components.misc
+            [game.maps.cell-grid :refer [add-body cached-get-adjacent-cells cell-blocked? get-bodies-from-cells get-body-ids get-cell get-cells remove-body]]
+            game.maps.contentfields
+            [game.utils.raycast :refer [ray-blocked?]]))
 
 (defn is-multiple-cell? [body] (:is-multiple-cell (:body @body)))
 
