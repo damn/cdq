@@ -392,11 +392,6 @@
                                                           :order render-map-indep-order)]
     (render g component)))
 
-(defn- render-game [g]
-  (rendermap g)
-  (render-map-content g)
-  (render-gui g))
-
 (defn- print-mouse-tile-position []
   (let [[tile-x tile-y] (get-mouse-tile-pos)]
     (str (float tile-x) " " (float tile-y))))
@@ -424,9 +419,6 @@
     (when @debug-mode
       (render-debug g 25 (get-mouseover-body)))))
 
-(defn- limit-delta [delta]
-  (min delta game.components.update/max-delta))
-
 (defgamestate ingame ids/ingame
   (enter [container statebasedgame]
     (input/clear-key-pressed-record)
@@ -435,13 +427,15 @@
   (init [container statebasedgame])
 
   (update [container statebasedgame delta]
-    (let [delta (limit-delta delta)]
+    (let [delta (min delta game.components.update/max-delta)]
       (update-shake delta)
       (update-game delta)))
 
   (render [container statebasedgame g]
     (translate-shake-before-render g)
-    (render-game g)
+    (rendermap g)
+    (render-map-content g)
+    (render-gui g)
     (translate-shake-after-render g))
 
   (keyPressed [int-key chr]))
