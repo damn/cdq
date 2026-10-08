@@ -14,7 +14,7 @@
     [game.components.core :refer [get-position player-body]]
     [game.components.body :refer [inside-cell?]]
     [game.maps.cell-grid :refer [add-cell-blocks-changed-listener cached-get-adjacent-cells cell-blocked? get-cell get-cell-grid is-diagonal? occupied-by-other?]]
-    [game.utils.geom :refer [direction-vector get-distance get-vector-to-player]]))
+    [game.utils.geom :refer [direction-vector get-distance]]))
 
 ;; Standart Potential Field algorithm (brute force)
 
@@ -193,7 +193,7 @@
         result (find-next-cell body own-cell)]
     (cond
       (= result :near-player-cell)
-      (get-vector-to-player body)
+      (direction-vector posi (get-position player-body))
 
       (not result)
       nil

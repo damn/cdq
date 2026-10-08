@@ -2,8 +2,7 @@
   (:require
     [utils.numbers :refer [approx-numbers]]
     [engine.input :refer [get-mouse-pos]]
-    [game.settings :refer [half-screen-h half-screen-w]]
-    [game.components.core :refer [get-position player-body]])
+    [game.settings :refer [half-screen-h half-screen-w]])
   (:import
     (org.newdawn.slick.geom Shape Vector2f Rectangle Circle Transform)))
 
@@ -62,15 +61,6 @@
   (let [[sx sy] source
         [tx ty] target]
     (.normalise (Vector2f. (- tx sx) (- ty sy)))))
-
-(defn entity-direction-vector [source target]
-  (direction-vector (get-position source) (get-position target)))
-
-(defn get-vector-to-player [body]
-  (entity-direction-vector body player-body))
-
-(defn get-vector-away-from-player [body]
-  (entity-direction-vector player-body body))
 
 (defn get-angle-from-vector
   "converts theta of slick Vector2f to angle from top (top is 0 degree, moving right is 90 degree etc.)"

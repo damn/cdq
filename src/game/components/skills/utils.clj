@@ -10,7 +10,7 @@
     [game.components.core :refer [add-to-removelist create-entity get-position id-entity-map player-body]]
     [game.components.render :refer [render-on-map]]
     [game.components.misc :refer [delete-after-duration-component]]
-    [game.utils.geom :refer [entity-direction-vector get-vector-to-mouse-coords]]
+    [game.utils.geom :refer [direction-vector get-vector-to-mouse-coords]]
     [game.components.skills.core :refer [get-skill-use-mouse-pos get-skill-use-mouse-tile-pos]]))
 
 (defn- cross [position image]
@@ -44,7 +44,7 @@
 
 (defn get-player-ranged-vector []
   (if-let [mouseover-body @saved-mouseover-body]
-    (entity-direction-vector player-body mouseover-body)
+    (direction-vector (get-position player-body) (get-position mouseover-body))
     (get-vector-to-mouse-coords (get-skill-use-mouse-pos))))
 
 

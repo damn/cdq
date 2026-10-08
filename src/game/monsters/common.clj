@@ -19,7 +19,7 @@
     [game.item.instance :refer [create-item-body]]
     [game.item.instance-impl :refer [create-rand-item]]
     [game.maps.data :refer [get-current-map-data]]
-    [game.utils.geom :refer [get-angle-to-position get-touched-tiles get-vector-away-from-player get-vector-to-player normalise rotate-angle-to-angle vector-from-angle vector2f]]
+    [game.utils.geom :refer [direction-vector get-angle-to-position get-touched-tiles normalise rotate-angle-to-angle vector-from-angle vector2f]]
     [game.utils.random :refer [get-rand-weighted-item if-chance percent-chance rand-int-between]]
     [game.utils.raycast :refer [is-path-blocked?]]))
 
@@ -52,7 +52,7 @@
     (potential-field-player-following body)
 
     (bodies-in-range? body player-body (:runaway-dist-sqrd component))
-    (get-vector-away-from-player body)
+    (direction-vector (get-position player-body) (get-position body))
 
     :else
     nil))
@@ -105,7 +105,7 @@
     (when finished
       (swap! body assoc-in [:movement :running-away] false))
     (if (and running-away (not finished))
-      (get-vector-away-from-player body)
+      (direction-vector (get-position player-body) (get-position body))
       (potential-field-player-following body))))
 
 (defn lowhp-runaway-movement [speed]
@@ -153,7 +153,7 @@
                    :animation (create-animation redball-frames :looping true)
                    :side :monster
                    :hits-side :player
-                   :movement (projectile-movement-component (get-vector-to-player entity) 80)
+                   :movement (projectile-movement-component (direction-vector (get-position entity) (get-position player-body)) 80)
                    :hit-effects [(dmg-effect [3 5])
                                  (stun-collision-effect 10 150)]
                    :maxrange maxrange))}))

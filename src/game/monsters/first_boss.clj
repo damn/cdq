@@ -16,7 +16,7 @@
     [game.item.instance :refer [create-item-body]]
     [game.monster.defmonster :refer [defmonster get-monster-properties]]
     [game.monster.spawn :refer [try-spawn]]
-    [game.utils.geom :refer [get-touched-tiles get-vector-to-player]]
+    [game.utils.geom :refer [direction-vector get-touched-tiles]]
     [game.monsters.common :refer [big-body-hit-effect create-homing-movement death-trigger monsterteleport-animation]]))
 
 (defn- rand-spawn-monster [monstertype position areahw areahh]
@@ -82,7 +82,7 @@
                                         (map #(fire-boss-ranged-projectile entity speed % rotation-speed effects)
                                              [0 90 180 270])))))})
   (movement-component ; TODO komische args ...
-    {:control-update (fn [body _ _] (get-vector-to-player body))}
+    {:control-update (fn [body _ _] (direction-vector (get-position body) (get-position player-body)))}
     12
     :ground)
   (single-animation-component ; TODO gleich folder-animation auchnoch reinpacken in single-animation-component?
