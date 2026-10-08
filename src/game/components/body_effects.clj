@@ -3,15 +3,16 @@
     [game.components.sleeping :refer [wake-up]]
     [game.components.misc :refer [delete-after-duration-component]]
     [utils.core :refer [split-kvs-and-more]]
-    [game.components.core :refer [add-component create-entity defcomponent destruct-entity get-entity get-id get-position]]
+    [game.components.core :refer [add-component create-entity destruct-entity get-entity get-id get-position]]
     [game.components.position :refer [position-component swap-position!]]))
 
 (defn get-sub-entities [entity]
   (when-let [subids (:ids (:sub-entities @entity))]
     (map get-entity subids)))
 
-(defcomponent sub-entities []
-  {:depends [:position]
+(defn sub-entities-component []
+  {:type :sub-entities
+   :depends [:position]
    :ids #{}
    :destruct (fn [entity]
               (dorun (map destruct-entity (get-sub-entities entity))))

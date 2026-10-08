@@ -8,7 +8,7 @@
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [spritesheet-frames]]
     [game.screenshake :refer [shake-screen]]
-    [game.components.core :refer [add-to-removelist defcomponent get-position get-side is-player? player-body]]
+    [game.components.core :refer [add-to-removelist get-position get-side is-player? player-body]]
     game.components.position
     game.components.misc
     [game.components.body :refer [get-touched-bodies is-affectable?]]
@@ -87,9 +87,11 @@
       (/ 1 armor-point-avg-reduce))))
 
 ; TODO depends body because destructible are applied body-hit-effects?
-(defcomponent destructible [hp :armor]
+(defn destructible-component [hp armor]
   {:pre [(>= hp 0) (>= armor 0)]}
-  {:hp (min-max-val hp)
+  {:type :destructible
+   :hp (min-max-val hp)
+   :armor armor
    :init (fn [entity]
            ; hp-bar brightness corresponds to image corner brightness
            (assert (or

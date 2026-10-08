@@ -11,7 +11,7 @@
     [utils.core :refer [diagonal-direction?]]
     [utils.coll :refer [genmap positions when-seq]]
     [game.settings :refer [tile-height tile-width]]
-    [game.components.core :refer [defcomponent get-position player-body]]
+    [game.components.core :refer [get-position player-body]]
     [game.components.body :refer [inside-cell?]]
     [game.maps.cell-grid :refer [add-cell-blocks-changed-listener cached-get-adjacent-cells cell-blocked? get-cell get-cell-grid is-diagonal? occupied-by-other?]]
     [game.utils.geom :refer [direction-vector get-distance get-vector-to-player]]))
@@ -89,8 +89,9 @@
       (swap! entity assoc-in [:potential-field :marked-cells]
         (wavefront-expansion (get-cell current-tile))))))
 
-(defcomponent potential-field []
-  {:depends [:position]
+(defn potential-field-component []
+  {:type :potential-field
+   :depends [:position]
    :posi-changed try-generate
    :init (fn [entity]
            (try-generate entity)

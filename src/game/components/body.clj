@@ -3,7 +3,8 @@
             [game.utils.geom :as geom]
             [game.maps.camera :refer [get-camera-position]]
             [game.settings :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
-            [game.components.core :refer [defcomponent get-cached-touched-cells get-entity get-half-height get-half-width get-id get-movement-type get-occupied-cell get-position is-solid? player-body]]
+            [utils.coll :refer [safe-merge]]
+            [game.components.core :refer [get-cached-touched-cells get-entity get-half-height get-half-width get-id get-movement-type get-occupied-cell get-position is-solid? player-body]]
             [game.components.render :refer [render-on-map]]
             [game.components.position :refer [swap-position!]]
             game.components.misc
@@ -76,35 +77,42 @@
 
 (declare body-info-renderfn)
 
-(defcomponent body [:solid :side :half-pxw :half-pxh :mouseover-outline]
+(defn body-component [solid side half-pxw half-pxh mouseover-outline]
   {:pre [(= (class solid) java.lang.Boolean)
          (#{:monster :player :no-side} side)
          (>= half-pxw (if solid half-min-solid-pxsize 0))
          (>= half-pxh (if solid half-min-solid-pxsize 0))
          (< (/ half-pxw tile-width) 2)
          (< (/ half-pxh tile-height) 2)]} ; wg. rendering on screen (max ungetestet - ist etwas kleiner als 3 die tats�chliche maximale size)
-  (render-on-map :air body-info-renderfn)
   (let [half-w (/ half-pxw tile-width)
         half-h (/ half-pxh tile-height)]
-    {:half-width half-w
-     :half-height half-h
-     :is-multiple-cell (geom/does-not-fit-in-a-tile? half-w half-h)
-     :depends [:position]
-     :init (if-not solid
-             set-touched-cells
-             (fn [entity]
-               (set-touched-cells entity)
-               (set-occupied-cell entity)))
-     :destruct (if-not solid
-                 remove-from-touched-cells
-                 (fn [entity]
-                   (remove-from-touched-cells entity)
-                   (remove-from-occupied-cell entity)))
-     :posi-changed (if-not solid
-                     update-touched-cells
-                     (fn [entity] ; posi changed of solid entities @ update-movement manually called
-                       (update-touched-cells entity)
-                       (update-occupied-cell entity)))}))
+    (safe-merge
+      {:type :body
+       :solid solid
+       :side side
+       :half-pxw half-pxw
+       :half-pxh half-pxh
+       :mouseover-outline mouseover-outline
+       :half-width half-w
+       :half-height half-h
+       :is-multiple-cell (geom/does-not-fit-in-a-tile? half-w half-h)
+       :depends [:position]
+       :init (if-not solid
+               set-touched-cells
+               (fn [entity]
+                 (set-touched-cells entity)
+                 (set-occupied-cell entity)))
+       :destruct (if-not solid
+                   remove-from-touched-cells
+                   (fn [entity]
+                     (remove-from-touched-cells entity)
+                     (remove-from-occupied-cell entity)))
+       :posi-changed (if-not solid
+                       update-touched-cells
+                       (fn [entity] ; posi changed of solid entities @ update-movement manually called
+                         (update-touched-cells entity)
+                         (update-occupied-cell entity)))}
+      (render-on-map :air body-info-renderfn))))
 
 (defn create-body
   [& {:keys [solid pxw pxh dimensions mouseover-outline side]

@@ -7,13 +7,16 @@
     game.settings
     [game.mouseoverbody :refer [get-mouseover-body]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
-    [game.components.core :refer [active defcomponent get-half-pxh get-position player-body]]
+    [game.components.core :refer [active get-half-pxh get-position player-body]]
     [game.components.body :refer [bodies-in-range?]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]))
 
-(defcomponent pressable [:mouseover-text :pressed & {color :color}]
-  {:color color})
+(defn pressable-component [mouseover-text pressed & {color :color}]
+  {:type :pressable
+   :mouseover-text mouseover-text
+   :pressed pressed
+   :color color})
 
 (ingame-loop-comp :render-mouseover-body-text
   (rendering :below-gui  [g _]

@@ -4,7 +4,8 @@
     [engine.render.color :refer [green]]
     [engine.render.image :refer [create-image]]
     [utils.numbers :refer [lower-than-max?]]
-    [game.components.core :refer [active defcomponent exists? get-id get-position player-body update-counter!]]
+    [utils.coll :refer [safe-merge]]
+    [game.components.core :refer [active exists? get-id get-position player-body update-counter!]]
     [game.components.body :refer [bodies-in-range?]]
     [game.components.misc :refer [rotation-component]]
     [game.components.render :refer [create-line-render-effect image-render-component]]
@@ -15,12 +16,14 @@
     [game.monster.defmonster :refer [defmonster]]
     [game.monsters.common :refer [default-death-trigger get-healable-monsters-around heal-radius]]))
 
-(defcomponent :cache-nearby-monsters []
-  {:counter (make-counter 1000)}
-  (active [delta {:keys [counter] :as c} entity]
-    (when (update-counter! entity delta c)
-      (swap! entity assoc-in [(:type c) :nearby-monsters]
-                 (doall (get-healable-monsters-around entity))))))
+(defn cache-nearby-monsters-component []
+  (safe-merge
+    {:type :cache-nearby-monsters
+     :counter (make-counter 1000)}
+    (active [delta {:keys [counter] :as c} entity]
+      (when (update-counter! entity delta c)
+        (swap! entity assoc-in [(:type c) :nearby-monsters]
+                   (doall (get-healable-monsters-around entity)))))))
 
 ; TODO not checking if ray-blocked ---> can heal through walls like other healer
 ; navigation meshes would make ray-blocked much simpler if in the same polygon/area

@@ -36,10 +36,6 @@
 (defn when-apply [f & args]
   (when f (apply f args)))
 
-(defn keywords-to-hash-map [keywords] ; other name
-  (into {} (for [k keywords]
-             [k (symbol (name k))])))
-
 (def pexpand-1 (comp pprint macroexpand-1))
 (def pexpand   (comp pprint macroexpand))
 

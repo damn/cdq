@@ -1,6 +1,6 @@
 (ns game.components.body-effects-impl
   (:require
-    [utils.coll :refer [mapvals]]
+    [utils.coll :refer [mapvals safe-merge]]
     [utils.numbers :refer [approx-numbers]]
     [engine.core :refer [defpreload reset update]]
     [engine.render.color :refer [rgbcolor]]
@@ -9,7 +9,7 @@
     [engine.render.assets :refer [folder-animation folder-frames]]
     [engine.render.graphics :refer [render-readable-text]]
     game.settings
-    [game.components.core :refer [active add-to-removelist defcomponent get-components get-id is-player? player-body reset-component-state-after-blocked]]
+    [game.components.core :refer [active add-to-removelist get-components get-id is-player? player-body reset-component-state-after-blocked]]
     game.components.misc
     game.components.body
     [game.components.body-effects :refer [defeffectentity get-certain-effect-entities get-sub-entities]]
@@ -210,18 +210,22 @@
                                       [(str (:cnt counter) "/" (:maxcnt counter))
                                        (get-id entity)]))
                                   (get-certain-effect-entities player-body :psi-charge))))
-  (defcomponent test []
-    (render-on-map :air [g _ c [x y]]
-      (render-readable-text g x (- y 20)
-                            :shift false
-                            (get-durations))))
+  (defn test-component []
+    (safe-merge
+      {:type :test}
+      (render-on-map :air [g _ c [x y]]
+        (render-readable-text g x (- y 20)
+                              :shift false
+                              (get-durations)))))
 
-  (defcomponent debug-render []
-    (render-on-map :air [g entity c [x y]]
-      (render-readable-text g x (- y 20)
-                            :shift false
-                                (get-in (:delete-after-duration @entity)
-                                        [:counter :cnt]))))
+  (defn debug-render-component []
+    (safe-merge
+      {:type :debug-render}
+      (render-on-map :air [g entity c [x y]]
+        (render-readable-text g x (- y 20)
+                              :shift false
+                                  (get-in (:delete-after-duration @entity)
+                                          [:counter :cnt])))))
   )
 
 ; Hit Effects

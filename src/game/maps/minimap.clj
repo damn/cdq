@@ -37,7 +37,7 @@
       (draw-rect g x y 0 0 color))
     (.flush g)))
 
-(defn show-on-minimap [color] ; TODO defcomponent?
+(defn show-on-minimap [color] ; TODO component?
   {:type :minimap-icon
    :color color
    :depends [:body]})

@@ -7,9 +7,10 @@
     [engine.render.graphics :refer [draw-line fill-centered-circle render-centered-shape render-readable-text]]
     [game.utils.geom :as geom]
     [utils.core :refer [define-order int-posi make-fn order-contains?]]
+    [utils.coll :refer [safe-merge]]
     [utils.numbers :refer [readable-number]]
     [game.settings :refer [in-pixel tile-height tile-width]]
-    [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init defcomponent defentity get-half-pxh get-half-pxw get-position update-counter!]]
+    [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init defentity get-half-pxh get-half-pxw get-position update-counter!]]
     [game.components.misc :refer [delete-after-duration-component]]
     [game.components.position :refer [position-component]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
@@ -58,10 +59,12 @@
 (defn translate-position [[x y]]
   [(* x tile-width),(* y tile-height)])
 
-(defcomponent rect-render [pxw pxh]
-  {:shape (geom/rectangle -1 -1 pxw pxh)}
-  (render-on-map [g _ c render-posi]
-    (render-centered-shape g (:shape c) render-posi)))
+(defn rect-render-component [pxw pxh]
+  (safe-merge
+    {:type :rect-render
+     :shape (geom/rectangle -1 -1 pxw pxh)}
+    (render-on-map [g _ c render-posi]
+      (render-centered-shape g (:shape c) render-posi))))
 
 (defn- render-rotated-lighted-image [g entity render-posi image apply-light]
   (when apply-light
@@ -72,12 +75,14 @@
     (render-rotated-centered-image g image angle render-posi)
     (render-centered-image image render-posi)))
 
-(defcomponent image-render [image & {:keys [order apply-light]
-                                     :or {order :default apply-light true}}]
-  (render-on-map order [g entity c render-posi]
-    (render-rotated-lighted-image g entity render-posi (:image c) apply-light))
-  {:depends [:position]
-   :image image})
+(defn image-render-component [image & {:keys [order apply-light]
+                                       :or {order :default apply-light true}}]
+  (safe-merge
+    {:type :image-render
+     :depends [:position]
+     :image image}
+    (render-on-map order [g entity c render-posi]
+      (render-rotated-lighted-image g entity render-posi (:image c) apply-light))))
 
 (defn- update-animation
   "control is a function with (fn [entity]) which must return the new animation key and can also update some stuff"
@@ -104,14 +109,17 @@
   (render-rotated-lighted-image g entity render-posi (get-frame (current-animation entity)) apply-light))
 
 ; types-animations is a map of keyword to animation and control returns a keyword which animation to play next.
-(defcomponent animation [:control types-animations & {:keys [order apply-light]
-                                                      :or {order :default apply-light true}}]
-  (render-on-map order render-animation)
-  (active update-animation)
-  {:depends [:position]
-   :akey nil
-   :apply-light apply-light}
-  types-animations)
+(defn animation-component [control types-animations & {:keys [order apply-light]
+                                                       :or {order :default apply-light true}}]
+  (safe-merge
+    {:type :animation
+     :control control
+     :depends [:position]
+     :akey nil
+     :apply-light apply-light}
+    (render-on-map order render-animation)
+    (active update-animation)
+    types-animations))
 
 (defn single-animation-component [animation & more]
   (apply animation-component (constantly :default) {:default animation} more))

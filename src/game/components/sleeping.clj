@@ -5,7 +5,7 @@
     [utils.counter :refer [create-counter update-counter]]
     [game.session :refer [atom-session]]
     [game.settings :refer [in-pixel screen-height screen-width]]
-    [game.components.core :refer [active block-active-components defcomponent unblock-active-components]]
+    [game.components.core :refer [active block-active-components unblock-active-components]]
     game.components.active
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
@@ -33,8 +33,9 @@
 
 (defn- is-sleeping? [entity] (:sleeping (:sleeping @entity)))
 
-(defcomponent sleeping []
-  {:depends [:body]
+(defn sleeping-component []
+  {:type :sleeping
+   :depends [:body]
    :sleeping true
    :init #(swap! % block-active-components)})
 

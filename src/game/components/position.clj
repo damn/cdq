@@ -1,11 +1,12 @@
 (ns game.components.position
   (:require
     [utils.core :refer [int-posi when-apply]]
-    [game.components.core :refer [defcomponent get-components get-position]]
+    [game.components.core :refer [get-components get-position]]
     [game.maps.contentfields :refer [put-entity-in-correct-content-field remove-entity-from-content-field]]))
 
-(defcomponent :position [p]
-  {:value p
+(defn position-component [p]
+  {:type :position
+   :value p
    :serialize [:value]
    :init put-entity-in-correct-content-field
    :destruct remove-entity-from-content-field

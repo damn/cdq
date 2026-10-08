@@ -1,7 +1,7 @@
 (ns game.components.core
   (:require
-    [utils.core :as utils :refer [condition-map-and-rest get-unique-number is-condition-map? keywords-to-hash-map make-fn when-apply]]
-    [utils.coll :refer [distinct-seq? filter-map safe-merge]]
+    [utils.core :as utils :refer [condition-map-and-rest get-unique-number make-fn when-apply]]
+    [utils.coll :refer [distinct-seq? filter-map]]
     [engine.core :refer [update]]
     [game.session :as session]
     [game.components.active :refer [add-blocks remove-blocks]]))
@@ -21,23 +21,6 @@
 ; Component = map with :type. Special keys:
 ; :depends [:a :b :c] -> entity checks at creation if those components exist.
 ; :init, :destruct -> (fn [entity]) at creation / removal.
-
-(defmacro defcomponent
-  "the first element of body may be {:pre :post}; the rest should be maps merged into the component-map.
-  creates a factory function with name: ctype-component.
-  Any number of arguments in arg-vector can be keywords, and for every keyword a map is conjoined to the body with those keywords as keys."
-  [ctype arg-vector & body]
-  (let [keywords-map (keywords-to-hash-map (filter keyword? arg-vector))
-        ; transform keywords to symbols for a normal argument vector
-        ; note some forms in the arg vector may be neither symbols nor keywords for example map destructuring so
-        ; we have to check if keyword?
-        arg-vector (mapv #(if (keyword? %) (symbol (name %)) %) arg-vector)
-        first-element (first body)
-        body (if (is-condition-map? first-element)
-               `(~first-element (safe-merge {:type ~(keyword ctype)} ~@(conj (rest body) keywords-map)))
-               `((safe-merge {:type ~(keyword ctype)} ~@(conj body keywords-map))))]
-    `(defn ~(symbol (str (name ctype) "-component")) ~arg-vector
-       ~@body)))
 
 ;; Entity
 

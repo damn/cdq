@@ -3,7 +3,8 @@
     [engine.render.color :as color :refer [set-color]]
     [engine.render.graphics :refer [draw-shape]]
     [game.settings :refer [tile-width]]
-    [game.components.core :refer [defcomponent get-half-pxw get-position]]
+    [utils.coll :refer [safe-merge]]
+    [game.components.core :refer [get-half-pxw get-position]]
     game.components.body
     [game.components.render :refer [render-on-map translate-position]]
     [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
@@ -19,9 +20,11 @@
   (set-color g (if (get-attackable-target-in-front body) color/red color/green))
   (draw-shape g (make-render-shape body)))
 
-(defcomponent target-in-front-rect-render []
-  (render-on-map :air [g entity c render-posi]
-                 (render-it g entity c)))
+(defn target-in-front-rect-render-component []
+  (safe-merge
+    {:type :target-in-front-rect-render}
+    (render-on-map :air [g entity c render-posi]
+                   (render-it g entity c))))
 
 
 

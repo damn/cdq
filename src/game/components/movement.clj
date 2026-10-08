@@ -2,7 +2,8 @@
   (:require
     [game.settings :refer [tile-width]]
     [game.components.update :refer [max-delta]]
-        [game.components.core :refer [active add-to-removelist defcomponent get-half-height get-half-width get-id get-movement-type get-position get-side is-player?]]
+        [utils.coll :refer [safe-merge]]
+        [game.components.core :refer [active add-to-removelist get-half-height get-half-width get-id get-movement-type get-position get-side is-player?]]
     [game.components.body :refer [calc-touched-cells get-body-bounds get-other-solid-bodies get-to-check-tiles min-solid-pxsize update-occupied-cell update-touched-cells]]
     [game.components.position :refer [swap-position!]]
     [game.maps.cell-grid :refer [cell-blocked? get-cells]]
@@ -142,19 +143,21 @@
 (defn in-tiles-per-ms [px-per-s] (/ px-per-s 1000 tile-width))
 
 ; speed is pixels/s
-(defcomponent movement [control speed :movement-type]
+(defn movement-component [control speed movement-type]
   {:pre [(#{:air :ground} movement-type)
          (>= speed 1) ; just to check that its now in px/s
          (<= speed max-speed)]}
-  (active update-component-movement)
-  control
-  {
+  (safe-merge
+    {:type :movement
+     :movement-type movement-type
 ;   :init (fn [entity]
 ;           ;  (not asserted becuz burrowed are burrowing @init... so not solid anymore)
 ;           (assert (or (:projectile-collision @entity) ;update-position-projectile
 ;                       (is-solid? entity)))) ;update-position-solid
-   :play-move-animation false
-   :speed (in-tiles-per-ms speed)})
+     :play-move-animation false
+     :speed (in-tiles-per-ms speed)}
+    (active update-component-movement)
+    control))
 
 (defn projectile-movement-component [move-vector speed]
   (movement-component

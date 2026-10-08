@@ -1,18 +1,21 @@
 (ns game.components.misc
   (:require
     [engine.core :refer [make-counter]]
+    [utils.coll :refer [safe-merge]]
     [utils.numbers :refer [increase-min-max-val]]
     [game.utils.geom :refer [entity-direction-vector get-angle-from-vector get-vector-to-mouse-coords]]
-    [game.components.core :refer [active add-to-removelist defcomponent get-half-height get-half-width player-body update-counter!]]))
+    [game.components.core :refer [active add-to-removelist get-half-height get-half-width player-body update-counter!]]))
 
-(defcomponent delete-after-duration [duration & {:keys [duration-over]}]
-  (active [delta c entity]
-    (when (update-counter! entity delta c)
-      (add-to-removelist entity)
-      (when duration-over
-        (duration-over entity))))
-  {:counter (make-counter duration)
-   :serialize [:counter]})
+(defn delete-after-duration-component [duration & {:keys [duration-over]}]
+  (safe-merge
+    {:type :delete-after-duration
+     :counter (make-counter duration)
+     :serialize [:counter]}
+    (active [delta c entity]
+      (when (update-counter! entity delta c)
+        (add-to-removelist entity)
+        (when duration-over
+          (duration-over entity))))))
 
 ;;
 
@@ -33,8 +36,9 @@
 
 ; bodies mit verschiedener w/h lieber nicht rotieren da die body-collision shape nicht mit rotiert.
 ; also rotation nur bei bodies mit gleicher w/h da sie dann in ihrer collision shape drinbleiben
-(defcomponent rotation []
-  {:init #(assert (= (get-half-width %) (get-half-height %)))
+(defn rotation-component []
+  {:type :rotation
+   :init #(assert (= (get-half-width %) (get-half-height %)))
    :moved rotate-to-vector
    :angle 0})
 
