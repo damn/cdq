@@ -5,7 +5,7 @@
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation folder-frames]]
     [utils.core :refer [translate-to-tile-middle]]
-    [game.components.core :refer [add-to-removelist get-position player-body]]
+    [game.components.core :refer [add-to-removelist player-body]]
     [game.components.body :refer [blocked-location?]]
     [game.components.render :refer [animation-entity create-line-render-effect single-animation-component]]
     [game.components.body-effects-impl :refer [dmg-effect stun-collision-effect]]
@@ -50,11 +50,11 @@
                    (play-sound "bfxr_bossdeath.wav")
                    (animation-entity
                      :animation (create-animation boss-explosion)
-                     :position (get-position body))
-                   (create-item-body (get-position body) "The Golden Banana")
+                     :position (:value (:position @body)))
+                   (create-item-body (:value (:position @body)) "The Golden Banana")
 
                    ; no lvl after this => no need to spawn an item!
-                   ; (create-rand-item (get-position body) :max-lvl (:rand-item-max-lvl (get-current-map-data)))
+                   ; (create-rand-item (:value (:position @body)) :max-lvl (:rand-item-max-lvl (get-current-map-data)))
 
                    (dorun (map add-to-removelist (:projectiles (:boss-ranged @body))))))
   (standalone-skill
@@ -64,7 +64,7 @@
     :props {:show-cast-bar true
             :shoot-sound "bfxr_monstercast.wav"
             :do-skill (fn [entity component]
-                        (rand-spawn-monster :little-bot (get-position entity) 6 3))})
+                        (rand-spawn-monster :little-bot (:value (:position @entity)) 6 3))})
   (standalone-skill
     :stype :boss-ranged
     :cooldown 3200
@@ -82,7 +82,7 @@
                                         (map #(fire-boss-ranged-projectile entity speed % rotation-speed effects)
                                              [0 90 180 270])))))})
   (movement-component ; TODO komische args ...
-    {:control-update (fn [body _ _] (direction-vector (get-position body) (get-position player-body)))}
+    {:control-update (fn [body _ _] (direction-vector (:value (:position @body)) (:value (:position @player-body))))}
     12
     :ground)
   (single-animation-component ; TODO gleich folder-animation auchnoch reinpacken in single-animation-component?

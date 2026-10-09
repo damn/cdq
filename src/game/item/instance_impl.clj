@@ -315,7 +315,7 @@
 
   (pickup-cheat-items)
 
-  (create-rand-item (get-position player-body) :max-lvl 3)
+  (create-rand-item (:value (:position @player-body)) :max-lvl 3)
 
   (try-pickup-item
     (create-item-instance "Gun"

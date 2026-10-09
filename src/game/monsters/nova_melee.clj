@@ -3,7 +3,7 @@
     [engine.core :refer [create-sound defpreload]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation folder-frames]]
-    [game.components.core :refer [get-position player-body]]
+    [game.components.core :refer [player-body]]
     [game.components.body :refer [circle-collides?]]
     [game.components.render :refer [single-animation-component]]
     [game.components.active :refer [blocks-component]]
@@ -19,7 +19,7 @@
 (def ^:private monster-nova-radius 4)
 
 (defn- player-in-nova-range? [monster]
-  (circle-collides? (get-position monster) monster-nova-radius player-body))
+  (circle-collides? (:value (:position @monster)) monster-nova-radius player-body))
 
 (defn- choose-active-nova-melee [entity skillmanager delta]
   (let [skills (:skills skillmanager)
@@ -30,7 +30,7 @@
         (enough-mana? nova skillmanager)
         (is-ready? nova)
         (player-in-nova-range? entity)
-        (not (ray-blocked? (get-position entity) (get-position player-body)))
+        (not (ray-blocked? (:value (:position @entity)) (:value (:position @player-body))))
         (zero? (rand-int 240)))
       :monster-nova
       :melee)))
@@ -52,7 +52,7 @@
                        {:shoot-sound "bfxr_monstercast.wav"
                         :do-skill (fn [entity component]
                                     (nova-effect
-                                      :position (get-position entity)
+                                      :position (:value (:position @entity))
                                       :duration 400
                                       :maxradius monster-nova-radius
                                       :affects-side :player

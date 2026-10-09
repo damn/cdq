@@ -3,7 +3,7 @@
     [game.settings :refer [tile-width]]
     [game.components.update :refer [max-delta]]
         [utils.coll :refer [safe-merge]]
-        [game.components.core :refer [active add-to-removelist get-position is-player?]]
+        [game.components.core :refer [active add-to-removelist is-player?]]
     [game.components.body :refer [calc-touched-cells get-body-bounds get-other-solid-bodies get-to-check-tiles min-solid-pxsize update-occupied-cell update-touched-cells]]
     [game.components.position :refer [swap-position!]]
     [game.maps.cell-grid :refer [cell-blocked? get-cells]]
@@ -42,7 +42,7 @@
 
 (defn- update-position-projectile
   [delta v x-direction y-direction speed body]
-  (let [new-position (create-new-position delta v (get-position body) speed)
+  (let [new-position (create-new-position delta v (:value (:position @body)) speed)
         blocked (try-move-projectile new-position body)]
     (when-not blocked
       (swap-position! body new-position))
@@ -79,7 +79,7 @@
 ; -> um vergleichen zu können ... also erst 3x schauen ob gleiche ergebnisse ...
 ; oder erstmal so lassen .... und auf wichtigeres konzentrieren
 (defn- try-move [body v xdir ydir delta speed movement-type noclip]
-  (let [new-posi (create-new-position delta v (get-position body) speed)
+  (let [new-posi (create-new-position delta v (:value (:position @body)) speed)
         to-check-tiles (get-to-check-tiles body new-posi xdir ydir) ; rename new-tiles, new-cells ?
         to-check-cells (get-cells to-check-tiles)
         blocked (blocked-for-body? body movement-type noclip new-posi to-check-cells)]
@@ -164,5 +164,4 @@
     {:control-update (constantly move-vector)}
     speed
     :air))
-
 

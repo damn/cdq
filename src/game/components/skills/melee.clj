@@ -8,7 +8,7 @@
     game.utils.random
     [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
     [game.utils.geom :refer [collides?]]
-    [game.components.core :refer [get-position id-entity-map is-player? player-body]]
+    [game.components.core :refer [id-entity-map is-player? player-body]]
     [game.components.body :refer [calc-touched-cells circle-collides? is-affectable? rect-shape]]
     [game.components.destructible :refer [attackable-by-player? calc-effective-melee-dmg deal-dmg]]
     [game.components.skills.core :refer [get-active-skill get-skill-use-mouse-button standalone-skill]]
@@ -34,7 +34,7 @@ so the entity can get in melee range.")
   ([body target attacked-already] ; TODO als :attacked-already key machen
     (let [puffer (if attacked-already melee-puffer start-melee-puffer)
           radius (+ puffer (:half-width (:body @body)))] ; TODO geht davon aus half-w = half-h von body (ansonsten komplizierter!)
-      (circle-collides? (get-position body) radius target))))
+      (circle-collides? (:value (:position @body)) radius target))))
 ; TODO vlt schneller einfach distance und den bounding radius der beiden abziehen
 ; == abstand und mit start-melee-puffer vergleichen
 
@@ -100,7 +100,7 @@ so the entity can get in melee range.")
 
 (defn get-attackable-target-in-front [body]
   (let [half-w-max (+ (:half-width (:body @body)) melee-puffer)
-        posi (get-position body)
+        posi (:value (:position @body))
         cshape (in-front-of-body-shape body melee-puffer)]
     (first (filter #(and (attackable-by-player? %)
                       (collides? cshape (rect-shape %)))

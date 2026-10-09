@@ -11,7 +11,7 @@
     [utils.core :refer [diagonal-direction?]]
     [utils.coll :refer [genmap positions when-seq]]
     [game.settings :refer [tile-height tile-width]]
-    [game.components.core :refer [get-position player-body]]
+    [game.components.core :refer [player-body]]
     [game.components.body :refer [inside-cell?]]
     [game.maps.cell-grid :refer [add-cell-blocks-changed-listener cached-get-adjacent-cells cell-blocked? get-cell get-cell-grid is-diagonal? occupied-by-other?]]
     [game.utils.geom :refer [direction-vector get-distance]]))
@@ -188,12 +188,12 @@
             own-cell))))))
 
 (defn potential-field-player-following [body]
-  (let [posi (get-position body)
+  (let [posi (:value (:position @body))
         own-cell (get-cell posi)
         result (find-next-cell body own-cell)]
     (cond
       (= result :near-player-cell)
-      (direction-vector posi (get-position player-body))
+      (direction-vector posi (:value (:position @player-body)))
 
       (not result)
       nil
@@ -232,7 +232,7 @@
 
 (defn calculate-mouseover-body-colors [mouseoverbody]
   (when-let [body mouseoverbody]
-    (let [occupied-cell (get-cell (get-position body))
+    (let [occupied-cell (get-cell (:value (:position @body)))
           own-dist (get-dist occupied-cell)
           adj-cells (cached-get-adjacent-cells occupied-cell)
           potential-cells (filter get-dist

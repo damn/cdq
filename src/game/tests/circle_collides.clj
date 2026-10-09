@@ -5,7 +5,7 @@
     [game.settings :refer [tile-width]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]
-    [game.components.core :refer [get-position id-entity-map]]
+    [game.components.core :refer [id-entity-map]]
     [game.components.destructible :refer [get-destructible-bodies]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
     [game.utils.raycast :refer [ray-blocked?]]))
@@ -20,13 +20,13 @@
 (ingame-loop-comp :circle-collides
   (rendering :below-gui [g component]
     (when-let [entity @opponent]
-      (let [posi (get-position entity)
+      (let [posi (:value (:position @entity))
             renderposi (screenpos-of-tilepos posi)
             pxradius (* circle-radius tile-width)
             circle (geom/circle renderposi pxradius)]
         (render-centered-shape g circle renderposi
           (if
-            (some #(not (ray-blocked? posi (get-position %)))
+            (some #(not (ray-blocked? posi (:value (:position @%))))
               (get-destructible-bodies posi circle-radius :monster))
             color/red color/green))))))
 ;(remove-entity :circle-collides)

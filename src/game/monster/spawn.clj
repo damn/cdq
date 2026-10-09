@@ -6,7 +6,7 @@
     [utils.numbers :refer [inc-or-dec-max]]
     [engine.render.assets :refer [folder-animation]]
     [game.monster.defmonster :refer [get-monster-properties]]
-    [game.components.core :refer [add-component get-position]]
+    [game.components.core :refer [add-component]]
     [game.components.body :refer [blocked-location?]]
     [game.components.render :refer [single-animation-component]]
     [game.maps.data :refer [get-current-map-data]]
@@ -27,8 +27,6 @@
   (do-in-game-loop
       (try-spawn [12.5 5.5] :first-boss))
   )
-
-
 
 (def test-group {:test-hunter 1})
 
@@ -99,7 +97,7 @@
                    "Big-Mana-Potion" 3
                    "Big-Heal-Potion" 3}]
   (defn- champion-drop [body]
-    (let [p (get-position body)]
+    (let [p (:value (:position @body))]
       (doseq [itemname (get-rand-weighted-items (rand-int-between 2 4) dropweights)]
         (create-item-body p itemname)))))
 
@@ -123,6 +121,4 @@
                      ; deactivated because problem with 'current-animation' in game.render and because
                      ; sleeping monsters with blocks fails because new components added dont have blocks
                      )))))
-
-
 

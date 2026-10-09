@@ -10,7 +10,7 @@
     [utils.coll :refer [safe-merge]]
     [utils.numbers :refer [readable-number]]
     [game.settings :refer [in-pixel tile-height tile-width]]
-    [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init get-position update-counter!]]
+    [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init update-counter!]]
     [game.components.misc :refer [delete-after-duration-component]]
     [game.components.position :refer [position-component]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
@@ -69,8 +69,8 @@
 (defn- render-rotated-lighted-image [g entity render-posi image apply-light]
   (when apply-light
     (if (:always-in-sight @entity)
-      (set-cached-brightness image (int-posi (get-position entity))) ; brightness like map tiles explored/unexplored
-      (set-brightness image (get-position entity))))
+      (set-cached-brightness image (int-posi (:value (:position @entity)))) ; brightness like map tiles explored/unexplored
+      (set-brightness image (:value (:position @entity)))))
   (if-let [angle (:angle (:rotation @entity))]
     (render-rotated-centered-image g image angle render-posi)
     (render-centered-image image render-posi)))
@@ -166,13 +166,13 @@
 
 (defn create-lines-render-effect [healer healed-bodies duration]
   (create-entity
-    (position-component (get-position healer))
+    (position-component (:value (:position @healer)))
     (delete-after-duration-component duration)
     {:type :always-in-sight}
     (merge {:type :visual}
            (render-on-map :air [g _ component start]
                           (set-color g color/green)
-                          (doseq [end (map #(translate-position (get-position %)) healed-bodies)]
+                          (doseq [end (map #(translate-position (:value (:position @%))) healed-bodies)]
                             (drawfatline g start end))))))
 
 (defn- create-line-render-effect* [start end duration color thin]
@@ -196,7 +196,7 @@
     (render-centered-image image posi)))
 
 (defn show-string-effect [body duration color string]
-  (let [tilepos (get-position body)]
+  (let [tilepos (:value (:position @body))]
     (ingame-loop-comp :string-effect
       {:counter (make-counter duration)
        :color (Color. ^Color color)}  ; copy before changing it @ set!

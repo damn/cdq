@@ -10,7 +10,7 @@
     [utils.coll :refer [mapvals]]
     engine.core
     [game.settings :refer [half-screen-h half-screen-w]]
-    [game.components.core :refer [get-position id-entity-map]]
+    [game.components.core :refer [id-entity-map]]
     [game.maps.data :refer [get-current-map-data]]
     [game.maps.cell-grid :refer [get-bodies-from-cells get-cells]]
     [game.maps.camera :refer [get-camera-position]])
@@ -46,7 +46,7 @@
 
 (defn- render-bodies [g x y start-leftx start-topy width-in-tiles height-in-tiles]
   (doseq [body (reset! (get-bodies) (select #(get @id-entity-map (:id (meta %))) @(get-bodies))) ; swap?
-          :let [{bodyx 0 bodyy 1 :as body-posi} (int-posi (get-position body))
+          :let [{bodyx 0 bodyy 1 :as body-posi} (int-posi (:value (:position @body)))
                 body-render-x (+ x (* scale (- bodyx start-leftx)))
                 body-render-y (+ y (* scale (- bodyy start-topy)))]
           :when (geom/point-in-rect? body-posi start-leftx start-topy width-in-tiles height-in-tiles)]
@@ -100,8 +100,4 @@
                              #{:air :ground} (:wall colors)
                              #{:ground} (:water colors)
                              #{} (:ground colors))]))))
-
-
-
-
 

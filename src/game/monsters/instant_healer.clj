@@ -5,7 +5,7 @@
     [engine.render.image :refer [create-image]]
     [utils.numbers :refer [lower-than-max?]]
     [utils.coll :refer [safe-merge]]
-    [game.components.core :refer [active get-position id-entity-map player-body update-counter!]]
+    [game.components.core :refer [active id-entity-map player-body update-counter!]]
     [game.components.body :refer [bodies-in-range?]]
     [game.components.misc :refer [rotation-component]]
     [game.components.render :refer [create-line-render-effect image-render-component]]
@@ -61,4 +61,4 @@
               :do-skill (fn [healer {needs-heal :needs-heal :as component}]
                           (when (healing-required-and-allowed? needs-heal healer healradius-squared)
                             (set-hp-to-max needs-heal)
-                            (create-line-render-effect (get-position healer) (get-position needs-heal) 200 :color green)))})))
+                            (create-line-render-effect (:value (:position @healer)) (:value (:position @needs-heal)) 200 :color green)))})))

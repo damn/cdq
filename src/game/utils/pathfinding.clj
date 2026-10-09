@@ -2,7 +2,7 @@
   (:require
     [game.utils.tilemap :refer [get-mouse-tile-pos]]
     [game.maps.cell-grid :refer [cell-blocked? get-cell get-map-h get-map-w]]
-    [game.components.core :refer [get-position player-body]])
+    [game.components.core :refer [player-body]])
   (:import
     (org.newdawn.slick.util.pathfinding TileBasedMap AStarPathFinder Mover Path)))
 
@@ -31,11 +31,9 @@
 
 ; gibt indexoutofbounds exception falls maus position ausserhalb des grids ist
 (defn update-current-path []
-  (let [[sx sy] (get-position player-body)
+  (let [[sx sy] (:value (:position @player-body))
         [tx ty] (get-mouse-tile-pos)]
     (reset!
       current-path
       (.findPath astarpathfinder mover sx sy tx ty))))
-
-
 

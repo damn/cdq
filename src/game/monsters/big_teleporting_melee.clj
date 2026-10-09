@@ -2,7 +2,7 @@
   (:require
     [engine.render.color :refer [white]]
     [engine.render.assets :refer [folder-animation]]
-    [game.components.core :refer [get-position player-body]]
+    [game.components.core :refer [player-body]]
     [game.components.body :refer [get-dist-to-player teleport]]
     [game.components.misc :refer [rotation-component]]
     [game.components.render :refer [create-line-render-effect single-animation-component]]
@@ -28,8 +28,8 @@
                             (let [dist (get-dist-to-player entity)]
                               (or (not dist) (>= dist 80))))
             :do-skill (fn [entity component]
-                        (let [old-posi (get-position entity)
-                              posis (get-free-posis entity (get-position player-body) 2 2)]
+                        (let [old-posi (:value (:position @entity))
+                              posis (get-free-posis entity (:value (:position @player-body)) 2 2)]
                           (when (not-empty posis)
                             (let [posi (rand-nth posis)]
                               (teleport entity posi)

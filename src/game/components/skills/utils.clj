@@ -7,7 +7,7 @@
     [game.utils.raycast :refer [ray-blocked?]]
     utils.core
     [game.mouseoverbody :refer [saved-mouseover-body]]
-    [game.components.core :refer [add-to-removelist create-entity get-position id-entity-map player-body]]
+    [game.components.core :refer [add-to-removelist create-entity id-entity-map player-body]]
     [game.components.render :refer [render-on-map]]
     [game.components.misc :refer [delete-after-duration-component]]
     [game.utils.geom :refer [direction-vector get-vector-to-mouse-coords]]
@@ -33,7 +33,7 @@
 
 (defn check-line-of-sight [entity _]
   (let [target (get-skill-use-mouse-tile-pos)]
-    (if (ray-blocked? (get-position entity) target)
+    (if (ray-blocked? (:value (:position @entity)) target)
       (do
         (show-msg-to-player "No line of sight to target!")
         (not-allowed-position-effect target)
@@ -44,7 +44,6 @@
 
 (defn get-player-ranged-vector []
   (if-let [mouseover-body @saved-mouseover-body]
-    (direction-vector (get-position player-body) (get-position mouseover-body))
+    (direction-vector (:value (:position @player-body)) (:value (:position @mouseover-body)))
     (get-vector-to-mouse-coords (get-skill-use-mouse-pos))))
-
 

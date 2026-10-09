@@ -5,7 +5,7 @@
     [engine.core :refer [defpreload play-sound]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-frames]]
-    [game.components.core :refer [create-entity get-position]]
+    [game.components.core :refer [create-entity]]
     [game.components.position :refer [position-component]]
     [game.components.render :refer [animation-entity single-animation-component]]
     [game.components.misc :refer [delete-after-duration-component]]))
@@ -23,7 +23,7 @@
              piercing maxrange maxtime]}]
   {:pre [(xor maxrange maxtime)]}
   (create-entity
-    (position-component (get-position startbody))
+    (position-component (:value (:position @startbody)))
     (create-body :solid false
                  :side side
                  :pxw px-size
@@ -39,6 +39,6 @@
                          (plop posi))}
     (single-animation-component animation :order :air :apply-light false)
     (delete-after-duration-component (or maxtime (/ maxrange (:speed movement)))
-                                     ;:duration-over (comp plop get-position)
+                                     ;:duration-over (comp plop #(:value (:position @%)))
                                      )))
 

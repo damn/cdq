@@ -1,7 +1,6 @@
 (ns game.components.position
   (:require
     [utils.core :refer [int-posi when-apply]]
-    [game.components.core :refer [get-position]]
     [game.maps.contentfields :refer [put-entity-in-correct-content-field remove-entity-from-content-field]]))
 
 (defn position-component [p]
@@ -12,7 +11,8 @@
    :destruct remove-entity-from-content-field
    :posi-changed put-entity-in-correct-content-field})
 
-(def get-tile (comp int-posi get-position))
+(defn get-tile [entity]
+  (int-posi (:value (:position @entity))))
 
 (defn swap-position! [entity posi & {filter-body :filter-body}]
   (swap! entity assoc-in [:position :value] posi)

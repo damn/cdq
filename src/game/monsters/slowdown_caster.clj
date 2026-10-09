@@ -1,7 +1,7 @@
 (ns game.monsters.slowdown-caster
   (:require
     [engine.render.assets :refer [folder-animation]]
-    [game.components.core :refer [get-position player-body]]
+    [game.components.core :refer [player-body]]
     [game.components.render :refer [single-animation-component]]
     [game.components.body-effects-impl :refer [dmg-effect slowdown-effect]]
     [game.components.skills.core :refer [standalone-skill]]
@@ -24,7 +24,7 @@
             :do-skill (fn [entity ranged-comp]
                         (let [speed 84
                               rotation-speed 0.1
-                              starting-angle (get-angle-to-position (get-position entity) (get-position player-body))]
+                              starting-angle (get-angle-to-position (:value (:position @entity)) (:value (:position @player-body)))]
                           (fire-projectile
                             :startbody entity
                             :px-size 10

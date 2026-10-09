@@ -3,7 +3,7 @@
     [engine.core :refer [play-sound]]
     [engine.render.assets :refer [folder-animation]]
     [utils.numbers :refer [variance-val-str]]
-    [game.components.core :refer [get-position player-body]]
+    [game.components.core :refer [player-body]]
     [game.components.body-effects-impl :refer [consume-psi-charges current-psi-charges stun]]
     [game.components.destructible :refer [deal-dmg get-destructible-bodies]]
     [game.components.render :refer [animation-entity]]
@@ -37,7 +37,7 @@ Stuns and deals damage
    :animation :casting
    :show-info-for [:cost]
    :do-skill (fn [entity {:keys [radius dmg-modifier] :as component}]
-               (let [posi (get-position entity)
+               (let [posi (:value (:position @entity))
                      cnt (consume-psi-charges entity)
                      duration (+ 1000 (* cnt 333))
                      dmg (* cnt dmg-modifier (rand-int-between (get-current-player-melee-dmg)))

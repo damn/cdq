@@ -6,7 +6,7 @@
     [engine.render.assets :refer [folder-frames]]
     [utils.numbers :refer [variance-val-str]]
     [game.settings :refer [in-tiles]]
-    [game.components.core :refer [get-position player-body]]
+    [game.components.core :refer [player-body]]
     [game.components.render :refer [animation-entity]]
     [game.components.destructible :refer [calc-effective-spell-dmg]]))
 

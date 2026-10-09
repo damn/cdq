@@ -4,7 +4,7 @@
             [game.maps.camera :refer [get-camera-position]]
             [game.settings :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
             [utils.coll :refer [safe-merge]]
-            [game.components.core :refer [get-position id-entity-map player-body]]
+            [game.components.core :refer [id-entity-map player-body]]
             [game.components.render :refer [render-on-map]]
             [game.components.position :refer [swap-position!]]
             game.components.misc
@@ -13,7 +13,7 @@
             [game.utils.raycast :refer [ray-blocked?]]))
 
 (defn get-body-bounds [body]
-  [(get-position body) (:half-width (:body @body)) (:half-height (:body @body))])
+  [(:value (:position @body)) (:half-width (:body @body)) (:half-height (:body @body))])
 
 (defn calc-touched-cells
   ([body]
@@ -32,7 +32,7 @@
     (let [cells (calc-touched-cells body)]
       (dorun (map #(swap! % update-in [:occupied] conj body) cells))
       (swap! body assoc-in [:body :occupied-cells] cells))
-    (let [cell (get-cell (get-position body))]
+    (let [cell (get-cell (:value (:position @body)))]
       (assert cell)
       (swap! cell update-in [:occupied] conj body)
       (swap! body assoc-in [:body :occupied-cell] cell))))
@@ -144,7 +144,7 @@
             (map #(get @id-entity-map %) (get-body-ids cell)))))
 
 (defn bodies-in-range? [b1 b2 range-sqr]
-  (geom/in-range? (get-position b1) (get-position b2) range-sqr))
+  (geom/in-range? (:value (:position @b1)) (:value (:position @b2)) range-sqr))
 
 ; circle-collides creates a new Circle shape for every check -> could be optimized
 (defn get-touched-bodies
@@ -169,7 +169,7 @@
 (defn colliding-with-other-solid-bodies? [body]
   (boolean
     (not-empty
-      (get-other-solid-bodies (get-position body) body (:cached-touched-cells (:body @body))))))
+      (get-other-solid-bodies (:value (:position @body)) body (:cached-touched-cells (:body @body))))))
 
 (defn blocked-location?
   ([posi half-w half-h movement-type]
@@ -216,7 +216,7 @@
 (defn on-screen-and-in-sight? [entity]
   (and
     ; TODO posi-in-rect hier? / does not take into account body size
-    (let [[x y] (get-position entity)
+    (let [[x y] (:value (:position @entity))
           x (float x)
           y (float y)
           [cx cy] (get-camera-position)
@@ -231,7 +231,7 @@
       (when @debug-mode debug/entities-always-in-los)
       (:always-in-sight @entity)
       (and (is-body-visible? entity)
-           (not (ray-blocked? (get-position player-body) (get-position entity)))))))
+           (not (ray-blocked? (:value (:position @player-body)) (:value (:position @entity))))))))
 
 ; Assert: not jumping over tiles, so speed is <1 tile at max-delta
 
@@ -281,8 +281,7 @@
 ;;
 
 (defn get-other-bodies-in-adjacent-cells [entity]
-  (->> entity  ; TODO could be faster using occupied-cell instead of get-position/get-cell...
-    get-position
+  (->> (:value (:position @entity))  ; TODO could be faster using occupied-cell instead of get-cell...
     get-cell
     cached-get-adjacent-cells
     get-bodies-from-cells

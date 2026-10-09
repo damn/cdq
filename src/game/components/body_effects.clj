@@ -3,7 +3,7 @@
     [game.components.sleeping :refer [wake-up]]
     [game.components.misc :refer [delete-after-duration-component]]
     [utils.core :refer [split-kvs-and-more]]
-    [game.components.core :refer [add-component create-entity destruct-entity get-position id-entity-map]]
+    [game.components.core :refer [add-component create-entity destruct-entity id-entity-map]]
     [game.components.position :refer [position-component swap-position!]]))
 
 (defn get-sub-entities [entity]
@@ -17,7 +17,7 @@
    :destruct (fn [entity]
               (dorun (map destruct-entity (get-sub-entities entity))))
    :posi-changed (fn [entity]
-                   (let [p (get-position entity)]
+                   (let [p (:value (:position @entity))]
                      (dorun (map #(swap-position! % p) (get-sub-entities entity)))))})
 
 (defn body-effect-entity
@@ -32,7 +32,7 @@
          additional-components] (split-kvs-and-more args)]
     (wake-up target)
     (apply create-entity
-           (position-component (get-position target))
+           (position-component (:value (:position @target)))
            {:type :body-effect
             :target target
             :effect-type type

@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [create-sound play-sound]]
     [engine.render.assets :refer [folder-animation]]
-    [game.components.core :refer [get-position player-body]]
+    [game.components.core :refer [player-body]]
     [game.components.misc :refer [rotation-component]]
     [game.components.render :refer [single-animation-component]]
     [game.components.skills.melee :refer [monster-melee-component]]
@@ -16,14 +16,14 @@
                    (default-monster-death this-body :sound false) ; TODO this strange sound false and play-sound ... => default monster dead more than 1 thing...
                    (play-sound "bfxr_dronedeath.wav")
                    (nova-effect ; TODO two novas because different dmg to player/monster ... => im dealt dmg trigger berücksichtigen?
-                     :position (get-position this-body)
+                     :position (:value (:position @this-body))
                      :duration 150
                      :maxradius 2
                      :affects-side [:player]
                      :dmg [20 20]
                      :animation (folder-animation :folder "effects/xpldrone/" :duration 150 :looping false))
                    (nova-effect
-                     :position (get-position this-body)
+                     :position (:value (:position @this-body))
                      :duration 150
                      :maxradius 2
                      :affects-side [:monster]

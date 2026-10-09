@@ -6,7 +6,7 @@
     game.settings
     [game.debug-settings :as debug]
     [game.utils.geom :refer [add direction-vector get-vector-to-mouse-coords normalise vector2f]]
-    [game.components.core :refer [get-position player-body]]
+    [game.components.core :refer [player-body]]
     [game.components.body :refer [colliding-with-other-solid-bodies?]]
     [game.components.movement :refer [movement-component]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
@@ -23,7 +23,7 @@
         d (when (is-key-down? :DOWN) [0 1])]
     (cond
       @saved-mouseover-body
-      (direction-vector (get-position body) (get-position @saved-mouseover-body))
+      (direction-vector (:value (:position @body)) (:value (:position @@saved-mouseover-body)))
 
       (and (not (is-leftm-consumed?)) (is-leftbutton-down?))
       (get-vector-to-mouse-coords)

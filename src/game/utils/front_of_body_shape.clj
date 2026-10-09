@@ -2,12 +2,11 @@
   (:require
     [game.utils.geom :as geom]
     utils.core
-    [game.components.core :refer [get-position]]
     game.components.body))
 
 (defn in-front-of-body-shape
   ([body height]
-   (in-front-of-body-shape (get-position body)
+   (in-front-of-body-shape (:value (:position @body))
                            (:half-width (:body @body))
                            height
                            (:angle (:rotation @body))))

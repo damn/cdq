@@ -4,7 +4,7 @@
     [engine.render.color :refer [red white]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation spritesheet-frames]]
-    [game.components.core :refer [get-position is-player? player-body]]
+    [game.components.core :refer [is-player? player-body]]
     [game.components.body :refer [get-bodies-at-position]]
     [game.components.render :refer [animation-entity create-line-render-effect single-animation-component]]
     [game.components.destructible :refer [deal-dmg]]
@@ -35,8 +35,8 @@
               :shoot-sound "bfxr_rayshooterhit.wav"
               :target-posi (atom nil) ; REMOVE
               :check-usable (fn [entity component]
-                              (let [shooter-posi (get-position entity)
-                                    target-posi (get-position player-body)]
+                              (let [shooter-posi (:value (:position @entity))
+                                    target-posi (:value (:position @player-body))]
                                 (when (and (in-range? shooter-posi target-posi maxrange-squared)
                                            (not (ray-blocked? shooter-posi target-posi)))
                                   (reset! (:target-posi component) target-posi)
@@ -53,4 +53,4 @@
                               (animation-entity :position target
                                                 :animation (create-animation (spritesheet-frames "effects/12_16_littleexpl.png" 12 16) :frame-duration 100)
                                                 :order :on-ground))
-                            (create-line-render-effect (get-position entity) target 70 :color red)))})))
+                            (create-line-render-effect (:value (:position @entity)) target 70 :color red)))})))

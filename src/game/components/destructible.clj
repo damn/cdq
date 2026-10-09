@@ -8,7 +8,7 @@
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [spritesheet-frames]]
     [game.screenshake :refer [shake-screen]]
-    [game.components.core :refer [add-to-removelist get-position is-player? player-body]]
+    [game.components.core :refer [add-to-removelist is-player? player-body]]
     game.components.position
     game.components.misc
     [game.components.body :refer [get-touched-bodies is-affectable?]]
@@ -140,7 +140,7 @@
   (if-let [{trigger :trigger} (:hit-effect @body)]
     (trigger body)
     (animation-entity
-      :position (get-position body)
+      :position (:value (:position @body))
       :animation (create-animation (if (is-player? body)
                                      blood-frames
                                      explosion-frames)))))
@@ -223,7 +223,4 @@
             (swap! target-body assoc-in [:destructible :is-dead] true)
             (when-not (is-player? target-body)
               (add-to-removelist target-body))))))))
-
-
-
 

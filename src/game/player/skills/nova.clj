@@ -3,7 +3,6 @@
     [engine.core :refer [defpreload]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-frames]]
-    [game.components.core :refer [get-position]]
     [game.entity.nova :refer [nova-effect]]
     [game.player.skill.learnable :refer [deflearnable-skill]]
     [game.player.skills.common :refer [dmg-info-player-spell]]))
@@ -23,7 +22,7 @@
    :animation :casting
    :do-skill (fn [entity {:keys [radius dmg] :as component}]
                (nova-effect
-                 :position (get-position entity)
+                 :position (:value (:position @entity))
                  :duration 200
                  :maxradius radius
                  :affects-side :monster

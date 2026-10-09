@@ -5,7 +5,7 @@
     utils.core
     [engine.input :refer [get-mouse-pos]]
     [game.settings :refer [half-screen-h half-screen-w]]
-    [game.components.core :refer [get-position player-body]]
+    [game.components.core :refer [player-body]]
     [game.utils.geom :refer [add direction-vector get-normal-vectors scale vec-posi vector2f]]
     [game.utils.tilemap :refer [get-mouse-tile-pos screenpos-of-tilepos]]
     [game.maps.cell-grid :refer [get-jcell-grid get-map-h get-map-w]]
@@ -75,7 +75,7 @@
     (draw-line g half-screen-w half-screen-h x y)))
 
 (defn update-test-raycast-steplist []
-  (let [[start-x start-y] (get-position player-body)
+  (let [[start-x start-y] (:value (:position @player-body))
         [target-x target-y] (get-mouse-tile-pos)
         steplist (map
                    (fn [step]
@@ -88,7 +88,7 @@
 (def current-steps (atom nil))
 
 (defn update-test-raycast-maxsteps []
-  (let [[start-x start-y] (get-position player-body)
+  (let [[start-x start-y] (:value (:position @player-body))
         [target-x target-y] (get-mouse-tile-pos)
         vector-x (- target-x start-x)
         vector-y (- target-y start-y)
@@ -97,7 +97,7 @@
     (reset! current-steps steps)))
 
 (defn draw-test-raycast [g]
-  (let [[start-x start-y] (get-position player-body)
+  (let [[start-x start-y] (:value (:position @player-body))
         [target-x target-y] (get-mouse-tile-pos)
         color (if (ray-blocked? start-x start-y target-x target-y)
                 color/red
@@ -107,7 +107,7 @@
 ; PATH BLOCKED TEST
 
 (defn draw-test-path-blocked [g]
-  (let [[start-x start-y] (get-position player-body)
+  (let [[start-x start-y] (:value (:position @player-body))
         [target-x target-y] (get-mouse-tile-pos)
         [start1 target1 start2 target2] (mapv vec-posi
                                                (create-double-ray-endpositions start-x start-y target-x target-y 0.4))
@@ -119,5 +119,4 @@
     (doto g
       (draw-line start1screenx start1screeny target1screenx target1screeny)
       (draw-line start2screenx start2screeny target2screenx target2screeny))))
-
 

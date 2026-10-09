@@ -30,7 +30,7 @@
     [game.maps.cell-grid :refer [cell-blocked? get-body-ids get-cell get-cell-grid get-map-h get-map-w]]
     [game.maps.camera :refer [get-camera-position]]
     [game.maps.tiledmaps :refer [get-layer-index]]
-    [game.components.core :refer [get-position player-body update-removelist]]
+    [game.components.core :refer [player-body update-removelist]]
     [game.components.body :refer [on-screen-and-in-sight?]]
     [game.components.render :refer [render-map-indep-order render-on-map-order rendering translate-position]]
     [game.components.destructible :refer [get-armor get-armor-reduce-info get-hp is-dead?]]
@@ -190,7 +190,7 @@
         iy (+ y 0.5)
         half-w 0.5
         half-h 0.5
-        light-posi (get-position player-body)]
+        light-posi (:value (:position @player-body))]
     (dorun
       (map-indexed
         (fn [idx corner]
@@ -379,7 +379,7 @@
        (renderfn g
                  entity
                  component
-                 (translate-position (get-position entity)))
+                 (translate-position (:value (:position @entity))))
         (catch Throwable t
           (println "Render error for entity " (:id (meta entity)) " and component type " (:type component)))))
     (reset-transform g)))

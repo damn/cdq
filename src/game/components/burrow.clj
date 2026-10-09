@@ -6,7 +6,7 @@
     [engine.render.assets :refer [spritesheet-frames]]
     [game.session :refer [atom-session]]
     game.components.active
-    [game.components.core :refer [active block-active-components get-position reset-component-state-after-blocked unblock-active-components]]
+    [game.components.core :refer [active block-active-components reset-component-state-after-blocked unblock-active-components]]
     [game.components.render :refer [animation-entity]]
     [game.components.body :refer [colliding-with-other-solid-bodies? get-dist-to-player get-other-bodies-in-adjacent-cells is-burrowed?]]
     game.components.position
@@ -20,7 +20,7 @@
 (defn- burrow [entity & {audiovisual :audiovisual :or {audiovisual true}}]
   (when audiovisual
     (play-sound "bfxr_burrow.wav")
-    (animation-entity :position (get-position entity)
+    (animation-entity :position (:value (:position @entity))
                       :animation (create-animation dust-frames :frame-duration 100)
                       :order :is-ground))
   (swap! entity #(-> % 
@@ -33,7 +33,7 @@
   (when (and (is-burrowed? entity)
              (not (colliding-with-other-solid-bodies? entity)))
     (play-sound "bfxr_unburrow.wav")
-    (animation-entity :position (get-position entity)
+    (animation-entity :position (:value (:position @entity))
                       :animation (create-animation dark-dust-frames))
     (swap! entity #(-> % 
          unblock-active-components
@@ -75,5 +75,4 @@
         (dorun (map check
           (filter #(:burrow @%)
                   (get-entities-in-active-content-fields)))))))
-
 

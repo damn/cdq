@@ -6,7 +6,7 @@
     [utils.core :refer [translate-to-tile-middle]]
     [utils.numbers :refer [get-ratio]]
     [game.settings :refer [in-tiles tile-height tile-width]]
-    [game.components.core :refer [get-position id-entity-map player-body update-counter!]]
+    [game.components.core :refer [id-entity-map player-body update-counter!]]
     [game.components.body :refer [blocked-location? bodies-in-range? teleport]]
     [game.components.render :refer [animation-entity]]
     [game.components.destructible :refer [explosion-frames get-destructible-bodies get-hp set-hp-to-max]]
@@ -30,7 +30,7 @@
   (vector-from-angle
     (if-not (get @id-entity-map (:id (meta target-body)))
       current-angle
-      (let [angle-to-target (get-angle-to-position (get-position projectile) (get-position target-body))
+      (let [angle-to-target (get-angle-to-position (:value (:position @projectile)) (:value (:position @target-body)))
             adjusted-angle (rotate-angle-to-angle current-angle angle-to-target rotationspeed delta)]
         (swap! projectile assoc-in [:movement :current-angle] adjusted-angle)
         adjusted-angle))))
@@ -52,7 +52,7 @@
     (potential-field-player-following body)
 
     (bodies-in-range? body player-body (:runaway-dist-sqrd component))
-    (direction-vector (get-position player-body) (get-position body))
+    (direction-vector (:value (:position @player-body)) (:value (:position @body)))
 
     :else
     nil))
@@ -105,7 +105,7 @@
     (when finished
       (swap! body assoc-in [:movement :running-away] false))
     (if (and running-away (not finished))
-      (direction-vector (get-position player-body) (get-position body))
+      (direction-vector (:value (:position @player-body)) (:value (:position @body)))
       (potential-field-player-following body))))
 
 (defn lowhp-runaway-movement [speed]
@@ -132,7 +132,7 @@
 
 (defn- path-to-player-blocked?
   [[sx sy] projectile-pxsize]
-  (let [[tx ty] (get-position player-body)
+  (let [[tx ty] (:value (:position @player-body))
         path-w (in-tiles projectile-pxsize)]
     (is-path-blocked? sx sy tx ty path-w)))
 
@@ -144,7 +144,7 @@
   (defn redball-projectile-skill-props []
     {:show-cast-bar false
      :check-usable (fn [entity component]
-                     (and (not (path-to-player-blocked? (get-position entity) pxsize))
+                     (and (not (path-to-player-blocked? (:value (:position @entity)) pxsize))
                           (bodies-in-range? entity player-body maxrange-squared)))
      :do-skill (fn [entity component]
                  (fire-projectile
@@ -153,7 +153,7 @@
                    :animation (create-animation redball-frames :looping true)
                    :side :monster
                    :hits-side :player
-                   :movement (projectile-movement-component (direction-vector (get-position entity) (get-position player-body)) 80)
+                   :movement (projectile-movement-component (direction-vector (:value (:position @entity)) (:value (:position @player-body))) 80)
                    :hit-effects [(dmg-effect [3 5])
                                  (stun-collision-effect 10 150)]
                    :maxrange maxrange))}))
@@ -173,7 +173,7 @@
 (defn monster-die-effect [body]
   (animation-entity
     :animation (create-animation monsterdie-frames)
-    :position (get-position body)))
+    :position (:value (:position @body))))
 
 (def ^:private monster-drop-table
   {{"Grenade" 1
@@ -188,7 +188,7 @@
   (monster-die-effect body) ; "effect" was ist das? sound/animation oder was
   (when sound
     (play-sound "bfxr_defaultmonsterdeath.wav"))
-  (let [position (get-position body)]
+  (let [position (:value (:position @body))]
     (if-chance 20 ; TODO when-chance
       (let [item-name (get-rand-weighted-item
                         (get-rand-weighted-item monster-drop-table))]
@@ -211,7 +211,7 @@
                   (shuffle hit-posis))
           :let [vx (/ x tile-width)
                 vy (/ y tile-height)
-                [x y] (get-position body)
+                [x y] (:value (:position @body))
                 explosion-posi [(+ x vx) (+ y vy)]]]
     (animation-entity
       :position explosion-posi
@@ -243,7 +243,7 @@
              (rand-when-low-hp body)
              (zero? (rand-int 5))) ; not too strong ... only 1 in 5
     (play-sound "bfxr_monstercast.wav")
-    (let [free-posis (get-free-posis body (get-position body) 6 3)]
+    (let [free-posis (get-free-posis body (:value (:position @body)) 6 3)]
       (when (seq free-posis)
         (let [posi (rand-nth free-posis)]
           (teleport body posi)
@@ -260,4 +260,4 @@
 
 (defn get-healable-monsters-around [healer]
   (remove #(= % healer)
-          (get-destructible-bodies (get-position healer) heal-radius :monster)))
+          (get-destructible-bodies (:value (:position @healer)) heal-radius :monster)))

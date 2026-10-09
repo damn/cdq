@@ -7,7 +7,7 @@
     game.settings
     [game.mouseoverbody :refer [get-mouseover-body]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
-    [game.components.core :refer [active get-position player-body]]
+    [game.components.core :refer [active player-body]]
     [game.components.body :refer [bodies-in-range?]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]))
@@ -23,7 +23,7 @@
     (when-let [mouseover-body (get-mouseover-body)]
       (when-let [{:keys [mouseover-text color]} (:pressable @mouseover-body)]
         (when (seq mouseover-text) ; rendering "" leads to just background black line ...
-          (let [[body-x body-y] (screenpos-of-tilepos (get-position mouseover-body))]
+          (let [[body-x body-y] (screenpos-of-tilepos (:value (:position @mouseover-body)))]
             (render-readable-text g
                                   body-x
                                   (- body-y (:half-pxh (:body @mouseover-body)) body-outline-height)
@@ -42,5 +42,4 @@
         (when (and (bodies-in-range? player-body body click-dist-sqr)
                    (try-consume-leftm-pressed))
           (pressedfn body))))))
-
 

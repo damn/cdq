@@ -4,7 +4,7 @@
     [utils.coll :refer [safe-merge]]
     [utils.numbers :refer [increase-min-max-val]]
     [game.utils.geom :refer [direction-vector get-angle-from-vector get-vector-to-mouse-coords]]
-    [game.components.core :refer [active add-to-removelist get-position player-body update-counter!]]))
+    [game.components.core :refer [active add-to-removelist player-body update-counter!]]))
 
 (defn delete-after-duration-component [duration & {:keys [duration-over]}]
   (safe-merge
@@ -26,7 +26,7 @@
   (set-rotation-angle body (get-angle-from-vector v)))
 
 (defn rotate-to-body [a b]
-  (rotate-to-vector a (direction-vector (get-position a) (get-position b))))
+  (rotate-to-vector a (direction-vector (:value (:position @a)) (:value (:position @b)))))
 
 (defn rotate-to-player [body]
   (rotate-to-body body player-body))

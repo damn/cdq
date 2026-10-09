@@ -7,7 +7,7 @@
     [game.item.cells :refer [try-pickup-item]]
     [game.item.grids :refer [showing-player-inventory?]]
     [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
-    [game.components.core :refer [add-to-removelist create-entity get-position player-body]]
+    [game.components.core :refer [add-to-removelist create-entity player-body]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [blocked-location? create-body]]
     game.components.misc
@@ -86,7 +86,7 @@
 
 (defn put-item-on-ground []
   {:pre [(is-item-in-hand?)]}
-  (let [{x 0 y 1 :as posi} (get-position player-body)
+  (let [{x 0 y 1 :as posi} (:value (:position @player-body))
         [w _] item-body-dimensions
         half-size (/ w tile-width 2)
         below-posi [x (+ 0.7 y)] ; put here so player sees that item is put on ground (confusing trying to put heal pot on player)

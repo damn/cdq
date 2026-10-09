@@ -11,7 +11,7 @@
     [engine.core :refer [defpreload ratio]]
     [game.settings :refer [debug-mode in-pixel]]
     [game.mouseoverbody :refer [get-mouseover-body]]
-    [game.components.core :refer [get-position id-entity-map is-player?]]
+    [game.components.core :refer [id-entity-map is-player?]]
     game.components.body
     [game.components.destructible :refer [destructible? get-hp]]
     [game.components.render :refer [current-animation rendering]]
@@ -96,7 +96,7 @@
   (render-body-info-bar g body render-position (ratio (:attack-counter skill)) color/blue (* 2 body-info-bars-h)))
 
 (defn body-renderfn [g body component {x 0 y 1 :as render-position}]
-  (let [tile-posi (get-position body)]
+  (let [tile-posi (:value (:position @body))]
     (when @debug-mode
       (when debug/show-body-bounds
         (render-body-bounds g body render-position color/white))
@@ -116,7 +116,6 @@
 (intern 'game.components.body 'body-info-renderfn body-renderfn)
 
 ;;;
-
 
 (defpreload ^:private outlines {:green {:topleft (create-image "outline/tl.png" :scale 0.5)
                                         :topright (create-image "outline/tr.png" :scale 0.5)
@@ -149,13 +148,12 @@
   (rendering :below-gui  [g c]
     (when-let [body (get-mouseover-body)]
       (when (:mouseover-outline (:body @body))
-        (let [p (screenpos-of-tilepos (get-position body))]
+        (let [p (screenpos-of-tilepos (:value (:position @body)))]
           (render-body-outline g body p
                                (if (and (not (is-player? body))
                                         (destructible? body))
                                  :red
                                  :green)))))))
-
 
 ; OR: current rendered image of body
 ; => make outline image => draw over it!? .. costs 20-30 ms to make that img would neet to cache it..!!

@@ -10,7 +10,7 @@
     [utils.coll :refer [genmap]]
     [game.session :refer [atom-session]]
     [game.settings :refer [debug-mode in-pixel]]
-    [game.components.core :refer [active create-entity get-position player-body]]
+    [game.components.core :refer [active create-entity player-body]]
     [game.components.position :refer [position-component]]
     [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
     [game.maps.cell-grid :refer [add-cell-blocks-changed-listener inside-map?]])
@@ -100,7 +100,7 @@
       tile-corner-colors)))
 
 (comment
-  (let [posi (get-position player-body)
+  (let [posi (:value (:position @player-body))
         light (:light @player-body)]
     (compare-times 100 (create-lightmap posi light))))
 
@@ -113,7 +113,7 @@
 (defn- update-light-sources []
   (let [sources (filter #(:light @%) (get-entities-in-active-content-fields))]
     (doseq [entity sources
-            :let [current-posi (get-position entity)
+            :let [current-posi (:value (:position @entity))
                   light (:light @entity)
                   old-position (-> light :lightmap :posi)
                   dirty (or
@@ -159,7 +159,7 @@
 ; and also when rotation the corner positions are not correct anymore
 (defn- apply-lightsource [image position light-source]
   (let [light (:light @light-source)
-        light-posi (get-position light-source)
+        light-posi (:value (:position @light-source))
         ; dont check if ray-blocked because
         ; already checked if entities are in-line-of-sight,
         ; so no need to cast another ray

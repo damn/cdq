@@ -76,11 +76,6 @@
   (dorun (map #(destruct-entity (get @id-entity-map %)) @removelist))
   (reset! removelist #{}))
 
-;; Get-position here becaused is used a lot.
-
-(defn get-position [entity]
-  (:value (:position @entity)))
-
 (declare player-body)
 
 (defn is-player? [entity]

@@ -3,7 +3,7 @@
     [data.grid2d :as grid]
         game.settings
     [game.maps.data :refer [get-current-map-data]]
-    [game.components.core :refer [get-position player-body]]))
+    [game.components.core :refer [player-body]]))
 
 ; Contentfield Entities
 ; -> :position sollten sie haben
@@ -31,7 +31,7 @@
 (defn put-entity-in-correct-content-field [entity]
   (let [old-field (get-content-field entity)
         new-field (get (get-contentfields)
-                       (get-field-idx-of-position (get-position entity)))]
+                       (get-field-idx-of-position (:value (:position @entity))))]
     (when-not (= old-field new-field)
       (swap! (:entities new-field) conj entity)
       (swap! entity assoc-in [:position :content-field] new-field)
