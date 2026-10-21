@@ -1,9 +1,10 @@
 (ns game.state.loading
+  (:import org.newdawn.slick.state.BasicGameState)
   (:require
     [engine.core :refer [get-screen-height get-screen-width]]
     [engine.render.graphics :as g]
-    [engine.statebasedgame :as state :refer [defgamestate]]
-    [utils.core :as utils]
+    [engine.statebasedgame :as state]
+    [utils.core :as utils :refer [get-unique-number]]
     [game.state.ids :as ids]
     game.player.session-data))
 
@@ -11,19 +12,23 @@
 
 (def ^:private loading-render-once (atom false))
 
-(defgamestate loading
-  (enter [container statebasedgame]
-    (reset! loading-render-once false))
+(def loading-gamestate
+  (let [id (get-unique-number)]
+    (proxy [BasicGameState] []
+      (getID [] id)
 
-  (init [container statebasedgame])
+      (enter [container statebasedgame]
+        (reset! loading-render-once false))
 
-  (update [container statebasedgame delta]
-    (when @loading-render-once
-      (utils/log "Loading new session")
-      (game.player.session-data/init @is-loaded-character)
-      (utils/log "Finished loading new session")
-      (state/enter-state ids/ingame)))
+      (init [container statebasedgame])
 
-  (render [container statebasedgame g]
-    (reset! loading-render-once true)
-    (g/render-readable-text g (/ (get-screen-width) 2) (/ (get-screen-height) 2) :centerx true "Loading...")))
+      (update [container statebasedgame delta]
+        (when @loading-render-once
+          (utils/log "Loading new session")
+          (game.player.session-data/init @is-loaded-character)
+          (utils/log "Finished loading new session")
+          (state/enter-state ids/ingame)))
+
+      (render [container statebasedgame g]
+        (reset! loading-render-once true)
+        (g/render-readable-text g (/ (get-screen-width) 2) (/ (get-screen-height) 2) :centerx true "Loading...")))))

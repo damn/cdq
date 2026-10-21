@@ -1,17 +1,6 @@
 (ns engine.statebasedgame
-  (:require [utils.core :refer (get-unique-number)])
   (:import
-    (org.newdawn.slick.state BasicGameState StateBasedGame)))
-
-(defmacro defgamestate [nm & more]
-  (let [id? (first more)
-        custom-id (when (or (symbol? id?) (number? id?))
-                    id?)]
-    `(let [id# ~(or custom-id `(get-unique-number))]
-       (def ~(symbol (str nm "-gamestate"))
-         (proxy [BasicGameState] []
-           (getID [] id#)
-           ~@(if custom-id (rest more) more))))))
+    (org.newdawn.slick.state StateBasedGame)))
 
 (defn init-state-based-game [title states]
   (def state-based-game

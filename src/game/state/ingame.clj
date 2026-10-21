@@ -1,14 +1,15 @@
 (ns game.state.ingame
   (:import
     (org.newdawn.slick Image SpriteSheet)
-    org.newdawn.slick.tiled.TiledMap)
+    org.newdawn.slick.tiled.TiledMap
+    org.newdawn.slick.state.BasicGameState)
   (:require
     [engine.input :as input :refer [get-mouse-pos is-key-pressed? is-rightm-consumed? try-consume-leftm-pressed try-consume-rightm-pressed]]
     [engine.render.color :refer [black red set-color white yellow]]
     [engine.render.image :refer [create-image draw-image get-dimensions get-sub-image]]
     [engine.render.assets :refer [get-sprite]]
     [engine.render.graphics :refer [draw-grid fill-rect render-readable-text reset-transform translate]]
-    [engine.statebasedgame :as state :refer [defgamestate enter-state]]
+    [engine.statebasedgame :as state :refer [enter-state]]
     [game.debug-settings :as debug]
     [game.state.ids :as ids]
     [game.state.mainmenu :refer [mainmenu-gamestate]]
@@ -383,7 +384,8 @@
                  component
                  (translate-position (:value (:position @entity))))
         (catch Throwable t
-          (println "Render error for entity " (:id (meta entity)) " and component type " (:type component)))))
+          (println "Render error for entity " (:id (meta entity)) " and component type " (:type component))
+          (.printStackTrace t))))
     (reset-transform g)))
 
 (defn- get-map-independent-render-comps []
@@ -421,23 +423,26 @@
     (when @debug-mode
       (render-debug g 25 (get-mouseover-body)))))
 
-(defgamestate ingame ids/ingame
-  (enter [container statebasedgame]
-    (input/clear-key-pressed-record)
-    (input/clear-mouse-pressed-record))
+(def ingame-gamestate
+  (proxy [BasicGameState] []
+    (getID [] ids/ingame)
 
-  (init [container statebasedgame])
+    (enter [container statebasedgame]
+      (input/clear-key-pressed-record)
+      (input/clear-mouse-pressed-record))
 
-  (update [container statebasedgame delta]
-    (let [delta (min delta game.components.update/max-delta)]
-      (update-shake delta)
-      (update-game delta)))
+    (init [container statebasedgame])
 
-  (render [container statebasedgame g]
-    (translate-shake-before-render g)
-    (rendermap g)
-    (render-map-content g)
-    (render-gui g)
-    (translate-shake-after-render g))
+    (update [container statebasedgame delta]
+      (let [delta (min delta game.components.update/max-delta)]
+        (update-shake delta)
+        (update-game delta)))
 
-  (keyPressed [int-key chr]))
+    (render [container statebasedgame g]
+      (translate-shake-before-render g)
+      (rendermap g)
+      (render-map-content g)
+      (render-gui g)
+      (translate-shake-after-render g))
+
+    (keyPressed [int-key chr])))

@@ -1,19 +1,23 @@
 (ns game.state.minimap
+  (:import org.newdawn.slick.state.BasicGameState)
   (:require
     [engine.input :refer [is-key-pressed?]]
-    [engine.statebasedgame :refer [defgamestate enter-state]]
+    [engine.statebasedgame :refer [enter-state]]
     [game.maps.minimap :refer [render-minimap]]
     [game.state.ids :as ids]))
 
-(defgamestate minimap ids/minimap
-  (enter [container statebasedgame])
+(def minimap-gamestate
+  (proxy [BasicGameState] []
+    (getID [] ids/minimap)
 
-  (init [container statebasedgame])
+    (enter [container statebasedgame])
 
-  (update [container statebasedgame delta]
-    (when (or (is-key-pressed? :TAB)
-              (is-key-pressed? :ESCAPE))
-      (enter-state ids/ingame)))
+    (init [container statebasedgame])
 
-  (render [container statebasedgame g]
-    (render-minimap g)))
+    (update [container statebasedgame delta]
+      (when (or (is-key-pressed? :TAB)
+                (is-key-pressed? :ESCAPE))
+        (enter-state ids/ingame)))
+
+    (render [container statebasedgame g]
+      (render-minimap g))))

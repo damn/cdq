@@ -2,16 +2,18 @@
   (:import
     (org.newdawn.slick Input Music)
     (org.newdawn.slick.gui TextField)
-    (org.newdawn.slick.loading LoadingList))
+    (org.newdawn.slick.loading LoadingList)
+    org.newdawn.slick.state.BasicGameState)
   (:require
     [engine.core :refer [app-game-container get-defaultfont get-line-height]]
     [engine.input :refer [update-mousebutton-state]]
     [engine.render.graphics :refer [render-readable-text]]
-    [engine.statebasedgame :refer [defgamestate enter-state]]
+    [engine.statebasedgame :refer [enter-state]]
     [game.gui :refer [make-guidisplay make-label make-textbutton remove-guicomponent render-guicomponent set-visible update-guicomponent]]
     [game.player.session-data :refer [current-character-name get-session-file-character-names]]
     [game.settings :refer [get-setting half-screen-w screen-height version]]
-    [game.state.loading :refer [is-loaded-character loading-gamestate]]))
+    [game.state.loading :refer [is-loaded-character loading-gamestate]]
+    [utils.core :refer [get-unique-number]]))
 
 (def ^:private creditstxt
   "Created by Michael Sappler
@@ -127,34 +129,38 @@
                               (doto (Music. "sounds/dungeon1.xm" true)
                                 (.setVolume (float 1)))))))
 
-(defgamestate mainmenu
-  (enter [container statebasedgame]
-    (LoadingList/setDeferredLoading false)
-    (when music
-      (.loop ^Music music))
-    (reset-menu-state))
+(def mainmenu-gamestate
+  (let [id (get-unique-number)]
+    (proxy [BasicGameState] []
+      (getID [] id)
 
-  (keyPressed [int-key chr]
-    (when (and @textfield-visible (= int-key Input/KEY_ENTER))
-      (try-create-character))
-    (when (= int-key Input/KEY_ESCAPE)
-      (.exit app-game-container)))
+      (enter [container statebasedgame]
+        (LoadingList/setDeferredLoading false)
+        (when music
+          (.loop ^Music music))
+        (reset-menu-state))
 
-  (leave [container statebasedgame])
+      (keyPressed [int-key chr]
+        (when (and @textfield-visible (= int-key Input/KEY_ENTER))
+          (try-create-character))
+        (when (= int-key Input/KEY_ESCAPE)
+          (.exit app-game-container)))
 
-  (init [container statebasedgame])
+      (leave [container statebasedgame])
 
-  (update [container statebasedgame delta]
-    (update-mousebutton-state)
-    (update-guicomponent menu-display)
-    (when (and (get-setting :skip-main-menu-at-startup)
-               (not @menu-skipped))
-      (reset! menu-skipped true)
-      (start-loading-game "Testchar" :new-character true)))
+      (init [container statebasedgame])
 
-  (render [container statebasedgame g]
-    (render-guicomponent g menu-display)
-    (when @textfield-visible
-      (.render textfield container g))
-    (render-readable-text g half-screen-w 0 :centerx true :background false :bigfont true "Cyber Dungeon Quest")
-    (render-readable-text g half-screen-w (- screen-height (get-line-height)) :centerx true :background false version)))
+      (update [container statebasedgame delta]
+        (update-mousebutton-state)
+        (update-guicomponent menu-display)
+        (when (and (get-setting :skip-main-menu-at-startup)
+                   (not @menu-skipped))
+          (reset! menu-skipped true)
+          (start-loading-game "Testchar" :new-character true)))
+
+      (render [container statebasedgame g]
+        (render-guicomponent g menu-display)
+        (when @textfield-visible
+          (.render textfield container g))
+        (render-readable-text g half-screen-w 0 :centerx true :background false :bigfont true "Cyber Dungeon Quest")
+        (render-readable-text g half-screen-w (- screen-height (get-line-height)) :centerx true :background false version)))))

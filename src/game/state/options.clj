@@ -1,8 +1,9 @@
 (ns game.state.options
+  (:import org.newdawn.slick.state.BasicGameState)
   (:require
     [engine.core :refer [fullscreen-supported?]]
     [engine.input :refer [is-key-pressed? update-mousebutton-state]]
-    [engine.statebasedgame :refer [defgamestate enter-state]]
+    [engine.statebasedgame :refer [enter-state]]
     [game.gui :refer [make-checkbox make-guidisplay make-label make-textbutton render-guicomponent update-guicomponent]]
     [game.state.ids :as ids]
     [game.state.mainmenu :refer [mainmenu-gamestate]]
@@ -40,16 +41,19 @@
                   :visible true
                   :parent options-display))))
 
-(defgamestate options ids/options
-  (enter [container statebasedgame])
+(def options-gamestate
+  (proxy [BasicGameState] []
+    (getID [] ids/options)
 
-  (init [container statebasedgame])
+    (enter [container statebasedgame])
 
-  (update [container statebasedgame delta]
-    (update-mousebutton-state)
-    (update-guicomponent options-display)
-    (when (is-key-pressed? :ESCAPE)
-      (enter-state ids/ingame)))
+    (init [container statebasedgame])
 
-  (render [container statebasedgame g]
-    (render-guicomponent g options-display)))
+    (update [container statebasedgame delta]
+      (update-mousebutton-state)
+      (update-guicomponent options-display)
+      (when (is-key-pressed? :ESCAPE)
+        (enter-state ids/ingame)))
+
+    (render [container statebasedgame g]
+      (render-guicomponent g options-display))))
