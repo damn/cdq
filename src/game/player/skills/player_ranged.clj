@@ -1,6 +1,5 @@
 (ns game.player.skills.player-ranged
   (:require
-    [engine.core :refer [defpreload]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-frames]]
     [game.components.body-effects-impl :refer [dmg-effect stun-collision-effect]]
@@ -10,7 +9,9 @@
     [game.player.skill.learnable :refer [deflearnable-skill]]
     [game.player.skills.common :refer [dmg-info-player-spell]]))
 
-(defpreload ^:private projectile-frames (folder-frames "effects/energyball/"))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private projectile-frames (folder-frames "effects/energyball/"))))
 
 (deflearnable-skill player-ranged
   :manacost 2

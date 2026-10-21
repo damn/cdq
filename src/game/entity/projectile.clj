@@ -2,7 +2,7 @@
   (:require
     [utils.core :refer [xor]]
     [game.components.body :refer [create-body]]
-    [engine.core :refer [defpreload play-sound]]
+    [engine.core :refer [play-sound]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-frames]]
     [game.components.core :refer [create-entity]]
@@ -10,7 +10,9 @@
     [game.components.render :refer [animation-entity single-animation-component]]
     [game.components.misc :refer [delete-after-duration-component]]))
 
-(defpreload ^:private projectile-hits-wall-frames (folder-frames "effects/ember/"))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private projectile-hits-wall-frames (folder-frames "effects/ember/"))))
 
 (defn- plop [position]
   (animation-entity

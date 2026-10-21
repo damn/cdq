@@ -1,6 +1,6 @@
 (ns game.player.skills.psi-bolt
   (:require
-    [engine.core :refer [defpreload play-sound]]
+    [engine.core :refer [play-sound]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-frames]]
     [utils.numbers :refer [variance-val-str]]
@@ -15,7 +15,9 @@
     [game.player.skill.learnable :refer [deflearnable-skill]]))
 
 (def ^:private psi-bolt-pxradius 17)
-(defpreload ^:private psi-bolt-frames (folder-frames "effects/psibolt/"))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private psi-bolt-frames (folder-frames "effects/psibolt/"))))
 
 (defn- do-skill-psi-bolt [entity component]
   (let [cnt (consume-psi-charges entity)

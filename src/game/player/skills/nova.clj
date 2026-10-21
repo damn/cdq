@@ -1,13 +1,14 @@
 (ns game.player.skills.nova
   (:require
-    [engine.core :refer [defpreload]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-frames]]
     [game.entity.nova :refer [nova-effect]]
     [game.player.skill.learnable :refer [deflearnable-skill]]
     [game.player.skills.common :refer [dmg-info-player-spell]]))
 
-(defpreload ^:private nova-frames (folder-frames "effects/nova/"))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private nova-frames (folder-frames "effects/nova/"))))
 
 (deflearnable-skill nova
   :manacost 10

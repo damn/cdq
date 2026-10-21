@@ -2,7 +2,7 @@
   (:require
     [utils.coll :refer [mapvals safe-merge]]
     [utils.numbers :refer [approx-numbers]]
-    [engine.core :refer [defpreload reset update]]
+    [engine.core :refer [reset update]]
     [engine.render.color :refer [rgbcolor]]
     [engine.render.image :refer [create-image get-scaled-copy]]
     [engine.render.animation :refer [create-animation render-centered-animation]]
@@ -161,7 +161,9 @@
 
 (def ^:private charge-body-distance 10)
 
-(defpreload ^:private psicharge-frames (map #(get-scaled-copy % 7 7) (folder-frames "effects/psicharges/")))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private psicharge-frames (map #(get-scaled-copy % 7 7) (folder-frames "effects/psicharges/")))))
 
 (defeffectentity ^:private psi-charge [body attackinc moveinc]
   :target body

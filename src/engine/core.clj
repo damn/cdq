@@ -11,9 +11,6 @@
   (doseq [f fns]
     (f)))
 
-(defmacro defpreload [& more]
-  `(alter-var-root #'engine.core/fns conj (fn [] (def ~@more))))
-
 ;;
 
 ; method of AppGameContainer does flip = true; -> so flip the icons vertical!
@@ -99,11 +96,13 @@
 (def allowed-characters (set (map char (range 32 126))))
 
 ; anuvverbubbla font has (range 32 91) & at draw-string make (.toUpperCase (str s))
-; (defpreload ^:private anuvverbubbla (SpriteSheetFont. (SpriteSheet. "anuvverbubbla_8x8.png" 8 8) \space))
+; (alter-var-root #'engine.core/fns conj
+;   (fn []
+;     (def ^:private anuvverbubbla (SpriteSheetFont. (SpriteSheet. "anuvverbubbla_8x8.png" 8 8) \space))))
 
 (deflazygetter get-defaultfont
   (SpriteSheetFont. (SpriteSheet. "simple_6x8.png" 6 8) \space))
-; using lazygetter instead of defpreload because other preload depends on this (make-frame => get text size)
+; using lazygetter instead of preload because other preload depends on this (make-frame => get text size)
 
 (defn reset-font [g] (.setFont ^Graphics g (get-defaultfont)))
 

@@ -6,7 +6,7 @@
     [game.components.core :refer [player-body]]
     [game.components.skills.melee :refer [melee-weapon]]
     [utils.numbers :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals variance-val-str]]
-    [engine.core :refer [create-sound defpreload]]
+    [engine.core :refer [create-sound]]
     [engine.render.image :refer [create-image]]
     [engine.render.animation :refer [create-animation get-duration]]
     [engine.render.assets :refer [folder-frames]]
@@ -43,7 +43,9 @@
                                :equip-boni (create-random-boni itemname (get-rand-weighted-item boni-counts) :max-level max-lvl)
                                :color equip-boni-item-color)))))
 
-(defpreload ^:private grenade-frames (folder-frames "effects/grenade/"))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private grenade-frames (folder-frames "effects/grenade/"))))
 
 ; TODO auch defusable aber net damit gemacht -> vlt mit split-kvs-and-more und unten equip/unequip zuf�hren?
 (defitem "Grenade" [{cnt :count}]

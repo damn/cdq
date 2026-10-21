@@ -8,7 +8,7 @@
     [engine.render.graphics :refer [draw-rect draw-shape fill-rect render-readable-text]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
     [utils.numbers :refer [get-ratio]]
-    [engine.core :refer [defpreload ratio]]
+    [engine.core :refer [ratio]]
     [game.settings :refer [debug-mode in-pixel]]
     [game.mouseoverbody :refer [get-mouseover-body]]
     [game.components.core :refer [id-entity-map is-player?]]
@@ -117,14 +117,16 @@
 
 ;;;
 
-(defpreload ^:private outlines {:green {:topleft (create-image "outline/tl.png" :scale 0.5)
-                                        :topright (create-image "outline/tr.png" :scale 0.5)
-                                        :bottomleft (create-image "outline/bl.png" :scale 0.5)
-                                        :bottomright (create-image "outline/br.png" :scale 0.5)}
-                                :red {:topleft (create-image "outline/tl_r.png" :scale 0.5)
-                                      :topright (create-image "outline/tr_r.png" :scale 0.5)
-                                      :bottomleft (create-image "outline/bl_r.png" :scale 0.5)
-                                      :bottomright (create-image "outline/br_r.png" :scale 0.5)}})
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private outlines {:green {:topleft (create-image "outline/tl.png" :scale 0.5)
+                                     :topright (create-image "outline/tr.png" :scale 0.5)
+                                     :bottomleft (create-image "outline/bl.png" :scale 0.5)
+                                     :bottomright (create-image "outline/br.png" :scale 0.5)}
+                             :red {:topleft (create-image "outline/tl_r.png" :scale 0.5)
+                                   :topright (create-image "outline/tr_r.png" :scale 0.5)
+                                   :bottomleft (create-image "outline/bl_r.png" :scale 0.5)
+                                   :bottomright (create-image "outline/br_r.png" :scale 0.5)}})))
 
 (def body-outline-height 2)
 

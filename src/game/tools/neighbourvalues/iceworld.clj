@@ -1,7 +1,6 @@
 (ns game.tools.neighbourvalues.iceworld
   (:require
     data.grid2d
-    [engine.core :refer [defpreload]]
     [engine.render.assets :refer [spritesheet]]
     game.utils.random
     [game.tools.transitiontilemaker :refer [get-transition-tile-value]]
@@ -51,7 +50,9 @@
   (defn calc-sprite-posi [grid posi value]
     (convert-to-spriteposi (calc-localid grid posi value) spritesheet-width)))
 
-(defpreload tilesheet (spritesheet "maps/iceworld.png" 48 48))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def tilesheet (spritesheet "maps/iceworld.png" 48 48))))
 
 (def blockprops
   {:undefined #{:ground}
@@ -78,7 +79,9 @@
 
 ; 16x16 TEST
 
-;(defpreload tilesheet (spritesheet "maps/test/dirt16x16likeiceworldblocks.png" 16 16))
+;(alter-var-root #'engine.core/fns conj
+;  (fn []
+;    (def tilesheet (spritesheet "maps/test/dirt16x16likeiceworldblocks.png" 16 16))))
 ;(use '(mapgen nad cave utils))
 ;(do
 ;  (make-tiledmap-file 16

@@ -1,10 +1,12 @@
 (ns engine.input
   "In order to use include engine.input/update-mousebutton-state and engine.core/init-all in your game."
-  (:require [engine.core :refer [app-game-container defpreload]])
+  (:require [engine.core :refer [app-game-container]])
   (:import org.newdawn.slick.Input))
 
-(defpreload ^:private input
-  (.getInput app-game-container))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private input
+      (.getInput app-game-container))))
 
 (defn clear-key-pressed-record   [] (.clearKeyPressedRecord   ^Input input))
 (defn clear-mouse-pressed-record [] (.clearMousePressedRecord ^Input input))

@@ -1,7 +1,6 @@
 (ns game.item.grids
   (:require
     [engine.render.image :refer [create-image]]
-    [engine.core :refer [defpreload]]
     [game.settings :refer [screen-height screen-width]]
     [game.gui :refer [is-visible? make-frame]]
     [game.ingame-gui :refer [frame-screenborder-distance ingamestate-display inventory-hotkey]]
@@ -91,9 +90,11 @@
   :is-equipment-cell false
   :visible-check showing-player-inventory?)
 
-(defpreload background-icons {:torso (create-image "items/armorbg.png")
-                              :hands (create-image "items/handsbg.png")
-                              :implants (create-image "items/implantsbg.png")})
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def background-icons {:torso (create-image "items/armorbg.png")
+                           :hands (create-image "items/handsbg.png")
+                           :implants (create-image "items/implantsbg.png")})))
 
 (add-item-grid
   :grid-type :hands

@@ -6,7 +6,7 @@
     [game.utils.geom :refer [point-in-rect?]]
     [utils.core :refer [deflazygetter]]
     [engine.input :refer [get-mouse-pos is-key-pressed? is-leftm-consumed? try-consume-leftm-pressed]]
-    [engine.core :refer [defpreload get-defaultfont get-text-height get-text-width]]))
+    [engine.core :refer [get-defaultfont get-text-height get-text-width]]))
 
 ; Nett:
 ; variable characterframe textlabel (text) function or jsut when text=function (text) instead of text
@@ -38,7 +38,9 @@
   (render-label g component)
   (render-pressable-rect g component))
 
-(defpreload ^:private selected-img (create-image "selected.png"))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private selected-img (create-image "selected.png"))))
 
 (defn- render-checkbox [g {:keys [bounds] :as component}]
   (let [[x y w h] bounds]
@@ -142,7 +144,7 @@
                                   [x y w h])})))
 
 (deflazygetter ^:private get-closeimg (create-image "close.png"))
-; using lazygetter instead of defpreload because other preload depends on this (make-frame)
+; using lazygetter instead of preload because other preload depends on this (make-frame)
 
 (defn make-frame [& data]
   (let [data (apply hash-map data)]

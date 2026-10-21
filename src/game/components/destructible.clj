@@ -2,7 +2,7 @@
   (:require
     [game.components.shield :refer [shield-try-consume-damage]]
     [utils.numbers :refer [increase-min-max-val lower-than-max? min-max-val rest-to-max set-to-max variance-val variance-val-str]]
-    [engine.core :refer [defpreload play-sound]]
+    [engine.core :refer [play-sound]]
     [engine.render.color :refer [rgbcolor]]
     [engine.render.image :refer [create-image]]
     [engine.render.animation :refer [create-animation]]
@@ -133,8 +133,12 @@
       (variance-val (* hp-multiplier player-standard-dmg) 0.5))
     (get-monster-armor armor-perc-reduce)))
 
-(defpreload explosion-frames (spritesheet-frames "effects/expsmall.png" 20 20))
-(defpreload ^:private blood-frames (spritesheet-frames "effects/blood.png" 20 20))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def explosion-frames (spritesheet-frames "effects/expsmall.png" 20 20))))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private blood-frames (spritesheet-frames "effects/blood.png" 20 20))))
 
 (defn- create-hit-effect [body]
   (if-let [{trigger :trigger} (:hit-effect @body)]

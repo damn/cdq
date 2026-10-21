@@ -1,6 +1,6 @@
 (ns game.monsters.mine
   (:require
-    [engine.core :refer [defpreload play-sound]]
+    [engine.core :refer [play-sound]]
     [engine.render.image :refer [create-image]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-frames spritesheet-frames]]
@@ -9,7 +9,9 @@
     [game.monster.defmonster :refer [defmonster]]
     [game.monsters.common :refer [death-trigger]]))
 
-(defpreload ^:private mine-explosion-frames (folder-frames "effects/mine/"))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private mine-explosion-frames (folder-frames "effects/mine/"))))
 
 (defmonster mine {:hp 1 :armor 0 :pxw 15 :pxh 15}
   (death-trigger (fn [this-body]

@@ -1,6 +1,6 @@
 (ns game.monsters.first-boss
   (:require
-    [engine.core :refer [defpreload play-sound]]
+    [engine.core :refer [play-sound]]
     [engine.render.color :refer [white]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation folder-frames]]
@@ -41,7 +41,9 @@
     :hit-effects effects
     :maxtime 12000))
 
-(defpreload ^:private boss-explosion (folder-frames "effects/bossexplosion/"))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private boss-explosion (folder-frames "effects/bossexplosion/"))))
 
 (defmonster first-boss {:hp 20 :armor 50 :pxw 33 :pxh 63}
   (big-body-hit-effect [[12 -15] [-8 -15] [0 -23] [1 -6] [-9 -4] [-8 4] [8 8] [-8 15] [3 23] [-6 25]])

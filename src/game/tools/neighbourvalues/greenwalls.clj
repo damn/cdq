@@ -1,7 +1,6 @@
 (ns game.tools.neighbourvalues.greenwalls
   (:require
     data.grid2d
-    [engine.core :refer [defpreload]]
     [engine.render.assets :refer [spritesheet]]
     [game.utils.random :refer [if-chance]]
     [game.tools.transitiontilemaker :refer [get-transition-tile-value]]
@@ -46,7 +45,9 @@
     (when-let [localid (calc-localid grid posi value)]
       (convert-to-spriteposi localid spritesheet-width))))
 
-(defpreload tilesheet (spritesheet "maps/test/greenwalls.png" 48 48))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def tilesheet (spritesheet "maps/test/greenwalls.png" 48 48))))
 
 ;(use '(mapgen nad cave utils cellular))
 ;(start-slick-basicgame

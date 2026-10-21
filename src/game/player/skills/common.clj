@@ -1,6 +1,6 @@
 (ns game.player.skills.common
   (:require
-    [engine.core :refer [defpreload play-sound]]
+    [engine.core :refer [play-sound]]
     [engine.render.image :refer [get-scaled-copy]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-frames]]
@@ -18,7 +18,9 @@
 
 (def curse-infostr "Curse\nOnly one curse is active at a time\n")
 
-(defpreload ^:private curse-frames (map #(get-scaled-copy % 0.3) (folder-frames "effects/curse/")))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private curse-frames (map #(get-scaled-copy % 0.3) (folder-frames "effects/curse/")))))
 
 (defn create-curse-effect [[x y]]
   (play-sound "bfxr_curse.wav")

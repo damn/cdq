@@ -1,6 +1,6 @@
 (ns game.monsters.nova-melee
   (:require
-    [engine.core :refer [create-sound defpreload]]
+    [engine.core :refer [create-sound]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation folder-frames]]
     [game.components.core :refer [player-body]]
@@ -35,7 +35,9 @@
       :monster-nova
       :melee)))
 
-(defpreload ^:private monster-nova-frames (folder-frames "effects/monsternova/"))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private monster-nova-frames (folder-frames "effects/monsternova/"))))
 
 (defn- create-nova-melee-skillmanager []
   (let [melee-weapon (skillmanager-skill

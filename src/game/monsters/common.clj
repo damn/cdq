@@ -1,6 +1,6 @@
 (ns game.monsters.common
   (:require
-    [engine.core :refer [create-sound defpreload make-counter play-sound]]
+    [engine.core :refer [create-sound make-counter play-sound]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-frames spritesheet-frames]]
     [utils.core :refer [translate-to-tile-middle]]
@@ -136,7 +136,9 @@
         path-w (in-tiles projectile-pxsize)]
     (is-path-blocked? sx sy tx ty path-w)))
 
-(defpreload ^:private redball-frames (folder-frames "effects/red_ball/"))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private redball-frames (folder-frames "effects/red_ball/"))))
 
 (let [maxrange 10
       maxrange-squared (Math/pow maxrange 2)
@@ -168,7 +170,9 @@
     :state-blocks state-blocks
     :props (redball-projectile-skill-props)))
 
-(defpreload ^:private monsterdie-frames (folder-frames "effects/monsterexplosion/"))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private monsterdie-frames (folder-frames "effects/monsterexplosion/"))))
 
 (defn monster-die-effect [body]
   (animation-entity
@@ -200,8 +204,12 @@
 
 (defn default-death-trigger [] (death-trigger default-monster-death))
 
-(defpreload ^:private bigger-explosion-frames (spritesheet-frames "effects/explosn.png" 20 20))
-(defpreload ^:private big-explosion-frames (spritesheet-frames "effects/expbig.png" 40 40))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private bigger-explosion-frames (spritesheet-frames "effects/explosn.png" 20 20))))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private big-explosion-frames (spritesheet-frames "effects/expbig.png" 40 40))))
 
 (defn rand-posis-hit-effect
   "pixel distance from center of boss for explosions"

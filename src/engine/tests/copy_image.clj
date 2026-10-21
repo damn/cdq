@@ -1,6 +1,6 @@
 (ns engine.tests.copy-image
   (:require
-    [engine.core :refer [defpreload start-slick-basicgame]]
+    [engine.core :refer [start-slick-basicgame]]
     [engine.render.image :refer [get-scaled-copy]]
     [engine.render.assets :refer [spritesheet-frames]]
     [engine.render.graphics :refer [fill-rect]])
@@ -8,8 +8,10 @@
 
 ; maybe compress the data so savegame is more readable? 1ASssF9g8aAgsGDGe
 
-(defpreload ^:private sheet-frames (map #(get-scaled-copy % 2)
-                                        (spritesheet-frames "effects/expbig.png" 40 40)))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private sheet-frames (map #(get-scaled-copy % 2)
+                                     (spritesheet-frames "effects/expbig.png" 40 40)))))
 (declare frankenstein)
 
 (defn render [container g]
