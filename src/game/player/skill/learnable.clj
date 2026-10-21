@@ -5,7 +5,7 @@
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [utils.core :refer [log split-key-val-and-maps]]
     [utils.numbers :refer [readable-number variance-val-str]]
-    [engine.render.color :refer [defcolor rgbcolor]]
+    [engine.render.color :refer [rgbcolor]]
     [engine.render.image :refer [create-image]]
     [engine.render.graphics :refer [fill-rect render-readable-text]]
     [game.settings :refer [screen-height]]
@@ -98,7 +98,7 @@
                  (str "damage: " (variance-val-str v) "\n")
                  (str (name k) ": " (readable-number v) "\n")))))
 
-(defcolor infostrcolor :r 0.3 :g 1 :b 0.6)
+(def infostrcolor (rgbcolor :r 0.3 :g 1 :b 0.6))
 
 (defn- get-skillmenu-skill-info-textseq
   "for learnable skills and skillmanager skills with :info"

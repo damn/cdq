@@ -3,7 +3,7 @@
   adjacent cells are walls and blocked.
   (important for wavefront-expansion and field-following)"
   (:require
-    [engine.render.color :as color :refer [defcolor rgbcolor set-color]]
+    [engine.render.color :as color :refer [rgbcolor set-color]]
     [engine.render.graphics :refer [draw-string fill-rect]]
     [game.components.position :refer [get-tile]]
     [game.components.movement :refer [movement-component]]
@@ -223,10 +223,10 @@
     (draw-string g xrect yrect (int dist))))
 
 (let [a 0.5]
-  (defcolor transp-red :r 1 :a a)
-  (defcolor transp-green :g 1 :a a)
-  (defcolor transp-orange :r 1 :g 0.34 :a a)
-  (defcolor transp-yellow :r 1 :g 1 :a a))
+  (def transp-red (rgbcolor :r 1 :a a))
+  (def transp-green (rgbcolor :g 1 :a a))
+  (def transp-orange (rgbcolor :r 1 :g 0.34 :a a))
+  (def transp-yellow (rgbcolor :r 1 :g 1 :a a)))
 
 (def ^:private adjacent-cells-colors (atom nil))
 

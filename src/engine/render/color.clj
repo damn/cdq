@@ -1,25 +1,20 @@
 (ns engine.render.color
   (:import (org.newdawn.slick Graphics Color)))
 
-(defmacro defslick2dcolors [& slick-static-colors]
-  `(do
-     ~@(map #(list 'def % (symbol (str "Color/" %))) slick-static-colors)))
-
-(defslick2dcolors
-  transparent
-  white
-  yellow
-  red
-  blue
-  green
-  black
-  gray
-  cyan
-  darkGray
-  lightGray
-  pink
-  orange
-  magenta)
+(def transparent Color/transparent)
+(def white Color/white)
+(def yellow Color/yellow)
+(def red Color/red)
+(def blue Color/blue)
+(def green Color/green)
+(def black Color/black)
+(def gray Color/gray)
+(def cyan Color/cyan)
+(def darkGray Color/darkGray)
+(def lightGray Color/lightGray)
+(def pink Color/pink)
+(def orange Color/orange)
+(def magenta Color/magenta)
 
 (defn rgbcolor [& {:keys [r g b a darker brighter]
                    :or {r 0 g 0 b 0 a 1 darker 0 brighter 0}}]
@@ -27,10 +22,7 @@
       (.darker darker)
       (.brighter brighter)))
 
-(defmacro defcolor [namesym & args]
-  `(def ~namesym (rgbcolor ~@args)))
-
 (defn set-color [^Graphics g color]
   (.setColor g color))
 
-(defcolor transparent-black :a 0.8)
+(def transparent-black (rgbcolor :a 0.8))
