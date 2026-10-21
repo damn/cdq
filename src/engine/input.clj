@@ -1,5 +1,5 @@
 (ns engine.input
-  "In order to use include engine.input/update-mousebutton-state and engine.core/init-all in your game."
+  "In order to use include engine.input/update-mousebutton-state and run engine.core/fns in your game."
   (:require [engine.core :refer [app-game-container]])
   (:import org.newdawn.slick.Input))
 

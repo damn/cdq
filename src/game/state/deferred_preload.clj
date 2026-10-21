@@ -1,7 +1,6 @@
 (ns game.state.deferred-preload
   (:import (org.newdawn.slick.loading LoadingList))
   (:require
-    [engine.core :refer [init-all]]
     [engine.render.graphics :refer [render-readable-text]]
     [engine.statebasedgame :refer [defgamestate enter-state]]
     [game.state.mainmenu :refer [mainmenu-gamestate]]))
@@ -12,7 +11,8 @@
 (defgamestate deferred-preload
   (init [container statebasedgame]
     (LoadingList/setDeferredLoading true)
-    (init-all))
+    (doseq [f engine.core/fns]
+      (f)))
 
   (update [container statebasedgame delta]
     (when-let [resource @next-resource]

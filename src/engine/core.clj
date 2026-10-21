@@ -7,10 +7,6 @@
 
 (def fns (list))
 
-(defn init-all []
-  (doseq [f fns]
-    (f)))
-
 ;;
 
 ; method of AppGameContainer does flip = true; -> so flip the icons vertical!
@@ -55,7 +51,8 @@
   (create-and-start-app-game-container
     :game (proxy [BasicGame] [title]
             (init [container]
-              (init-all)
+              (doseq [f fns]
+                (f))
               (init container))
             (update [container delta]
               (update container delta))
