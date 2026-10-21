@@ -1,7 +1,7 @@
 (ns game.item.grids
   (:require
     [engine.render.image :refer [create-image]]
-    [engine.core :refer [defpreload initialize]]
+    [engine.core :refer [defpreload]]
     [game.settings :refer [screen-height screen-width]]
     [game.gui :refer [is-visible? make-frame]]
     [game.ingame-gui :refer [frame-screenborder-distance ingamestate-display inventory-hotkey]]
@@ -58,15 +58,16 @@
 (def ^:private inventoryrx (- screen-width inventory-width frame-screenborder-distance))
 (def inventoryry frame-screenborder-distance)
 
-(initialize
-  (def inventory-frame (make-frame :name :inventory
-                                   :bounds [inventoryrx
-                                            inventoryry
-                                            inventory-width
-                                            inventory-height]
-                                   :hotkey inventory-hotkey
-                                   :visible false
-                                   :parent ingamestate-display)))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def inventory-frame (make-frame :name :inventory
+                                     :bounds [inventoryrx
+                                              inventoryry
+                                              inventory-width
+                                              inventory-height]
+                                     :hotkey inventory-hotkey
+                                     :visible false
+                                     :parent ingamestate-display))))
 
 (defn showing-player-inventory? [] (is-visible? inventory-frame))
 

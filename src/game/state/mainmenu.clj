@@ -4,7 +4,7 @@
     (org.newdawn.slick.gui TextField)
     (org.newdawn.slick.loading LoadingList))
   (:require
-    [engine.core :refer [app-game-container get-defaultfont get-line-height initialize]]
+    [engine.core :refer [app-game-container get-defaultfont get-line-height]]
     [engine.input :refer [update-mousebutton-state]]
     [engine.render.graphics :refer [render-readable-text]]
     [engine.statebasedgame :refer [defgamestate enter-state]]
@@ -70,36 +70,37 @@
 
 (declare set-visiblity-state)
 
-(initialize
-  (init-textfield)
-  (def ^:private create-char-button (make-textbutton :location [menu-second-column-x (+ menu-buttons-y 30)]
-                                                     :text "create"
-                                                     :pressed try-create-character
-                                                     :parent menu-display))
-  (def ^:private credits-label (make-label :location [menu-second-column-x menu-buttons-y]
-                                           :text creditstxt
-                                           :parent menu-display))
-  (make-textbutton :location [menu-buttons-x menu-buttons-y]
-                   :text "New Character"
-                   :pressed (fn []
-                              (.setText textfield "")
-                              (.start (Thread. (fn []
-                                                 (Thread/sleep 100)
-                                                 (.setFocus textfield true))))
-                              (set-visiblity-state :new-char))
-                   :parent menu-display)
-  (make-textbutton :text "Load Character"
-                   :location [menu-buttons-x (+ menu-buttons-y 25)]
-                   :pressed #(set-visiblity-state :load-char)
-                   :parent menu-display)
-  (make-textbutton :text "Credits"
-                   :location [menu-buttons-x (+ menu-buttons-y 50)]
-                   :pressed #(set-visiblity-state :credits)
-                   :parent menu-display)
-  (make-textbutton :text "Exit Game"
-                   :location [menu-buttons-x (+ menu-buttons-y 75)]
-                   :pressed #(.exit app-game-container)
-                   :parent menu-display))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (init-textfield)
+    (def ^:private create-char-button (make-textbutton :location [menu-second-column-x (+ menu-buttons-y 30)]
+                                                       :text "create"
+                                                       :pressed try-create-character
+                                                       :parent menu-display))
+    (def ^:private credits-label (make-label :location [menu-second-column-x menu-buttons-y]
+                                             :text creditstxt
+                                             :parent menu-display))
+    (make-textbutton :location [menu-buttons-x menu-buttons-y]
+                     :text "New Character"
+                     :pressed (fn []
+                                (.setText textfield "")
+                                (.start (Thread. (fn []
+                                                   (Thread/sleep 100)
+                                                   (.setFocus textfield true))))
+                                (set-visiblity-state :new-char))
+                     :parent menu-display)
+    (make-textbutton :text "Load Character"
+                     :location [menu-buttons-x (+ menu-buttons-y 25)]
+                     :pressed #(set-visiblity-state :load-char)
+                     :parent menu-display)
+    (make-textbutton :text "Credits"
+                     :location [menu-buttons-x (+ menu-buttons-y 50)]
+                     :pressed #(set-visiblity-state :credits)
+                     :parent menu-display)
+    (make-textbutton :text "Exit Game"
+                     :location [menu-buttons-x (+ menu-buttons-y 75)]
+                     :pressed #(.exit app-game-container)
+                     :parent menu-display)))
 
 (let [visibility {:none      [false false false false]
                   :new-char  [false true true false]
@@ -120,10 +121,11 @@
 
 (def ^:private music nil)
 
-(initialize
-  (alter-var-root #'music (constantly
-                            (doto (Music. "sounds/dungeon1.xm" true)
-                              (.setVolume (float 1))))))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (alter-var-root #'music (constantly
+                              (doto (Music. "sounds/dungeon1.xm" true)
+                                (.setVolume (float 1)))))))
 
 (defgamestate mainmenu
   (enter [container statebasedgame]

@@ -1,6 +1,6 @@
 (ns game.mouse-cursor
   (:require
-    [engine.core :refer [initialize set-mouse-cursor]]
+    [engine.core :refer [set-mouse-cursor]]
     [utils.core :refer [deflazygetter]])
   (:import org.newdawn.slick.opengl.CursorLoader))
 
@@ -13,8 +13,9 @@
   (defn reset-default-mouse-cursor []
     (set-mouse-cursor (get-default-mouse-cursor) hotspotx hotspoty)))
 
-(initialize
-  (reset-default-mouse-cursor))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (reset-default-mouse-cursor)))
 
 ; (.setDefaultMouseCursor app-game-container) -> der normale
 

@@ -20,7 +20,7 @@
     [game.utils.tilemap :refer [get-mouse-tile-pos mouse-int-tile-pos]]
     [utils.core :refer [int-posi sort-by-order]]
     [utils.numbers :refer [get-ratio readable-number variance-val-str]]
-    [engine.core :refer [get-line-height initialize play-sound]]
+    [engine.core :refer [get-line-height play-sound]]
     [game.settings :refer [debug-mode display-height-in-tiles display-width-in-tiles get-setting half-display-h-in-tiles half-display-w-in-tiles half-screen-h half-screen-w left-offset-in-tiles screen-height screen-width tile-height tile-width top-offset-in-tiles]]
     [game.screenshake :refer [translate-shake-after-render translate-shake-before-render update-shake]]
     [game.mouseoverbody :refer [get-mouseover-body]]
@@ -208,12 +208,13 @@
                         white
                         infostr))
 
-(initialize
-  (def ^:private rahmen (create-image "gui/rahmen.png"))
-  (def ^:private rahmenw (first (get-dimensions rahmen)))
-  (def ^:private rahmenh (second (get-dimensions rahmen)))
-  (def ^:private hpcontent (create-image "gui/hp.png"))
-  (def ^:private manacontent (create-image "gui/mana.png")))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private rahmen (create-image "gui/rahmen.png"))
+    (def ^:private rahmenw (first (get-dimensions rahmen)))
+    (def ^:private rahmenh (second (get-dimensions rahmen)))
+    (def ^:private hpcontent (create-image "gui/hp.png"))
+    (def ^:private manacontent (create-image "gui/mana.png"))))
 
 (defn- render-hpmana-bar [g x y contentimg minmaxval name]
   (draw-image rahmen x y)
@@ -238,12 +239,13 @@
         (render-readable-text g half-screen-w 0 :centerx true
                               (str (readable-number armor) " Armor\n" (get-armor-reduce-info armor)))))))
 
-(initialize
-  (def ^:private character-frame (make-frame :name :character
-                                    :bounds [(- screen-width frame-screenborder-distance 160) (+ inventoryry inventory-height 5) 160 30]
-                                    :hotkey char-hotkey
-                                    :visible false
-                                    :parent ingamestate-display)))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private character-frame (make-frame :name :character
+                                      :bounds [(- screen-width frame-screenborder-distance 160) (+ inventoryry inventory-height 5) 160 30]
+                                      :hotkey char-hotkey
+                                      :visible false
+                                      :parent ingamestate-display))))
 
 (defn- status-dmg-info [{:keys [is-melee dmg-info] :as skill}]
   (cond

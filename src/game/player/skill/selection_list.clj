@@ -1,6 +1,5 @@
 (ns game.player.skill.selection-list
   (:require
-    [engine.core :refer [initialize]]
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.player.skill.learnable :refer [render-skillbutton-tooltip]]
@@ -86,10 +85,11 @@
     (def ^:private button-y y)
     button))
 
-(initialize
-  (def ^:private selected-skill-buttons
-    {:left (create-selected-skill-button :left xleftselectedskillbutton)
-     :right (create-selected-skill-button :right xrightselectedskillbutton)}))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private selected-skill-buttons
+      {:left (create-selected-skill-button :left xleftselectedskillbutton)
+       :right (create-selected-skill-button :right xrightselectedskillbutton)})))
 
 (defn- create-skills-list [mousebutton buttonx buttony]
   (doseq [button (map :button (mousebutton select-skills-list))]

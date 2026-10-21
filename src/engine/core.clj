@@ -5,23 +5,14 @@
     (org.newdawn.slick ScalableGame AppGameContainer BasicGame Sound Font Graphics GameContainer
                        SpriteSheet SpriteSheetFont)))
 
-; Pre-load big images so the game does not pause/lag when they are played for the first time
-; even more important when those images are played only one time for example big monster explosion
-; use defpreload for it
-
-;;
-
-(def ^:private fns (list))
-
-(defmacro initialize [& exprs]
-  `(alter-var-root #'engine.core/fns conj (fn [] ~@exprs)))
+(def fns (list))
 
 (defn init-all []
   (doseq [f fns]
     (f)))
 
 (defmacro defpreload [& more]
-  `(initialize (def ~@more)))
+  `(alter-var-root #'engine.core/fns conj (fn [] (def ~@more))))
 
 ;;
 

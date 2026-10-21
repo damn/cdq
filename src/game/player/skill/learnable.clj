@@ -1,7 +1,6 @@
 (ns game.player.skill.learnable
   (:require
     clojure.set
-    [engine.core :refer [initialize]]
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [utils.core :refer [log split-key-val-and-maps]]
@@ -62,12 +61,13 @@
     (into {} (for [skill (map #(%) @init-fns)]
                [(:type skill) skill]))))
 
-(initialize
-  (def ^:private skillmenu-frame (make-frame :name :skillmenu
-                                    :bounds [skillmenu-x skillmenu-y 100 95]
-                                    :hotkey skillmenu-hotkey
-                                    :visible false
-                                    :parent ingamestate-display)))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private skillmenu-frame (make-frame :name :skillmenu
+                                      :bounds [skillmenu-x skillmenu-y 100 95]
+                                      :hotkey skillmenu-hotkey
+                                      :visible false
+                                      :parent ingamestate-display))))
 
 (defn- init-skillmenu-buttons []
   (let [x 5
@@ -87,9 +87,10 @@
                                                 (assign-unused-hotkey-and-open-skillslist (:type skill))))
                                    :parent skillmenu-frame)}))))
 
-(initialize
-  (init-learnable-skills)
-  (init-skillmenu-buttons))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (init-learnable-skills)
+    (init-skillmenu-buttons)))
 
 (defn- properties-str [props-map]
   (apply str (for [[k v] props-map]
@@ -149,15 +150,16 @@
                   :learned (for [[skilltype skill] learnable-skills]
                              [skilltype false])})))
 
-(initialize
-  (def ^:private freeskillpointsbutton
-    (make-imgbutton
-      :image (create-image "icons/skills_free.png" :scale buttonscale)
-      :location [(+ buttonx-start (* x-dist -1)) (- screen-height 18)]
-      :pressed #(switch-visible skillmenu-frame)
-      :tooltip "You have free skill points"
-      :parent ingamestate-display
-      :visible false)))
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private freeskillpointsbutton
+      (make-imgbutton
+        :image (create-image "icons/skills_free.png" :scale buttonscale)
+        :location [(+ buttonx-start (* x-dist -1)) (- screen-height 18)]
+        :pressed #(switch-visible skillmenu-frame)
+        :tooltip "You have free skill points"
+        :parent ingamestate-display
+        :visible false))))
 
 (ingame-loop-comp :update-button-visibility
   (active [delta c _]
