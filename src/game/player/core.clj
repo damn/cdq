@@ -1,5 +1,7 @@
 (ns game.player.core
   (:require
+    [game.components.body-effects-impl :refer [create-armor-reduce-effect slowdown stun]]
+    [game.utils.random :refer [when-chance]]
     [engine.render.color :as color]
     game.components.update
     game.maps.data
@@ -20,7 +22,6 @@
     [game.components.destructible :refer [destructible-component player-start-hp]]
     [game.components.body :refer [create-body teleport]]
     [game.components.body-effects :refer [get-sub-entities]]
-    [game.components.item-boni :refer [item-boni-component]]
     [game.item.cells :refer [get-inventory-cells-with-item-name remove-item-from-cell]]
     [game.components.movement.ai.potential-field :refer [potential-field-component]]
     [game.player.movement :refer [player-movement-component]]
@@ -67,6 +68,31 @@
     (remove-item-from-cell (rand-nth cells))
     (revive-player)
     true))
+
+; use integers because floating point arithmetic is not precise.
+; So when using floats and adding/subtracting some bonis it may be 0.999 instead of 1
+(defn item-boni-component []
+  {:type :item-boni
+   :min-inc 0
+   :max-inc 0
+   :percent-modify 100
+   :percent-modify-spell 100
+   :melee-crit 0
+   :spell-crit 0
+   :hp-leech 0
+   :mana-leech 0
+   :chance-stun 0
+   :chance-slow 0
+   :chance-reduce-armor 0
+   :dealt-melee-dmg-effect (fn [target-body]
+                             (let [{:keys [chance-stun chance-slow chance-reduce-armor]} (:item-boni @player-body)]
+                               (when-chance chance-stun
+                                 (stun target-body 1000))
+                               (when-chance chance-slow
+                                 (slowdown target-body 10))
+                               (when-chance chance-reduce-armor
+                                 (create-armor-reduce-effect target-body 50 10))))})
+
 
 (defn- create-player-body [position]
   (create-entity
