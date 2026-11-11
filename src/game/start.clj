@@ -13,6 +13,7 @@
     [game.session :as sess]
     [engine.settings :refer [jar-file?]]
     [utils.core :as utils]
+    [game.components.render :refer [image-render-component]]
     [engine.core :refer [create-and-start-app-game-container fullscreen-supported?]]
     [game.settings :refer [get-setting init-config! screen-height screen-scale screen-width]]
     game.components.body-render
