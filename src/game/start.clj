@@ -4,7 +4,7 @@
            (java.awt.event KeyEvent ActionListener)
            (org.newdawn.slick Image Color))
   (:require
-    [engine.render.image :as g :refer [create-image]]
+    [engine.render.image :as g :refer [create-image get-scaled-copy]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation folder-frames spritesheet-frames]]
     [engine.render.color :as color :refer [green orange red white]]
@@ -12,7 +12,7 @@
     [engine.settings :refer [jar-file?]]
     [engine.core :refer [create-and-start-app-game-container create-sound fullscreen-supported? make-counter play-sound]]
     [utils.core :as utils :refer [translate-to-tile-middle]]
-    [utils.numbers :refer [get-ratio lower-than-max?]]
+    [utils.numbers :refer [get-ratio lower-than-max? variance-val-str]]
     [utils.coll :refer [safe-merge]]
     [game.session :as sess]
     [game.settings :refer [get-setting in-tiles init-config! screen-height screen-scale screen-width tile-height tile-width]]
@@ -20,14 +20,14 @@
     [game.components.body :refer [blocked-location? bodies-in-range? circle-collides? get-bodies-at-position get-dist-to-player teleport]]
     [game.components.misc :refer [hp-regen-component rotate-to-player rotation-component]]
     [game.components.render :refer [animation-component animation-entity create-line-render-effect create-lines-render-effect image-render-component single-animation-component]]
-    [game.components.destructible :refer [deal-dmg explosion-frames get-destructible-bodies get-hp is-dead? set-hp-to-max]]
-    [game.components.body-effects-impl :refer [dmg-effect slowdown-effect stun-collision-effect]]
+    [game.components.destructible :refer [calc-effective-spell-dmg deal-dmg explosion-frames get-destructible-bodies get-hp is-dead? set-hp-to-max]]
+    [game.components.body-effects-impl :refer [add-psi-charge aoe-armor-reducer consume-psi-charges create-bullettime-effects current-psi-charges dmg-effect max-psi-charges slowdown-effect stun stun-collision-effect]]
     [game.components.active :refer [blocks-component]]
     [game.components.shield :refer [shield-component]]
     [game.components.movement :refer [movement-component projectile-movement-component]]
     [game.components.movement.ai.potential-field :refer [path-to-player-movement potential-field-player-following]]
-    [game.components.skills.core :refer [enough-mana? get-skill is-attacking? is-ready? is-usable? skillmanager-component skillmanager-skill standalone-skill]]
-    [game.components.skills.melee :refer [melee-weapon monster-melee-component monster-melee-props]]
+    [game.components.skills.core :refer [enough-mana? get-skill get-skill-use-mouse-tile-pos is-attacking? is-ready? is-usable? skillmanager-component skillmanager-skill standalone-skill]]
+    [game.components.skills.melee :refer [get-current-player-melee-dmg melee-weapon monster-melee-component monster-melee-props player-melee-props]]
     [game.components.sleeping :refer [wake-up]]
     [game.entity.projectile :refer [fire-projectile]]
     [game.entity.nova :refer [nova-effect]]
@@ -45,13 +45,8 @@
     game.maps.add
     game.media
     game.entity.teleporters
-    game.player.skills.player-ranged
-    game.player.skills.psi-charger
-    game.player.skills.nova
-    game.player.skills.bullettime-field
-    game.player.skills.aoe-armor-reduce
-    game.player.skills.stomp
-    game.player.skills.psi-bolt
+    [game.components.skills.utils :refer [check-line-of-sight get-player-ranged-vector]]
+    [game.player.skill.learnable :refer [deflearnable-skill]]
     [game.state.deferred-preload :refer [deferred-preload-gamestate]]
     [game.state.mainmenu :refer [mainmenu-gamestate]]
     [game.state.loading :refer [loading-gamestate]]
@@ -804,6 +799,216 @@
   (path-to-player-movement 72)
   (rotation-component)
   (image-render-component (create-image "opponents/coredemonhand.png")))
+
+;;; player.skills
+
+(defn dmg-info-player-spell [skill]
+  (variance-val-str
+    (calc-effective-spell-dmg
+      (:dmg skill)
+      (:percent-modify-spell (:item-boni @player-body)))))
+
+(def curse-infostr "Curse\nOnly one curse is active at a time\n")
+
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private curse-frames (map #(get-scaled-copy % 0.3) (folder-frames "effects/curse/")))))
+
+(defn create-curse-effect [[x y]]
+  (play-sound "bfxr_curse.wav")
+  (animation-entity
+    :position [x (- y (in-tiles (/ 80 3)))]
+    :animation (create-animation curse-frames)))
+
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private projectile-frames (folder-frames "effects/energyball/"))))
+
+(deflearnable-skill player-ranged
+  :manacost 2
+  :menu-posi [0 0]
+  :mousebutton :both
+  :icon "icons/ranged.png"
+  :info "Fires a projectile"
+  {:dmg [5 7]
+   :dmg-info dmg-info-player-spell
+   :show-info-for [:cost :dmg]
+   :animation :casting
+   :do-skill (fn [entity component]
+               (fire-projectile
+                 :startbody entity
+                 :px-size 8
+                 :animation (create-animation projectile-frames :looping true)
+                 :side :player
+                 :hits-side :monster
+                 :movement (projectile-movement-component (get-player-ranged-vector) 160)
+                 :hit-effects [(dmg-effect (:dmg component) :is-player-spell true)
+                               (stun-collision-effect 100 200)]
+                 :piercing false
+                 :maxrange 8))})
+
+(defn- psi-charge-hit-effect [_]
+  (let [{:keys [attack-bonus movement-bonus]} (:psi-charger game.player.skill.learnable/learnable-skills)]
+    (add-psi-charge player-body attack-bonus movement-bonus)))
+
+(deflearnable-skill psi-charger
+  :manacost 12
+  :menu-posi [1 0]
+  :mousebutton :both
+  :icon "icons/psi_charger.png"
+  :info
+  "Melee Attack where every successful hit
+gives you a PSI-Charge. PSI-Charges give
+you a passive bonus and can be used with
+finisher-skills.
+
+1 Charge  - +20% Movement-Speed
+            +13% Attack-Speed
+2 Charges - +40% Movement-Speed
+            +27% Attack-Speed
+3 Charges - +60% Movement-Speed
+            +40% Attack-Speed"
+  {:attack-bonus (/ 0.4 max-psi-charges)
+   :movement-bonus (/ 0.6 max-psi-charges)
+   :show-info-for [:cost]}
+  (player-melee-props [psi-charge-hit-effect]))
+
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private nova-frames (folder-frames "effects/nova/"))))
+
+(deflearnable-skill nova
+  :manacost 10
+  :menu-posi [2 0]
+  :mousebutton :right
+  :icon "icons/nova.png"
+  :info "Fires a nova."
+  {:dmg [6 9]
+   :dmg-info dmg-info-player-spell
+   :radius 3
+   :show-info-for [:cost :dmg]
+   :animation :casting
+   :do-skill (fn [entity {:keys [radius dmg] :as component}]
+               (nova-effect
+                 :position (:value (:position @entity))
+                 :duration 200
+                 :maxradius radius
+                 :affects-side :monster
+                 :dmg dmg
+                 :is-player-spell true
+                 :animation (create-animation nova-frames)))})
+
+(deflearnable-skill bullettime-field
+  :manacost 50
+  :menu-posi [0 1]
+  :mousebutton :both
+  :icon "icons/bullettime.png"
+  :info (str curse-infostr "Slows down monsters by 60%")
+  {:radius 1.5
+   :seconds 20
+   :show-info-for [:cost :seconds]
+   :animation :casting
+   :check-usable check-line-of-sight
+   :do-skill (fn [_ {:keys [radius seconds]}]
+               (let [posi (get-skill-use-mouse-tile-pos)]
+                 (create-curse-effect posi)
+                 (create-bullettime-effects posi radius seconds)))})
+
+(deflearnable-skill aoe-armor-reduce
+  :manacost 50
+  :menu-posi [0 2]
+  :mousebutton :both
+  :icon "icons/armorreduce.png"
+  :info (str curse-infostr "Reduces armor by 50%")
+  {:radius 1.5
+   :seconds 20
+   :show-info-for [:cost :seconds]
+   :animation :casting
+   :check-usable check-line-of-sight
+   :do-skill (fn [_ {:keys [radius seconds]}]
+               (let [posi (get-skill-use-mouse-tile-pos)]
+                 (create-curse-effect posi)
+                 (aoe-armor-reducer posi radius 50 seconds)))})
+
+(deflearnable-skill stomp
+  :manacost 10
+  :menu-posi [1 1]
+  :mousebutton :right
+  :icon "icons/stomp.png"
+  :info "Finisher-Skill
+Stuns and deals damage
+
+0 Charges - 1s stun duration
+1 Charge  - 1.3s stun duration
+            20% melee weapon damage
+2 Charges - 1.6s stun duration
+            40% melee weapon damage
+3 Charges - 2s stun duration
+            60% melee weapon damage"
+  {:dmg-info (fn [skill]
+               (let [cnt (current-psi-charges player-body)
+                     [mn mx] (get-current-player-melee-dmg)
+                     modifier (* cnt (:dmg-modifier skill))]
+                 (variance-val-str
+                   [(* modifier mn) (* modifier mx)])))
+   :radius 2
+   :dmg-modifier 0.2
+   :animation :casting
+   :show-info-for [:cost]
+   :do-skill (fn [entity {:keys [radius dmg-modifier] :as component}]
+               (let [posi (:value (:position @entity))
+                     cnt (consume-psi-charges entity)
+                     duration (+ 1000 (* cnt 333))
+                     dmg (* cnt dmg-modifier (rand-int-between (get-current-player-melee-dmg)))
+                     hits (get-destructible-bodies posi radius :monster)]
+                 (play-sound "explode-erco.wav")
+                 (animation-entity
+                   :position posi
+                   :animation (folder-animation :folder "effects/stomp/" :looping false))
+                 (dorun (map #(stun % duration) hits))
+                 (dorun (map #(deal-dmg dmg %) hits))))})
+
+(def ^:private psi-bolt-pxradius 17)
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (def ^:private psi-bolt-frames (folder-frames "effects/psibolt/"))))
+
+(defn- do-skill-psi-bolt [entity component]
+  (let [cnt (consume-psi-charges entity)
+        radius (in-tiles psi-bolt-pxradius)
+        dmg (*
+              (+ 0.5 (* cnt 0.5))
+              (rand-int-between (get-current-player-melee-dmg)))
+        posi (get-skill-use-mouse-tile-pos)
+        hits (get-destructible-bodies posi radius :monster)]
+    (play-sound "bfxr_psibolt.wav")
+    (animation-entity
+      :animation (create-animation psi-bolt-frames)
+      :position posi)
+    (dorun (map #(deal-dmg dmg %) hits))))
+
+(deflearnable-skill psi-bolt
+  :manacost 15
+  :menu-posi [1 2]
+  :mousebutton :right
+  :icon "icons/psibolt.png"
+  :info "Finisher-Skill
+PSI-Explosion
+
+0 Charges - 50% melee weapon damage
+1 Charge  - 100% melee weapon damage
+2 Charges - 150% melee weapon damage
+3 Charges - 200% melee weapon damage"
+  {:animation :casting
+   :show-info-for [:cost]
+   :check-usable check-line-of-sight
+   :do-skill do-skill-psi-bolt
+   :dmg-info (fn [entity skill]
+               (let [cnt (current-psi-charges entity)
+                     [mn mx] (get-current-player-melee-dmg)
+                     modifier (+ 0.5 (* cnt 0.5))]
+                 (variance-val-str
+                   [(* modifier mn) (* modifier mx)])))})
 
 ;;; serialization (was game.serialization)
 
