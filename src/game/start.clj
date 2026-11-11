@@ -2,8 +2,9 @@
   (:import (java.awt GridLayout Dimension)
            (javax.swing JPanel JFrame JButton ButtonGroup JRadioButton)
            (java.awt.event KeyEvent ActionListener)
-           (org.newdawn.slick Image Color SpriteSheet)
+           (org.newdawn.slick Image Color SpriteSheet Input Music)
            org.newdawn.slick.tiled.TiledMap
+           (org.newdawn.slick.gui TextField)
            (org.newdawn.slick.loading LoadingList)
            org.newdawn.slick.state.BasicGameState)
   (:require
@@ -14,12 +15,12 @@
     [engine.render.graphics :refer [draw-grid fill-rect render-readable-text reset-transform translate]]
     [engine.statebasedgame :as state :refer [enter-state init-state-based-game state-based-game]]
     [engine.settings :refer [jar-file?]]
-    [engine.core :refer [create-and-start-app-game-container create-sound fullscreen-supported? get-line-height make-counter play-sound]]
+    [engine.core :refer [app-game-container create-and-start-app-game-container create-sound fullscreen-supported? get-defaultfont get-line-height get-screen-height get-screen-width make-counter play-sound]]
     [utils.core :as utils :refer [get-unique-number int-posi sort-by-order translate-to-tile-middle]]
     [utils.numbers :refer [get-ratio lower-than-max? readable-number variance-val-str]]
     [utils.coll :refer [safe-merge]]
     [game.session :as sess]
-    [game.settings :refer [debug-mode display-height-in-tiles display-width-in-tiles get-setting half-display-h-in-tiles half-display-w-in-tiles half-screen-h half-screen-w in-tiles init-config! left-offset-in-tiles screen-height screen-scale screen-width tile-height tile-width top-offset-in-tiles]]
+    [game.settings :refer [debug-mode display-height-in-tiles display-width-in-tiles get-setting half-display-h-in-tiles half-display-w-in-tiles half-screen-h half-screen-w in-tiles init-config! left-offset-in-tiles screen-height screen-scale screen-width tile-height tile-width top-offset-in-tiles version]]
     [game.components.core :refer [active add-to-removelist id-entity-map is-player? player-body update-counter! update-removelist]]
     [game.components.body :refer [blocked-location? bodies-in-range? circle-collides? get-bodies-at-position get-dist-to-player on-screen-and-in-sight? teleport]]
     [game.components.misc :refer [hp-regen-component rotate-to-player rotation-component]]
@@ -38,7 +39,7 @@
     [game.item.instance :refer [create-item-body put-item-on-ground]]
     [game.item.instance-impl :refer [create-rand-item]]
     [game.maps.data :refer [get-current-map-data iterating-map-dependent-comps]]
-    [game.maps.minimap :refer [show-on-minimap]]
+    [game.maps.minimap :refer [render-minimap show-on-minimap]]
     [game.utils.geom :refer [direction-vector get-angle-to-position get-touched-tiles in-range? normalise rotate-angle-to-angle vector-from-angle vector2f]]
     [game.utils.random :refer [get-rand-weighted-item if-chance percent-chance rand-int-between]]
     [game.utils.raycast :refer [is-path-blocked? ray-blocked?]]
@@ -52,15 +53,13 @@
     [game.components.skills.utils :refer [check-line-of-sight get-player-ranged-vector]]
     [game.player.skill.learnable :refer [deflearnable-skill]]
     [engine.input :as input :refer [get-mouse-pos is-key-pressed? is-rightm-consumed? try-consume-leftm-pressed try-consume-rightm-pressed update-mousebutton-state]]
-    [game.gui :refer [is-visible? make-checkbox make-frame make-guidisplay make-label make-textbutton render-guicomponent update-guicomponent]]
+    [game.gui :refer [is-visible? make-checkbox make-frame make-guidisplay make-label make-textbutton remove-guicomponent render-guicomponent set-visible update-guicomponent]]
     [game.state.ids :as ids]
     [game.status-options :refer [get-state get-text set-state status-check-boxes]]
-    [game.state.mainmenu :refer [mainmenu-gamestate]]
-    [game.state.loading :refer [loading-gamestate]]
     [game.debug-settings :as debug]
     [game.components.update :as cupd]
     [game.maps.mapchange :refer [check-change-map]]
-    [game.player.session-data :refer [current-character-name]]
+    [game.player.session-data :refer [current-character-name get-session-file-character-names]]
     [game.utils.lightning :refer [image-corners set-cached-brightness]]
     [game.utils.tilemap :refer [get-mouse-tile-pos mouse-int-tile-pos]]
     [game.screenshake :refer [translate-shake-after-render translate-shake-before-render update-shake]]
@@ -77,8 +76,7 @@
     [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
     [game.player.skill.selection-list :refer [close-skill-selection-lists some-skill-selection-list-visible?]]
     [game.player.skill.skillmanager :refer [get-selected-skill]]
-    [game.player.core :refer [player-death try-revive-player]]
-    [game.state.minimap :refer [minimap-gamestate]])
+    [game.player.core :refer [player-death try-revive-player]])
   (:gen-class))
 
 ;;; monsters.common
@@ -1159,6 +1157,185 @@ PSI-Explosion
     (.add frame panel)
     (.pack frame)))
 
+;;; loading (was game.state.loading)
+
+(def is-loaded-character (atom false))
+
+(def ^:private loading-render-once (atom false))
+
+(def loading-gamestate
+  (let [id (get-unique-number)]
+    (proxy [BasicGameState] []
+      (getID [] id)
+
+      (enter [container statebasedgame]
+        (reset! loading-render-once false))
+
+      (init [container statebasedgame])
+
+      (update [container statebasedgame delta]
+        (when @loading-render-once
+          (utils/log "Loading new session")
+          (game.player.session-data/init @is-loaded-character)
+          (utils/log "Finished loading new session")
+          (state/enter-state ids/ingame)))
+
+      (render [container statebasedgame g]
+        (reset! loading-render-once true)
+        (render-readable-text g (/ (get-screen-width) 2) (/ (get-screen-height) 2) :centerx true "Loading...")))))
+
+;;; mainmenu (was game.state.mainmenu)
+
+(def ^:private creditstxt
+  "Created by Michael Sappler
+  Devlog: http://resatori.com
+
+  Graphics:
+  - Icons by Lorc
+  - lostgarden.com by Daniel Cook
+  - AI Wars Graphics pack (arcen games):
+  Chris Park, Daniel Cook, Philippe Chabot
+  and Hans Martin Portmann.
+  - AngbandTk Icons by David Gervais
+
+  Music:
+  - dungeon1.xm
+  from http://modarchive.org/
+  by Gammis of Lemonride ")
+
+(def ^:private menu-buttons-x 5)
+(def ^:private menu-second-column-x (+ menu-buttons-x 100))
+(def ^:private menu-buttons-y 20)
+
+(defn- init-textfield []
+  (def ^:private textfield (TextField. app-game-container (get-defaultfont) menu-second-column-x menu-buttons-y (* (+ 15 3) 6) 10))
+  (def ^:private textfield-visible (atom false))
+  (.setConsumeEvents textfield false)
+  (.setFocus textfield false)
+  (.setMaxLength textfield 15))
+
+(defn- start-loading-game [character-name & {new-character :new-character}]
+  (.setFocus textfield false)
+  (reset! is-loaded-character (not new-character))
+  (reset! current-character-name character-name)
+  (enter-state loading-gamestate))
+
+(defn- try-create-character []
+  (when-let [char-name (seq (.getText textfield))]
+    (start-loading-game (apply str char-name) :new-character true)))
+
+(def ^:private menu-display (make-guidisplay))
+
+(declare load-saved-game-components)
+
+(defn- init-load-saved-game-textbuttons []
+  (when (bound? #'load-saved-game-components)
+    (dorun (map #(remove-guicomponent menu-display %) load-saved-game-components)))
+  (def ^:private load-saved-game-components (map-indexed
+                                              (fn [idx char-name]
+                                                (make-textbutton
+                                                  :text char-name
+                                                  :location [menu-second-column-x (+ menu-buttons-y (* idx 12))]
+                                                  :pressed #(start-loading-game char-name :new-character false)
+                                                  :visible false
+                                                  :parent menu-display))
+                                              (get-session-file-character-names))))
+
+(declare set-visiblity-state)
+
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (init-textfield)
+    (def ^:private create-char-button (make-textbutton :location [menu-second-column-x (+ menu-buttons-y 30)]
+                                                       :text "create"
+                                                       :pressed try-create-character
+                                                       :parent menu-display))
+    (def ^:private credits-label (make-label :location [menu-second-column-x menu-buttons-y]
+                                             :text creditstxt
+                                             :parent menu-display))
+    (make-textbutton :location [menu-buttons-x menu-buttons-y]
+                     :text "New Character"
+                     :pressed (fn []
+                                (.setText textfield "")
+                                (.start (Thread. (fn []
+                                                   (Thread/sleep 100)
+                                                   (.setFocus textfield true))))
+                                (set-visiblity-state :new-char))
+                     :parent menu-display)
+    (make-textbutton :text "Load Character"
+                     :location [menu-buttons-x (+ menu-buttons-y 25)]
+                     :pressed #(set-visiblity-state :load-char)
+                     :parent menu-display)
+    (make-textbutton :text "Credits"
+                     :location [menu-buttons-x (+ menu-buttons-y 50)]
+                     :pressed #(set-visiblity-state :credits)
+                     :parent menu-display)
+    (make-textbutton :text "Exit Game"
+                     :location [menu-buttons-x (+ menu-buttons-y 75)]
+                     :pressed #(.exit app-game-container)
+                     :parent menu-display)))
+
+(let [visibility {:none      [false false false false]
+                  :new-char  [false true true false]
+                  :load-char [false false false true]
+                  :credits   [true false false false]}]
+  (defn- set-visiblity-state [vis-state]
+    (let [current (vis-state visibility)]
+      (set-visible credits-label (current 0))
+      (reset! textfield-visible (current 1))
+      (set-visible create-char-button (current 2))
+      (dorun (map #(set-visible % (current 3)) load-saved-game-components)))))
+
+(defn- reset-menu-state []
+  (init-load-saved-game-textbuttons)
+  (set-visiblity-state :none))
+
+(def ^:private menu-skipped (atom false))
+
+(def ^:private music nil)
+
+(alter-var-root #'engine.core/fns conj
+  (fn []
+    (alter-var-root #'music (constantly
+                              (doto (Music. "sounds/dungeon1.xm" true)
+                                (.setVolume (float 1)))))))
+
+(def mainmenu-gamestate
+  (let [id (get-unique-number)]
+    (proxy [BasicGameState] []
+      (getID [] id)
+
+      (enter [container statebasedgame]
+        (LoadingList/setDeferredLoading false)
+        (when music
+          (.loop ^Music music))
+        (reset-menu-state))
+
+      (keyPressed [int-key chr]
+        (when (and @textfield-visible (= int-key Input/KEY_ENTER))
+          (try-create-character))
+        (when (= int-key Input/KEY_ESCAPE)
+          (.exit app-game-container)))
+
+      (leave [container statebasedgame])
+
+      (init [container statebasedgame])
+
+      (update [container statebasedgame delta]
+        (update-mousebutton-state)
+        (update-guicomponent menu-display)
+        (when (and (get-setting :skip-main-menu-at-startup)
+                   (not @menu-skipped))
+          (reset! menu-skipped true)
+          (start-loading-game "Testchar" :new-character true)))
+
+      (render [container statebasedgame g]
+        (render-guicomponent g menu-display)
+        (when @textfield-visible
+          (.render textfield container g))
+        (render-readable-text g half-screen-w 0 :centerx true :background false :bigfont true "Cyber Dungeon Quest")
+        (render-readable-text g half-screen-w (- screen-height (get-line-height)) :centerx true :background false version)))))
+
 ;;; ingame (was game.state.ingame)
 
 ;;; item update (was game.item.update)
@@ -1609,6 +1786,24 @@ PSI-Explosion
 
     (render [container statebasedgame g]
       (render-guicomponent g options-display))))
+
+;;; minimap (was game.state.minimap)
+
+(def minimap-gamestate
+  (proxy [BasicGameState] []
+    (getID [] ids/minimap)
+
+    (enter [container statebasedgame])
+
+    (init [container statebasedgame])
+
+    (update [container statebasedgame delta]
+      (when (or (is-key-pressed? :TAB)
+                (is-key-pressed? :ESCAPE))
+        (enter-state ids/ingame)))
+
+    (render [container statebasedgame g]
+      (render-minimap g))))
 
 ;;; deferred-preload (was game.state.deferred-preload)
 
