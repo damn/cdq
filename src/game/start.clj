@@ -4,7 +4,10 @@
            (java.awt.event KeyEvent ActionListener)
            (org.newdawn.slick Image Color))
   (:require
-    [engine.render.image :as g]
+    [game.monsters.common :refer [default-death-trigger ranged-component ranged-runaway-movement-comp]]
+    [engine.render.image :as g :refer [create-image]]
+    [game.components.misc :refer [rotation-component]]
+    [game.utils.random :refer [rand-int-between]]
     [engine.render.color :as color]
     [engine.statebasedgame :refer [init-state-based-game state-based-game]]
     [game.session :as sess]
@@ -29,7 +32,6 @@
     game.monsters.big-skull-chainsaw
     game.monsters.big-teleporting-melee
     game.monsters.burrower
-    game.monsters.ranged
     game.monsters.shield-turret
     game.monsters.mage-skull
     game.monsters.fly
@@ -47,6 +49,7 @@
     game.player.skills.aoe-armor-reduce
     game.player.skills.stomp
     game.player.skills.psi-bolt
+    [game.monster.defmonster :refer [defmonster]]
     [game.state.deferred-preload :refer [deferred-preload-gamestate]]
     [game.state.mainmenu :refer [mainmenu-gamestate]]
     [game.state.loading :refer [loading-gamestate]]
@@ -54,6 +57,13 @@
     [game.state.options :refer [options-gamestate]]
     [game.state.minimap :refer [minimap-gamestate]])
   (:gen-class))
+
+(defmonster ranged {:hp 0.6 :armor 5 :pxw 15 :pxh 15}
+  (default-death-trigger)
+  (ranged-runaway-movement-comp 24 (rand-int-between 2 6) :ground)
+  (rotation-component)
+  (image-render-component (create-image "opponents/core_raider.png"))
+  (ranged-component :cooldown (rand-int-between 2000 2500) :attacktime 500))
 
 ;;; serialization (was game.serialization)
 
