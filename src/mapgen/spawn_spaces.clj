@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [create-grid get-8-neighbour-positions height posis width]]
     [cdq.core :refer [assoc-ks]]
-    [mapgen.utils :refer [get-3x3-cellvalues]]
+    [cdq.core :refer [get-3x3-cellvalues]]
     [game.maps.cell-grid :refer [cell-blocked?]]))
 
 (defn- ground?

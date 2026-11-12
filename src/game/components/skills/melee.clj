@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [create-sound]]
     [cdq.core :refer [in-tiles]]
-    [game.components.update :refer [max-delta]]
+    [cdq.core :refer [max-delta]]
     [game.item.cells :refer [get-equiped-hands-item]]
         [game.mouseoverbody :refer [get-mouseover-body]]
     game.utils.random

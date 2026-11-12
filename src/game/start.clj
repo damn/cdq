@@ -39,7 +39,7 @@
     [game.entity.nova :refer [nova-effect]]
     [game.item.instance :refer [create-item-body put-item-on-ground]]
     [game.item.instance-impl :refer [create-rand-item]]
-    [game.maps.data :refer [get-current-map-data iterating-map-dependent-comps]]
+    [cdq.core :refer [get-current-map-data iterating-map-dependent-comps]]
     [game.maps.minimap :refer [render-minimap show-on-minimap]]
     [game.utils.geom :refer [direction-vector get-angle-to-position get-touched-tiles in-range? normalise rotate-angle-to-angle vector-from-angle vector2f]]
     [game.utils.random :refer [get-rand-weighted-item if-chance percent-chance rand-int-between]]
@@ -55,10 +55,10 @@
     [game.player.skill.learnable :refer [deflearnable-skill]]
     [engine.input :as input :refer [get-mouse-pos is-key-pressed? is-rightm-consumed? try-consume-leftm-pressed try-consume-rightm-pressed update-mousebutton-state]]
     [game.gui :refer [is-visible? make-checkbox make-frame make-guidisplay make-label make-textbutton remove-guicomponent render-guicomponent set-visible update-guicomponent]]
-    [game.state.ids :as ids]
+    [cdq.core :as ids]
     [game.status-options :refer [get-state get-text set-state status-check-boxes]]
     [cdq.core :as debug]
-    [game.components.update :as cupd]
+    [cdq.core :as cupd]
     [game.maps.mapchange :refer [check-change-map]]
     [game.player.session-data :refer [current-character-name get-session-file-character-names]]
     [game.utils.lightning :refer [image-corners set-cached-brightness]]
@@ -1851,7 +1851,7 @@ PSI-Explosion
     (init [container statebasedgame])
 
     (update [container statebasedgame delta]
-      (let [delta (min delta game.components.update/max-delta)]
+      (let [delta (min delta cdq.core/max-delta)]
         (update-shake delta)
         (update-game delta)))
 

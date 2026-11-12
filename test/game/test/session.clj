@@ -35,7 +35,7 @@
     (is (= new-posi (get-posi)))
 
     (is (zero? (get-count)))
-    (game.components.update/update-component new-count (get-component entity :delete-after-duration) entity)
+    (cdq.core/update-component new-count (get-component entity :delete-after-duration) entity)
     (is (= new-count (get-count)))
 
     (game.player.session-data/save-game)

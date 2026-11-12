@@ -2,7 +2,7 @@
   (:require
     [cdq.core :as grid]
         cdq.core
-    [game.maps.data :refer [get-current-map-data]]
+    [cdq.core :refer [get-current-map-data]]
     [game.components.core :refer [player-body]]))
 
 ; Contentfield Entities

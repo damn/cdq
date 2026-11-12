@@ -567,3 +567,243 @@
 (defmacro xor [a b]
   `(or (and (not ~a) ~b)
        (and ~a (not ~b))))
+
+(defn scalegrid [grid factor]
+  (create-grid (* (width grid) factor)
+               (* (height grid) factor)
+               (fn [posi]
+                 (get grid (mapv #(int (/ % factor)) posi)))))
+; TODO other keys in the map-grid are lost -> look where i transform grids like this
+; merge with ld-grid?
+
+(defn create-borders-positions [grid] ; TODO not distinct -> apply distinct or set
+  (let [w (width grid),h (height grid)]
+    (concat
+      (mapcat (fn [x] [[x 0] [x (dec h)]]) (range w))
+      (mapcat (fn [y] [[0 y] [(dec w) y]]) (range h)))))
+
+(defn get-3x3-cellvalues [grid posi]
+  (map grid (cons posi (get-8-neighbour-positions posi))))
+
+(defn not-border-position? [[x y] grid]
+  (and (>= x 1) (>= y 1)
+       (< x (dec (width grid)))
+       (< y (dec (height grid)))))
+
+(defn border-position? [p grid] (not (not-border-position? p grid)))
+
+(defn wall-at? [grid posi]
+  (= :wall (get grid posi)))
+
+(defn undefined-value-behind-walls
+  "also border positions set to undefined where there are nil values"
+  [grid]
+  (transform grid
+             (fn [posi value]
+               (if (and (= :wall value)
+                        (every? #(let [value (get grid %)]
+                                   (or (= :wall value) (nil? value)))
+                                (get-8-neighbour-positions posi)))
+                 :undefined
+                 value))))
+
+(defn fill-single-cells [grid]
+  (transform grid
+             (fn [posi value]
+               (if (and (not-border-position? posi grid)
+                        (= :wall value)
+                        (not-any? #(wall-at? grid %) (get-4-neighbour-positions posi)))
+                 :ground
+                 value))))
+
+(defn- position-of [elem coll]
+  (first (positions #{elem} coll)))
+
+(defn- comes-after? "checks if o1 comes after o2."
+  [o1 o2]
+  (some #{(:type o2)} (:after o1)))
+
+(defn- has-correct-order? [elem a-seq]
+  (if-not (:after elem)
+    true
+    (let [posis (positions #(comes-after? elem %) a-seq)]
+      (cond
+        (empty? posis) true
+
+        (let [idx (position-of elem a-seq)]
+          (every? #(> idx %) posis))
+        true
+
+        :else false))))
+
+(defn- remove-one [item coll]
+  (let [idx (position-of item coll)]
+    (concat (take idx coll) (drop (inc idx) coll))))
+
+(defn- fix [incorrect a-seq]
+  (let [adjusted-seq (remove-one incorrect a-seq)
+        correct-idx (inc (apply max
+                           (positions #(comes-after? incorrect %) adjusted-seq)))]
+    (concat (take correct-idx adjusted-seq) [incorrect] (drop correct-idx adjusted-seq))))
+
+(defn order-maps
+  "Orders a sequence of maps, where every map has obligatory key :type and optional key :after types.
+   Cyclic orders lead to an error."
+  ([a-seq]
+    (order-maps a-seq (count a-seq)))
+  ([a-seq iterations-left]
+    (if (zero? iterations-left)
+      (throw (Error. "May be a cyclic order! Should be finished after (count a-seq) iterations."))
+      (if-let [incorrect (first (filter #(not (has-correct-order? % a-seq)) a-seq))]
+        (order-maps (fix incorrect a-seq) (dec iterations-left))
+        a-seq))))
+
+; only change @player-death and switch-debug
+(def running (atom true))
+(def update-session (atom-session running :save-session false))
+
+; das spiel soll bei 20fps noch "schnell" sein,d.h. net langsamer werden (max-delta wirkt -> game wird langsamer)
+; 1000/20 = 50
+(def max-delta 50)
+
+(defn update-component [delta component entity]
+  ((:updatefn component) delta component entity))
+
+;-> mit active zusammen in einen namespace?
+;-> und vielleicht auch mit blocks?
+(defn update-active-components [delta entities]
+  (doseq [entity entities
+          component (vals @entity)
+          :when (and (:updatefn component)
+                     (not-blocked? component))]
+    (try
+      (update-component (try-slowdown-delta delta component) component entity)
+      (catch Throwable t
+        (println "Entity " (:id (meta entity)) " with component " (:type component) " fails: " t)
+        (reset! running false)
+        (throw t)))))
+
+; Tempor�r hier- setze genau da wo geloopt wird hin!
+(def iterating-map-dependent-comps (atom false))
+(defn iterating-components? [] @iterating-map-dependent-comps)
+
+(def maps-data-session (reify Session
+               (load-session [_ _]
+                 (def ^:private maps-data {})
+                 (def added-map-order []))
+               (save-session [_])
+               (new-session-data [_])))
+
+(defn add-map [k data]
+  (alter-var-root #'maps-data assoc k data)
+  (alter-var-root #'added-map-order conj k))
+
+(defn get-map-keys [] (keys maps-data))
+
+(defn get-map-data [map-name] (get maps-data map-name))
+
+(defn get-pretty-name [map-key] (:pretty-name (get-map-data map-key)))
+
+; TODO faster access when current-map references maps-data and not the key?
+; test get-cells for example ...
+
+; 1 Do not change this while @update-components
+; -> or all comps of one map using grids of other maps etc.
+; 2 use only do-in-map or set-map!
+; 3 only set to a existing map - key
+; TODO VAR DOC?
+(def current-map (atom nil :validator (fn [_] (assert (not (iterating-components?)))
+                                        true)))
+
+(defn set-map! [new-map]
+  {:pre [(contains? maps-data new-map)]}
+  (reset! current-map new-map))
+
+(defmacro do-in-map
+  "Executes the exprs with current-map set to \"in\" and restores the previous current-map afterwards."
+  [in & exprs]
+  `(let [old# @current-map
+         ~'_ (reset! current-map ~in)
+         retrn# (do ~@exprs)]
+     (reset! current-map old#)
+     retrn#))
+
+(defn get-current-map-data [] (get maps-data @current-map))
+
+; primary keys because of cyclic dependencies between options menu and ingame-state
+(def ingame  (get-unique-number))
+(def options (get-unique-number))
+(def minimap (get-unique-number))
+
+; this transitiontilemaker works with scaledx2 maps and utilizes just 12 different tiles (else 256 different tiles would be needed)
+; so for each of these 12 tiles correspond to a number of the 256 combinations
+
+; algorithm from: http://www.saltgames.com/2010/a-bitwise-method-for-applying-tilemaps/
+(defn- transitiontile
+  ([k obligatory]
+    {:pre [(= (count obligatory) 1)]}
+    {(first obligatory) k})
+  ([k obligatory optional]
+    (zipmap (map #(apply + % obligatory) (apply +perm optional))
+            (repeat k))))
+
+(def ^:private idxvalues [1 128 64 2 32 4 8 16])
+
+(let [idxvalues-order [[-1 -1] [-1 0] [-1 1] [0 -1] [0 1] [1 -1] [1 0] [1 1]]]
+  (assert (= (get-8-neighbour-positions [0 0]) idxvalues-order)))
+
+(comment
+  ; Values for every neighbour:
+  {[-1 -1] 1  [0 -1] 2 [1 -1] 4
+   [-1 0]  128         [1 0] 8
+   [-1 1]  64 [0 1] 32 [1 1] 16}
+
+  [1   2  4
+   128 _  8
+   64  32 16])
+
+(def ^:private neighbour-idxvalue-to-transitiontile-key
+  (apply safe-merge
+         (map #(apply transitiontile %)
+              [[:topleft        [1]]
+               [:topright       [4]]
+               [:bottomleft     [64]]
+               [:bottomright    [16]]
+               [:left           [128]    [1 64]]
+               [:right          [8]      [4 16]]
+               [:top            [2]      [1 4]]
+               [:bottom         [32]     [16 64]]
+               [:topandleft     [128 2]  [1 4 64]]
+               [:topandright    [2 8]    [1 4 16]]
+               [:leftandbottom  [128 32] [1 64 16]]
+               [:rightandbottom [8 32]   [16 4 64]]])))
+
+(def ^:private transitiontile-keys
+  (set (vals neighbour-idxvalue-to-transitiontile-key)))
+
+(defn- get-transition-tile-idxvalue [count-neighbour? grid posi]
+  (apply +
+         (map-indexed (fn [idx p] (if (count-neighbour? p (get grid p))
+                                    (get idxvalues idx)
+                                    0))
+                      (get-8-neighbour-positions posi))))
+
+(defn- get-localid-for-tile-idxvalue [neighbourvalues id default-value]
+  (or (get neighbourvalues
+           (get neighbour-idxvalue-to-transitiontile-key id))
+      default-value))
+
+(defn get-transition-tile-value [posi grid & {:keys [neighbourvalues default-value count-neighbour?]}]
+  (let [ks (set (keys neighbourvalues))]
+    (assert (= ks transitiontile-keys)
+            (str "keys are not transitiontilekeys: " ks)))
+  (get-localid-for-tile-idxvalue neighbourvalues
+                                 (get-transition-tile-idxvalue count-neighbour? grid posi)
+                                 default-value))
+
+; TODO also beforestring/afterstring automatically machen
+; just input grid+tilesets.
+
+
+; TODO make a visual editor for transitiontile properties?
+; just set for every tile obligatory/optional and it calculates localid automatically.?

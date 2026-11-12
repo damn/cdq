@@ -1,6 +1,6 @@
 (ns game.maps.add
   (:require
-    [game.maps.data :as data]
+    [cdq.core :as data]
     [cdq.core :refer [get-setting]]
     game.utils.lightning
     [cdq.core :refer [log translate-to-tile-middle xor]]

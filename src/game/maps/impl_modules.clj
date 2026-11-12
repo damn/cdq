@@ -46,8 +46,8 @@
                        (when (:teleporter value)
                          (static-teleporter
                            :save-game true
-                           :from [@game.maps.data/current-map (translate-to-tile-middle posi)]
-                           :to [next-map (:start-position (game.maps.data/get-map-data next-map))])))
+                           :from [@cdq.core/current-map (translate-to-tile-middle posi)]
+                           :to [next-map (:start-position (cdq.core/get-map-data next-map))])))
                      (doseq [[posi value] grid2d]
                        (when-let [doortype (:door value)]
                          (make-door (translate-to-tile-middle posi)

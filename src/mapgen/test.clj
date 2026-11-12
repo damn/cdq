@@ -12,7 +12,7 @@
     mapgen.spawn-spaces
     [mapgen.cellular :refer [calculate-regions cellular-automata-gridgen connect-regions flood-fill]]
     [mapgen.nad :refer [fix-not-allowed-diagonals get-nads mark-nads]]
-    [mapgen.utils :refer [fill-single-cells wall-at?]]
+    [cdq.core :refer [fill-single-cells wall-at?]]
     [mapgen.populate :refer [get-populated-grid-posis get-rand-end-posi]])
   (:import java.util.Random))
 

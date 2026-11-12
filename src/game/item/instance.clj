@@ -6,7 +6,7 @@
     [engine.render.assets :refer [folder-animation]]
     [engine.render.image :refer [get-scaled-copy]]
     [cdq.core :refer [safe-merge]]
-    game.maps.data
+    cdq.core
     [game.item.cells :refer [try-pickup-item]]
     [game.item.grids :refer [showing-player-inventory?]]
     [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]

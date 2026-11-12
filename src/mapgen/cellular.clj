@@ -4,7 +4,7 @@
     [cdq.core :refer [create-grid get-4-neighbour-positions get-8-neighbour-positions posis transform]]
     [cdq.core :refer [assoc-ks]]
     [game.utils.random :refer [percent-chance]]
-    [mapgen.utils :refer [border-position? create-borders-positions]]))
+    [cdq.core :refer [border-position? create-borders-positions]]))
 
 (comment
 "The basic idea is to fill the first map randomly, then repeatedly create new maps using the 4-5 rule:

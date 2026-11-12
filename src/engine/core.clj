@@ -145,7 +145,7 @@
              :stopped? stopped?))))
 
 ; if (> maxdelta maxcnt) it could happen that after update it is again 'stopped?' in next update
-; could assert (<= maxcnt maxdelta), but dont want to depend on game.components.update here.
+; could assert (<= maxcnt maxdelta), but dont want to depend on cdq.core here.
 (defn make-counter [maxcnt]
   (ImmutableCounter. 0 maxcnt false))
 

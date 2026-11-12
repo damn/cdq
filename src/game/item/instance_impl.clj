@@ -1,6 +1,6 @@
 (ns game.item.instance-impl
   (:require
-    [game.maps.data :refer [current-map]]
+    [cdq.core :refer [current-map]]
     [game.components.movement :refer [projectile-movement-component]]
     [game.components.body-effects-impl :refer [battle-drugs dmg-effect]]
     [game.components.core :refer [player-body]]

@@ -11,7 +11,7 @@
     engine.core
     [cdq.core :refer [half-screen-h half-screen-w]]
     [game.components.core :refer [id-entity-map]]
-    [game.maps.data :refer [get-current-map-data]]
+    [cdq.core :refer [get-current-map-data]]
     [game.maps.cell-grid :refer [get-bodies-from-cells get-cells]]
     [game.maps.camera :refer [get-camera-position]])
   (:import (org.newdawn.slick Graphics Image)))

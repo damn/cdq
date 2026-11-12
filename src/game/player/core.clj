@@ -7,8 +7,8 @@
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation]]
     [engine.render.graphics :refer [render-readable-text]]
-    game.components.update
-    game.maps.data
+    cdq.core
+    cdq.core
     [game.maps.minimap :refer [show-on-minimap]]
     [game.components.skills.core :refer [is-attacking? reset-skills]]
     [game.components.skills.melee :refer [get-player-skill-animation-key]]
@@ -129,17 +129,17 @@
                                (str "be revived. Restorations left: " (dec (count restorations)) "")
                                "exit the game."))))
   (let [body player-body]
-    (reset! game.components.update/running false)
+    (reset! cdq.core/running false)
     (play-sound "bfxr_playerdeath.wav")
     (dorun (map add-to-removelist (get-sub-entities body)))
-    (game.components.update/update-component 0 (:animation @body) body) ; set death animation
+    (cdq.core/update-component 0 (:animation @body) body) ; set death animation
     (swap! player-body assoc-in [:destructible :hp :current] 0)
     (set-rotation-angle body 0)))
 
 (defn- revive-player []
   (show-msg-to-player "") ; removes the old msg
-  (reset! game.components.update/running true)
-  (teleport player-body (:start-position (game.maps.data/get-current-map-data)))
+  (reset! cdq.core/running true)
+  (teleport player-body (:start-position (cdq.core/get-current-map-data)))
   (swap! player-body #(-> % 
     (assoc-in [:destructible :is-dead] false)
     (update-in [:destructible :hp] set-to-max)

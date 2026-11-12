@@ -5,7 +5,7 @@
     [game.components.core :refer [player-body]]
     [game.components.body :refer [teleport]]
     [game.components.skills.core :refer [is-attacking?]]
-    [game.maps.data :refer [get-pretty-name set-map!]]))
+    [cdq.core :refer [get-pretty-name set-map!]]))
 
 (def ^:private queued (atom nil))
 

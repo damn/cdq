@@ -2,7 +2,7 @@
   (:require
     [engine.render.color :as color]
     [engine.render.image :refer [create-image]]
-    game.state.ids
+    cdq.core
     [engine.statebasedgame :refer [enter-state]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]
@@ -122,6 +122,6 @@ over a skill at the bottom left selection lists.
     (make-imgbutton
       :image (create-image "icons/options.png" :scale buttonscale)
       :location [(+ buttonx-start (* x-dist 4)) (- screen-height 18)]
-      :pressed #(enter-state game.state.ids/options)
+      :pressed #(enter-state cdq.core/options)
       :tooltip (hotkey-str options-hotkey "Options/Exit")
       :parent ingamestate-display)))

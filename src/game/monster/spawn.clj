@@ -9,7 +9,7 @@
     [game.components.core :refer [add-component]]
     [game.components.body :refer [blocked-location?]]
     [game.components.render :refer [single-animation-component]]
-    [game.maps.data :refer [get-current-map-data]]
+    [cdq.core :refer [get-current-map-data]]
     [game.utils.random :refer [get-rand-weighted-items rand-int-between when-chance]]))
 
 (defn try-spawn [posi monster-type & {debug :debug}]
@@ -18,7 +18,7 @@
         blocked (blocked-location? posi half-w half-h movement-type)
         spawned (when-not blocked (create posi))]
     (when debug
-      (println (str "try-spawn " monster-type " at " @game.maps.data/current-map " " posi " spawned? " (boolean spawned))))
+      (println (str "try-spawn " monster-type " at " @cdq.core/current-map " " posi " spawned? " (boolean spawned))))
     spawned))
 
 (comment
@@ -116,7 +116,7 @@
     (let [monsters (apply spawn-group (rand-nth group-definitions) posis (apply concat more))]  ; concat so the map is a sequence of its elements
       (when champions
         (when-chance 5
-                     ;(log "monsters at posi " (first posis) "championized" " in map " @game.maps.data/current-map)
+                     ;(log "monsters at posi " (first posis) "championized" " in map " @cdq.core/current-map)
                      ;(dorun (map championize-monster monsters))
                      ; deactivated because problem with 'current-animation' in game.render and because
                      ; sleeping monsters with blocks fails because new components added dont have blocks

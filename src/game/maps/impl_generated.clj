@@ -70,7 +70,7 @@
                      (static-teleporter
                        :save-game true
                        :from [:tech-graveyard (translate-to-tile-middle center-endroom)]
-                       :to [:tech (:start-position (game.maps.data/get-map-data :tech))])
+                       :to [:tech (:start-position (cdq.core/get-map-data :tech))])
                      (create-chest (translate-to-tile-middle center-treasureroom) :item-name "Cyborg Brain Booster")
                      (doseq [p stuff-posis]
                        (create-chest p)))
@@ -109,7 +109,7 @@
                      (static-teleporter
                        :save-game true
                        :from [:tech end-posi]
-                       :to [:blood-caves (:start-position (game.maps.data/get-map-data :blood-caves))]))
+                       :to [:blood-caves (:start-position (cdq.core/get-map-data :blood-caves))]))
      :rand-item-max-lvl 2}))
 
 (game.maps.add/defgeneratedmap :blood-caves

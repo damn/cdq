@@ -1,7 +1,7 @@
 (ns game.utils.lightning
   (:require
     [engine.render.color :as color]
-    game.maps.data
+    cdq.core
     [game.utils.geom :refer [get-distance tiles-inside-rect]]
     [game.utils.raycast :refer [ray-blocked?]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
@@ -75,7 +75,7 @@
   [light-posi {:keys [radius] :as light}]
   (merge
     {:posi light-posi}
-    (let [explored-tile-corners (:explored-tile-corners (game.maps.data/get-current-map-data))
+    (let [explored-tile-corners (:explored-tile-corners (cdq.core/get-current-map-data))
           corner-colors (into {}
                           (for [tileposi (tiles-inside-rect [light-posi radius radius])
                                 :when (inside-map? tileposi)
@@ -206,7 +206,7 @@
     (reset-brightness image)))
 
 (defn explored? [corner-tile-position]
-  (get @(:explored-tile-corners (game.maps.data/get-current-map-data)) corner-tile-position))
+  (get @(:explored-tile-corners (cdq.core/get-current-map-data)) corner-tile-position))
 ; is expensive always accessing current map data?
 ; maybe when render-grid dereference it 1 time and then just (get explored-tile-corners corner-position)
 ; but how to do at set-cached-brightness of tiledmaps? => just use a different explored? ...

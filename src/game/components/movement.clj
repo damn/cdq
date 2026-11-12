@@ -1,7 +1,7 @@
 (ns game.components.movement
   (:require
     [cdq.core :refer [tile-width]]
-    [game.components.update :refer [max-delta]]
+    [cdq.core :refer [max-delta]]
         [cdq.core :refer [safe-merge]]
         [game.components.core :refer [active add-to-removelist is-player?]]
     [game.components.body :refer [calc-touched-cells get-body-bounds get-other-solid-bodies get-to-check-tiles min-solid-pxsize update-occupied-cell update-touched-cells]]

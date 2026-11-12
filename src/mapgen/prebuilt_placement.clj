@@ -2,7 +2,7 @@
   (:require
     [cdq.core :as grid]
     [game.utils.geom :refer [tiles-inside-rect]]
-    [mapgen.utils :refer [wall-at?]])
+    [cdq.core :refer [wall-at?]])
   (:import cdq.core.VectorGrid))
 
 

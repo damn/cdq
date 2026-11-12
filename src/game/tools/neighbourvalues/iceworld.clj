@@ -3,7 +3,7 @@
     cdq.core
     [engine.render.assets :refer [spritesheet]]
     game.utils.random
-    [game.tools.transitiontilemaker :refer [get-transition-tile-value]]
+    [cdq.core :refer [get-transition-tile-value]]
     [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi make-tiledmap-file resource]]))
 
 ; needs a grid scaled x2 at least and nil cells behind other walls; also remove NADS & single cells
@@ -59,7 +59,7 @@
    :wall #{:ground}
    :ground #{}})
 
-(require '[mapgen.nad :refer [fix-not-allowed-diagonals]] '[mapgen.cave :refer [cave-gridgen]] '[mapgen.utils :refer [fill-single-cells scalegrid undefined-value-behind-walls]])
+(require '[mapgen.nad :refer [fix-not-allowed-diagonals]] '[mapgen.cave :refer [cave-gridgen]] '[cdq.core :refer [fill-single-cells scalegrid undefined-value-behind-walls]])
 
 (comment
   (make-tiledmap-file 48

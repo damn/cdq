@@ -1,7 +1,7 @@
 (ns game.maps.impl
   (:require
     game.maps.add
-    game.maps.data
+    cdq.core
     [cdq.core :as grid :refer [get-4-neighbour-positions mapgrid->vectorgrid posis transform height width]]
     [cdq.core :refer [log translate-to-tile-middle]]
     engine.core
@@ -29,12 +29,12 @@
     game.item.instance
     [game.item.instance :refer [create-item-body]]
     [game.item.instance-impl :refer [create-rand-item]]
-    [game.maps.data :refer [get-current-map-data]]
+    [cdq.core :refer [get-current-map-data]]
     [game.utils.random :refer [rand-int-between]]
     game.utils.random
     game.utils.lightning
     [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi get-spriteidx]]
-    [mapgen.utils :refer [border-position? fill-single-cells scalegrid undefined-value-behind-walls wall-at?]]
+    [cdq.core :refer [border-position? fill-single-cells scalegrid undefined-value-behind-walls wall-at?]]
     [mapgen.cave :refer [cave-gridgen]]
     mapgen.spawn-spaces
     [mapgen.populate :refer [get-populated-grid-posis]]
@@ -293,7 +293,7 @@
 ; use visualvm for bottleneck anyway...
 ; test with (Random. seed) & nth coll (srand-int (count ...) random) & (sshuffle) ...
 
-(defn- is-corner-position? [[x y] grid] ; TODO move to grid2d/mapgen.utils ?
+(defn- is-corner-position? [[x y] grid] ; TODO move to grid2d/cdq.core ?
   (and (or (= x 0) (= x (dec (width grid))))
        (or (= y 0) (= y (dec (height grid))))))
 

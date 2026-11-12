@@ -4,7 +4,7 @@
     [cdq.core :refer [diagonal-direction? int-posi translate-to-tile-middle]]
     [cdq.core :refer [atom-session]]
     [game.components.core :refer [id-entity-map]]
-    [game.maps.data :refer [get-current-map-data]]))
+    [cdq.core :refer [get-current-map-data]]))
 
 (defn get-cell-grid [] (:cell-grid (get-current-map-data)))
 (defn get-jcell-grid [] (force (:j-cell-grid (get-current-map-data))))

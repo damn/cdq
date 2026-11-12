@@ -6,16 +6,16 @@
     game.components.core
     game.components.sleeping
     game.components.burrow
-    game.components.update
+    cdq.core
     [game.item.cells :refer [add-item-to-cell empty-all-item-grids]]
     [game.item.grids :refer [item-grids]]
     [game.item.in-hand :refer [item-in-hand set-item-in-hand]]
     [game.item.instance :refer [create-item-instance]]
     [game.item.boni :refer [create-equip-boni-save load-equip-boni-save]]
     [cdq.core :refer [cells]]
-    [game.maps.data :as data]
+    [cdq.core :as data]
     game.maps.cell-grid
-    game.maps.data
+    cdq.core
     game.maps.add
     game.player.core
     game.player.skill.learnable
@@ -150,7 +150,7 @@
 (defn- session-components []
   (map (fn [[v stype]] [(deref v) (or stype (make-type v))])
        [; resets all map data -> do it before creating maps => TODO put both in one maps-session-component?
-        [#'game.maps.data/session]
+        [#'cdq.core/maps-data-session]
         ; create maps before putting entities in them
         [#'game.maps.add/session]
 
@@ -172,7 +172,7 @@
         [#'game.status-options/session]
         [#'game.mouseoverbody/cache-session]
         [#'game.mouseoverbody/saved-mouseover-body-session]
-        [#'game.components.update/session]
+        [#'cdq.core/update-session]
         [#'game.components.sleeping/session]
         [#'game.components.burrow/session]
         [#'game.utils.lightning/session]

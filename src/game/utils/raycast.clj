@@ -8,7 +8,7 @@
     [game.utils.geom :refer [add direction-vector get-normal-vectors scale vec-posi vector2f]]
     [game.utils.tilemap :refer [get-mouse-tile-pos screenpos-of-tilepos]]
     [game.maps.cell-grid :refer [get-jcell-grid get-map-h get-map-w]]
-    game.maps.data)
+    cdq.core)
   (:import game.utils.RayCaster))
 
 ; mit jcell-grid weil performanter als andere probierte l�sung: tilebasedmap zugriff auf get-cell bei jedem call to blocked.

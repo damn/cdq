@@ -1,6 +1,6 @@
 (ns mapgen.populate
   (:require
-    [mapgen.utils :refer [wall-at?]]
+    [cdq.core :refer [wall-at?]]
     [cdq.core :refer [height width]]
     [game.utils.random :refer [high-weighted-rand-nth]]
     [mapgen.cellular :refer [flood-fill]])

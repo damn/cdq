@@ -6,7 +6,7 @@
   (:require
     [cdq.core :refer [assoc-ks]]
     [cdq.core :refer [posis]]
-    [mapgen.utils :refer [wall-at?]]))
+    [cdq.core :refer [wall-at?]]))
 
 (defn- nad-corner? [grid [fromx fromy] [tox toy]]
   (and
