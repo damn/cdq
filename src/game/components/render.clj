@@ -6,7 +6,7 @@
     [engine.render.animation :refer [get-frame is-stopped? restart]]
     [engine.render.graphics :refer [draw-line fill-centered-circle render-centered-shape render-readable-text]]
     [game.utils.geom :as geom]
-    [utils.core :refer [define-order int-posi make-fn order-contains?]]
+    [cdq.core :refer [define-order int-posi make-fn order-contains?]]
     [cdq.core :refer [safe-merge]]
     [cdq.core :refer [readable-number]]
     [cdq.core :refer [in-pixel tile-height tile-width]]

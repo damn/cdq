@@ -8,7 +8,7 @@
     [game.components.position :refer [get-tile]]
     [game.components.movement :refer [movement-component]]
     [cdq.core :refer [cells get-8-neighbour-positions]]
-    [utils.core :refer [diagonal-direction?]]
+    [cdq.core :refer [diagonal-direction?]]
     [cdq.core :refer [genmap positions when-seq]]
     [cdq.core :refer [tile-height tile-width]]
     [game.components.core :refer [player-body]]

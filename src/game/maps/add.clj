@@ -3,7 +3,7 @@
     [game.maps.data :as data]
     [cdq.core :refer [get-setting]]
     game.utils.lightning
-    [utils.core :refer [log translate-to-tile-middle xor]]
+    [cdq.core :refer [log translate-to-tile-middle xor]]
     cdq.core
     [game.maps.cell-grid :refer [create-grid-from-gen-grid create-jcell-grid]]
     [game.maps.contentfields :refer [create-mapcontentfields]]

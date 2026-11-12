@@ -1,6 +1,6 @@
 (ns game.components.core
   (:require
-    [utils.core :refer [get-unique-number make-fn when-apply]]
+    [cdq.core :refer [get-unique-number make-fn when-apply]]
     [cdq.core :refer [distinct-seq? filter-map]]
     [engine.core :refer [update]]
     [cdq.core :as session]

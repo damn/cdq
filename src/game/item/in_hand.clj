@@ -3,7 +3,7 @@
     [engine.core :refer [set-mouse-cursor]]
     [engine.render.image :refer [get-scaled-copy]]
     [cdq.core :refer [screen-scale]]
-    [utils.core :refer [deflazygetter]])
+    [cdq.core :refer [deflazygetter]])
   (:import org.newdawn.slick.opengl.CursorLoader))
 
 ;;; mouse-cursor

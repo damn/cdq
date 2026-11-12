@@ -17,7 +17,7 @@
     [engine.statebasedgame :as state :refer [enter-state init-state-based-game state-based-game]]
     [engine.settings :refer [jar-file?]]
     [engine.core :refer [app-game-container create-and-start-app-game-container create-sound fullscreen-supported? get-defaultfont get-line-height get-screen-height get-screen-width make-counter play-sound]]
-    [utils.core :as utils :refer [get-unique-number int-posi sort-by-order translate-to-tile-middle]]
+    [cdq.core :as utils :refer [get-unique-number int-posi sort-by-order translate-to-tile-middle]]
     [cdq.core :refer [get-ratio lower-than-max? readable-number variance-val-str]]
     [cdq.core :refer [safe-merge]]
     [cdq.core :as sess]

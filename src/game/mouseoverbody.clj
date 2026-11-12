@@ -1,7 +1,7 @@
 (ns game.mouseoverbody
   (:require
     [game.ingame-gui :refer [mouse-inside-some-gui-component?]]
-    [utils.core :refer [sort-by-order]]
+    [cdq.core :refer [sort-by-order]]
     [engine.input :refer [is-leftbutton-down?]]
     [cdq.core :refer [debug-mode]]
     [cdq.core :refer [atom-session]]

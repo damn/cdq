@@ -1,5 +1,5 @@
 (ns game.state.ids
-  (:require [utils.core :refer [get-unique-number]]))
+  (:require [cdq.core :refer [get-unique-number]]))
 
 ; primary keys because of cyclic dependencies between options menu and ingame-state
 (def ingame  (get-unique-number))

@@ -3,7 +3,7 @@
     game.maps.add
     game.maps.data
     [cdq.core :as grid :refer [get-4-neighbour-positions mapgrid->vectorgrid posis transform height width]]
-    [utils.core :refer [log translate-to-tile-middle]]
+    [cdq.core :refer [log translate-to-tile-middle]]
     engine.core
     [engine.core :refer [play-sound]]
     [engine.render.assets :refer [get-sprite spritesheet]]

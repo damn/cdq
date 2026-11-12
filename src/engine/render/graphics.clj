@@ -1,7 +1,7 @@
 (ns engine.render.graphics
   (:require
     [clojure.string :refer [split-lines]]
-    [utils.core :refer [split-kvs-and-more]]
+    [cdq.core :refer [split-kvs-and-more]]
     [cdq.core :refer [when-seq]]
     [game.utils.geom :as geom]
     [engine.core :as core :refer [allowed-characters get-defaultfont get-screen-height get-screen-width get-text-height get-text-width reset-font]]

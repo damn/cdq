@@ -1,5 +1,5 @@
 (ns engine.core
-  (:require [utils.core :refer (deflazygetter)])
+  (:require [cdq.core :refer (deflazygetter)])
   (:import
     org.lwjgl.opengl.Display
     (org.newdawn.slick ScalableGame AppGameContainer BasicGame Sound Font Graphics GameContainer

@@ -3,7 +3,7 @@
     clojure.set
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
-    [utils.core :refer [log split-key-val-and-maps]]
+    [cdq.core :refer [log split-key-val-and-maps]]
     [cdq.core :refer [readable-number variance-val-str]]
     [engine.render.color :refer [rgbcolor]]
     [engine.render.image :refer [create-image]]

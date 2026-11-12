@@ -6,7 +6,7 @@
     [game.utils.geom :as geom]
     [clojure.set :refer [select union]]
     cdq.core
-    [utils.core :refer [int-posi]]
+    [cdq.core :refer [int-posi]]
     [cdq.core :refer [mapvals]]
     engine.core
     [cdq.core :refer [half-screen-h half-screen-w]]

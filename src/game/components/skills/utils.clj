@@ -5,7 +5,6 @@
     [game.components.position :refer [position-component]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
     [game.utils.raycast :refer [ray-blocked?]]
-    utils.core
     [game.mouseoverbody :refer [saved-mouseover-body]]
     [game.components.core :refer [add-to-removelist create-entity id-entity-map player-body]]
     [game.components.render :refer [render-on-map]]

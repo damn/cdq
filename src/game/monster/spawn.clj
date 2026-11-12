@@ -2,7 +2,7 @@
   (:require
     [game.item.instance :refer [create-item-body]]
     [cdq.core :refer [posis]]
-    [utils.core :refer [log translate-to-tile-middle]]
+    [cdq.core :refer [log translate-to-tile-middle]]
     [cdq.core :refer [inc-or-dec-max]]
     [engine.render.assets :refer [folder-animation]]
     [game.monster.defmonster :refer [get-monster-properties]]

@@ -2,7 +2,6 @@
   (:require
     [engine.render.color :as color :refer [set-color]]
     [engine.render.graphics :refer [draw-line]]
-    utils.core
     [engine.input :refer [get-mouse-pos]]
     [cdq.core :refer [half-screen-h half-screen-w]]
     [game.components.core :refer [player-body]]

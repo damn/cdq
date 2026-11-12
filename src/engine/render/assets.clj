@@ -1,10 +1,10 @@
 (ns engine.render.assets
   (:require
-    [utils.core :refer [get-jar-entries]]
     [engine.settings :refer [jar-file?]]
     [engine.render.image :refer [create-image]]
     [engine.render.animation :refer [create-animation default-frame-duration]])
   (:import java.io.File
+           java.util.zip.ZipInputStream
            (org.newdawn.slick Color SpriteSheet)))
 
 (def ^:private debug false)
@@ -20,6 +20,20 @@
   (sort (if prefix
           (filter #(.startsWith ^String % prefix) names)
           names)))
+
+; http://stackoverflow.com/questions/1429172/list-files-inside-a-jar-file
+(defn- get-jar-entries [filter-predicate]
+  (let [src (.getCodeSource (.getProtectionDomain game.utils.RayCaster))
+        zip (ZipInputStream. (.openStream (.getLocation src)))]
+    (loop [entry (.getNextEntry zip)
+           hits []]
+      (if entry
+        (recur (.getNextEntry zip)
+               (let [entryname (.getName entry)]
+                 (if (filter-predicate entryname)
+                   (conj hits entryname)
+                   hits)))
+        hits))))
 
 ; TODO  only do with jar file?
 ; (log "getting *.png jar entries...")

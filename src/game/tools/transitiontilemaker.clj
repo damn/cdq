@@ -1,6 +1,6 @@
 (ns game.tools.transitiontilemaker
   (:require
-    [utils.core :refer [+perm]]
+    [cdq.core :refer [+perm]]
     [cdq.core :refer [safe-merge]]
     [cdq.core :refer [get-8-neighbour-positions]]))
 

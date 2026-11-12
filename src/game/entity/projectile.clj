@@ -1,6 +1,6 @@
 (ns game.entity.projectile
   (:require
-    [utils.core :refer [xor]]
+    [cdq.core :refer [xor]]
     [game.components.body :refer [create-body]]
     [engine.core :refer [play-sound]]
     [engine.render.animation :refer [create-animation]]

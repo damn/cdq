@@ -6,7 +6,7 @@
     [game.utils.raycast :refer [ray-blocked?]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.maps.minimap :refer [update-minimap]]
-    [utils.core :refer [compare-times int-posi]]
+    [cdq.core :refer [compare-times int-posi]]
     [cdq.core :refer [genmap]]
     [cdq.core :refer [atom-session]]
     [cdq.core :refer [debug-mode in-pixel]]

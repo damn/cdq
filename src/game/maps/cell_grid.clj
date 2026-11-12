@@ -1,7 +1,7 @@
 (ns game.maps.cell-grid
   (:require
     [cdq.core :as grid]
-    [utils.core :refer [diagonal-direction? int-posi translate-to-tile-middle]]
+    [cdq.core :refer [diagonal-direction? int-posi translate-to-tile-middle]]
     [cdq.core :refer [atom-session]]
     [game.components.core :refer [id-entity-map]]
     [game.maps.data :refer [get-current-map-data]]))

@@ -7,7 +7,6 @@
         [game.mouseoverbody :refer [get-mouseover-body]]
     game.utils.random
     [game.utils.geom :as geom :refer [collides?]]
-    utils.core
     game.components.body
     [game.components.core :refer [id-entity-map is-player? player-body]]
     [game.components.body :refer [calc-touched-cells circle-collides? is-affectable? rect-shape]]
