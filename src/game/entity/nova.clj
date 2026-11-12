@@ -7,7 +7,7 @@
     [clojure.set :refer [union]]
         [engine.render.color :refer [rgbcolor]]
         [engine.render.graphics :refer [render-centered-shape]]
-    [game.settings :refer [in-pixel]]
+    [cdq.core :refer [in-pixel]]
     [game.components.core :refer [active add-to-removelist create-entity update-counter!]]
     [game.components.render :refer [render-on-map single-animation-component]]))
 

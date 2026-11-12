@@ -4,7 +4,7 @@
     [engine.render.graphics :refer [render-readable-text]]
     [game.components.body-render :refer [body-outline-height]]
     [engine.input :refer [try-consume-leftm-pressed]]
-    game.settings
+    cdq.core
     [game.mouseoverbody :refer [get-mouseover-body]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
     [game.components.core :refer [active player-body]]

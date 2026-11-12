@@ -2,7 +2,7 @@
   (:require
     [engine.render.color :as color]
     [engine.render.graphics :refer [fill-rect render-readable-text]]
-    [data.grid2d :refer [get-8-neighbour-positions]]
+    [cdq.core :refer [get-8-neighbour-positions]]
     [utils.core :refer [boolperm]]
     [cdq.core :refer [mapvals]]
     [engine.core :refer [start-slick-basicgame]]))

@@ -1,9 +1,9 @@
 (ns game.status-options
   (:require
     [engine.core :refer [app-game-container fullscreen-supported?]]
-    [game.settings :refer [get-setting]]
+    [cdq.core :refer [get-setting]]
     [game.utils.lightning :refer [active-lightning]]
-    game.session))
+    cdq.core))
 
 (defprotocol StatusCheckBox
   (get-text [this])
@@ -45,7 +45,7 @@
     (get-state [this] @active-lightning)
     (set-state [this is-selected] (reset! active-lightning is-selected))))
 
-(def session (reify game.session/Session
+(def session (reify cdq.core/Session
                (load-session [_ data]
                  (when data
                    (doseq [[text state] data]

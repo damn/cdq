@@ -4,7 +4,7 @@
     [engine.render.graphics :refer [draw-line]]
     utils.core
     [engine.input :refer [get-mouse-pos]]
-    [game.settings :refer [half-screen-h half-screen-w]]
+    [cdq.core :refer [half-screen-h half-screen-w]]
     [game.components.core :refer [player-body]]
     [game.utils.geom :refer [add direction-vector get-normal-vectors scale vec-posi vector2f]]
     [game.utils.tilemap :refer [get-mouse-tile-pos screenpos-of-tilepos]]

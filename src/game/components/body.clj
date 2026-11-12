@@ -1,8 +1,8 @@
 (ns game.components.body
-  (:require [game.debug-settings :as debug]
+  (:require [cdq.core :as debug]
             [game.utils.geom :as geom]
             [game.maps.camera :refer [get-camera-position]]
-            [game.settings :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
+            [cdq.core :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
             [cdq.core :refer [safe-merge]]
             [game.components.core :refer [id-entity-map player-body]]
             [game.components.render :refer [render-on-map]]

@@ -1,7 +1,7 @@
 (ns mapgen.populate
   (:require
     [mapgen.utils :refer [wall-at?]]
-    [data.grid2d :refer [height width]]
+    [cdq.core :refer [height width]]
     [game.utils.random :refer [high-weighted-rand-nth]]
     [mapgen.cellular :refer [flood-fill]])
   (:import (org.newdawn.slick.util.pathfinding TileBasedMap AStarPathFinder Mover Path)))

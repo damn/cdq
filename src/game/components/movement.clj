@@ -1,6 +1,6 @@
 (ns game.components.movement
   (:require
-    [game.settings :refer [tile-width]]
+    [cdq.core :refer [tile-width]]
     [game.components.update :refer [max-delta]]
         [cdq.core :refer [safe-merge]]
         [game.components.core :refer [active add-to-removelist is-player?]]

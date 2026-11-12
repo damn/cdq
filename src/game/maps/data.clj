@@ -1,11 +1,11 @@
 (ns game.maps.data
-  (:require game.session))
+  (:require cdq.core))
 
 ; Tempor�r hier- setze genau da wo geloopt wird hin!
 (def iterating-map-dependent-comps (atom false))
 (defn iterating-components? [] @iterating-map-dependent-comps)
 
-(def session (reify game.session/Session
+(def session (reify cdq.core/Session
                (load-session [_ _]
                  (def ^:private maps-data {})
                  (def added-map-order []))

@@ -4,15 +4,15 @@
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [utils.core :refer [log split-key-val-and-maps]]
-    [utils.numbers :refer [readable-number variance-val-str]]
+    [cdq.core :refer [readable-number variance-val-str]]
     [engine.render.color :refer [rgbcolor]]
     [engine.render.image :refer [create-image]]
     [engine.render.graphics :refer [fill-rect render-readable-text]]
-    [game.settings :refer [screen-height]]
+    [cdq.core :refer [screen-height]]
     game.media
     [game.gui :refer [get-bounds is-visible? make-frame make-imgbutton mouseover? set-visible switch-visible]]
     [game.ingame-gui :refer [buttonscale buttonx-start frame-screenborder-distance ingamestate-display skillmenu-hotkey x-dist]]
-    game.session
+    cdq.core
     [game.player.skill.skillmanager :refer [add-player-skill assign-unused-hotkey-and-open-skillslist create-skill-icon]]
     [game.components.core :refer [active player-body]]
     [game.components.skills.core :refer [skillmanager-skill]]
@@ -131,7 +131,7 @@
     (when (is-visible? skillmenu-frame)
       (dorun (map #(render-skillbutton-tooltip g %) skillmenu-buttons)))))
 
-(def session (reify game.session/Session
+(def session (reify cdq.core/Session
                (load-session [_ {:keys [free-points learned]}]
                  (swap! player-body assoc-in [:skillmanager :free-skill-points] free-points)
                  (doseq [[skilltype learned-this] learned

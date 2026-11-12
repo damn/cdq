@@ -1,6 +1,6 @@
 (ns game.tools.tiledmap-grid-convert
   (:require
-    [data.grid2d :refer [height width]]
+    [cdq.core :refer [height width]]
     [utils.prxml :refer [xml-str]])
   (:import (org.newdawn.slick.tiled TiledMap TileSet)))
 

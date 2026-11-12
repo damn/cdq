@@ -1,14 +1,14 @@
 (ns game.components.body-effects-impl
   (:require
     [cdq.core :refer [mapvals safe-merge]]
-    [utils.numbers :refer [approx-numbers]]
+    [cdq.core :refer [approx-numbers]]
     [engine.core :refer [reset update]]
     [engine.render.color :refer [rgbcolor]]
     [engine.render.image :refer [create-image get-scaled-copy]]
     [engine.render.animation :refer [create-animation render-centered-animation]]
     [engine.render.assets :refer [folder-animation folder-frames]]
     [engine.render.graphics :refer [render-readable-text]]
-    game.settings
+    cdq.core
     [game.components.core :refer [active add-to-removelist is-player? player-body reset-component-state-after-blocked]]
     game.components.misc
     game.components.body
@@ -16,7 +16,7 @@
     [game.components.render :refer [circle-around-body-render-comp render-above-body render-on-map single-animation-component]]
     [game.components.destructible :refer [deal-dmg get-armor get-destructible-bodies]]
     game.components.movement
-    [game.components.active :refer [add-blocks mark-slowed remove-blocks unmark-slowed]]
+    [cdq.core :refer [add-blocks mark-slowed remove-blocks unmark-slowed]]
     [game.utils.random :refer [if-chance]]
     [game.utils.geom :refer [degree-add degree-minus degrees? scale vec-posi vector-from-angle]]
     game.item.instance

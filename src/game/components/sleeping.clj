@@ -2,11 +2,11 @@
   (:require
     [game.utils.geom :as geom]
     [engine.render.graphics :refer [render-centered-shape render-readable-text]]
-    [utils.counter :refer [create-counter update-counter]]
-    [game.session :refer [atom-session]]
-    [game.settings :refer [in-pixel screen-height screen-width]]
+    [cdq.core :refer [create-counter update-counter]]
+    [cdq.core :refer [atom-session]]
+    [cdq.core :refer [in-pixel screen-height screen-width]]
     [game.components.core :refer [active block-active-components unblock-active-components]]
-    game.components.active
+    cdq.core
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.body :refer [get-body-bounds get-other-bodies-in-adjacent-cells]]

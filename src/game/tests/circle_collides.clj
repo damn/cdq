@@ -2,7 +2,7 @@
   (:require
     [engine.render.color :as color]
     [game.utils.geom :as geom]
-    [game.settings :refer [tile-width]]
+    [cdq.core :refer [tile-width]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]
     [game.components.core :refer [id-entity-map]]

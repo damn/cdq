@@ -1,6 +1,6 @@
 (ns game.item.instance  ; TODO refactor dependencies wg. instance-impl abkapselung
   (:require
-    [game.settings :refer [tile-width]]
+    [cdq.core :refer [tile-width]]
     [engine.core :refer [make-counter play-sound update update-finally-merge]]
     [engine.render.animation :refer [is-stopped? render-centered-animation restart]]
     [engine.render.assets :refer [folder-animation]]

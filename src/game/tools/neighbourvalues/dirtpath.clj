@@ -1,6 +1,6 @@
 (ns game.tools.dirtpath
   (:require
-    [data.grid2d :refer [get-8-neighbour-positions]]
+    [cdq.core :refer [get-8-neighbour-positions]]
     [engine.core :refer [start-slick-basicgame]]
     [game.utils.random :refer [if-chance]]
     [mapgen.populate :refer [find-path]]

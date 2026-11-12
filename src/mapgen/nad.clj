@@ -5,7 +5,7 @@
  - light shines through the edges"
   (:require
     [cdq.core :refer [assoc-ks]]
-    [data.grid2d :refer [posis]]
+    [cdq.core :refer [posis]]
     [mapgen.utils :refer [wall-at?]]))
 
 (defn- nad-corner? [grid [fromx fromy] [tox toy]]

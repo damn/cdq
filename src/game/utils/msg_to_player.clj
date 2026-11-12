@@ -1,10 +1,10 @@
 (ns game.utils.msg-to-player
   (:require
     [engine.render.graphics :refer [render-readable-text]]
-    [game.settings :refer [half-screen-h half-screen-w]]
+    [cdq.core :refer [half-screen-h half-screen-w]]
     [game.components.render :refer [rendering]]
-    [utils.counter :refer [create-counter reset-counter! update-counter]]
-    [game.session :refer [atom-session]]
+    [cdq.core :refer [create-counter reset-counter! update-counter]]
+    [cdq.core :refer [atom-session]]
     [game.components.core :refer [active]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]))
 

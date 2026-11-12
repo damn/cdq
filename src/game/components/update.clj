@@ -1,7 +1,7 @@
 (ns game.components.update
   (:require
-    [game.components.active :refer [not-blocked? try-slowdown-delta]]
-    [game.session :refer [atom-session]]))
+    [cdq.core :refer [not-blocked? try-slowdown-delta]]
+    [cdq.core :refer [atom-session]]))
 
 ; only change @player-death and switch-debug
 (def running (atom true))

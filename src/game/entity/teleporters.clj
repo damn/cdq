@@ -8,7 +8,7 @@
     utils.core
     [engine.core :refer [play-sound]]
     game.media
-    game.settings
+    cdq.core
     game.utils.lightning
     [game.maps.minimap :refer [show-on-minimap]]
     [game.maps.mapchange :refer [queue-map-change]]

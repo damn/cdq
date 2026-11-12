@@ -5,7 +5,7 @@
     [game.components.body :refer [create-body]]
     [game.components.destructible :refer [monster-destructible]]
     [game.components.sleeping :refer [sleeping-component]]
-    [game.settings :refer [tile-height tile-width]]))
+    [cdq.core :refer [tile-height tile-width]]))
 
 (defn create-monster
   "use defmonster not this for defining monsters"

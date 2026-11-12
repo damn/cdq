@@ -1,7 +1,7 @@
 (ns game.components.destructible
   (:require
     [game.components.shield :refer [shield-try-consume-damage]]
-    [utils.numbers :refer [increase-min-max-val lower-than-max? min-max-val rest-to-max set-to-max variance-val variance-val-str]]
+    [cdq.core :refer [increase-min-max-val lower-than-max? min-max-val rest-to-max set-to-max variance-val variance-val-str]]
     [engine.core :refer [play-sound]]
     [engine.render.color :refer [rgbcolor]]
     [engine.render.image :refer [create-image]]

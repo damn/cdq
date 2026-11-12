@@ -3,8 +3,8 @@
     [utils.core :refer [get-unique-number make-fn when-apply]]
     [cdq.core :refer [distinct-seq? filter-map]]
     [engine.core :refer [update]]
-    [game.session :as session]
-    [game.components.active :refer [add-blocks remove-blocks]]))
+    [cdq.core :as session]
+    [cdq.core :refer [add-blocks remove-blocks]]))
 
 (def id-entity-map (atom {}))
 

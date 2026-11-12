@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [make-counter]]
     [cdq.core :refer [safe-merge]]
-    [utils.numbers :refer [increase-min-max-val]]
+    [cdq.core :refer [increase-min-max-val]]
     [game.utils.geom :refer [direction-vector get-angle-from-vector get-vector-to-mouse-coords]]
     [game.components.core :refer [active add-to-removelist player-body update-counter!]]))
 

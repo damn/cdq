@@ -1,5 +1,5 @@
 (ns mapgen.cave
-  (:require [data.grid2d :as grid]
+  (:require [cdq.core :as grid]
             [cdq.core :refer (assoc-ks)]
             [game.utils.random :as rand]))
 

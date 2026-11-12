@@ -13,14 +13,14 @@
     [game.components.skills.core :refer [is-attacking? reset-skills]]
     [game.components.skills.melee :refer [get-player-skill-animation-key]]
     [game.utils.lightning :refer [light-component]]
-    [utils.numbers :refer [set-to-max]]
+    [cdq.core :refer [set-to-max]]
     [cdq.core :refer [when-seq]]
     [engine.core :refer [play-sound]]
     [engine.input :refer [is-key-down? is-leftbutton-down? is-leftm-consumed?]]
     engine.input
     game.maps.contentfields
     [game.components.core :refer [add-to-removelist create-entity player-body]]
-    [game.components.active :refer [switch-state]]
+    [cdq.core :refer [switch-state]]
     [game.components.position :refer [position-component]]
     [game.components.movement :refer [movement-component]]
     game.components.movement
@@ -37,8 +37,8 @@
     game.player.skill.learnable
     [game.player.speed :refer [player-move-speed]]
     [game.mouseoverbody :refer [saved-mouseover-body]]
-    game.settings
-    [game.debug-settings :as debug]
+    cdq.core
+    [cdq.core :as debug]
     [game.utils.geom :refer [add direction-vector get-vector-to-mouse-coords normalise vector2f]]
     game.utils.geom
     [game.utils.msg-to-player :refer [show-msg-to-player]]))

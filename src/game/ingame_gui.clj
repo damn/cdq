@@ -8,7 +8,7 @@
     [game.components.render :refer [rendering]]
     [game.components.core :refer [active]]
     [engine.core :refer [get-text-height]]
-    [game.settings :refer [get-setting screen-height]]
+    [cdq.core :refer [get-setting screen-height]]
     [game.gui :refer [is-visible? make-frame make-guidisplay make-imgbutton make-label mouseover? render-guicomponent set-visible switch-visible update-guicomponent]]))
 
 (def ^:private controls-hotkey :H)

@@ -4,12 +4,12 @@
     [engine.input :refer [get-mouse-pos is-leftbutton-down? is-rightbutton-down?]]
     [utils.core :refer [split-key-val-and-maps]]
     [cdq.core :refer [mapvals]]
-    [utils.numbers :refer [lower-than-max? min-max-val rest-to-max set-to-max]]
+    [cdq.core :refer [lower-than-max? min-max-val rest-to-max set-to-max]]
     [engine.render.animation :refer [is-stopped?]]
     [game.utils.tilemap :refer [get-mouse-tile-pos]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
     [game.components.core :refer [active is-player? update-counter!]]
-    [game.components.active :refer [blocks-component switch-state]]
+    [cdq.core :refer [blocks-component switch-state]]
     [game.components.render :refer [current-animation show-gains-mana-effect]]))
 
 (defn is-ready?        [{state :state}] (= state :ready))

@@ -1,6 +1,6 @@
 (ns mapgen.spawn-spaces
   (:require
-    [data.grid2d :refer [create-grid get-8-neighbour-positions height posis width]]
+    [cdq.core :refer [create-grid get-8-neighbour-positions height posis width]]
     [cdq.core :refer [assoc-ks]]
     [mapgen.utils :refer [get-3x3-cellvalues]]
     [game.maps.cell-grid :refer [cell-blocked?]]))

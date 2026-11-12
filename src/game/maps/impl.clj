@@ -2,13 +2,13 @@
   (:require
     game.maps.add
     game.maps.data
-    [data.grid2d :as grid :refer [get-4-neighbour-positions mapgrid->vectorgrid posis transform height width]]
+    [cdq.core :as grid :refer [get-4-neighbour-positions mapgrid->vectorgrid posis transform height width]]
     [utils.core :refer [log translate-to-tile-middle]]
     engine.core
     [engine.core :refer [play-sound]]
     [engine.render.assets :refer [get-sprite spritesheet]]
     [engine.render.color :as color]
-    game.settings
+    cdq.core
     game.media
     [game.media :refer [get-itemsprite]]
     game.components.core

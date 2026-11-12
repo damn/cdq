@@ -1,8 +1,8 @@
 (ns game.utils.geom
   (:require
-    [utils.numbers :refer [approx-numbers]]
+    [cdq.core :refer [approx-numbers]]
     [engine.input :refer [get-mouse-pos]]
-    [game.settings :refer [half-screen-h half-screen-w]])
+    [cdq.core :refer [half-screen-h half-screen-w]])
   (:import
     (org.newdawn.slick.geom Shape Vector2f Rectangle Circle Transform)))
 

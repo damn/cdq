@@ -13,22 +13,22 @@
     [engine.render.assets :refer [folder-animation folder-frames get-sprite spritesheet-frames]]
     [engine.render.color :as color :refer [black green orange red rgbcolor set-color white yellow]]
     [engine.render.graphics :refer [draw-grid fill-rect render-readable-text reset-transform translate]]
-    [data.grid2d :refer [height width]]
+    [cdq.core :refer [height width]]
     [engine.statebasedgame :as state :refer [enter-state init-state-based-game state-based-game]]
     [engine.settings :refer [jar-file?]]
     [engine.core :refer [app-game-container create-and-start-app-game-container create-sound fullscreen-supported? get-defaultfont get-line-height get-screen-height get-screen-width make-counter play-sound]]
     [utils.core :as utils :refer [get-unique-number int-posi sort-by-order translate-to-tile-middle]]
-    [utils.numbers :refer [get-ratio lower-than-max? readable-number variance-val-str]]
+    [cdq.core :refer [get-ratio lower-than-max? readable-number variance-val-str]]
     [cdq.core :refer [safe-merge]]
-    [game.session :as sess]
-    [game.settings :refer [debug-mode display-height-in-tiles display-width-in-tiles get-setting half-display-h-in-tiles half-display-w-in-tiles half-screen-h half-screen-w in-tiles init-config! left-offset-in-tiles screen-height screen-scale screen-width tile-height tile-width top-offset-in-tiles version]]
+    [cdq.core :as sess]
+    [cdq.core :refer [debug-mode display-height-in-tiles display-width-in-tiles get-setting half-display-h-in-tiles half-display-w-in-tiles half-screen-h half-screen-w in-tiles init-config! left-offset-in-tiles screen-height screen-scale screen-width tile-height tile-width top-offset-in-tiles version]]
     [game.components.core :refer [active add-to-removelist id-entity-map is-player? player-body update-counter! update-removelist]]
     [game.components.body :refer [blocked-location? bodies-in-range? circle-collides? get-bodies-at-position get-dist-to-player on-screen-and-in-sight? teleport]]
     [game.components.misc :refer [hp-regen-component rotate-to-player rotation-component]]
     [game.components.render :refer [animation-component animation-entity create-line-render-effect create-lines-render-effect image-render-component render-map-indep-order render-on-map-order rendering single-animation-component translate-position]]
     [game.components.destructible :refer [calc-effective-spell-dmg deal-dmg explosion-frames get-armor get-armor-reduce-info get-destructible-bodies get-hp is-dead? set-hp-to-max]]
     [game.components.body-effects-impl :refer [add-psi-charge aoe-armor-reducer consume-psi-charges create-bullettime-effects current-psi-charges dmg-effect max-psi-charges slowdown-effect stun stun-collision-effect]]
-    [game.components.active :refer [blocks-component]]
+    [cdq.core :refer [blocks-component]]
     [game.components.shield :refer [shield-component]]
     [game.components.movement :refer [movement-component projectile-movement-component]]
     [game.components.movement.ai.potential-field :refer [calculate-mouseover-body-colors path-to-player-movement potential-field-player-following render-potential-field-following-mouseover-info render-potential-field-info]]
@@ -57,7 +57,7 @@
     [game.gui :refer [is-visible? make-checkbox make-frame make-guidisplay make-label make-textbutton remove-guicomponent render-guicomponent set-visible update-guicomponent]]
     [game.state.ids :as ids]
     [game.status-options :refer [get-state get-text set-state status-check-boxes]]
-    [game.debug-settings :as debug]
+    [cdq.core :as debug]
     [game.components.update :as cupd]
     [game.maps.mapchange :refer [check-change-map]]
     [game.player.session-data :refer [current-character-name get-session-file-character-names]]
@@ -1252,7 +1252,7 @@ PSI-Explosion
         (reify ActionListener
           (actionPerformed [this e]
             (when-let [{:keys [scale fullscreen]} (first (filter #(.isSelected (:button %)) buttons))]
-              (intern 'game.settings 'screen-scale scale)
+              (intern 'cdq.core 'screen-scale scale)
               (.setEnabled startbutton false)
               (.dispose frame)
               (start-the-game fullscreen))))))))

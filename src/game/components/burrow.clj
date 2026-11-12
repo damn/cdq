@@ -1,11 +1,11 @@
 (ns game.components.burrow
   (:require
-    [utils.counter :refer [create-counter update-counter]]
+    [cdq.core :refer [create-counter update-counter]]
     [engine.core :refer [play-sound]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [spritesheet-frames]]
-    [game.session :refer [atom-session]]
-    game.components.active
+    [cdq.core :refer [atom-session]]
+    cdq.core
     [game.components.core :refer [active block-active-components reset-component-state-after-blocked unblock-active-components]]
     [game.components.render :refer [animation-entity]]
     [game.components.body :refer [colliding-with-other-solid-bodies? get-dist-to-player get-other-bodies-in-adjacent-cells is-burrowed?]]

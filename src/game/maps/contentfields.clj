@@ -1,7 +1,7 @@
 (ns game.maps.contentfields
   (:require
-    [data.grid2d :as grid]
-        game.settings
+    [cdq.core :as grid]
+        cdq.core
     [game.maps.data :refer [get-current-map-data]]
     [game.components.core :refer [player-body]]))
 

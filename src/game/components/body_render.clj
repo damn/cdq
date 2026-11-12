@@ -1,15 +1,15 @@
 (ns game.components.body-render
   (:require
-    [game.debug-settings :as debug]
+    [cdq.core :as debug]
     [game.utils.geom :as geom]
     [engine.render.color :as color :refer [rgbcolor set-color]]
     [engine.render.image :refer [create-image draw-image]]
     [engine.render.animation :refer [get-frame]]
     [engine.render.graphics :refer [draw-rect draw-shape fill-rect render-readable-text]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
-    [utils.numbers :refer [get-ratio]]
+    [cdq.core :refer [get-ratio]]
     [engine.core :refer [ratio]]
-    [game.settings :refer [debug-mode in-pixel]]
+    [cdq.core :refer [debug-mode in-pixel]]
     [game.mouseoverbody :refer [get-mouseover-body]]
     [game.components.core :refer [id-entity-map is-player?]]
     game.components.body

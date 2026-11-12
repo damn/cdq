@@ -2,12 +2,12 @@
   (:require
     [engine.render.image :refer [create-image get-scaled-copy]]
         [engine.input :refer [is-leftbutton-down? is-rightbutton-down? is-rightm-consumed? mousebutton]]
-    game.settings
+    cdq.core
     [game.mouseoverbody :refer [get-mouseover-body saved-mouseover-body]]
     [game.components.skills.core :refer [enough-mana? skillmanager-component skillmanager-skill]]
     [game.components.skills.melee :refer [player-melee-props]]
     [game.components.core :refer [active add-to-removelist player-body]]
-    [game.components.active :refer [add-block blocks-component remove-block]]
+    [cdq.core :refer [add-block blocks-component remove-block]]
     game.components.body
     [game.components.destructible :refer [attackable-by-player?]]
     [game.components.misc :refer [rotate-to-body rotate-to-mouse]]

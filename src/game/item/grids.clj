@@ -1,10 +1,10 @@
 (ns game.item.grids
   (:require
     [engine.render.image :refer [create-image]]
-    [game.settings :refer [screen-height screen-width]]
+    [cdq.core :refer [screen-height screen-width]]
     [game.gui :refer [is-visible? make-frame]]
     [game.ingame-gui :refer [frame-screenborder-distance ingamestate-display inventory-hotkey]]
-    [data.grid2d :refer [cells create-grid height width]]))
+    [cdq.core :refer [cells create-grid height width]]))
 
 (defn- create-empty-item-cell [posi allows-type grid equipment]
   {:item (atom nil)
@@ -18,7 +18,7 @@
 ; protocol ItemGrid extends VectorGrid (get-rx (get-grid-type etc?
 ; separate [item-grid item-grid-data]
 (deftype ItemGrid [grid2d m]
-  data.grid2d.Grid2D
+  cdq.core.Grid2D
   (cells [this] (cells grid2d))
   (width [this] (width grid2d))
   (height [this] (height grid2d))

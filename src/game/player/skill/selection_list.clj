@@ -5,10 +5,10 @@
     [game.player.skill.learnable :refer [render-skillbutton-tooltip]]
         [engine.render.color :refer [rgbcolor]]
         [engine.render.graphics :refer [fill-rect render-readable-text]]
-    [game.settings :refer [screen-height]]
+    [cdq.core :refer [screen-height]]
     [game.gui :refer [get-absolute-posi get-bounds is-visible? make-imgbutton mouseover? remove-guicomponent set-visible]]
     [game.ingame-gui :refer [ingamestate-display]]
-    [game.session :refer [atom-session]]
+    [cdq.core :refer [atom-session]]
     [game.components.core :refer [active]]
     [game.components.skills.core :refer [is-cooling-down?]]
     [game.player.skill.skillmanager :refer [create-skill-icon get-selected-skill get-skills-for-mousebutton mousebuttons set-selected-skill]]))

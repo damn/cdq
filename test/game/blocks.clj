@@ -2,7 +2,7 @@
   (:require
     [game.test.utils :refer [with-private-fns]]
     [clojure.test :refer [deftest is]]
-    [game.components.active :refer [add-block not-blocked? remove-block switch-state]]))
+    [cdq.core :refer [add-block not-blocked? remove-block switch-state]]))
 
 (deftest test-not-blocked
   (is (= (not-blocked? {:abc 4}) true))
@@ -12,7 +12,7 @@
   (is (thrown? AssertionError (not-blocked? {:blocks -1})))
   (is (thrown? ClassCastException (not-blocked? {:blocks "hi"}))))
 
-(with-private-fns [game.components.active [switch-blocking]]
+(with-private-fns [cdq.core [switch-blocking]]
   (deftest add-and-remove
     (is (= (add-block {:test {}} :test)
            {:test {:blocks 1}}))

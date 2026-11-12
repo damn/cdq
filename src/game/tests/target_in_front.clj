@@ -2,7 +2,7 @@
   (:require
     [engine.render.color :as color :refer [set-color]]
     [engine.render.graphics :refer [draw-shape]]
-    [game.settings :refer [tile-width]]
+    [cdq.core :refer [tile-width]]
     [cdq.core :refer [safe-merge]]
     game.components.body
     [game.components.render :refer [render-on-map translate-position]]

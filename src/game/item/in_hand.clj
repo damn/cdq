@@ -2,7 +2,7 @@
   (:require
     [engine.core :refer [set-mouse-cursor]]
     [engine.render.image :refer [get-scaled-copy]]
-    [game.settings :refer [screen-scale]]
+    [cdq.core :refer [screen-scale]]
     [utils.core :refer [deflazygetter]])
   (:import org.newdawn.slick.opengl.CursorLoader))
 

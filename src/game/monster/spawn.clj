@@ -1,9 +1,9 @@
 (ns game.monster.spawn
   (:require
     [game.item.instance :refer [create-item-body]]
-    [data.grid2d :refer [posis]]
+    [cdq.core :refer [posis]]
     [utils.core :refer [log translate-to-tile-middle]]
-    [utils.numbers :refer [inc-or-dec-max]]
+    [cdq.core :refer [inc-or-dec-max]]
     [engine.render.assets :refer [folder-animation]]
     [game.monster.defmonster :refer [get-monster-properties]]
     [game.components.core :refer [add-component]]

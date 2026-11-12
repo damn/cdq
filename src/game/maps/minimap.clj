@@ -5,11 +5,11 @@
     [engine.render.graphics :refer [draw-rect fill-rect]]
     [game.utils.geom :as geom]
     [clojure.set :refer [select union]]
-    data.grid2d
+    cdq.core
     [utils.core :refer [int-posi]]
     [cdq.core :refer [mapvals]]
     engine.core
-    [game.settings :refer [half-screen-h half-screen-w]]
+    [cdq.core :refer [half-screen-h half-screen-w]]
     [game.components.core :refer [id-entity-map]]
     [game.maps.data :refer [get-current-map-data]]
     [game.maps.cell-grid :refer [get-bodies-from-cells get-cells]]

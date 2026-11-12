@@ -1,7 +1,7 @@
 (ns game.maps.tiledmaps
   (:require
     [game.maps.cell-grid :refer [create-cell]]
-    [data.grid2d :refer [create-grid transform]])
+    [cdq.core :refer [create-grid transform]])
   (:import (org.newdawn.slick.tiled TiledMap LightManager)))
 
 (defn construct-tiledmap

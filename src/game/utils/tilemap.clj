@@ -3,7 +3,7 @@
     [engine.input :refer [get-mouse-pos]]
     [game.maps.camera :refer [get-camera-position]]
     [utils.core :refer [int-posi]]
-    [game.settings :refer [half-screen-h half-screen-w tile-height tile-width]]))
+    [cdq.core :refer [half-screen-h half-screen-w tile-height tile-width]]))
 
 (defn tilepos-of-screenpos [[x y]]
   (let [[middlex middley] (get-camera-position)

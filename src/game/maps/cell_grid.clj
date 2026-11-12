@@ -1,8 +1,8 @@
 (ns game.maps.cell-grid
   (:require
-    [data.grid2d :as grid]
+    [cdq.core :as grid]
     [utils.core :refer [diagonal-direction? int-posi translate-to-tile-middle]]
-    [game.session :refer [atom-session]]
+    [cdq.core :refer [atom-session]]
     [game.components.core :refer [id-entity-map]]
     [game.maps.data :refer [get-current-map-data]]))
 

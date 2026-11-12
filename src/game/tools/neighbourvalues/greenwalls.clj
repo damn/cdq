@@ -1,6 +1,6 @@
 (ns game.tools.neighbourvalues.greenwalls
   (:require
-    data.grid2d
+    cdq.core
     [engine.render.assets :refer [spritesheet]]
     [game.utils.random :refer [if-chance]]
     [game.tools.transitiontilemaker :refer [get-transition-tile-value]]

@@ -1,7 +1,7 @@
 (ns game.components.skills.melee
   (:require
     [engine.core :refer [create-sound]]
-    [game.settings :refer [in-tiles]]
+    [cdq.core :refer [in-tiles]]
     [game.components.update :refer [max-delta]]
     [game.item.cells :refer [get-equiped-hands-item]]
         [game.mouseoverbody :refer [get-mouseover-body]]

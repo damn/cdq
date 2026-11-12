@@ -3,7 +3,7 @@
     [engine.render.color :as color :refer [rgbcolor set-color]]
     [engine.render.image :refer [create-empty-image]]
     [engine.render.graphics :refer [draw-grid draw-string fill-rect]]
-    [data.grid2d :refer [height posis width]]
+    [cdq.core :refer [height posis width]]
     [cdq.core :refer [assoc-ks]]
     [engine.core :refer [start-slick-basicgame]]
     [engine.input :refer [get-mouse-pos is-key-pressed?]]

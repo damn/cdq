@@ -2,7 +2,7 @@
   (:require
     [clojure.walk :refer [postwalk]]
     game.mouseoverbody
-    [game.session :as session :refer [load-session new-session-data save-session]]
+    [cdq.core :as session :refer [load-session new-session-data save-session]]
     game.components.core
     game.components.sleeping
     game.components.burrow
@@ -12,7 +12,7 @@
     [game.item.in-hand :refer [item-in-hand set-item-in-hand]]
     [game.item.instance :refer [create-item-instance]]
     [game.item.boni :refer [create-equip-boni-save load-equip-boni-save]]
-    [data.grid2d :refer [cells]]
+    [cdq.core :refer [cells]]
     [game.maps.data :as data]
     game.maps.cell-grid
     game.maps.data
@@ -26,7 +26,7 @@
     [cdq.core :refer [distinct-seq?]]
     [game.monster.spawn :refer [try-spawn]]
     [game.maps.tiledmaps :refer [get-tileproperties]]
-    [game.settings :refer [version]]
+    [cdq.core :refer [version]]
     [game.status-options :refer [session]]))
 
 (def current-character-name (atom nil))
