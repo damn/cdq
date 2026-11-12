@@ -14,7 +14,7 @@
     [game.components.skills.melee :refer [get-player-skill-animation-key]]
     [game.utils.lightning :refer [light-component]]
     [utils.numbers :refer [set-to-max]]
-    [utils.coll :refer [when-seq]]
+    [cdq.core :refer [when-seq]]
     [engine.core :refer [play-sound]]
     [engine.input :refer [is-key-down? is-leftbutton-down? is-leftm-consumed?]]
     engine.input

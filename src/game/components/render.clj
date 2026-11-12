@@ -7,7 +7,7 @@
     [engine.render.graphics :refer [draw-line fill-centered-circle render-centered-shape render-readable-text]]
     [game.utils.geom :as geom]
     [utils.core :refer [define-order int-posi make-fn order-contains?]]
-    [utils.coll :refer [safe-merge]]
+    [cdq.core :refer [safe-merge]]
     [utils.numbers :refer [readable-number]]
     [game.settings :refer [in-pixel tile-height tile-width]]
     [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init update-counter!]]

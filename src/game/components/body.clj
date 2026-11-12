@@ -3,7 +3,7 @@
             [game.utils.geom :as geom]
             [game.maps.camera :refer [get-camera-position]]
             [game.settings :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
-            [utils.coll :refer [safe-merge]]
+            [cdq.core :refer [safe-merge]]
             [game.components.core :refer [id-entity-map player-body]]
             [game.components.render :refer [render-on-map]]
             [game.components.position :refer [swap-position!]]

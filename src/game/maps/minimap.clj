@@ -7,7 +7,7 @@
     [clojure.set :refer [select union]]
     data.grid2d
     [utils.core :refer [int-posi]]
-    [utils.coll :refer [mapvals]]
+    [cdq.core :refer [mapvals]]
     engine.core
     [game.settings :refer [half-screen-h half-screen-w]]
     [game.components.core :refer [id-entity-map]]

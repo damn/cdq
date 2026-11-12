@@ -1,4 +1,4 @@
-(ns utils.coll)
+(ns cdq.core)
 
 (defn indexed ; from clojure.contrib.seq-utils (discontinued in 1.3)
   "Returns a lazy sequence of [index, item] pairs, where items come

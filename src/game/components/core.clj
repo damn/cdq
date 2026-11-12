@@ -1,7 +1,7 @@
 (ns game.components.core
   (:require
     [utils.core :refer [get-unique-number make-fn when-apply]]
-    [utils.coll :refer [distinct-seq? filter-map]]
+    [cdq.core :refer [distinct-seq? filter-map]]
     [engine.core :refer [update]]
     [game.session :as session]
     [game.components.active :refer [add-blocks remove-blocks]]))

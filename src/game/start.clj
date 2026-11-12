@@ -19,7 +19,7 @@
     [engine.core :refer [app-game-container create-and-start-app-game-container create-sound fullscreen-supported? get-defaultfont get-line-height get-screen-height get-screen-width make-counter play-sound]]
     [utils.core :as utils :refer [get-unique-number int-posi sort-by-order translate-to-tile-middle]]
     [utils.numbers :refer [get-ratio lower-than-max? readable-number variance-val-str]]
-    [utils.coll :refer [safe-merge]]
+    [cdq.core :refer [safe-merge]]
     [game.session :as sess]
     [game.settings :refer [debug-mode display-height-in-tiles display-width-in-tiles get-setting half-display-h-in-tiles half-display-w-in-tiles half-screen-h half-screen-w in-tiles init-config! left-offset-in-tiles screen-height screen-scale screen-width tile-height tile-width top-offset-in-tiles version]]
     [game.components.core :refer [active add-to-removelist id-entity-map is-player? player-body update-counter! update-removelist]]

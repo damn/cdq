@@ -3,7 +3,7 @@
     [engine.core :refer [create-sound make-counter play-sound playonce reset update update-finally-merge]]
     [engine.input :refer [get-mouse-pos is-leftbutton-down? is-rightbutton-down?]]
     [utils.core :refer [split-key-val-and-maps]]
-    [utils.coll :refer [mapvals]]
+    [cdq.core :refer [mapvals]]
     [utils.numbers :refer [lower-than-max? min-max-val rest-to-max set-to-max]]
     [engine.render.animation :refer [is-stopped?]]
     [game.utils.tilemap :refer [get-mouse-tile-pos]]

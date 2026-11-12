@@ -1,6 +1,6 @@
 (ns game.components.body-effects-impl
   (:require
-    [utils.coll :refer [mapvals safe-merge]]
+    [cdq.core :refer [mapvals safe-merge]]
     [utils.numbers :refer [approx-numbers]]
     [engine.core :refer [reset update]]
     [engine.render.color :refer [rgbcolor]]

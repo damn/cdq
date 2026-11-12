@@ -5,7 +5,7 @@
     [engine.render.animation :refer [is-stopped? render-centered-animation restart]]
     [engine.render.assets :refer [folder-animation]]
     [engine.render.image :refer [get-scaled-copy]]
-    [utils.coll :refer [safe-merge]]
+    [cdq.core :refer [safe-merge]]
     game.maps.data
     [game.item.cells :refer [try-pickup-item]]
     [game.item.grids :refer [showing-player-inventory?]]

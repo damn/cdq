@@ -4,7 +4,7 @@
  - potential field generation must check for it; following must cut it
  - light shines through the edges"
   (:require
-    [utils.coll :refer [assoc-ks]]
+    [cdq.core :refer [assoc-ks]]
     [data.grid2d :refer [posis]]
     [mapgen.utils :refer [wall-at?]]))
 

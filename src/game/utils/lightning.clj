@@ -7,7 +7,7 @@
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.maps.minimap :refer [update-minimap]]
     [utils.core :refer [compare-times int-posi]]
-    [utils.coll :refer [genmap]]
+    [cdq.core :refer [genmap]]
     [game.session :refer [atom-session]]
     [game.settings :refer [debug-mode in-pixel]]
     [game.components.core :refer [active create-entity player-body]]

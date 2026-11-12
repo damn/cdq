@@ -1,7 +1,7 @@
 (ns game.tools.transitiontilemaker
   (:require
     [utils.core :refer [+perm]]
-    [utils.coll :refer [safe-merge]]
+    [cdq.core :refer [safe-merge]]
     [data.grid2d :refer [get-8-neighbour-positions]]))
 
 ; this transitiontilemaker works with scaledx2 maps and utilizes just 12 different tiles (else 256 different tiles would be needed)

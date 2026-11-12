@@ -9,7 +9,7 @@
     [game.components.movement :refer [movement-component]]
     [data.grid2d :refer [cells get-8-neighbour-positions]]
     [utils.core :refer [diagonal-direction?]]
-    [utils.coll :refer [genmap positions when-seq]]
+    [cdq.core :refer [genmap positions when-seq]]
     [game.settings :refer [tile-height tile-width]]
     [game.components.core :refer [player-body]]
     [game.components.body :refer [inside-cell?]]

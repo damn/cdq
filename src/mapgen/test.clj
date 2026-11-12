@@ -4,7 +4,7 @@
     [engine.render.image :refer [create-empty-image]]
     [engine.render.graphics :refer [draw-grid draw-string fill-rect]]
     [data.grid2d :refer [height posis width]]
-    [utils.coll :refer [assoc-ks]]
+    [cdq.core :refer [assoc-ks]]
     [engine.core :refer [start-slick-basicgame]]
     [engine.input :refer [get-mouse-pos is-key-pressed?]]
     [game.utils.random :refer [create-seed]]

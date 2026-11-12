@@ -3,7 +3,7 @@
     [engine.render.color :as color :refer [set-color]]
     [engine.render.graphics :refer [draw-shape]]
     [game.settings :refer [tile-width]]
-    [utils.coll :refer [safe-merge]]
+    [cdq.core :refer [safe-merge]]
     game.components.body
     [game.components.render :refer [render-on-map translate-position]]
     [game.components.skills.melee :refer [get-attackable-target-in-front in-front-of-body-shape melee-puffer]]))

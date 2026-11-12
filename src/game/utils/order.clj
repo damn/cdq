@@ -1,5 +1,5 @@
 (ns game.utils.order
-  (:require [utils.coll :refer [positions]]))
+  (:require [cdq.core :refer [positions]]))
 
 (defn- position-of [elem coll]
   (first (positions #{elem} coll)))

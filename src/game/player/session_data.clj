@@ -23,7 +23,7 @@
     game.utils.lightning
     game.utils.msg-to-player
     [utils.core :refer [log translate-to-tile-middle]]
-    [utils.coll :refer [distinct-seq?]]
+    [cdq.core :refer [distinct-seq?]]
     [game.monster.spawn :refer [try-spawn]]
     [game.maps.tiledmaps :refer [get-tileproperties]]
     [game.settings :refer [version]]
