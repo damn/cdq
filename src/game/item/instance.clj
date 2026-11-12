@@ -1,20 +1,47 @@
 (ns game.item.instance  ; TODO refactor dependencies wg. instance-impl abkapselung
   (:require
     [game.settings :refer [tile-width]]
-    [engine.core :refer [play-sound]]
+    [engine.core :refer [make-counter play-sound update update-finally-merge]]
+    [engine.render.animation :refer [is-stopped? render-centered-animation restart]]
+    [engine.render.assets :refer [folder-animation]]
     [engine.render.image :refer [get-scaled-copy]]
+    [utils.coll :refer [safe-merge]]
     game.maps.data
     [game.item.cells :refer [try-pickup-item]]
     [game.item.grids :refer [showing-player-inventory?]]
     [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
-    [game.components.core :refer [add-to-removelist create-entity player-body]]
+    [game.components.core :refer [active add-to-removelist create-entity player-body]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [blocked-location? create-body]]
     game.components.misc
-    [game.components.render :refer [image-render-component]]
-    [game.components.glittering :refer [glittering-component]]
+    [game.components.render :refer [image-render-component render-on-map]]
     [game.components.pressable :refer [pressable-component]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]))
+
+;;; glittering
+
+(defn glittering-component []
+  (safe-merge
+    {:type :glittering
+     :counter (make-counter 2000)
+     :active false
+     :animation (folder-animation :folder "effects/itemglitter/"
+                                  :looping false
+                                  :duration 300)}
+    (active [delta {:keys [active counter animation] :as c} entity]
+      (swap! entity assoc-in [(:type c)]
+                 (if active
+                   (let [animation (update animation delta)]
+                     (if (is-stopped? animation)
+                       (assoc c :active false :animation (restart animation))
+                       (assoc c :animation animation)))
+                   (update-finally-merge c :counter delta
+                                         {:active true}))))
+    (render-on-map :air [g _ {:keys [active animation] :as c} render-posi]
+      (when active
+        (render-centered-animation animation render-posi)))))
+
+;;; instance
 
 (def item-create-fns {})
 

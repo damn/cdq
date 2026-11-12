@@ -29,7 +29,7 @@
                          (fn [grid posi value]
                            (if-let [sprite-idx (get sprite-idx-grid posi)]
                              sprite-idx
-                             (gauntletly/calc-sprite-posi grid posi value))))
+                             (calc-sprite-posi grid posi value))))
      :sprite-sheet spritesheet
      :details-calc-sprite-posi (let [sprite-idx-grid (transform grid2d #(:details-sprite-idx %2))]
                                  (fn [grid posi value]

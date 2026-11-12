@@ -5,6 +5,7 @@
     [mapgen.utils :refer [wall-at?]])
   (:import data.grid2d.VectorGrid))
 
+
 (defn- is-5x5-walls-space? [center grid]
   (let [tiles (tiles-inside-rect [center 2 2])] ; room half width&height = 2 => 5x5
     (when (every? #(wall-at? grid %) tiles)

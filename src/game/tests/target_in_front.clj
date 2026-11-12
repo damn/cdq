@@ -6,8 +6,7 @@
     [utils.coll :refer [safe-merge]]
     game.components.body
     [game.components.render :refer [render-on-map translate-position]]
-    [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
-    [game.components.skills.melee :refer [get-attackable-target-in-front melee-puffer]]))
+    [game.components.skills.melee :refer [get-attackable-target-in-front in-front-of-body-shape melee-puffer]]))
 
 (defn- make-render-shape [body]
   (let [posi (-> (:value (:position @body)) translate-position)

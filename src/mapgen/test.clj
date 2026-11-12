@@ -114,7 +114,7 @@
 (defn- flood-fill-distances-heatmap []
   (color-flood-fill-heatmap @current-grid (get-mouse-tile-pos)))
 
-(require '[mapgen.findpath :refer [find-path]])
+(require '[mapgen.populate :refer [find-path]])
 
 (defn- flood-fill-from-start-to-end-path []
   (let [start-posi (get-mouse-tile-pos)

@@ -6,13 +6,32 @@
     [game.item.cells :refer [get-equiped-hands-item]]
         [game.mouseoverbody :refer [get-mouseover-body]]
     game.utils.random
-    [game.utils.front-of-body-shape :refer [in-front-of-body-shape]]
-    [game.utils.geom :refer [collides?]]
+    [game.utils.geom :as geom :refer [collides?]]
+    utils.core
+    game.components.body
     [game.components.core :refer [id-entity-map is-player? player-body]]
     [game.components.body :refer [calc-touched-cells circle-collides? is-affectable? rect-shape]]
     [game.components.destructible :refer [attackable-by-player? calc-effective-melee-dmg deal-dmg]]
     [game.components.skills.core :refer [get-active-skill get-skill-use-mouse-button standalone-skill]]
     [game.maps.cell-grid :refer [get-bodies-from-cells]]))
+
+;;; front-of-body-shape
+
+(defn in-front-of-body-shape
+  ([body height]
+   (in-front-of-body-shape (:value (:position @body))
+                           (:half-width (:body @body))
+                           height
+                           (:angle (:rotation @body))))
+  ([[x y] half-w height angle]
+   (geom/rotate
+    (geom/rectangle (- x half-w)
+                    (- y half-w height)
+                    (* 2 half-w)
+                    height)
+    angle x y)))
+
+;;; melee
 
 ; TODO unabh von tiles machen ->in pixels?
 (def melee-puffer 0.8)

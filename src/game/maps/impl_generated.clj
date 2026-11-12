@@ -61,7 +61,7 @@
      :calc-sprite-posi (fn [grid posi value]
                          (if-let [value (get roomposi-to-spriteidx posi)]
                            value
-                           (gauntletly/calc-sprite-posi grid posi value)))
+                           (calc-sprite-posi grid posi value)))
      :sprite-sheet gauntletly1-tilesheet
      :start-position start-posi
      :spawn-monsters (fn []
@@ -98,7 +98,7 @@
      :calc-sprite-posi (fn [grid posi value]
                          (if-let [value (get roomposi-to-spriteidx posi)]
                            value
-                           (gauntletly/calc-sprite-posi grid posi value)))
+                           (calc-sprite-posi grid posi value)))
      :sprite-sheet gauntletly2-tilesheet
      :start-position start-posi
      :spawn-monsters (fn [] (spawn-monsters tech-groups))
@@ -129,7 +129,7 @@
      :calc-sprite-posi (fn [grid posi value]
                          (if-let [value (get roomposi-to-spriteidx posi)]
                            value
-                           (gauntletly/calc-sprite-posi grid posi value)))
+                           (calc-sprite-posi grid posi value)))
      :sprite-sheet gauntletly3-tilesheet
      :start-position translated-start-posi
      :spawn-monsters (fn [] (spawn-monsters bloodcaves-groups))

@@ -11,8 +11,9 @@
     [engine.render.image :as g :refer [create-image draw-image get-dimensions get-scaled-copy get-sub-image]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation folder-frames get-sprite spritesheet-frames]]
-    [engine.render.color :as color :refer [black green orange red set-color white yellow]]
+    [engine.render.color :as color :refer [black green orange red rgbcolor set-color white yellow]]
     [engine.render.graphics :refer [draw-grid fill-rect render-readable-text reset-transform translate]]
+    [data.grid2d :refer [height width]]
     [engine.statebasedgame :as state :refer [enter-state init-state-based-game state-based-game]]
     [engine.settings :refer [jar-file?]]
     [engine.core :refer [app-game-container create-and-start-app-game-container create-sound fullscreen-supported? get-defaultfont get-line-height get-screen-height get-screen-width make-counter play-sound]]
@@ -64,20 +65,147 @@
     [game.utils.tilemap :refer [get-mouse-tile-pos mouse-int-tile-pos]]
     [game.screenshake :refer [translate-shake-after-render translate-shake-before-render update-shake]]
     [game.mouseoverbody :refer [get-mouseover-body]]
-    [game.ingame-gui :refer [char-hotkey close-all-frames frame-screenborder-distance ingamestate-display mouse-inside-some-gui-component? options-hotkey some-visible-frame?]]
+    [game.ingame-gui :refer [background-color char-hotkey close-all-frames foreground-color frame-screenborder-distance ingamestate-display mouse-inside-some-gui-component? options-hotkey some-visible-frame?]]
     [game.maps.contentfields :refer [get-entities-in-active-content-fields get-player-content-field-idx]]
     [game.maps.cell-grid :refer [cell-blocked? get-body-ids get-cell get-cell-grid get-map-h get-map-w]]
     [game.maps.camera :refer [get-camera-position]]
     [game.maps.tiledmaps :refer [get-layer-index]]
     [game.components.ingame-loop :refer [get-ingame-loop-entities ingame-loop-comp]]
-    [game.item.cells :refer [add-item-to-cell cell-empty-and-allows-item? cell-filled-and-allows-item? inc-count-of-item? item-not-in-use? remove-item-from-cell remove-one-item]]
-    [game.item.grids :refer [hks-cells inventory-height inventoryry item-grids]]
-    [game.item.cells-ui :refer [get-mouseover-item-cell mouse-over-an-item-cell?]]
+    [game.item.cells :refer [add-item-to-cell cell-empty-and-allows-item? cell-filled-and-allows-item? inc-count-of-item? item-in-use? item-not-in-use? remove-item-from-cell remove-one-item]]
+    [game.item.grids :refer [background-icons cell-h cell-w hks-cells inventory-height inventoryry item-grids]]
+    [game.item.colors :refer [equip-boni-item-color]]
     [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
     [game.player.skill.selection-list :refer [close-skill-selection-lists some-skill-selection-list-visible?]]
     [game.player.skill.skillmanager :refer [get-selected-skill]]
     [game.player.core :refer [player-death try-revive-player]])
   (:gen-class))
+
+;;; item.cells-ui
+
+(defn- get-item-textseq [cell]
+  (let [item @(:item cell)
+        itemname (or (:pretty-name item) (:name item))
+        color (or (:color item) color/lightGray)]
+    (concat
+      [color
+       (str itemname
+            (when-let [cnt (:count item)]
+              (str " (" cnt ")")))
+       color/white
+       (:info item)
+       equip-boni-item-color]
+      (when-let [boni (:equip-boni item)]
+        (map :info boni)))))
+
+(defn- get-cell-renderposi
+  ([cell]
+    (get-cell-renderposi (:posi cell) (:grid-type cell)))
+  ([[cx cy] grid-type]
+    (let [grid (grid-type item-grids) ; :keys
+          gx (:rx grid)
+          gy (:ry grid)]
+      (get-cell-renderposi gx gy cx cy)))
+  ([gx gy cx cy]
+    [(+ gx (* cx cell-w))
+     (+ gy (* cy cell-h))]))
+
+(defn get-mouseover-item-cell ; TODO ??
+  ([]
+    (some
+      #(when ((:visible-check %))
+         (get-mouseover-item-cell (:grid-type %)))
+      (vals item-grids)))
+  ([renderx rendery item-grid]
+    (let [[mx my] (get-mouse-pos)
+          cx (/ (- mx renderx) cell-w)
+          cy (/ (- my rendery) cell-h)
+          cellposi [(int cx) (int cy)]]
+      (if-not (or (< cx 0) (< cy 0)) ; da (int -0.X) wird zu 0
+        (get item-grid cellposi))))
+  ([grid-type]
+    (let [item-grid (grid-type item-grids)
+          gx (:rx item-grid)
+          gy (:ry item-grid)]
+      (get-mouseover-item-cell gx gy item-grid))))
+
+(defn mouse-over-an-item-cell? []
+  (get-mouseover-item-cell))
+
+(defn- item-droppable-in-cell? [item cell]
+  (or
+    (cell-empty-and-allows-item? cell item)
+    (inc-count-of-item? @(:item cell) item)
+    (cell-filled-and-allows-item? cell item)))
+
+(defn- render-item-tooltip [g]
+  (when-let [cell (get-mouseover-item-cell)]
+    (when @(:item cell)
+      (let [[rx ry] (get-cell-renderposi cell)
+            textseq (get-item-textseq cell)]
+        (if (= :belt (:grid-type cell))
+          (apply render-readable-text g rx ry :above true textseq)
+          (apply render-readable-text g rx (+ ry cell-h) textseq))))))
+
+(ingame-loop-comp :item-tooltip
+  (rendering :tooltips [g c]
+    (render-item-tooltip g)))
+
+(def ^:private item-cells-bg-color (.darker background-color 0.5))
+(def ^:private item-cells-fg-color foreground-color)
+
+(def ^:private droppable-color (rgbcolor :g 0.6 :a 0.8))
+(def ^:private not-allowed-color (rgbcolor :r 0.6 :a 0.8))
+
+(defn- render-cell-droppable-indicator [g cell rx ry]
+  (fill-rect g rx ry cell-w cell-h
+    (if (item-droppable-in-cell? @item-in-hand cell)
+      droppable-color
+      not-allowed-color)))
+
+(defn- render-item-in-cell [g item cell rx ry]
+  (when (item-in-use? cell)
+    (fill-rect g rx ry cell-w cell-h color/red))
+  (draw-image (:image item) rx ry)
+  (when-let [cnt (:count item)]
+    (render-readable-text g rx ry cnt)))
+
+(defn- render-item-grid
+  "renders background, a grid and item-images/count if items in cell."
+  [g grid-type]
+  (let [grid (grid-type item-grids) ; :keys
+        gridw (width grid)
+        gridh (height grid)
+        x (:rx grid)
+        y (:ry grid)
+        w (* gridw cell-w)
+        h (* gridh cell-h)
+        mouseover-item-cell (get-mouseover-item-cell)]
+    (fill-rect g x y w h item-cells-bg-color)
+    (doseq [[[cx cy] cell] grid]
+      (let [[rx ry] (get-cell-renderposi x y cx cy)
+            item @(:item cell)]
+        (when (and (is-item-in-hand?) (= cell mouseover-item-cell))
+          (render-cell-droppable-indicator g cell rx ry))
+        (when item
+          (render-item-in-cell g item cell (inc rx) (inc ry))) ; cell size > item-size so the item is not behind the grid lines
+        (when (and (not item) (get background-icons grid-type))
+          (draw-image (get background-icons grid-type) (inc rx) (inc ry)))))
+    (set-color g item-cells-fg-color)
+    (draw-grid g x y gridw gridh cell-w cell-h)))
+
+(defn- render-belt-hotkeys [g]
+  (doseq [hotkey (keys hks-cells)
+          :let [cell-posi (get hks-cells hotkey)
+                [rx ry] (get-cell-renderposi cell-posi :belt)]]
+    (render-readable-text g (+ rx (/ cell-w 2)) ry :above true :centerx true (name hotkey))))
+
+(ingame-loop-comp :item-cells
+  (rendering [g c]
+    (dorun (map
+      #(when ((:visible-check %))
+         (render-item-grid g (:grid-type %))) ; give grid as argument ...
+      (vals item-grids)))
+    (render-belt-hotkeys g)))
 
 ;;; monsters.common
 

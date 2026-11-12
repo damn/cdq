@@ -3,7 +3,7 @@
     [data.grid2d :refer [get-8-neighbour-positions]]
     [engine.core :refer [start-slick-basicgame]]
     [game.utils.random :refer [if-chance]]
-    [mapgen.findpath :refer [find-path]]
+    [mapgen.populate :refer [find-path]]
     [game.maps.tiledmaps :refer [construct-tiledmap create-grid-from-tiled-map]]
     [game.tools.transitiontilemaker :refer [get-transition-tile-value]]
     [game.tools.tiledmap-grid-convert :refer [make-tiledmap-file resource]]))
