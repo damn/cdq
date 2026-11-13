@@ -6,7 +6,7 @@
     [cdq.core :refer [log translate-to-tile-middle]]
     [cdq.core :refer [inc-or-dec-max]]
     [cdq.core :refer [folder-animation]]
-    [game.monster.defmonster :refer [get-monster-properties]]
+    [cdq.core :refer [get-monster-properties]]
     [cdq.core :refer [add-component]]
     [cdq.core :refer [blocked-location?]]
     [cdq.core :refer [single-animation-component]]

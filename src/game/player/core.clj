@@ -12,7 +12,7 @@
     cdq.core
     [cdq.core :refer [show-on-minimap]]
     [cdq.core :refer [is-attacking? reset-skills]]
-    [game.components.skills.melee :refer [get-player-skill-animation-key]]
+    [cdq.core :refer [get-player-skill-animation-key]]
     [cdq.core :refer [light-component]]
     [cdq.core :refer [set-to-max]]
     [cdq.core :refer [when-seq]]
@@ -29,12 +29,12 @@
     [cdq.core :refer [destructible-component is-dead? player-start-hp]]
     [cdq.core :refer [colliding-with-other-solid-bodies? create-body teleport]]
     [cdq.core :refer [get-sub-entities]]
-    [game.item.cells :refer [get-inventory-cells-with-item-name remove-item-from-cell]]
+    [cdq.core :refer [get-inventory-cells-with-item-name remove-item-from-cell]]
     [game.components.movement.ai.potential-field :refer [potential-field-component]]
     [game.player.skill.skillmanager :refer [create-player-skillmanager get-current-standard-skill]]
     game.player.skill.learnable
-    [game.player.speed :refer [player-move-speed]]
-    [game.mouseoverbody :refer [saved-mouseover-body]]
+    [cdq.core :refer [player-move-speed]]
+    [cdq.core :refer [saved-mouseover-body]]
     cdq.core
     [cdq.core :as debug]
 

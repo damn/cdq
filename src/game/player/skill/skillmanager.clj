@@ -3,9 +3,9 @@
     [cdq.core :refer [create-image get-scaled-copy]]
         [cdq.core :refer [is-leftbutton-down? is-rightbutton-down? is-rightm-consumed?]]
     cdq.core
-    [game.mouseoverbody :refer [get-mouseover-body saved-mouseover-body]]
+    [cdq.core :refer [get-mouseover-body saved-mouseover-body]]
     [cdq.core :refer [enough-mana? skillmanager-component skillmanager-skill]]
-    [game.components.skills.melee :refer [player-melee-props]]
+    [cdq.core :refer [player-melee-props]]
     [cdq.core :refer [active add-to-removelist player-body]]
     [cdq.core :refer [add-block blocks-component remove-block]]
     [cdq.core :refer [attackable-by-player?]]

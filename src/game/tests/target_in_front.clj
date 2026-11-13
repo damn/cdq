@@ -5,7 +5,7 @@
     [cdq.core :refer [tile-width]]
     [cdq.core :refer [safe-merge]]
     [cdq.core :refer [render-on-map translate-position]]
-    [game.components.skills.melee :refer [get-attackable-target-in-front in-front-of-body-shape melee-puffer]]))
+    [cdq.core :refer [get-attackable-target-in-front in-front-of-body-shape melee-puffer]]))
 
 (defn- make-render-shape [body]
   (let [posi (-> (:value (:position @body)) translate-position)

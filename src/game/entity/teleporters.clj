@@ -6,7 +6,6 @@
     [cdq.core :refer [spritesheet-frames]]
     [cdq.core :refer [current-map do-in-map get-pretty-name]]
     [cdq.core :refer [play-sound]]
-    game.media
     cdq.core
     [cdq.core :refer [show-on-minimap]]
     [game.maps.mapchange :refer [queue-map-change]]
@@ -14,7 +13,7 @@
     [cdq.core :refer [position-component]]
     [cdq.core :refer [create-body]]
     [cdq.core :refer [single-animation-component]]
-    [game.components.pressable :refer [pressable-component]]))
+    [cdq.core :refer [pressable-component]]))
 
 (defn create-teleporter
   [& {:keys [position target-map target-posi animation do-after-use save-game]}]

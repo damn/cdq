@@ -23,7 +23,8 @@
            (org.newdawn.slick.geom Circle Rectangle Shape Transform Vector2f)
            (org.newdawn.slick.state StateBasedGame)
            (org.newdawn.slick.tiled LightManager TiledMap)
-           (org.newdawn.slick.util.pathfinding AStarPathFinder Mover Path TileBasedMap))
+           (org.newdawn.slick.util.pathfinding AStarPathFinder Mover Path TileBasedMap)
+           (org.newdawn.slick.opengl CursorLoader))
   (:require [clojure.set :as set]
             [clojure.string :as str]))
 
@@ -4793,3 +4794,843 @@ over a skill at the bottom left selection lists.
       :pressed #(enter-state options)
       :tooltip (ingame-gui-hotkey-str options-hotkey "Options/Exit")
       :parent ingamestate-display)))
+
+;; item grids
+
+(defn- item-grid-create-empty-cell [posi allows-type grid equipment]
+  {:item (atom nil)
+   :is-equipment equipment
+   :allows-type allows-type
+   :posi posi
+   :grid-type grid})
+
+; 'inherits' from VectorGrid and just valAt changed...
+; other ideas: item-grid data as metadata of VectorGrid
+; protocol ItemGrid extends VectorGrid (get-rx (get-grid-type etc?
+; separate [item-grid item-grid-data]
+(deftype ItemGrid [grid2d m]
+  Grid2D
+  (cells [this] (cells grid2d))
+  (width [this] (width grid2d))
+  (height [this] (height grid2d))
+
+  clojure.lang.Seqable
+  (seq [this] (seq grid2d))
+
+  clojure.lang.ILookup
+  (valAt [this k]
+    (if (keyword? k)
+      (k m)
+      (.valAt grid2d k))))
+
+(def item-grids {})
+
+(defn add-item-grid [& {:keys [w h rx ry allows-type grid-type is-equipment-cell visible-check]
+                        :as argsmap}]
+  {:pre [(not-any? #{grid-type} (keys item-grids))]}
+  (alter-var-root #'item-grids assoc grid-type
+                  (ItemGrid. (create-grid w h #(item-grid-create-empty-cell % allows-type grid-type is-equipment-cell))
+                             (select-keys argsmap [:visible-check :grid-type :rx :ry :allows-type]))))
+
+(def ^:private item-grid-inventory-cells-x 6)
+(def ^:private item-grid-inventory-cells-y 4)
+
+(def item-cell-w 17) ; cells = item-size+1 so items fit inside grid lines, else top and left pixel line of items not visible
+(def item-cell-h 17)
+
+(def ^:private item-grid-borderpx 2)
+(def ^:private item-grid-inventory-width (+ (* 2 item-grid-borderpx)
+                         (* item-grid-inventory-cells-x item-cell-w)))
+(def inventory-height (+ (* 2 item-grid-borderpx)
+                          (* 2 item-cell-h)
+                          (* item-grid-inventory-cells-y item-cell-h)))
+
+(def ^:private item-grid-inventoryrx (- screen-width item-grid-inventory-width frame-screenborder-distance))
+(def inventoryry frame-screenborder-distance)
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def inventory-frame (make-frame :name :inventory
+                                     :bounds [item-grid-inventoryrx
+                                              inventoryry
+                                              item-grid-inventory-width
+                                              inventory-height]
+                                     :hotkey inventory-hotkey
+                                     :visible false
+                                     :parent ingamestate-display))))
+
+(defn showing-player-inventory? [] (gui-visible? inventory-frame))
+
+(add-item-grid
+  :grid-type :belt
+  :w 3 ; add cells -> add hotkeys
+  :h 1
+  :rx (- screen-width (* 3 item-cell-w) 1) ; -1 because rendering exactly at screen-height the bottom&right line will not be seen
+  :ry (- screen-height item-cell-h 1)
+  :allows-type :usable
+  :is-equipment-cell true
+  :visible-check (constantly true))
+
+(add-item-grid
+  :grid-type :inventory
+  :w item-grid-inventory-cells-x
+  :h item-grid-inventory-cells-y
+  :rx (+ item-grid-inventoryrx item-grid-borderpx)
+  :ry (+ inventoryry item-grid-borderpx (* 2 item-cell-h))
+  :allows-type :all
+  :is-equipment-cell false
+  :visible-check showing-player-inventory?)
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def item-background-icons {:torso (create-image "items/armorbg.png")
+                           :hands (create-image "items/handsbg.png")
+                           :implants (create-image "items/implantsbg.png")})))
+
+(add-item-grid
+  :grid-type :hands
+  :w 1
+  :h 1
+  :rx (+ item-grid-inventoryrx item-grid-borderpx)
+  :ry (+ inventoryry item-grid-borderpx)
+  :allows-type :hands
+  :is-equipment-cell true
+  :visible-check showing-player-inventory?)
+
+(add-item-grid
+  :grid-type :torso
+  :w 1
+  :h 1
+  :rx (+ item-grid-inventoryrx item-grid-borderpx item-cell-w)
+  :ry (+ inventoryry item-grid-borderpx)
+  :allows-type :torso
+  :is-equipment-cell true
+  :visible-check showing-player-inventory?)
+
+(add-item-grid
+  :grid-type :implants
+  :w 1
+  :h 1
+  :rx (+ item-grid-inventoryrx item-grid-borderpx)
+  :ry (+ inventoryry item-grid-borderpx item-cell-h)
+  :allows-type :implant
+  :is-equipment-cell true
+  :visible-check showing-player-inventory?)
+
+(def hks-cells
+  {:Q [0 0]
+   :W [1 0]
+   :E [2 0]})
+
+;; item cells
+
+(defn get-equiped-hands-item []
+  @(:item (get (:hands item-grids) [0 0]))) ; (-> item-grids :hands [0 0])
+
+(defn cell-allows-item? [{allows :allows-type :as cell} item]
+  (or
+    (= :all allows)
+    (= (:type item) allows)))
+
+(defn cell-empty-and-allows-item? [cell item]
+  (and
+    (nil? @(:item cell))
+    (cell-allows-item? cell item)))
+
+(defn cell-filled-and-allows-item? [cell item]
+  (and
+    @(:item cell)
+    (cell-allows-item? cell item)))
+
+(defn inc-count-of-item? [item1 item2]
+  (and
+    item1
+    (:count item1)
+    (:count item2)
+    (= (:name item1) (:name item2))))
+
+(defn- item-cell-check-apply-boni [item cell k]
+  (let [components player-body]
+    (when (:is-equipment cell)
+      (swap! components thread-through (map k (:equip-boni item)))
+      (when-let [equip (k item)]
+        (swap! components equip)))))
+
+(defn add-item-to-cell [item cell]
+  {:pre [(cell-empty-and-allows-item? cell item)]}
+  (reset! (:item cell) item)
+  (item-cell-check-apply-boni item cell :equip))
+
+(defn remove-item-from-cell [cell]
+  (let [item @(:item cell)] ; get the item bevor setting it nil so that :unequip works!
+    (reset! (:item cell) nil)
+    (item-cell-check-apply-boni item cell :unequip)))
+
+(defn empty-all-item-grids []
+  (doseq [grid (vals item-grids)
+          cell (cells grid)]
+      (remove-item-from-cell cell)))
+
+(defn remove-one-item [cell]
+  (let [item @(:item cell)]
+    (if-let [cnt (:count item)]
+      (if (> cnt 1)
+        (swap! (:item cell) update-in [:count] dec)
+        (remove-item-from-cell cell))
+      (remove-item-from-cell cell))))
+
+(defn remove-one-item-from [grid-type item-name]
+  {:pre [(some #{item-name}
+           (map #(:name @(:item %))
+             (cells (:belt item-grids))))]}
+  (remove-one-item
+    (first (filter
+      #(= item-name (:name @(:item %)))
+      (cells (:belt item-grids))))))
+
+(defn item-not-in-use? [cell]
+  (let [item @(:item cell)
+        skillmanager (:skillmanager @player-body)
+        active-skill (get-active-skill skillmanager)
+        in-use (and
+                 (:is-equipment cell) item (is-attacking? skillmanager)
+                 (or
+                   (and (:skill item) (= active-skill (:skill item)))
+                   (and (:melee-weapon item) (= (get-equiped-hands-item) item) (:is-melee active-skill))))]
+    (not in-use)))
+
+(defn item-in-use? [cell]
+  (not (item-not-in-use? cell)))
+
+(defn get-inventory-cells-with-item-name [item-name grid-type]
+  (filter
+    #(and
+       @(:item %)
+       (= (:name @(:item %)) item-name))
+    (cells (grid-type item-grids))))
+
+(defn- item-try-put-in
+  "returns true when the item was picked up"
+  [picked-item grid-type]
+  (let [item-cells (cells (grid-type item-grids))
+        cell-with-same-item (first
+                              (get-inventory-cells-with-item-name (:name picked-item) grid-type))
+        picked-up (if
+                    (and
+                      cell-with-same-item
+                      (:count @(:item cell-with-same-item)))
+                    (swap! (:item cell-with-same-item) update-in [:count] + (:count picked-item))
+                    (if-let [free-cell (first (filter #(nil? @(:item %)) item-cells))]
+                      (do
+                        (add-item-to-cell picked-item free-cell)
+                        true)
+                      false))]
+    picked-up))
+
+(defn try-pickup-item [item]
+  (or
+    (when-let [grid-type (:grid-type
+                           (first (filter #(= (:allows-type %) (:type item))
+                             (vals item-grids))))]
+      (item-try-put-in item grid-type)) ; 1. try
+    (item-try-put-in item :inventory))) ; 2. try
+
+;; mouseoverbody
+
+(defn- mouseover-get-current []
+  (when-not (mouse-inside-some-gui-component?)
+    (let [tile-posi (get-mouse-tile-pos)
+          hits (get-bodies-at-position tile-posi)]
+      (when hits
+        (let [; der als letztes gerenderte ist ganz am obersten
+              ; jeder body hat :rendering also brauch net removen
+              hits (filter on-screen-and-in-sight?
+                           (reverse
+                             (sort-by-order hits
+                                            #(:order (first (filter :rendering (vals @%))))
+                                            render-on-map-order)))
+              ;_ (println "hits: " (map #(map :type (get-components %)) hits))
+              hits (if (> (count hits) 1) (remove is-player? hits) hits)]
+          (first hits))))))
+
+(def ^:private mouseover-body-cache (atom nil)) ; cache exists so that only one time in a frame mouseover-get-current is calculated
+(def mouseover-cache-session (atom-session mouseover-body-cache :save-session false))
+
+; when played holds leftmouse down the mouseoverbody stays the same as long as mouse is down, even if it is not under the mouse anymore
+(def saved-mouseover-body (atom nil))
+(def saved-mouseover-body-session
+  (atom-session saved-mouseover-body :save-session false))
+
+(defn get-mouseover-body []
+  (if-let [body @saved-mouseover-body]
+    (when (get @id-entity-map (:id (meta body))) body)
+    (if @debug-mode
+      (mouseover-get-current)
+      (when (and @mouseover-body-cache (get @id-entity-map (:id (meta @mouseover-body-cache)))) @mouseover-body-cache))))
+
+; -> der map-indep-comp :check-pressable-mouseoverbody benutzt get-mouseover-body und konnte vor
+; update-saved drankommen!
+; deshalb nur returnt wenn er exists.
+
+(defn- mouseover-keep-saved? [body]
+  (and (is-leftbutton-down?)
+       (get @id-entity-map (:id (meta body)))
+       (on-screen-and-in-sight? body)))
+
+(ingame-loop-comp :update-saved-and-cache
+  (active [_ _ _]
+    (reset! mouseover-body-cache (mouseover-get-current))
+    (when (and @saved-mouseover-body
+               (not (mouseover-keep-saved? @saved-mouseover-body)))
+      (reset! saved-mouseover-body nil))
+    (when-let [body @mouseover-body-cache]
+      (when (and (is-leftbutton-down?)
+                 (not @saved-mouseover-body)
+                 (attackable-by-player? body))
+        (reset! saved-mouseover-body body)))))
+
+;; melee skills
+
+;;; front-of-body-shape
+
+(defn in-front-of-body-shape
+  ([body height]
+   (in-front-of-body-shape (:value (:position @body))
+                           (:half-width (:body @body))
+                           height
+                           (:angle (:rotation @body))))
+  ([[x y] half-w height angle]
+   (rotate-shape
+    (rectangle (- x half-w)
+                    (- y half-w height)
+                    (* 2 half-w)
+                    height)
+    angle x y)))
+
+;;; melee
+
+; TODO unabh von tiles machen ->in pixels?
+(def melee-puffer 0.8)
+
+(let [pixel 5]
+  (def start-melee-puffer (in-tiles pixel)))
+
+(comment
+  "visual \"close-ness\" required for melee attacks
+if an entity is very fast and the movement step in 1 frame is >as this then
+it can not get in melee range -> in this case split up movement into multiple smaller steps
+so the entity can get in melee range.")
+
+(defn body-in-melee-range?
+  "attacked-already weil wenn noch nicht @attacking state sondern schauen ob in range -> kleinerer abstand.
+   spater grosserer abstand moglich weil sonst bewegt sich gegner 1 frame weg  und ausser range .."
+  ([body target]
+    (body-in-melee-range? body target true))
+  ([body target attacked-already] ; TODO als :attacked-already key machen
+    (let [puffer (if attacked-already melee-puffer start-melee-puffer)
+          radius (+ puffer (:half-width (:body @body)))] ; TODO geht davon aus half-w = half-h von body (ansonsten komplizierter!)
+      (circle-collides? (:value (:position @body)) radius target))))
+; TODO vlt schneller einfach distance und den bounding radius der beiden abziehen
+; == abstand und mit start-melee-puffer vergleichen
+
+(defn- melee-target-in-range? [entity target-id & {:keys [attacked-already]}]
+  (body-in-melee-range? entity (get @id-entity-map target-id) attacked-already))
+
+(defn- melee-check-usable-player [entity {:keys [target-body-id] :as melee-comp}]
+  (let [mouseover-target-id (when-let [body (get-mouseover-body)]
+                              (when (attackable-by-player? body)
+                                (:id (meta body))))]
+    (case (get-skill-use-mouse-button)
+      :left (when mouseover-target-id
+              (swap! entity assoc-in [:skillmanager :skills (:type melee-comp) :target-body-id]
+                         mouseover-target-id)
+              (melee-target-in-range? entity mouseover-target-id :attacked-already false))
+      :right (do
+               (swap! entity assoc-in [:skillmanager :skills (:type melee-comp) :target-body-id]
+                          (or mouseover-target-id nil))
+               true))))
+
+(defn- melee-check-usable-monster [entity melee-comp]
+  (melee-target-in-range? entity (:target-body-id melee-comp) :attacked-already false))
+
+(defn melee-weapon
+  ([base-dmg hit-sound]
+    {:base-dmg base-dmg :hit-sound hit-sound})
+  ([base-dmg hit-sound animation]
+    (assoc (melee-weapon base-dmg hit-sound) :animation animation)))
+
+(def ^:private melee-fist-weapon
+  (melee-weapon [1 2] (create-sound "bfxr_fisthit.wav") :fist))
+
+(defn- melee-current-player-weapon []
+  (or (:melee-weapon (get-equiped-hands-item)) melee-fist-weapon))
+
+(defn- melee-weapon-for [entity melee-skill]
+  (if (is-player? entity)
+    (melee-current-player-weapon)
+    (:melee-weapon melee-skill)))
+
+(defn- melee-hit [entity meleecomp targetbody]
+  (let [{:keys [base-dmg hit-sound]} (melee-weapon-for entity meleecomp)]
+    (deal-dmg base-dmg targetbody :is-player-melee (is-player? entity))
+    (dorun (map #(% targetbody) (:hit-effects meleecomp)))
+    ;(play-sound hit-sound)
+    ))
+
+(defn- melee-try-hit-target
+  "returns nil when target not in range or does not exist anymore"
+  [entity {:keys [target-body-id] :as meleecomp}]
+  (when target-body-id
+    (let [targetbody (get @id-entity-map target-body-id)]
+      (if (and targetbody
+               (is-affectable? targetbody)
+               (melee-target-in-range? entity target-body-id :attacked-already true))
+        (melee-hit entity meleecomp targetbody)
+        (comment "missed target!")))))
+
+(defn- melee-create-props [target-body-id]
+  {:target-body-id target-body-id
+   :is-melee true
+   :do-skill melee-try-hit-target})
+
+(defn get-attackable-target-in-front [body]
+  (let [half-w-max (+ (:half-width (:body @body)) melee-puffer)
+        posi (:value (:position @body))
+        cshape (in-front-of-body-shape body melee-puffer)]
+    (first (filter #(and (attackable-by-player? %)
+                      (collides? cshape (rect-shape %)))
+                (get-bodies-from-cells
+                  (calc-touched-cells posi half-w-max half-w-max))))))
+
+(defn- melee-do-skill-player [entity {:keys [target-body-id] :as meleecomp}]
+  (let [mouse (get-skill-use-mouse-button)]
+    (case mouse
+      :left
+      (melee-try-hit-target entity meleecomp)
+
+      :right
+      (when-not (and target-body-id (melee-try-hit-target entity meleecomp))
+        (when-let [target (get-attackable-target-in-front entity)]
+          (melee-hit entity meleecomp target))))))
+
+(defn player-melee-props [hit-effects]
+  (merge
+    (melee-create-props :undefined-yet)
+    {:do-skill melee-do-skill-player
+     :hit-effects hit-effects
+     :check-usable melee-check-usable-player}))
+
+(defn monster-melee-props [target-body-id melee-weapon]
+  (merge
+    (melee-create-props target-body-id)
+    {:melee-weapon melee-weapon
+     :check-usable melee-check-usable-monster}))
+
+(defn get-current-player-melee-dmg []
+  (-> (melee-current-player-weapon) :base-dmg (calc-effective-melee-dmg (:item-boni @player-body))))
+
+(defn monster-melee-component
+  [& {:keys [cooldown hit-sound target-id attacktime]}]
+  (standalone-skill
+    :stype :melee
+    :cooldown cooldown
+    :attacktime attacktime
+    :state-blocks {:attacking :movement
+                   :cooldown :movement}
+    :props (monster-melee-props target-id (melee-weapon [4 6] hit-sound))))
+
+(defn get-player-skill-animation-key []
+  (let [skill (get-active-skill (:skillmanager @player-body))]
+    (:animation
+      (if (:is-melee skill) (melee-current-player-weapon) skill))))
+
+;; body-render
+
+(defn- body-render-melee-debug-info [g p body]
+  (when-let [meleecomp (get-skill body :melee)]
+    (let [target-body (get @id-entity-map (:target-body-id meleecomp))
+          start-attack-puffer (in-pixel (+ start-melee-puffer (:half-width (:body @body))))
+          hit-puffer (in-pixel (+ melee-puffer (:half-width (:body @body))))]
+      (when target-body
+        (set-color g (if (body-in-melee-range? body target-body false) red green))
+        (draw-shape g (circle p start-attack-puffer))
+        (draw-shape g (circle p hit-puffer))))))
+
+(defn- body-render-debug-info [g [x y] body]
+  (when (and @debug-mode show-body-debug-info)
+    ;(render-readable-text g x y :shift false (str (get-id body)))
+    ;(body-render-melee-debug-info g [x y] body)
+;    (when-let [c (get-skill body :melee)]
+;      (render-readable-text g x y :shift false (str (:state c))))
+    (when-let [rangedcomp (get-skill body :ranged)]
+      (render-readable-text g x y :shift false (str (:state rangedcomp))))))
+
+(defn- body-render-bounds [g body [x y] color]
+  (let [h-width (:half-pxw (:body @body))
+        h-height (:half-pxh (:body @body))
+        x (- x h-width)
+        y (- y h-height)]
+    (draw-rect g x y (* 2 h-width) (* 2 h-height) color)))
+
+(def ^:private body-render-hpbar-colors
+  {:green     (rgbcolor :g 1 :darker 0.2)
+   :darkgreen (rgbcolor :g 1 :darker 0.5)
+   :yellow    (rgbcolor :r 1 :g 1 :darker 0.5)
+   :red       (rgbcolor :r 1 :darker 0.5)})
+
+(defn- body-render-hpbar-color [ratio]
+  (let [ratio (float ratio)
+        color (cond
+                (> ratio 0.75) :green
+                (> ratio 0.5)  :darkgreen
+                (> ratio 0.25) :yellow
+                :else          :red)]
+    (color body-render-hpbar-colors)))
+
+(defn- body-render-bar
+  ([g x y w h ratio color]
+    (fill-rect g x y w h black)
+    (fill-rect g (inc x) (inc y) (* ratio (- w 2)) (- h 2) color))
+  ([g x y w h current-val max-val color]
+    (body-render-bar g x y w h (get-ratio current-val max-val) color)))
+
+(def ^:private body-render-info-bars-h 3)
+
+(defn- body-render-info-bar [g body [x y] ratio color ybuffer]
+  (let [half-w (int (:half-pxw (:body @body)))
+        half-h (int (:half-pxh (:body @body)))
+        h body-render-info-bars-h]
+    (body-render-bar g (- x half-w) (- y half-h ybuffer) (* 2 half-w) h ratio color)))
+
+(defn- body-render-hp-bar [g body render-position]
+  (let [hp (get-hp body)
+        ratio (get-ratio hp)
+        color (body-render-hpbar-color ratio)
+        color (if @active-lightning
+                (.darker ^Color color
+                  (let [image (or
+                                (:image (:image-render @body))
+                                (get-animation-frame (current-animation body)))
+                        intensity (let [color (.getCornerColor ^Image image Image/TOP_LEFT)]
+                                    (/ (+ (.r color) (.g color) (.b color)) 3))]
+                    (- 1 intensity)))
+                color)]
+    (body-render-info-bar g body render-position ratio color body-render-info-bars-h)))
+
+(defn- body-render-attacking-bar [g body skill render-position]
+  (body-render-info-bar g body render-position (counter-ratio (:attack-counter skill)) blue (* 2 body-render-info-bars-h)))
+
+(defn body-info-renderfn [g body component {x 0 y 1 :as render-position}]
+  (let [tile-posi (:value (:position @body))]
+    (when @debug-mode
+      (when show-body-bounds
+        (body-render-bounds g body render-position white))
+      (body-render-debug-info g render-position body))
+    (when (not (is-player? body))
+      (when (destructible? body)
+        (body-render-hp-bar g body render-position))
+      (let [skillmanager (:skillmanager @body)
+            active-type (:active-type skillmanager)]
+        (when (and skillmanager
+                   (#{:healing :monster-nova} active-type)
+                   (is-attacking? skillmanager))
+          (body-render-attacking-bar g body (get-active-skill skillmanager) render-position)))
+      (when-let [component (first (filter #(and (:show-cast-bar %) (is-attacking? %)) (vals @body)))]
+        (body-render-attacking-bar g body component render-position)))))
+
+;;;
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private body-render-outlines {:green {:topleft (create-image "outline/tl.png" :scale 0.5)
+                                     :topright (create-image "outline/tr.png" :scale 0.5)
+                                     :bottomleft (create-image "outline/bl.png" :scale 0.5)
+                                     :bottomright (create-image "outline/br.png" :scale 0.5)}
+                             :red {:topleft (create-image "outline/tl_r.png" :scale 0.5)
+                                   :topright (create-image "outline/tr_r.png" :scale 0.5)
+                                   :bottomleft (create-image "outline/bl_r.png" :scale 0.5)
+                                   :bottomright (create-image "outline/br_r.png" :scale 0.5)}})))
+
+(def body-outline-height 2)
+
+; The corner is at pixel x4 y4 where the body outline corner is
+(defn- body-render-draw-outline-shape [image x y]
+  (draw-image image (- x 2) (- y 2)))
+
+(defn- body-render-outline [g body [x y] color]
+  (let [h-width (:half-pxw (:body @body))
+        h-height (:half-pxh (:body @body))
+        leftx (- x h-width)
+        rightx (+ x h-width)
+        topy (- y h-height)
+        bottomy (+ y h-height)]
+    (body-render-draw-outline-shape (:topleft (color body-render-outlines)) leftx topy)
+    (body-render-draw-outline-shape (:topright (color body-render-outlines)) rightx topy)
+    (body-render-draw-outline-shape (:bottomleft (color body-render-outlines)) leftx bottomy)
+    (body-render-draw-outline-shape (:bottomright (color body-render-outlines)) rightx bottomy)))
+
+(ingame-loop-comp :body-outline
+  (rendering :below-gui  [g c]
+    (when-let [body (get-mouseover-body)]
+      (when (:mouseover-outline (:body @body))
+        (let [p (screenpos-of-tilepos (:value (:position @body)))]
+          (body-render-outline g body p
+                               (if (and (not (is-player? body))
+                                        (destructible? body))
+                                 :red
+                                 :green)))))))
+
+; OR: current rendered image of body
+; => make outline image => draw over it!? .. costs 20-30 ms to make that img would neet to cache it..!!
+
+;; item in-hand
+
+;;; mouse-cursor
+
+(let [hotspotx 0
+      hotspoty 0]
+
+  (deflazygetter ^:private item-get-default-mouse-cursor
+    (-> (CursorLoader/get) (.getCursor "cursor.png" hotspotx hotspoty)))
+
+  (defn reset-default-mouse-cursor []
+    (set-mouse-cursor (item-get-default-mouse-cursor) hotspotx hotspoty)))
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (reset-default-mouse-cursor)))
+
+; (.setDefaultMouseCursor app-game-container) -> der normale
+
+;;; in-hand
+
+(def item-in-hand (atom nil))
+
+(defn is-item-in-hand? [] @item-in-hand)
+
+(defn set-item-in-hand [item]
+  (reset! item-in-hand item)
+  (set-mouse-cursor (get-scaled-copy (:image item) screen-scale) (* 8 screen-scale) (* 8 screen-scale)))
+
+(defn empty-item-in-hand []
+  (reset! item-in-hand nil)
+  (reset-default-mouse-cursor))
+
+;; player speed
+
+(def player-move-speed 70) ; px/s
+
+(def ^:private player-speed-animation-types
+  {:movement  [:moving]
+   :attacking [:sword :sword-small :sword-big :fist]
+   :casting   [:casting :meditation]})
+
+(defn- player-inc-speed [component value types]
+  {:pre [(contains? player-speed-animation-types types)]}
+  (reduce #(update-in %1 [%2 :speed] + value)
+          component
+          (get player-speed-animation-types types)))
+
+(defn incr-attack-speed  [entity-hash value]
+  (update-in entity-hash [:animation] player-inc-speed value :attacking))
+
+(defn incr-casting-speed [entity-hash value]
+  (update-in entity-hash [:animation] player-inc-speed value :casting))
+
+(defn incr-move-speed [entity-hash modifier]
+  (-> entity-hash
+      (update-in [:animation] player-inc-speed modifier :movement)
+      (update-in [:movement :speed] + (* (in-tiles-per-ms player-move-speed) modifier))))
+
+;; pressable
+
+(defn pressable-component [mouseover-text pressed & {color :color}]
+  {:type :pressable
+   :mouseover-text mouseover-text
+   :pressed pressed
+   :color color})
+
+(ingame-loop-comp :render-mouseover-body-text
+  (rendering :below-gui  [g _]
+    (when-let [mouseover-body (get-mouseover-body)]
+      (when-let [{:keys [mouseover-text color]} (:pressable @mouseover-body)]
+        (when (seq mouseover-text) ; rendering "" leads to just background black line ...
+          (let [[body-x body-y] (screenpos-of-tilepos (:value (:position @mouseover-body)))]
+            (render-readable-text g
+                                  body-x
+                                  (- body-y (:half-pxh (:body @mouseover-body)) body-outline-height)
+                                  :centerx true
+                                  :above true
+                                  (or color white)
+                                  mouseover-text)))))))
+
+(def ^:private pressable-click-distance-tiles 1.5)
+(def ^:private pressable-click-dist-sqr (* pressable-click-distance-tiles pressable-click-distance-tiles))
+
+(ingame-loop-comp :check-pressable-mouseoverbody
+  (active [_ _ _]
+    (when-let [body (get-mouseover-body)]
+      (when-let [{pressedfn :pressed} (:pressable @body)]
+        (when (and (bodies-in-range? player-body body pressable-click-dist-sqr)
+                   (try-consume-leftm-pressed))
+          (pressedfn body))))))
+
+;; media
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private items-spritesheet (spritesheet "items/items.png" 16 16))))
+
+(defn get-itemsprite [p]
+  (get-sprite items-spritesheet p))
+
+;; defmonster
+
+(defn create-monster
+  "use defmonster not this for defining monsters"
+  [position monster-type {hp :hp armor :armor :as props} & components] ; monster-type not used?! TODO was used for (:is-boss) or something like that
+  (apply create-entity
+         (position-component position)
+         (create-body :solid true
+                      :side :monster
+                      :pxw (:pxw props)
+                      :pxh (:pxh props)
+                      :mouseover-outline true)
+         (monster-destructible hp armor)
+         (sleeping-component)
+         components))
+
+(def monster-defs {})
+
+(defn get-monster-properties [type]
+  (or (get monster-defs type)
+      (throw (Error. (str "Could not find monster: " type)))))
+
+(defmacro defmonster [monster-type props & components]
+  `(let [props# ~props
+         type# ~(keyword monster-type)]
+     (alter-var-root #'monster-defs assoc type#
+       {:create (fn [position#] (create-monster position# type# props# ~@components))
+        :half-w (/ (:pxw props#) tile-width 2)
+        :half-h (/ (:pxh props#) tile-height 2)
+        :movement-type :ground})))
+
+;; status-options
+
+(defprotocol StatusCheckBox
+  (status-get-text [this])
+  (status-get-state [this])
+  (status-set-state [this is-selected]))
+
+(def status-check-boxes (atom []))
+
+(defmacro status-check-box [& forms]
+  `(swap! status-check-boxes conj
+          (reify StatusCheckBox ~@forms)))
+
+;(status-check-box
+;  (status-get-text [this] "Music")
+;  (status-get-state [this] (.isMusicOn app-game-container))
+;  (status-set-state [this is-selected] (.setMusicOn app-game-container is-selected)))
+
+(status-check-box
+  (status-get-text [this] "Sound")
+  (status-get-state [this] (.isSoundOn app-game-container))
+  (status-set-state [this is-selected] (.setSoundOn app-game-container is-selected)))
+
+(status-check-box
+  (status-get-text [this] "Fullscreen")
+  (status-get-state [this] (.isFullscreen app-game-container))
+  (status-set-state [this is-selected]
+    (when (fullscreen-supported?)
+      (.setFullscreen app-game-container is-selected))))
+
+(status-check-box
+  (status-get-text [this] "Show FPS")
+  (status-get-state [this] (.isShowingFPS app-game-container))
+  (status-set-state [this is-selected] (.setShowFPS app-game-container is-selected)))
+
+; config is not initialized before 'start'
+#_(when (get-setting :lightning-options-menu-checkbox)
+  (status-check-box
+    (status-get-text [this] "Lightning effects")
+    (status-get-state [this] @active-lightning)
+    (status-set-state [this is-selected] (reset! active-lightning is-selected))))
+
+(def status-options-session (reify Session
+               (load-session [_ data]
+                 (when data
+                   (doseq [[text state] data]
+                     (status-set-state
+                       (first (filter #(= text (status-get-text %)) @status-check-boxes))
+                       state))))
+               (save-session [_]
+                 (for [status @status-check-boxes]
+                   [(status-get-text status) (status-get-state status)]))
+               (new-session-data [_])))
+
+;; maps.add
+
+(defn add-maps-data
+  [& {:keys [map-key cell-grid load-content pretty-name rand-item-max-lvl start-position
+             tiled-map sprite-sheet details-sprite-sheet spawn-monsters]
+      :as argsmap}]
+  {:pre [(xor tiled-map sprite-sheet)
+         (not-any? #{map-key} (get-map-keys))]}
+  (let [w (width cell-grid)
+        h (height cell-grid)]
+    (add-map map-key
+                  (merge
+                    (dissoc argsmap :map-key)
+                    {:j-cell-grid (delay (create-jcell-grid cell-grid))
+                     :contentfields (create-mapcontentfields w h)
+                     :minimap-image (create-minimap-image w h)
+                     :minimap-bodies (atom #{})
+                     :explored-tile-corners (atom (create-grid w h (constantly false)))})))
+  (log "Finished creating " map-key)
+  ;(check-not-allowed-diagonals cell-grid)
+  )
+
+(def ^:private maps-add-create-fns [])
+
+(defmacro maps-add-create-fn [& args]
+  `(alter-var-root #'maps-add-create-fns conj (fn [] ~@args)))
+
+(def maps-add-session (reify Session
+               (load-session [_ _]
+                 (require (get-setting :map-impl-namespace))
+                 (doseq [create maps-add-create-fns]
+                   (create)))
+               (save-session [_])
+               (new-session-data [_])))
+
+(defn tilemap-make-argmap [bodyseq]
+  (let [temp (apply hash-map bodyseq)
+        tiled-map (construct-tiledmap (str "maps/" (:file temp))
+                                      lightmanager)]
+    (merge (dissoc temp :file)
+           {:start-position (translate-to-tile-middle (get-player-entity-start-position tiled-map))
+            :tiled-map tiled-map
+            :cell-grid (create-cell-grid-from-tiled-map tiled-map)})))
+
+(defn generatedmap-make-argmap [bodyseq]
+  (let [{:keys [grid blockprops calc-sprite-posi details-calc-sprite-posi] :as temp} (first bodyseq)]
+    (merge (dissoc temp :grid :blockprops :calc-sprite-posi :details-calc-sprite-posi)
+           {:cell-grid (create-grid-from-gen-grid grid blockprops calc-sprite-posi details-calc-sprite-posi)})))
+
+(defn call-add-maps-data [mapkey make-argmap-fn & bodyseq]
+  (apply add-maps-data
+         (apply concat  ; concat so the map is a sequence of its elements
+                (assoc (make-argmap-fn bodyseq)
+                       :map-key mapkey))))
+
+(defmacro deftilemap [mapkey & body]
+  `(maps-add-create-fn
+     (call-add-maps-data ~mapkey tilemap-make-argmap ~@body)))
+
+(defmacro defgeneratedmap [mapkey body]
+  `(maps-add-create-fn
+     (call-add-maps-data ~mapkey generatedmap-make-argmap ~body)))
+
+; --> mach prozedural generierte maps mit prostprocessing (fill-singles/set-cells-behind-walls-nil/remove-nads/..?)
+;& assertions 0 NADS z.b. ...?

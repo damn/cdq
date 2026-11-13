@@ -4,7 +4,7 @@
     [cdq.core :refer [rand-int-between]]
     game.components.body-effects-impl
     [cdq.core :refer [get-player-armor]]
-    [game.player.speed :refer [incr-attack-speed incr-casting-speed incr-move-speed]]))
+    [cdq.core :refer [incr-attack-speed incr-casting-speed incr-move-speed]]))
 
 ; lvl-stats mit count 3 hier überall explizit -> mach von variable abhängig
 

@@ -9,14 +9,13 @@
     [cdq.core :refer [create-image]]
     [cdq.core :refer [fill-rect render-readable-text]]
     [cdq.core :refer [screen-height]]
-    game.media
     [cdq.core :refer [gui-get-bounds gui-visible? make-frame make-imgbutton gui-mouseover? gui-set-visible gui-switch-visible]]
     [cdq.core :refer [buttonscale buttonx-start frame-screenborder-distance ingamestate-display skillmenu-hotkey ingame-gui-x-dist]]
     cdq.core
     [game.player.skill.skillmanager :refer [add-player-skill assign-unused-hotkey-and-open-skillslist create-skill-icon]]
     [cdq.core :refer [active player-body]]
     [cdq.core :refer [skillmanager-skill]]
-    game.components.skills.melee))
+    ))
 
 ; This ns is skillmenu & learnable-skills
 

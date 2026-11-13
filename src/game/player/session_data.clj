@@ -1,20 +1,18 @@
 (ns game.player.session-data
   (:require
     [clojure.walk :refer [postwalk]]
-    game.mouseoverbody
     [cdq.core :as session :refer [load-session new-session-data save-session]]
     game.components.burrow
     cdq.core
-    [game.item.cells :refer [add-item-to-cell empty-all-item-grids]]
-    [game.item.grids :refer [item-grids]]
-    [game.item.in-hand :refer [item-in-hand set-item-in-hand]]
+    [cdq.core :refer [add-item-to-cell empty-all-item-grids]]
+    [cdq.core :refer [item-grids]]
+    [cdq.core :refer [item-in-hand set-item-in-hand]]
     [game.item.instance :refer [create-item-instance]]
     [game.item.boni :refer [create-equip-boni-save load-equip-boni-save]]
     [cdq.core :refer [cells]]
     [cdq.core :as data]
     cdq.core
     cdq.core
-    game.maps.add
     game.player.core
     game.player.skill.learnable
     game.player.skill.selection-list
@@ -23,7 +21,7 @@
     [game.monster.spawn :refer [try-spawn]]
     [cdq.core :refer [get-tileproperties]]
     [cdq.core :refer [version]]
-    [game.status-options :refer [session]]))
+    [cdq.core :refer [status-options-session]]))
 
 (def current-character-name (atom nil))
 
@@ -148,7 +146,7 @@
        [; resets all map data -> do it before creating maps => TODO put both in one maps-session-component?
         [#'cdq.core/maps-data-session]
         ; create maps before putting entities in them
-        [#'game.maps.add/session]
+        [#'cdq.core/maps-add-session]
 
         ; resets all entity data -> do it before addding entities
         [#'cdq.core/clear-entities-session]
@@ -165,9 +163,9 @@
         [#'game.player.skill.selection-list/hotkeys-session]
         [#'game.player.skill.learnable/session] ; depends on player-body/learnable-skills already initialised
         [#'item-save-session "item.save/session"] ; depends on player-body (apply item bonis)
-        [#'game.status-options/session]
-        [#'game.mouseoverbody/cache-session]
-        [#'game.mouseoverbody/saved-mouseover-body-session]
+        [#'cdq.core/status-options-session]
+        [#'cdq.core/mouseover-cache-session]
+        [#'cdq.core/saved-mouseover-body-session]
         [#'cdq.core/update-session]
         [#'cdq.core/sleeping-session]
         [#'game.components.burrow/session]

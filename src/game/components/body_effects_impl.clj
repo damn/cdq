@@ -17,7 +17,7 @@
     [cdq.core :refer [add-blocks mark-slowed remove-blocks unmark-slowed]]
     [cdq.core :refer [if-chance]]
     game.item.instance
-    [game.player.speed :refer [incr-attack-speed incr-casting-speed incr-move-speed]]))
+    [cdq.core :refer [incr-attack-speed incr-casting-speed incr-move-speed]]))
 
 (defeffectentity ^:private battle-drugs-entity [seconds speedup]
   :target player-body

@@ -37,7 +37,7 @@
 ; there is postprocessing before scaling (NADs, single cells, connect-regions for cellular)
 ; and there is after scaling (mark undefined cells)
 ;
-(game.maps.add/defgeneratedmap :tech-graveyard
+(cdq.core/defgeneratedmap :tech-graveyard
   (let [grid (cellular-automata-gridgen (rand-int-between 35 75) (rand-int-between 35 75)
                                         :fillprob 64
                                         :generations 5
@@ -76,7 +76,7 @@
                        (create-chest p)))
      :rand-item-max-lvl 1}))
 
-(game.maps.add/defgeneratedmap :tech
+(cdq.core/defgeneratedmap :tech
   (let [grid (cellular-automata-gridgen (rand-int-between 55 100) (rand-int-between 55 100)
                                         :fillprob 64
                                         :generations 5
@@ -112,7 +112,7 @@
                        :to [:blood-caves (:start-position (cdq.core/get-map-data :blood-caves))]))
      :rand-item-max-lvl 2}))
 
-(game.maps.add/defgeneratedmap :blood-caves
+(cdq.core/defgeneratedmap :blood-caves
   (let [{:keys [start grid]} (cave-gridgen (Random.) 25 1000 :wide)
         scale 2
         scale-position (fn [p] (mapv #(* scale %) p))

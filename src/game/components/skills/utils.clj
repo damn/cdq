@@ -6,7 +6,7 @@
     [cdq.core :refer [position-component]]
     [cdq.core :refer [show-msg-to-player]]
     [cdq.core :refer [ray-blocked?]]
-    [game.mouseoverbody :refer [saved-mouseover-body]]
+    [cdq.core :refer [saved-mouseover-body]]
     [cdq.core :refer [add-to-removelist create-entity id-entity-map player-body]]
     [cdq.core :refer [render-on-map]]
     [cdq.core :refer [delete-after-duration-component]]

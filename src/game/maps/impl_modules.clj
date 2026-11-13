@@ -78,7 +78,7 @@
 ;                                      "module7.tmx"])
 ;                                   ["module_end.tmx"]))) door-sprite-indizes))))
 
-(game.maps.add/defgeneratedmap :level-one
+(cdq.core/defgeneratedmap :level-one
   (makemodulebasedmap :modules (map
                                  #(str "modules/level1/" %)
                                  (concat
@@ -98,7 +98,7 @@
                       :pretty-name "Level 1"
                       :rand-item-max-lvl 1))
 
-(game.maps.add/defgeneratedmap :level-two
+(cdq.core/defgeneratedmap :level-two
   (makemodulebasedmap :modules (map #(str "modules/" %)
                                     (concat
                                       ["level2/start.tmx"]
@@ -114,7 +114,7 @@
                       :pretty-name "Level 2"
                       :rand-item-max-lvl 2))
 
-(game.maps.add/defgeneratedmap :level-three
+(cdq.core/defgeneratedmap :level-three
   (makemodulebasedmap :modules (map #(str "modules/" %) ["level3/boss.tmx"])
                       :next-map :level-three
                       :spritesheet gauntletly3-tilesheet

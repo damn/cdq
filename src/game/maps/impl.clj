@@ -1,19 +1,17 @@
 (ns game.maps.impl
   (:require
     [cdq.core :refer [green magenta]]
-    game.maps.add
     cdq.core
     [cdq.core :as grid :refer [get-4-neighbour-positions mapgrid->vectorgrid posis transform height width]]
     [cdq.core :refer [log translate-to-tile-middle]]
     [cdq.core :refer [play-sound]]
     [cdq.core :refer [get-sprite spritesheet]]
     cdq.core
-    game.media
-    [game.media :refer [get-itemsprite]]
+    [cdq.core :refer [get-itemsprite]]
     [cdq.core :refer [add-to-removelist create-entity]]
     [cdq.core :refer [position-component]]
     [cdq.core :refer [create-body]]
-    [game.components.pressable :refer [pressable-component]]
+    [cdq.core :refer [pressable-component]]
     [cdq.core :refer [image-render-component]]
     [game.entity.teleporters :refer [static-teleporter]]
     game.player.core

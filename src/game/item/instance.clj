@@ -7,14 +7,14 @@
     [cdq.core :refer [get-scaled-copy]]
     [cdq.core :refer [safe-merge]]
     cdq.core
-    [game.item.cells :refer [try-pickup-item]]
-    [game.item.grids :refer [showing-player-inventory?]]
-    [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
+    [cdq.core :refer [try-pickup-item]]
+    [cdq.core :refer [showing-player-inventory?]]
+    [cdq.core :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
     [cdq.core :refer [active add-to-removelist create-entity player-body]]
     [cdq.core :refer [position-component]]
     [cdq.core :refer [blocked-location? create-body]]
     [cdq.core :refer [image-render-component render-on-map]]
-    [game.components.pressable :refer [pressable-component]]
+    [cdq.core :refer [pressable-component]]
     [cdq.core :refer [show-msg-to-player]]))
 
 ;;; glittering

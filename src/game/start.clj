@@ -34,7 +34,7 @@
     [cdq.core :refer [movement-component projectile-movement-component]]
     [game.components.movement.ai.potential-field :refer [calculate-mouseover-body-colors path-to-player-movement potential-field-player-following render-potential-field-following-mouseover-info render-potential-field-info]]
     [cdq.core :refer [enough-mana? get-mana get-skill get-skill-use-mouse-tile-pos is-attacking? is-ready? is-usable? skillmanager-component skillmanager-skill standalone-skill]]
-    [game.components.skills.melee :refer [get-current-player-melee-dmg melee-weapon monster-melee-component monster-melee-props player-melee-props]]
+    [cdq.core :refer [get-current-player-melee-dmg melee-weapon monster-melee-component monster-melee-props player-melee-props]]
     [cdq.core :refer [wake-up]]
     [game.entity.projectile :refer [fire-projectile]]
     [game.entity.nova :refer [nova-effect]]
@@ -44,19 +44,16 @@
     [cdq.core :refer [render-minimap show-on-minimap]]
     [cdq.core :refer [get-rand-weighted-item if-chance percent-chance rand-int-between]]
     [cdq.core :refer [is-path-blocked? ray-blocked?]]
-    [game.monster.defmonster :refer [defmonster get-monster-properties]]
+    [cdq.core :refer [defmonster get-monster-properties]]
     [game.monster.spawn :refer [try-spawn]]
-    game.components.body-render
     game.components.burrow
-    game.maps.add
-    game.media
     game.entity.teleporters
     [game.components.skills.utils :refer [check-line-of-sight get-player-ranged-vector]]
     [game.player.skill.learnable :refer [deflearnable-skill]]
     [cdq.core :refer [clear-key-pressed-record clear-mouse-pressed-record get-mouse-pos is-key-pressed? is-rightm-consumed? try-consume-leftm-pressed try-consume-rightm-pressed update-mousebutton-state]]
     [cdq.core :refer [gui-visible? make-checkbox make-frame make-guidisplay make-label make-textbutton remove-guicomponent render-guicomponent gui-set-visible update-guicomponent]]
     [cdq.core :as ids]
-    [game.status-options :refer [get-state get-text set-state status-check-boxes]]
+    [cdq.core :refer [status-get-state status-get-text status-set-state status-check-boxes]]
     [cdq.core :as debug]
     [cdq.core :as cupd]
     [game.maps.mapchange :refer [check-change-map]]
@@ -64,17 +61,17 @@
     [cdq.core :refer [image-corners set-cached-brightness]]
     [cdq.core :refer [get-mouse-tile-pos mouse-int-tile-pos]]
     [cdq.core :refer [translate-shake-after-render translate-shake-before-render update-shake]]
-    [game.mouseoverbody :refer [get-mouseover-body]]
+    [cdq.core :refer [get-mouseover-body]]
     [cdq.core :refer [ingame-gui-background-color char-hotkey close-all-frames ingame-gui-foreground-color frame-screenborder-distance ingamestate-display mouse-inside-some-gui-component? options-hotkey some-visible-frame?]]
     [cdq.core :refer [get-entities-in-active-content-fields get-player-content-field-idx]]
     [cdq.core :refer [cell-blocked? get-body-ids get-cell get-cell-grid get-map-h get-map-w]]
     [cdq.core :refer [get-camera-position]]
     [cdq.core :refer [get-layer-index]]
     [cdq.core :refer [get-ingame-loop-entities ingame-loop-comp]]
-    [game.item.cells :refer [add-item-to-cell cell-empty-and-allows-item? cell-filled-and-allows-item? inc-count-of-item? item-in-use? item-not-in-use? remove-item-from-cell remove-one-item]]
-    [game.item.grids :refer [background-icons cell-h cell-w hks-cells inventory-height inventoryry item-grids]]
+    [cdq.core :refer [add-item-to-cell cell-empty-and-allows-item? cell-filled-and-allows-item? inc-count-of-item? item-in-use? item-not-in-use? remove-item-from-cell remove-one-item]]
+    [cdq.core :refer [item-background-icons item-cell-h item-cell-w hks-cells inventory-height inventoryry item-grids]]
     [game.item.colors :refer [equip-boni-item-color]]
-    [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
+    [cdq.core :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
     [game.player.skill.selection-list :refer [close-skill-selection-lists some-skill-selection-list-visible?]]
     [game.player.skill.skillmanager :refer [get-selected-skill]]
     [game.player.core :refer [player-death try-revive-player]])
@@ -106,8 +103,8 @@
           gy (:ry grid)]
       (get-cell-renderposi gx gy cx cy)))
   ([gx gy cx cy]
-    [(+ gx (* cx cell-w))
-     (+ gy (* cy cell-h))]))
+    [(+ gx (* cx item-cell-w))
+     (+ gy (* cy item-cell-h))]))
 
 (defn get-mouseover-item-cell ; TODO ??
   ([]
@@ -117,8 +114,8 @@
       (vals item-grids)))
   ([renderx rendery item-grid]
     (let [[mx my] (get-mouse-pos)
-          cx (/ (- mx renderx) cell-w)
-          cy (/ (- my rendery) cell-h)
+          cx (/ (- mx renderx) item-cell-w)
+          cy (/ (- my rendery) item-cell-h)
           cellposi [(int cx) (int cy)]]
       (if-not (or (< cx 0) (< cy 0)) ; da (int -0.X) wird zu 0
         (get item-grid cellposi))))
@@ -144,7 +141,7 @@
             textseq (get-item-textseq cell)]
         (if (= :belt (:grid-type cell))
           (apply render-readable-text g rx ry :above true textseq)
-          (apply render-readable-text g rx (+ ry cell-h) textseq))))))
+          (apply render-readable-text g rx (+ ry item-cell-h) textseq))))))
 
 (ingame-loop-comp :item-tooltip
   (rendering :tooltips [g c]
@@ -157,14 +154,14 @@
 (def ^:private not-allowed-color (rgbcolor :r 0.6 :a 0.8))
 
 (defn- render-cell-droppable-indicator [g cell rx ry]
-  (fill-rect g rx ry cell-w cell-h
+  (fill-rect g rx ry item-cell-w item-cell-h
     (if (item-droppable-in-cell? @item-in-hand cell)
       droppable-color
       not-allowed-color)))
 
 (defn- render-item-in-cell [g item cell rx ry]
   (when (item-in-use? cell)
-    (fill-rect g rx ry cell-w cell-h red))
+    (fill-rect g rx ry item-cell-w item-cell-h red))
   (draw-image (:image item) rx ry)
   (when-let [cnt (:count item)]
     (render-readable-text g rx ry cnt)))
@@ -177,8 +174,8 @@
         gridh (height grid)
         x (:rx grid)
         y (:ry grid)
-        w (* gridw cell-w)
-        h (* gridh cell-h)
+        w (* gridw item-cell-w)
+        h (* gridh item-cell-h)
         mouseover-item-cell (get-mouseover-item-cell)]
     (fill-rect g x y w h item-cells-bg-color)
     (doseq [[[cx cy] cell] grid]
@@ -188,16 +185,16 @@
           (render-cell-droppable-indicator g cell rx ry))
         (when item
           (render-item-in-cell g item cell (inc rx) (inc ry))) ; cell size > item-size so the item is not behind the grid lines
-        (when (and (not item) (get background-icons grid-type))
-          (draw-image (get background-icons grid-type) (inc rx) (inc ry)))))
+        (when (and (not item) (get item-background-icons grid-type))
+          (draw-image (get item-background-icons grid-type) (inc rx) (inc ry)))))
     (set-color g item-cells-fg-color)
-    (draw-grid g x y gridw gridh cell-w cell-h)))
+    (draw-grid g x y gridw gridh item-cell-w item-cell-h)))
 
 (defn- render-belt-hotkeys [g]
   (doseq [hotkey (keys hks-cells)
           :let [cell-posi (get hks-cells hotkey)
                 [rx ry] (get-cell-renderposi cell-posi :belt)]]
-    (render-readable-text g (+ rx (/ cell-w 2)) ry :above true :centerx true (name hotkey))))
+    (render-readable-text g (+ rx (/ item-cell-w 2)) ry :above true :centerx true (name hotkey))))
 
 (ingame-loop-comp :item-cells
   (rendering [g c]
@@ -1886,10 +1883,10 @@ PSI-Explosion
     (dorun
       (map-indexed
         (fn [idx item]
-          (make-checkbox :text (get-text item)
+          (make-checkbox :text (status-get-text item)
                          :location [100 (+ options-by (* options-ypuffer idx))]
-                         :pressed #(set-state item %)
-                         :selected (boolean (get-state item))
+                         :pressed #(status-set-state item %)
+                         :selected (boolean (status-get-state item))
                          :parent options-display))
         @status-check-boxes))
     (when-not (fullscreen-supported?)
