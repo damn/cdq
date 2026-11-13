@@ -25,7 +25,10 @@
   :profiles {:uberjar {:aot [game.starter game.start]
                        :main game.starter}}
   :plugins [[lein-hiera "2.0.0"]]
-  :aliases {"build" ["do" "clean" "uberjar"]})
+  :aliases {"build" ["do" "clean" "uberjar"]}
+  :global-vars {*warn-on-reflection* true
+                *print-level* 3}
+  )
 
 ; :main mapgen.test
 ;
