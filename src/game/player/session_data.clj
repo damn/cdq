@@ -12,7 +12,6 @@
     [cdq.core :as data]
     cdq.core
     cdq.core
-    game.player.core
     game.player.skill.selection-list
     [cdq.core :refer [log translate-to-tile-middle]]
     [cdq.core :refer [distinct-seq?]]
@@ -62,7 +61,7 @@
 (defn load-maps-content
   "loads the map content in the right order"
   []
-  (game.player.core/init-player (:start-position (data/get-current-map-data)))
+  (cdq.core/init-player (:start-position (data/get-current-map-data)))
   (doseq [map-name data/added-map-order]
     (data/do-in-map map-name
                     (let [{:keys [load-content spawn-monsters tiled-map]} (data/get-map-data map-name)]

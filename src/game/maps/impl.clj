@@ -14,7 +14,6 @@
     [cdq.core :refer [pressable-component]]
     [cdq.core :refer [image-render-component]]
     [game.entity.teleporters :refer [static-teleporter]]
-    game.player.core
     game.player.skill.selection-list
     [cdq.core :refer [bloodcaves-groups spawn-monsters tech-groups techgy-groups try-spawn]]
     cdq.core

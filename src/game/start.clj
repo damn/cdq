@@ -73,7 +73,7 @@
     [cdq.core :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
     [game.player.skill.selection-list :refer [close-skill-selection-lists some-skill-selection-list-visible?]]
     [cdq.core :refer [get-selected-skill]]
-    [game.player.core :refer [player-death try-revive-player]])
+    [cdq.core :refer [player-death try-revive-player]])
   (:gen-class))
 
 ;;; item.cells-ui
