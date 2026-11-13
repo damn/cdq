@@ -6,9 +6,8 @@
         [cdq.core :refer [safe-merge]]
         [cdq.core :refer [active add-to-removelist is-player?]]
     [game.components.body :refer [calc-touched-cells get-body-bounds get-other-solid-bodies get-to-check-tiles min-solid-pxsize update-occupied-cell update-touched-cells]]
-    [game.components.position :refer [swap-position!]]
-    [cdq.core :refer [cell-blocked? get-cells]]
-    game.utils.raycast))
+    [cdq.core :refer [swap-position!]]
+    [cdq.core :refer [cell-blocked? get-cells]]))
 
 (defn- create-new-position
   [delta [vx vy] [old-x old-y] speed]

@@ -3,7 +3,7 @@
     [cdq.core :refer [circle set-radius]]
     [cdq.core :refer [rgbcolor]]
     [cdq.core :refer [make-counter counter-ratio]]
-    [game.components.position :refer [position-component]]
+    [cdq.core :refer [position-component]]
     [game.components.destructible :refer [deal-dmg get-destructible-bodies]]
     [clojure.set :refer [union]]
         [cdq.core :refer [render-centered-shape]]

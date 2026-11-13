@@ -3,7 +3,10 @@
 ; engine.input
 ; remove duplicated `cdq.core` in namespace forms.
 (ns cdq.core
-  (:import (java.util Random)
+  (:import (java.io File)
+           (java.util Random)
+           (java.util.zip ZipInputStream)
+           (game.utils RayCaster)
            (org.lwjgl.opengl Display)
            (org.newdawn.slick AppGameContainer
                               BasicGame
@@ -2521,3 +2524,341 @@ Rendering the map, minimap, map-entities depends on the camera position"
     (cond (empty? tile-values) (throw (Error. "Player start position not found in \"entities\" layer of tiledmap."))
           (= (count tile-values) 1) (first (first tile-values))
           :else (throw (Error. "Multiple player start positions found in \"entities\" layer of tiledmap.")))))
+
+;; misc components
+
+(defn delete-after-duration-component [duration & {:keys [duration-over]}]
+  (safe-merge
+    {:type :delete-after-duration
+     :counter (make-counter duration)
+     :serialize [:counter]}
+    (active [delta c entity]
+      (when (update-counter! entity delta c)
+        (add-to-removelist entity)
+        (when duration-over
+          (duration-over entity))))))
+
+;;
+
+(defn set-rotation-angle [entity angle] ; TODO has rotation component
+  (swap! entity assoc-in [:rotation :angle] angle))
+
+(defn- misc-rotate-to-vector [body v]
+  (set-rotation-angle body (get-angle-from-vector v)))
+
+(defn rotate-to-body [a b]
+  (misc-rotate-to-vector a (direction-vector (:value (:position @a)) (:value (:position @b)))))
+
+(defn rotate-to-player [body]
+  (rotate-to-body body player-body))
+
+(defn rotate-to-mouse [body]
+  (misc-rotate-to-vector body (get-vector-to-mouse-coords)))
+
+; bodies mit verschiedener w/h lieber nicht rotieren da die body-collision shape nicht mit rotiert.
+; also rotation nur bei bodies mit gleicher w/h da sie dann in ihrer collision shape drinbleiben
+(defn rotation-component []
+  {:type :rotation
+   :init #(assert (= (:half-width (:body @%)) (:half-height (:body @%))))
+   :moved misc-rotate-to-vector
+   :angle 0})
+
+;;
+
+(defn- misc-regenerate [data delta percent-reg-per-second]
+  (increase-min-max-val data
+                        (->
+                          percent-reg-per-second
+                          (/ 100)         ; percent -> multiplier
+                          (* (:max data)) ; in 1 second
+                          (/ 1000)        ; in 1 ms
+                          (* delta))))
+
+(defn regeneration-component [ctype ks percent-reg-per-second]
+  (merge {:type ctype
+          :reg-per-second percent-reg-per-second}
+         (active [delta component entity]
+           (swap! entity update-in ks misc-regenerate delta (:reg-per-second component)))))
+
+(defn hp-regen-component [percent-reg-per-second]
+  (regeneration-component :hp-regen [:destructible :hp] percent-reg-per-second))
+
+(defn mana-regen-component [percent-reg-per-second]
+  (regeneration-component :mana-regen [:skillmanager :mana] percent-reg-per-second))
+
+;; animation
+
+(defprotocol Animation
+  (animation-stopped?  [_])
+  (restart-animation   [_])
+  (get-animation-duration [_])
+  (get-animation-frame    [_]))
+
+(defrecord ImmutableAnimation [frames frame-duration looping speed cnt maxcnt]
+  Updateable
+  (tick [this delta]
+    (let [newcnt (+ cnt (* speed delta))]
+      (assoc this :cnt (cond (< newcnt maxcnt) newcnt
+                             looping           (min maxcnt (- newcnt maxcnt))
+                             :else             maxcnt))))
+  Animation
+  (animation-stopped? [_]
+    (and (not looping) (= cnt maxcnt)))
+  (restart-animation [this]
+    (assoc this :cnt 0))
+  (get-animation-duration [_]
+    maxcnt)
+  (get-animation-frame [this]
+    ; int because speed can make delta a float value.
+    (get frames (int (quot (dec cnt) frame-duration)))))
+
+(def default-frame-duration 33)
+
+(defn create-animation [frames & {:keys [frame-duration looping]
+                                  :or {frame-duration default-frame-duration looping false}}]
+  (map->ImmutableAnimation
+    {:frames (vec frames)
+     :frame-duration frame-duration
+     :looping looping
+     :speed 1
+     :cnt 0
+     :maxcnt (* (count frames) frame-duration)}))
+
+(defn render-centered-animation [animation position]
+  (render-centered-image (get-animation-frame animation) position))
+
+;; assets
+
+(def ^:private assets-debug false)
+(def ^:private assets-already-printed (atom #{}))
+
+(defn- assets-debug-print-result [folder prefix result]
+  (when assets-debug
+    (when-not (contains? @assets-already-printed [folder prefix])
+      (swap! assets-already-printed conj [folder prefix])
+      (println "\n" [folder prefix] " : " result))))
+
+(defn- assets-filter-prefix-and-sort [names prefix]
+  (sort (if prefix
+          (filter #(.startsWith ^String % prefix) names)
+          names)))
+
+; http://stackoverflow.com/questions/1429172/list-files-inside-a-jar-file
+(defn- assets-get-jar-entries [filter-predicate]
+  (let [src (.getCodeSource (.getProtectionDomain game.utils.RayCaster))
+        zip (ZipInputStream. (.openStream (.getLocation src)))]
+    (loop [entry (.getNextEntry zip)
+           hits []]
+      (if entry
+        (recur (.getNextEntry zip)
+               (let [entryname (.getName entry)]
+                 (if (filter-predicate entryname)
+                   (conj hits entryname)
+                   hits)))
+        hits))))
+
+; TODO  only do with jar file?
+; (log "getting *.png jar entries...")
+(let [all-png-entries (assets-get-jar-entries #(.endsWith ^String % ".png"))]
+
+  (defn get-sorted-pngs-in-jar [folder & {prefix :prefix}]
+    (let [hits (filter #(.startsWith ^String % folder) all-png-entries)
+          names (map #(subs % (inc (.lastIndexOf ^String % "/"))) hits)
+          result (assets-filter-prefix-and-sort names prefix)]
+      (assert (apply = (map #(.lastIndexOf ^String % "/") hits)))
+      (assets-debug-print-result folder prefix result)
+      result)))
+
+"
+entryname:
+data/player/shooting/shoot0.png
+data/player/shooting/shoot1.png
+data/player/shooting/raw/weapon.png
+
+startswith: data/player/shooting/
+endswith: .png
+
+result includes weapon.png
+
+how to filter /raw ?
+-> filter out if between starts and ends is another slash / ?
+assert lastindexOf slash is the same for names in a folder?
+"
+
+
+(defn- assets-get-sorted-pngs [folder & {prefix :prefix}]
+    (let [file (File. ^String (str "resources/" folder))
+          listed-files (.listFiles file)
+          pngs (filter #(.endsWith (.getPath ^File %) ".png") listed-files)
+          names (map #(.getName ^File %) pngs)
+          result (assets-filter-prefix-and-sort names prefix)]
+      (assets-debug-print-result folder prefix result)
+      result))
+
+(def get-pngs (if jar-file? get-sorted-pngs-in-jar assets-get-sorted-pngs))
+
+; TODO use & more for image arguments like :transparent , so for example :scale also becomes possible
+(defn folder-frames [folder & {:keys [transparent prefix]}]
+  (doall ; for pre-loading
+    (map
+      #(create-image (str folder %) :transparent transparent)
+      (get-pngs folder :prefix prefix))))
+
+(defn folder-animation
+  "duration is duration of all frames together, will be split evenly across frames."
+  [& {:keys [folder looping duration transparent prefix]}]
+  (let [frames (folder-frames folder :transparent transparent :prefix prefix)]
+    (create-animation frames
+                      :frame-duration (if duration
+                                        (int (/ duration (count frames)))
+                                        default-frame-duration)
+                      :looping looping)))
+
+(defn spritesheet
+  ([file tilew tileh]
+    (SpriteSheet. ^String file (int tilew) (int tileh)))
+  ([file tilew tileh more]
+    (SpriteSheet. ^String file (int tilew) (int tileh) ^Color more)))
+
+(defn get-sprite [^SpriteSheet sheet [x y]]
+  (.getSprite sheet x y))
+
+(defn- assets-get-sheet-frames [^SpriteSheet sheet]
+  (for [y (range (.getVerticalCount sheet))
+        x (range (.getHorizontalCount sheet))]
+    (get-sprite sheet [x y])))
+
+(defn spritesheet-frames [& more]
+  (assets-get-sheet-frames (apply spritesheet more)))
+
+;; position component
+
+(defn position-component [p]
+  {:type :position
+   :value p
+   :serialize [:value]
+   :init put-entity-in-correct-content-field
+   :destruct remove-entity-from-content-field
+   :posi-changed put-entity-in-correct-content-field})
+
+(defn get-entity-tile [entity]
+  (int-posi (:value (:position @entity))))
+
+(defn swap-position! [entity posi & {filter-body :filter-body}]
+  (swap! entity assoc-in [:position :value] posi)
+  (doseq [c (vals @entity)
+          :when (not
+                  (and
+                    filter-body
+                    (= :body (:type c))))]
+    (when-apply (:posi-changed c) entity)))
+
+;; raycast
+
+; mit jcell-grid weil performanter als andere probierte losung: tilebasedmap zugriff auf get-cell bei jedem call to blocked.
+; 10x so schnell mit jcell-grid
+; Annahme: cell-grid andert net wahrend einer ray-blocked? anfrage; deswegen auch jcell-grid
+
+(defn ray-blocked?
+  ([start-x start-y target-x target-y]
+    (RayCaster/rayBlocked start-x start-y target-x target-y (get-map-w) (get-map-h) (get-jcell-grid)))
+  ([p1 p2]
+    (let [[x1 y1] (vec-posi p1)
+          [x2 y2] (vec-posi p2)]
+      (ray-blocked? x1 y1 x2 y2))))
+
+(defn ray-maxsteps
+  [start-x start-y vector-x vector-y max-steps]
+  (let [erg (RayCaster/castMaxSteps start-x start-y vector-x vector-y (get-map-w) (get-map-h) (get-jcell-grid) max-steps)]
+    (if (= -1 erg) :not-blocked erg)))
+
+(defn- raycast-create-double-ray-endpositions
+  "path-w in tiles."
+  [start-x,start-y,target-x,target-y,path-w]
+  {:pre [(< path-w 0.98)]} ; wieso 0.98??
+  (let [path-w (+ path-w 0.02) ;etwas grosser damit z.b. projektil nicht an ecken anstosst
+        v (direction-vector [start-x start-y] [target-y target-y])
+        [normal1 normal2] (get-normal-vectors v)
+        normal1 (scale-vector normal1 (/ path-w 2))
+        normal2 (scale-vector normal2 (/ path-w 2))
+        start1  (vector-add (vector2f start-x  start-y)  normal1)
+        start2  (vector-add (vector2f start-x  start-y)  normal2)
+        target1 (vector-add (vector2f target-x target-y) normal1)
+        target2 (vector-add (vector2f target-x target-y) normal2)]
+    [start1,target1,start2,target2]))
+
+(defn is-path-blocked?
+  "path-w in tiles. casts two rays."
+  ([start-x,start-y,target-x,target-y,path-w]
+    (let [[start1,target1,start2,target2] (raycast-create-double-ray-endpositions start-x start-y target-x target-y path-w)]
+      (is-path-blocked? start1 target1 start2 target2)))
+  ([start1,target1,start2,target2]
+    (or
+      (ray-blocked? start1 target1)
+      (ray-blocked? start2 target2))))
+
+(defn- raycast-steplist
+  [start-x start-y target-x target-y]
+  (seq
+    (RayCaster/castSteplist start-x start-y target-x target-y (get-map-w) (get-map-h) (get-jcell-grid))))
+
+; STEPLIST TEST
+
+(def raycast-current-steplist (atom nil))
+
+(defn raycast-steplist-contains? [tilex tiley]
+  (some
+    (fn [[x y]]
+      (and (= x tilex) (= y tiley)))
+    @raycast-current-steplist))
+
+(defn- raycast-render-line-middle-to-mouse [g color]
+  (set-color g color)
+  (let [[x y] (get-mouse-pos)]
+    (draw-line g half-screen-w half-screen-h x y)))
+
+(defn update-test-raycast-steplist []
+  (let [[start-x start-y] (:value (:position @player-body))
+        [target-x target-y] (get-mouse-tile-pos)
+        steplist (map
+                   (fn [step]
+                     [(.x step) (.y step)])
+                   (raycast-steplist start-x start-y target-x target-y))]
+    (reset! raycast-current-steplist steplist)))
+
+;; MAXSTEPS TEST
+
+(def raycast-current-steps (atom nil))
+
+(defn update-test-raycast-maxsteps []
+  (let [[start-x start-y] (:value (:position @player-body))
+        [target-x target-y] (get-mouse-tile-pos)
+        vector-x (- target-x start-x)
+        vector-y (- target-y start-y)
+        maxsteps 10
+        steps (ray-maxsteps start-x start-y vector-x vector-y maxsteps)]
+    (reset! raycast-current-steps steps)))
+
+(defn draw-test-raycast [g]
+  (let [[start-x start-y] (:value (:position @player-body))
+        [target-x target-y] (get-mouse-tile-pos)
+        color (if (ray-blocked? start-x start-y target-x target-y)
+                red
+                green)]
+    (raycast-render-line-middle-to-mouse g color)))
+
+; PATH BLOCKED TEST
+
+(defn draw-test-path-blocked [g]
+  (let [[start-x start-y] (:value (:position @player-body))
+        [target-x target-y] (get-mouse-tile-pos)
+        [start1 target1 start2 target2] (mapv vec-posi
+                                               (raycast-create-double-ray-endpositions start-x start-y target-x target-y 0.4))
+        [start1screenx,start1screeny] (screenpos-of-tilepos start1)
+        [target1screenx,target1screeny] (screenpos-of-tilepos target1)
+        [start2screenx,start2screeny] (screenpos-of-tilepos start2)
+        [target2screenx,target2screeny] (screenpos-of-tilepos target2)]
+    (set-color g (if (is-path-blocked? start1 target1 start2 target2) red green))
+    (doto g
+      (draw-line start1screenx start1screeny target1screenx target1screeny)
+      (draw-line start2screenx start2screeny target2screenx target2screeny))))

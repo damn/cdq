@@ -6,10 +6,9 @@
             [cdq.core :refer [safe-merge]]
             [cdq.core :refer [id-entity-map player-body]]
             [game.components.render :refer [render-on-map]]
-            [game.components.position :refer [swap-position!]]
-            game.components.misc
+            [cdq.core :refer [swap-position!]]
             [cdq.core :refer [cell-add-body cached-get-adjacent-cells cell-blocked? get-bodies-from-cells get-body-ids get-cell get-cells cell-remove-body]]
-            [game.utils.raycast :refer [ray-blocked?]]))
+            [cdq.core :refer [ray-blocked?]]))
 
 (defn get-body-bounds [body]
   [(:value (:position @body)) (:half-width (:body @body)) (:half-height (:body @body))])

@@ -1,10 +1,10 @@
 (ns game.components.body-effects
   (:require
     [game.components.sleeping :refer [wake-up]]
-    [game.components.misc :refer [delete-after-duration-component]]
+    [cdq.core :refer [delete-after-duration-component]]
     [cdq.core :refer [split-kvs-and-more]]
     [cdq.core :refer [add-component create-entity destruct-entity id-entity-map]]
-    [game.components.position :refer [position-component swap-position!]]))
+    [cdq.core :refer [position-component swap-position!]]))
 
 (defn get-sub-entities [entity]
   (when-let [subids (:ids (:sub-entities @entity))]

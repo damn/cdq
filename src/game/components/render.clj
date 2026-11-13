@@ -4,15 +4,15 @@
     [cdq.core :refer [green rgbcolor set-color]]
     [cdq.core :refer [make-counter counter-ratio tick]]
     [cdq.core :refer [get-dimensions render-centered-image render-rotated-centered-image]]
-    [engine.render.animation :refer [get-frame is-stopped? restart]]
+    [cdq.core :refer [get-animation-frame animation-stopped? restart-animation]]
     [cdq.core :refer [draw-line fill-centered-circle render-centered-shape render-readable-text]]
     [cdq.core :refer [define-order int-posi make-fn order-contains?]]
     [cdq.core :refer [safe-merge]]
     [cdq.core :refer [readable-number]]
     [cdq.core :refer [in-pixel tile-height tile-width]]
     [cdq.core :refer [active add-to-removelist create-entity create-entity-no-init update-counter!]]
-    [game.components.misc :refer [delete-after-duration-component]]
-    [game.components.position :refer [position-component]]
+    [cdq.core :refer [delete-after-duration-component]]
+    [cdq.core :refer [position-component]]
     [cdq.core :refer [ingame-loop-comp]]
     [cdq.core :refer [screenpos-of-tilepos]]
     [game.utils.lightning :refer [set-brightness set-cached-brightness]])
@@ -91,7 +91,7 @@
         new-akey (control entity)
         _ (assert (keyword? new-akey))
         new-animation (cond-> (new-akey component)
-                        (not= last-akey new-akey) restart
+                        (not= last-akey new-akey) restart-animation
                         :then                     (tick delta))]
     (swap! entity update-in [(:type component)]
                 assoc
@@ -106,7 +106,7 @@
   ; can be nil when mapchange -> render happends before update for a component (else update happends before render)
   (when-not (:akey component)
     (update-animation 1 component entity))
-  (render-rotated-lighted-image g entity render-posi (get-frame (current-animation entity)) apply-light))
+  (render-rotated-lighted-image g entity render-posi (get-animation-frame (current-animation entity)) apply-light))
 
 ; types-animations is a map of keyword to animation and control returns a keyword which animation to play next.
 (defn animation-component [control types-animations & {:keys [order apply-light]
@@ -132,7 +132,7 @@
     (single-animation-component animation :order order :apply-light false)
     (merge {:type :delete-after-stopped}
            (active [_ _ entity]
-             (when (-> (:animation @entity) :default is-stopped?)
+             (when (-> (:animation @entity) :default animation-stopped?)
                (add-to-removelist entity))))))
 
 ; FIXME animation that is passed to reload session args == initial one with cnt = 0 ....

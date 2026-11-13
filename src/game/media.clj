@@ -1,6 +1,6 @@
 (ns game.media
   (:require
-    [engine.render.assets :refer [get-sprite spritesheet]]))
+    [cdq.core :refer [get-sprite spritesheet]]))
 
 (alter-var-root #'cdq.core/init-fns conj
   (fn []

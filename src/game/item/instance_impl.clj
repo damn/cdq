@@ -8,8 +8,8 @@
     [cdq.core :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals variance-val-str]]
     [cdq.core :refer [create-sound]]
     [cdq.core :refer [create-image]]
-    [engine.render.animation :refer [create-animation get-duration]]
-    [engine.render.assets :refer [folder-frames]]
+    [cdq.core :refer [create-animation get-animation-duration]]
+    [cdq.core :refer [folder-frames]]
     [game.media :refer [get-itemsprite]]
     game.mouseoverbody
     [game.entity.nova :refer [nova-effect]]
@@ -192,7 +192,7 @@
   (round-n-decimals (/ (+ mi mx) 2 seconds) 2))
 
 (defn- get-sword-infostr [{:keys [animation base-dmg] :as weapon}]
-  (let [seconds (-> (:animation @player-body) animation get-duration in-seconds)]
+  (let [seconds (-> (:animation @player-body) animation get-animation-duration in-seconds)]
     (str
       (variance-val-str base-dmg) " Damage\n"
       (case animation :sword-small "Fast" :sword "Normal" :sword-big "Slow") " Attack-Speed\n"

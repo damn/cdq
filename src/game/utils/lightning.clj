@@ -3,7 +3,7 @@
     [cdq.core :refer [get-distance tiles-inside-rect]]
     [cdq.core :refer [rgbcolor white]]
     cdq.core
-    [game.utils.raycast :refer [ray-blocked?]]
+    [cdq.core :refer [ray-blocked?]]
     [cdq.core :refer [ingame-loop-comp]]
     [game.maps.minimap :refer [update-minimap]]
     [cdq.core :refer [compare-times int-posi]]
@@ -11,7 +11,7 @@
     [cdq.core :refer [atom-session]]
     [cdq.core :refer [debug-mode in-pixel]]
     [cdq.core :refer [active create-entity player-body]]
-    [game.components.position :refer [position-component]]
+    [cdq.core :refer [position-component]]
     [cdq.core :refer [get-entities-in-active-content-fields]]
     [cdq.core :refer [add-cell-blocks-changed-listener inside-map?]])
   (:import org.newdawn.slick.tiled.LightManager

@@ -10,7 +10,7 @@
     [cdq.core :refer [add-block blocks-component remove-block]]
     game.components.body
     [game.components.destructible :refer [attackable-by-player?]]
-    [game.components.misc :refer [rotate-to-body rotate-to-mouse]]
+    [cdq.core :refer [rotate-to-body rotate-to-mouse]]
     [game.components.body-effects :refer [defeffectentity get-certain-effect-entities]]))
 
 (defn get-player-skills []

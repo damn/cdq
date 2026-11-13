@@ -5,7 +5,7 @@
     [cdq.core :refer [split-key-val-and-maps]]
     [cdq.core :refer [mapvals]]
     [cdq.core :refer [lower-than-max? min-max-val rest-to-max set-to-max]]
-    [engine.render.animation :refer [is-stopped?]]
+    [cdq.core :refer [animation-stopped?]]
     [cdq.core :refer [get-mouse-tile-pos]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
     [cdq.core :refer [active is-player? update-counter!]]
@@ -61,7 +61,7 @@
     (if (:skillmanager @entity)
       (update-counter-skill! entity delta skill :attack-counter)
       (update-counter! entity delta skill :attack-counter))
-    (is-stopped? (current-animation entity))))
+    (animation-stopped? (current-animation entity))))
 
 (defn- do-skill-effect [entity {:keys [do-skill] :as skill}]
   (do-skill entity skill))

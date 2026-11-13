@@ -5,12 +5,10 @@
     [cdq.core :refer [increase-min-max-val lower-than-max? min-max-val rest-to-max set-to-max variance-val variance-val-str]]
     [cdq.core :refer [play-sound]]
     [cdq.core :refer [create-image]]
-    [engine.render.animation :refer [create-animation]]
-    [engine.render.assets :refer [spritesheet-frames]]
+    [cdq.core :refer [create-animation]]
+    [cdq.core :refer [spritesheet-frames]]
     [game.screenshake :refer [shake-screen]]
     [cdq.core :refer [add-to-removelist is-player? player-body]]
-    game.components.position
-    game.components.misc
     [game.components.body :refer [get-touched-bodies is-affectable?]]
     [game.components.render :refer [animation-entity image-render-component show-gains-hp-effect show-gains-mana-effect show-string-effect]]
     [game.components.body-effects :refer [defeffectentity]]

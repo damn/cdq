@@ -2,8 +2,8 @@
   (:require
     [cdq.core :refer [blue]]
     [cdq.core :refer [get-dimensions]]
-    [engine.render.animation :refer [create-animation get-frame]]
-    [engine.render.assets :refer [spritesheet-frames]]
+    [cdq.core :refer [create-animation get-animation-frame]]
+    [cdq.core :refer [spritesheet-frames]]
     [cdq.core :refer [current-map do-in-map get-pretty-name]]
     [cdq.core :refer [play-sound]]
     game.media
@@ -12,10 +12,9 @@
     [game.maps.minimap :refer [show-on-minimap]]
     [game.maps.mapchange :refer [queue-map-change]]
     [cdq.core :refer [create-entity]]
-    [game.components.position :refer [position-component]]
+    [cdq.core :refer [position-component]]
     [game.components.body :refer [create-body]]
     [game.components.render :refer [single-animation-component]]
-    game.components.misc
     [game.components.pressable :refer [pressable-component]]))
 
 (defn create-teleporter
@@ -23,7 +22,7 @@
   (create-entity
     (position-component position)
     (create-body :solid false
-                 :dimensions (get-dimensions (get-frame animation))
+                 :dimensions (get-dimensions (get-animation-frame animation))
                  :mouseover-outline true)
     ;(light-component :intensity 0.8 :radius 2)
     {:type :always-in-sight}

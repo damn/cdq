@@ -8,7 +8,7 @@
     [cdq.core :refer [id-entity-map]]
     [game.components.destructible :refer [get-destructible-bodies]]
     [cdq.core :refer [screenpos-of-tilepos]]
-    [game.utils.raycast :refer [ray-blocked?]]))
+    [cdq.core :refer [ray-blocked?]]))
 ; monsters live in game.start
 
 (def opponent (atom nil))

@@ -6,12 +6,11 @@
     [cdq.core :refer [approx-numbers]]
     [cdq.core :refer [reset-counter tick]]
     [cdq.core :refer [create-image get-scaled-copy]]
-    [engine.render.animation :refer [create-animation render-centered-animation]]
-    [engine.render.assets :refer [folder-animation folder-frames]]
+    [cdq.core :refer [create-animation render-centered-animation]]
+    [cdq.core :refer [folder-animation folder-frames]]
     [cdq.core :refer [render-readable-text]]
     cdq.core
     [cdq.core :refer [active add-to-removelist is-player? player-body reset-component-state-after-blocked]]
-    game.components.misc
     game.components.body
     [game.components.body-effects :refer [defeffectentity get-certain-effect-entities get-sub-entities]]
     [game.components.render :refer [circle-around-body-render-comp render-above-body render-on-map single-animation-component]]

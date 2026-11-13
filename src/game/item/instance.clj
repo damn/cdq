@@ -2,8 +2,8 @@
   (:require
     [cdq.core :refer [tile-width]]
     [cdq.core :refer [make-counter play-sound tick tick-finally-merge]]
-    [engine.render.animation :refer [is-stopped? render-centered-animation restart]]
-    [engine.render.assets :refer [folder-animation]]
+    [cdq.core :refer [animation-stopped? render-centered-animation restart-animation]]
+    [cdq.core :refer [folder-animation]]
     [cdq.core :refer [get-scaled-copy]]
     [cdq.core :refer [safe-merge]]
     cdq.core
@@ -11,9 +11,8 @@
     [game.item.grids :refer [showing-player-inventory?]]
     [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
     [cdq.core :refer [active add-to-removelist create-entity player-body]]
-    [game.components.position :refer [position-component]]
+    [cdq.core :refer [position-component]]
     [game.components.body :refer [blocked-location? create-body]]
-    game.components.misc
     [game.components.render :refer [image-render-component render-on-map]]
     [game.components.pressable :refer [pressable-component]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]))
@@ -32,8 +31,8 @@
       (swap! entity assoc-in [(:type c)]
                  (if active
                    (let [animation (tick animation delta)]
-                     (if (is-stopped? animation)
-                       (assoc c :active false :animation (restart animation))
+                     (if (animation-stopped? animation)
+                       (assoc c :active false :animation (restart-animation animation))
                        (assoc c :animation animation)))
                    (tick-finally-merge c :counter delta
                                          {:active true}))))

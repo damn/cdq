@@ -6,13 +6,12 @@
     [cdq.core :as grid :refer [get-4-neighbour-positions mapgrid->vectorgrid posis transform height width]]
     [cdq.core :refer [log translate-to-tile-middle]]
     [cdq.core :refer [play-sound]]
-    [engine.render.assets :refer [get-sprite spritesheet]]
+    [cdq.core :refer [get-sprite spritesheet]]
     cdq.core
     game.media
     [game.media :refer [get-itemsprite]]
     [cdq.core :refer [add-to-removelist create-entity]]
-    game.components.position
-    [game.components.position :refer [position-component]]
+    [cdq.core :refer [position-component]]
     [game.components.body :refer [create-body]]
     [game.components.pressable :refer [pressable-component]]
     [game.components.render :refer [image-render-component]]

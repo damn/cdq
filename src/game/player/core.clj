@@ -5,8 +5,8 @@
     [game.components.body-effects-impl :refer [create-armor-reduce-effect slowdown stun]]
     [cdq.core :refer [when-chance]]
     [cdq.core :refer [create-image]]
-    [engine.render.animation :refer [create-animation]]
-    [engine.render.assets :refer [folder-animation]]
+    [cdq.core :refer [create-animation]]
+    [cdq.core :refer [folder-animation]]
     [cdq.core :refer [render-readable-text]]
     cdq.core
     cdq.core
@@ -21,10 +21,10 @@
     cdq.core
     [cdq.core :refer [add-to-removelist create-entity player-body]]
     [cdq.core :refer [switch-state]]
-    [game.components.position :refer [position-component]]
+    [cdq.core :refer [position-component]]
     [game.components.movement :refer [movement-component]]
     game.components.movement
-    [game.components.misc :refer [mana-regen-component rotation-component set-rotation-angle]]
+    [cdq.core :refer [mana-regen-component rotation-component set-rotation-angle]]
     [cdq.core :refer [ingame-loop-comp]]
     [game.components.render :refer [animation-component rendering]]
     game.components.render

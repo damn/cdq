@@ -4,7 +4,7 @@
     [cdq.core :refer [black blue green red rgbcolor set-color white]]
     [cdq.core :as debug]
     [cdq.core :refer [create-image draw-image]]
-    [engine.render.animation :refer [get-frame]]
+    [cdq.core :refer [get-animation-frame]]
     [cdq.core :refer [draw-rect draw-shape fill-rect render-readable-text]]
     [cdq.core :refer [screenpos-of-tilepos]]
     [cdq.core :refer [get-ratio]]
@@ -85,7 +85,7 @@
                 (.darker ^Color color
                   (let [image (or
                                 (:image (:image-render @body))
-                                (get-frame (current-animation body)))
+                                (get-animation-frame (current-animation body)))
                         intensity (let [color (.getCornerColor ^Image image Image/TOP_LEFT)]
                                     (/ (+ (.r color) (.g color) (.b color)) 3))]
                     (- 1 intensity)))

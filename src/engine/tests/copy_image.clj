@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [start-slick-basicgame]]
     [cdq.core :refer [get-scaled-copy]]
-    [engine.render.assets :refer [spritesheet-frames]]
+    [cdq.core :refer [spritesheet-frames]]
     [cdq.core :refer [fill-rect]])
   (:import (org.newdawn.slick Image Color)))
 

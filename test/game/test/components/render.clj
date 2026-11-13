@@ -3,9 +3,9 @@
     [clojure.test :refer [deftest is]]
     [game.test.utils :refer [with-private-fns]]
     [cdq.core :refer [create-entity get-component]]
-    [game.components.position :refer [position-component]]
+    [cdq.core :refer [position-component]]
     [game.components.render :refer [animation-component current-animation]]
-    [engine.render.animation :refer [create-animation]]))
+    [cdq.core :refer [create-animation]]))
 
 (with-private-fns [game.components.render [update-animation]]
   (deftest test-animation-component-update

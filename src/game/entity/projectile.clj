@@ -3,12 +3,12 @@
     [cdq.core :refer [xor]]
     [game.components.body :refer [create-body]]
     [cdq.core :refer [play-sound]]
-    [engine.render.animation :refer [create-animation]]
-    [engine.render.assets :refer [folder-frames]]
+    [cdq.core :refer [create-animation]]
+    [cdq.core :refer [folder-frames]]
     [cdq.core :refer [create-entity]]
-    [game.components.position :refer [position-component]]
+    [cdq.core :refer [position-component]]
     [game.components.render :refer [animation-entity single-animation-component]]
-    [game.components.misc :refer [delete-after-duration-component]]))
+    [cdq.core :refer [delete-after-duration-component]]))
 
 (alter-var-root #'cdq.core/init-fns conj
   (fn []

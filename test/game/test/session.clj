@@ -6,7 +6,7 @@
             
             [cdq.core :refer [get-all-entities-of-current-map]]
             [cdq.core :refer [get-component get-position]]
-            [game.components.position :refer [swap-position!]]
+            [cdq.core :refer [swap-position!]]
             game.player.session-data))
 
 (use-fixtures :once start-game-once-fixture)

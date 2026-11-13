@@ -6,7 +6,7 @@
     [cdq.core :refer [direction-vector get-distance]]
     [cdq.core :refer [rgbcolor set-color white]]
     [cdq.core :refer [draw-string fill-rect]]
-    [game.components.position :refer [get-tile]]
+    [cdq.core :refer [get-entity-tile]]
     [game.components.movement :refer [movement-component]]
     [cdq.core :refer [cells get-8-neighbour-positions]]
     [cdq.core :refer [diagonal-direction?]]
@@ -21,7 +21,7 @@
 (defn- potential-field
   "returns the marked cells"
   [size entity]
-  (let [start-cell (get-cell (get-tile entity))
+  (let [start-cell (get-cell (get-entity-tile entity))
         start-posi (:posi @start-cell)]
     (for [cell (cells (get-cell-grid))
           :let [posi (:posi @cell)
@@ -81,7 +81,7 @@
 
 (defn- try-generate [entity]
   (let [component (:potential-field @entity)
-        current-tile (get-tile entity)
+        current-tile (get-entity-tile entity)
         dirty (not= current-tile (:last-tile component))]
     (when dirty
       (swap! entity assoc-in [:potential-field :last-tile] current-tile)

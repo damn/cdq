@@ -1,7 +1,7 @@
 (ns game.tools.neighbourvalues.greenwalls
   (:require
     cdq.core
-    [engine.render.assets :refer [spritesheet]]
+    [cdq.core :refer [spritesheet]]
     [cdq.core :refer [if-chance]]
     [cdq.core :refer [get-transition-tile-value]]
     [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi]]))
