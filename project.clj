@@ -9,7 +9,7 @@
   ;; grid2d inlined at src/data/grid2d.clj
   ;; slick2d inlined at slick/src
   :java-source-paths ["src" "slick/src"]
-  :aot [engine.render.animation] ; read-string of Animation record
+  :aot [cdq.core] ; read-string of Animation record
   :main game.start
   :uberjar-name "cdq_3.jar"
   :omit-source true

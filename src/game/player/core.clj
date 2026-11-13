@@ -10,7 +10,7 @@
     [cdq.core :refer [render-readable-text]]
     cdq.core
     cdq.core
-    [game.maps.minimap :refer [show-on-minimap]]
+    [cdq.core :refer [show-on-minimap]]
     [game.components.skills.core :refer [is-attacking? reset-skills]]
     [game.components.skills.melee :refer [get-player-skill-animation-key]]
     [game.utils.lightning :refer [light-component]]

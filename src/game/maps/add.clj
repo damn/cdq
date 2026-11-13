@@ -7,7 +7,7 @@
     cdq.core
     [cdq.core :refer [create-grid-from-gen-grid create-jcell-grid]]
     [cdq.core :refer [create-mapcontentfields]]
-    [game.maps.minimap :refer [create-minimap-image]]
+    [cdq.core :refer [create-minimap-image]]
     [cdq.core :refer [construct-tiledmap create-cell-grid-from-tiled-map get-player-entity-start-position]]
     [cdq.core :refer [create-grid height width]]))
 

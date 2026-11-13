@@ -5,7 +5,7 @@
     cdq.core
     [cdq.core :refer [ray-blocked?]]
     [cdq.core :refer [ingame-loop-comp]]
-    [game.maps.minimap :refer [update-minimap]]
+    [cdq.core :refer [update-minimap]]
     [cdq.core :refer [compare-times int-posi]]
     [cdq.core :refer [genmap]]
     [cdq.core :refer [atom-session]]

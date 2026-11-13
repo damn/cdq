@@ -22,7 +22,7 @@
     cdq.core
     [cdq.core :refer [cell-blocks-changed-update-listeners change-cell-blocks get-cell]]
     [cdq.core :refer [construct-tiledmap create-grid-from-tiled-map get-layer-index get-player-entity-start-position get-tile-property-value get-tileproperties]]
-    [game.maps.minimap :refer [show-on-minimap]]
+    [cdq.core :refer [show-on-minimap]]
     game.item.instance
     [game.item.instance :refer [create-item-body]]
     [game.item.instance-impl :refer [create-rand-item]]

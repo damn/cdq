@@ -24,7 +24,8 @@
            (org.newdawn.slick.state StateBasedGame)
            (org.newdawn.slick.tiled LightManager TiledMap)
            (org.newdawn.slick.util.pathfinding AStarPathFinder Mover Path TileBasedMap))
-  (:require [clojure.string :as str]))
+  (:require [clojure.set :as set]
+            [clojure.string :as str]))
 
 (defn indexed ; from clojure.contrib.seq-utils (discontinued in 1.3)
   "Returns a lazy sequence of [index, item] pairs, where items come
@@ -2862,3 +2863,90 @@ assert lastindexOf slash is the same for names in a folder?
     (doto g
       (draw-line start1screenx start1screeny target1screenx target1screeny)
       (draw-line start2screenx start2screeny target2screenx target2screeny))))
+
+;; minimap
+
+(defn- minimap-get-image  [] (:minimap-image  (get-current-map-data)))
+(defn- minimap-get-bodies [] (:minimap-bodies (get-current-map-data)))
+
+(let [alpha 0.9]
+  (def ^:private minimap-colors
+    (mapvals
+      {:wall   [:r 1 :g 1 :b 1 :a 1]
+       :ground [:r 0.5 :g 0.5 :b 0.5 :a alpha]
+       :water  [:r 0.6 :g 0.6 :b 0.6 :a alpha]}
+      #(apply rgbcolor %))))
+; where is unexplored color defined?
+; wall color chosen as light so you can spot frontiers between ground and unexplored quicker
+
+(defn create-minimap-image [w h] (Image. (int w) (int h) Image/FILTER_NEAREST))
+
+(defn- minimap-draw-on-image [posicolorseq]
+  (let [g (.getGraphics ^Image (minimap-get-image))] ; TODO .getGraphics expensive?
+    (doseq [[[x y] color] posicolorseq]
+      (draw-rect g x y 0 0 color))
+    (.flush g)))
+
+(defn show-on-minimap [color] ; TODO component?
+  {:type :minimap-icon
+   :color color
+   :depends [:body]})
+
+(def ^:private minimap-scale 1)
+
+(defn- minimap-render-bodies [g x y start-leftx start-topy width-in-tiles height-in-tiles]
+  (doseq [body (reset! (minimap-get-bodies) (set/select #(get @id-entity-map (:id (meta %))) @(minimap-get-bodies))) ; swap?
+          :let [{bodyx 0 bodyy 1 :as body-posi} (int-posi (:value (:position @body)))
+                body-render-x (+ x (* minimap-scale (- bodyx start-leftx)))
+                body-render-y (+ y (* minimap-scale (- bodyy start-topy)))]
+          :when (point-in-rect? body-posi start-leftx start-topy width-in-tiles height-in-tiles)]
+    (fill-rect g (- body-render-x 0.5) (- body-render-y 0.5) 2 2 (:color (:minimap-icon @body)))))
+
+(defn- minimap-cut-sub-image
+  "out of image borders the image repeats itself, which shows on small maps, so dont create a sub-image which shows parts outside of image bounds"
+  [^Image image start-leftx start-topy width-in-tiles height-in-tiles shift-right shift-down]
+  (let [[imgw imgh] (get-dimensions image)
+        subimage-leftx (max 0 start-leftx)
+        subimage-topy (max 0 start-topy)
+        subimage-width (- width-in-tiles shift-right)
+        subimage-height (- height-in-tiles shift-down)
+        subimage-width (if (> (+ subimage-leftx subimage-width)
+                           imgw)
+                         (- imgw subimage-leftx)
+                         subimage-width)
+        subimage-height (if (> (+ subimage-topy subimage-height)
+                               imgh)
+                          (- imgh subimage-topy)
+                      subimage-height)]
+    (get-sub-image image subimage-leftx subimage-topy subimage-width subimage-height)))
+
+(defn render-minimap [g]
+  (let [puffer 2
+        x puffer
+        y puffer
+        half-w-tiles (int (/ (- half-screen-w puffer) minimap-scale))
+        half-h-tiles (int (/ (- half-screen-h puffer) minimap-scale))
+        width-in-tiles (* 2 half-w-tiles)
+        height-in-tiles (* 2 half-h-tiles)
+        px-width (* minimap-scale width-in-tiles)
+        px-height (* minimap-scale height-in-tiles)
+        [camerax cameray] (int-posi (get-camera-position))
+        start-leftx (- camerax half-w-tiles)
+        start-topy (- cameray half-h-tiles)
+        shift-right (if (neg? start-leftx) (Math/abs (float start-leftx)) 0)
+        shift-down (if (neg? start-topy) (Math/abs (float start-topy)) 0)
+        subimg (minimap-cut-sub-image (minimap-get-image) start-leftx start-topy width-in-tiles height-in-tiles shift-right shift-down)
+        subimage (get-scaled-copy subimg minimap-scale)]
+    (fill-rect g x y px-width px-height (rgbcolor :r 1 :g 1 :b 1 :a 0.3))
+    (draw-image subimage (+ x (* minimap-scale shift-right)) (+ y (* minimap-scale shift-down)))
+    (draw-rect g x y px-width px-height gray)
+    (minimap-render-bodies g x y start-leftx start-topy width-in-tiles height-in-tiles)))
+
+(defn update-minimap [sensed-tiles]
+  (let [sensed-cells (get-cells sensed-tiles)]
+    (swap! (minimap-get-bodies) set/union (set (filter #(:minimap-icon @%) (get-bodies-from-cells sensed-cells))))
+    (minimap-draw-on-image (for [{:keys [posi blocks]} (map deref (remove nil? sensed-cells))]
+                     [posi (case blocks
+                             #{:air :ground} (:wall minimap-colors)
+                             #{:ground} (:water minimap-colors)
+                             #{} (:ground minimap-colors))]))))

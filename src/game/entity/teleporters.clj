@@ -9,7 +9,7 @@
     game.media
     cdq.core
     game.utils.lightning
-    [game.maps.minimap :refer [show-on-minimap]]
+    [cdq.core :refer [show-on-minimap]]
     [game.maps.mapchange :refer [queue-map-change]]
     [cdq.core :refer [create-entity]]
     [cdq.core :refer [position-component]]

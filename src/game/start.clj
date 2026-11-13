@@ -41,7 +41,7 @@
     [game.item.instance :refer [create-item-body put-item-on-ground]]
     [game.item.instance-impl :refer [create-rand-item]]
     [cdq.core :refer [get-current-map-data iterating-map-dependent-comps]]
-    [game.maps.minimap :refer [render-minimap show-on-minimap]]
+    [cdq.core :refer [render-minimap show-on-minimap]]
     [cdq.core :refer [get-rand-weighted-item if-chance percent-chance rand-int-between]]
     [cdq.core :refer [is-path-blocked? ray-blocked?]]
     [game.monster.defmonster :refer [defmonster get-monster-properties]]
