@@ -74,6 +74,8 @@
 (defn start-test []
   (start-slick-basicgame
     :init (fn [container]
+            (doseq [f engine.core/fns]
+              (f))
             (def image (create-image "opponents/storage1.png")))
     :render (fn [container g]
               (fill-rect g 0 0 800 600 Color/blue)

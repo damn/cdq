@@ -166,6 +166,8 @@
 ;(use '(mapgen nad cave utils cellular))
 ;(start-slick-basicgame
 ;  :init (fn [container]
+;          (doseq [f engine.core/fns]
+;            (f))
 ;          (let [grid (cellular-automata-gridgen 100
 ;                                                100
 ;                                                :fillprob 64

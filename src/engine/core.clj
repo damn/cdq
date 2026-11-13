@@ -43,14 +43,11 @@
 (defn start-slick-basicgame
   [& {:keys [full-screen title width height init update render]
       :or {title "test" width 800 height 600
-           init (fn [container])
            update (fn [container delta])
            render (fn [container g])}}]
   (create-and-start-app-game-container
     :game (proxy [BasicGame] [title]
             (init [container]
-              (doseq [f fns]
-                (f))
               (init container))
             (update [container delta]
               (update container delta))

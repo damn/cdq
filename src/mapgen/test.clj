@@ -184,6 +184,8 @@
   :width screenw
   :height screenh
   :init (fn [container]
+          (doseq [f engine.core/fns]
+            (f))
           (update-grid (generate-cave)))
   :update (fn [container delta]
             (doseq [[k command] key-commands

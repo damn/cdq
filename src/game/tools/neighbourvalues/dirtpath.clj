@@ -32,6 +32,8 @@
 
 (start-slick-basicgame
   :init (fn [container]
+          (doseq [f engine.core/fns]
+            (f))
           (let [grid (create-grid-from-tiled-map (construct-tiledmap (resource "tech.tmx")))
                 pathposis (find-path [10 10] [5 73] grid pathblocked?)
                 is-path-posi? (fn [p] (some #{p} pathposis))

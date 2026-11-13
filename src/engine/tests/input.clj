@@ -39,6 +39,9 @@
 (defn start-test []
   (start-slick-basicgame
     :title "Input Test"
+    :init (fn [container]
+            (doseq [f engine.core/fns]
+              (f)))
     :update (fn [container delta]
               (update-mousebutton-state)
               (update-test))

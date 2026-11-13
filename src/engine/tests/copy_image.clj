@@ -32,7 +32,9 @@
 
 (defn start-test []
   (start-slick-basicgame
-    :init (fn [container])
+    :init (fn [container]
+            (doseq [f engine.core/fns]
+              (f)))
     :render (fn [container g]
               (fill-rect g 0 0 800 600 Color/blue)
               (render container g))))

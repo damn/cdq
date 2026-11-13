@@ -17,6 +17,8 @@
 
 (start-slick-basicgame
   :init (fn [container]
+          (doseq [f engine.core/fns]
+            (f))
           (def image (create-image "opponents/station/station01.png")))
 
   :update (fn [container delta]

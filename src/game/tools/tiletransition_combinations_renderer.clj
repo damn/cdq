@@ -83,6 +83,9 @@
 (start-slick-basicgame
   :width screenw
   :height 600
+  :init (fn [container]
+          (doseq [f engine.core/fns]
+            (f)))
   :render (fn [container g]
             (fill-rect g 0 0 800 600 color/gray)
             (render g)))
