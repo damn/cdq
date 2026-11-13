@@ -16,8 +16,8 @@
     [cdq.core :refer [set-to-max]]
     [cdq.core :refer [when-seq]]
     [cdq.core :refer [play-sound]]
-    [engine.input :refer [is-key-down? is-leftbutton-down? is-leftm-consumed?]]
-    engine.input
+    [cdq.core :refer [is-key-down? is-leftbutton-down? is-leftm-consumed?]]
+    cdq.core
     game.maps.contentfields
     [game.components.core :refer [add-to-removelist create-entity player-body]]
     [cdq.core :refer [switch-state]]

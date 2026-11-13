@@ -53,7 +53,7 @@
     game.entity.teleporters
     [game.components.skills.utils :refer [check-line-of-sight get-player-ranged-vector]]
     [game.player.skill.learnable :refer [deflearnable-skill]]
-    [engine.input :as input :refer [get-mouse-pos is-key-pressed? is-rightm-consumed? try-consume-leftm-pressed try-consume-rightm-pressed update-mousebutton-state]]
+    [cdq.core :refer [clear-key-pressed-record clear-mouse-pressed-record get-mouse-pos is-key-pressed? is-rightm-consumed? try-consume-leftm-pressed try-consume-rightm-pressed update-mousebutton-state]]
     [game.gui :refer [is-visible? make-checkbox make-frame make-guidisplay make-label make-textbutton remove-guicomponent render-guicomponent set-visible update-guicomponent]]
     [cdq.core :as ids]
     [game.status-options :refer [get-state get-text set-state status-check-boxes]]
@@ -1547,7 +1547,7 @@ PSI-Explosion
 ;;; update-ingame (was game.update-ingame)
 
 (defn- update-game [delta]
-  (when (input/is-key-pressed? options-hotkey)
+  (when (is-key-pressed? options-hotkey)
     (cond
       (is-item-in-hand?) (put-item-on-ground)
       (some-visible-frame?) (close-all-frames)
@@ -1555,16 +1555,16 @@ PSI-Explosion
       (is-dead? player-body) (when-not (try-revive-player)
                                (state/enter-state mainmenu-gamestate))
       :else (state/enter-state ids/options)))
-  (when (input/is-key-pressed? :TAB)
+  (when (is-key-pressed? :TAB)
     (state/enter-state ids/minimap))
   (when (and (get-setting :debug-mode)
-             (input/is-key-pressed? :D))
+             (is-key-pressed? :D))
     (swap! debug-mode not))
   (when (and (get-setting :is-pausable)
-             (input/is-key-pressed? :P))
+             (is-key-pressed? :P))
     (swap! cupd/running not))
   (when @cupd/running
-    (input/update-mousebutton-state)
+    (update-mousebutton-state)
     (update-removelist)
     (update-items)
     (try
@@ -1845,8 +1845,8 @@ PSI-Explosion
     (getID [] ids/ingame)
 
     (enter [container statebasedgame]
-      (input/clear-key-pressed-record)
-      (input/clear-mouse-pressed-record))
+      (clear-key-pressed-record)
+      (clear-mouse-pressed-record))
 
     (init [container statebasedgame])
 

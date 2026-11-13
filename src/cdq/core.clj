@@ -1,3 +1,4 @@
+; urgent: remove protocols because lein clean problems (what bt my idea of working w protocols later?)
 ; TODO next:
 ; engine.input
 ; remove duplicated `cdq.core` in namespace forms.
@@ -9,6 +10,7 @@
                               Font
                               GameContainer
                               Graphics
+                              Input
                               ScalableGame
                               Sound
                               SpriteSheet
@@ -1040,3 +1042,91 @@
 
 (defn reset-counter [counter]
   (assoc counter :cnt 0))
+
+; Call update-mousebutton-state each frame and run init-fns at game start.
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private slick-input
+      (.getInput app-game-container))))
+
+(defn clear-key-pressed-record   [] (.clearKeyPressedRecord   ^Input slick-input))
+(defn clear-mouse-pressed-record [] (.clearMousePressedRecord ^Input slick-input))
+
+(defn get-mouse-pos []
+  [(.getMouseX ^Input slick-input)
+   (.getMouseY ^Input slick-input)])
+
+(defn- to-mouse-key [k]
+  (case k
+    :left  Input/MOUSE_LEFT_BUTTON
+    :right Input/MOUSE_RIGHT_BUTTON))
+
+(defn- is-mouse-button-down? [k] (.isMouseButtonDown ^Input slick-input (to-mouse-key k)))
+(defn- is-mouse-pressed?     [k] (.isMousePressed    ^Input slick-input (to-mouse-key k)))
+
+(def is-leftbutton-down?  (partial is-mouse-button-down? :left))
+(def is-rightbutton-down? (partial is-mouse-button-down? :right))
+
+(def ^:private to-keyboard-key
+  (memoize (fn [k]
+             (eval (symbol (str "org.newdawn.slick.Input/KEY_" (name k)))))))
+
+(defn is-key-pressed?
+  "Since last call to this. So do not call this twice in one frame else it will return false."
+  [k]
+  (.isKeyPressed ^Input slick-input (to-keyboard-key k)))
+
+(defn is-key-down? [k]
+  (.isKeyDown ^Input slick-input (to-keyboard-key k)))
+
+; when using is-...-pressed? it is probably useful also to check if is-...-consumed?
+; for example a bug occured:
+; waypoints menu opens with try-consume-..-pressed while is-...-pressed? closed it again in the same frame
+; TODO maybe is-...-pressed? always checks if not consumed yet (so it is really 'consumed')
+
+(def ^:private initial-mousebutton {:pressed  false
+                                    :consumed false})
+
+(def ^:private mousebutton-state (atom {:left  initial-mousebutton
+                                        :right initial-mousebutton}))
+
+(defn- mousebutton-pressed? [button] (-> @mousebutton-state button :pressed))
+
+(defn is-leftm-pressed?  [] (mousebutton-pressed? :left))
+(defn is-rightm-pressed? [] (mousebutton-pressed? :right))
+
+(defn- mousebutton-consumed? [button] (-> @mousebutton-state button :consumed))
+
+(defn is-leftm-consumed?  [] (mousebutton-consumed? :left))
+(defn is-rightm-consumed? [] (mousebutton-consumed? :right))
+
+(defn- check-if-pressed [mb-state button]
+  (assoc-in mb-state [button :pressed] (is-mouse-pressed? button)))
+
+(defn- resolve-consumed [mb-state button]
+  (if (and (-> mb-state button :consumed)
+           (not (is-mouse-button-down? button)))
+    (assoc-in mb-state [button :consumed] false)
+    mb-state))
+
+(defn update-mousebutton-state []
+  (swap! mousebutton-state #(-> %
+                  (check-if-pressed :left)
+                  (resolve-consumed :left)
+                  (check-if-pressed :right)
+                  (resolve-consumed :right))))
+
+(defn- try-consume-mouse-pressed [button]
+  (when (and (mousebutton-pressed? button)
+             (not (mousebutton-consumed? button)))
+    (swap! mousebutton-state assoc-in [button :consumed] true)))
+
+(defn try-consume-leftm-pressed
+  "If leftmouse was pressed this frame and not yet consumed, consumes it and returns true else returns nil.
+   It is consumed as long as the leftmouse-button is down."
+  []
+  (try-consume-mouse-pressed :left))
+
+(defn try-consume-rightm-pressed []
+  (try-consume-mouse-pressed :right))

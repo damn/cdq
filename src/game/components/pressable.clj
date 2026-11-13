@@ -3,7 +3,7 @@
     [engine.render.color :as color]
     [engine.render.graphics :refer [render-readable-text]]
     [game.components.body-render :refer [body-outline-height]]
-    [engine.input :refer [try-consume-leftm-pressed]]
+    [cdq.core :refer [try-consume-leftm-pressed]]
     cdq.core
     [game.mouseoverbody :refer [get-mouseover-body]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]

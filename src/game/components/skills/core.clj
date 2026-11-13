@@ -1,7 +1,7 @@
 (ns game.components.skills.core
   (:require
     [cdq.core :refer [create-sound make-counter play-sound playonce reset-counter tick tick-finally-merge]]
-    [engine.input :refer [get-mouse-pos is-leftbutton-down? is-rightbutton-down?]]
+    [cdq.core :refer [get-mouse-pos is-leftbutton-down? is-rightbutton-down?]]
     [cdq.core :refer [split-key-val-and-maps]]
     [cdq.core :refer [mapvals]]
     [cdq.core :refer [lower-than-max? min-max-val rest-to-max set-to-max]]

@@ -1,7 +1,7 @@
 (ns engine.tests.input
   (:require
     [cdq.core :refer [start-slick-basicgame]]
-    [engine.input :refer [get-mouse-pos is-key-down? is-key-pressed? is-leftbutton-down? is-leftm-consumed? is-leftm-pressed? is-rightbutton-down? is-rightm-consumed? is-rightm-pressed? try-consume-leftm-pressed try-consume-rightm-pressed update-mousebutton-state]]
+    [cdq.core :refer [get-mouse-pos is-key-down? is-key-pressed? is-leftbutton-down? is-leftm-consumed? is-leftm-pressed? is-rightbutton-down? is-rightm-consumed? is-rightm-pressed? try-consume-leftm-pressed try-consume-rightm-pressed update-mousebutton-state]]
     [engine.render.graphics :refer [render-readable-text]]))
 
 (def lastpressed (atom {}))

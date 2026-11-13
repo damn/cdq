@@ -5,7 +5,7 @@
     [game.player.skill.learnable :refer [render-skillbutton-tooltip]]
         [engine.render.color :refer [rgbcolor]]
         [engine.render.graphics :refer [fill-rect render-readable-text]]
-    [cdq.core :refer [screen-height]]
+    [cdq.core :refer [is-key-pressed? screen-height]]
     [game.gui :refer [get-absolute-posi get-bounds is-visible? make-imgbutton mouseover? remove-guicomponent set-visible]]
     [game.ingame-gui :refer [ingamestate-display]]
     [cdq.core :refer [atom-session]]
@@ -150,7 +150,7 @@
 (ingame-loop-comp :up-skill-hotkeys
     (active [delta c _]
       (doseq [k numberkeys
-              :when (engine.input/is-key-pressed? k)]
+              :when (is-key-pressed? k)]
         (update-skill-hotkeys (Integer/parseInt (name k))))))
 
 (intern 'game.player.skill.skillmanager 'assign-unused-hotkey-and-open-skillslist

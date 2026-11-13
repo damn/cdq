@@ -5,7 +5,7 @@
     [engine.render.graphics :refer [draw-rect fill-rect render-readable-text]]
     [game.utils.geom :refer [point-in-rect?]]
     [cdq.core :refer [deflazygetter]]
-    [engine.input :refer [get-mouse-pos is-key-pressed? is-leftm-consumed? try-consume-leftm-pressed]]
+    [cdq.core :refer [get-mouse-pos is-key-pressed? is-leftm-consumed? try-consume-leftm-pressed]]
     [cdq.core :refer [get-defaultfont get-text-height get-text-width]]))
 
 ; Nett:

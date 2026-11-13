@@ -2,7 +2,7 @@
   (:require
     [game.ingame-gui :refer [mouse-inside-some-gui-component?]]
     [cdq.core :refer [sort-by-order]]
-    [engine.input :refer [is-leftbutton-down?]]
+    [cdq.core :refer [is-leftbutton-down?]]
     [cdq.core :refer [debug-mode]]
     [cdq.core :refer [atom-session]]
     [game.components.core :refer [active id-entity-map is-player?]]

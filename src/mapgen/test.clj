@@ -6,7 +6,7 @@
     [cdq.core :refer [height posis width]]
     [cdq.core :refer [assoc-ks]]
     [cdq.core :refer [start-slick-basicgame]]
-    [engine.input :refer [get-mouse-pos is-key-pressed?]]
+    [cdq.core :refer [get-mouse-pos is-key-pressed?]]
     [cdq.core :refer [create-seed]]
     [mapgen.cave :refer [cave-gridgen]]
     mapgen.spawn-spaces

@@ -2,7 +2,7 @@
   (:require
     [engine.render.color :as color :refer [set-color]]
     [engine.render.graphics :refer [draw-line]]
-    [engine.input :refer [get-mouse-pos]]
+    [cdq.core :refer [get-mouse-pos]]
     [cdq.core :refer [half-screen-h half-screen-w]]
     [game.components.core :refer [player-body]]
     [game.utils.geom :refer [add direction-vector get-normal-vectors scale vec-posi vector2f]]

@@ -37,7 +37,7 @@
   (shake))
 
 (defn update-shake [delta]
-;  (when (engine.input/is-key-pressed? :M)
+;  (when (is-key-pressed? :M)
 ;    (shake-screen))
   (when (> @shake-amt 0)
     (swap! shake-time - delta)

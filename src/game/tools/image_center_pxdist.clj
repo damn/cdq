@@ -2,7 +2,7 @@
   (:require
     [game.utils.geom :as geom]
     [cdq.core :refer [start-slick-basicgame]]
-    [engine.input :refer [get-mouse-pos is-leftm-pressed? update-mousebutton-state]]
+    [cdq.core :refer [get-mouse-pos is-leftm-pressed? update-mousebutton-state]]
     [engine.render.image :refer [create-image]]
     [engine.render.graphics :refer [render-centered-shape render-readable-text]]))
 

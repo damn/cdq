@@ -1,6 +1,6 @@
 (ns game.utils.tilemap
   (:require
-    [engine.input :refer [get-mouse-pos]]
+    [cdq.core :refer [get-mouse-pos]]
     [game.maps.camera :refer [get-camera-position]]
     [cdq.core :refer [int-posi]]
     [cdq.core :refer [half-screen-h half-screen-w tile-height tile-width]]))
