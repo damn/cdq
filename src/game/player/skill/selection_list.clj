@@ -3,7 +3,7 @@
     [cdq.core :refer [rgbcolor]]
     [cdq.core :refer [rendering]]
     [cdq.core :refer [ingame-loop-comp]]
-    [game.player.skill.learnable :refer [render-skillbutton-tooltip]]
+    [cdq.core :refer [render-skillbutton-tooltip]]
         [cdq.core :refer [fill-rect render-readable-text]]
     [cdq.core :refer [is-key-pressed? screen-height]]
     [cdq.core :refer [gui-get-absolute-posi gui-get-bounds gui-visible? make-imgbutton gui-mouseover? remove-guicomponent gui-set-visible]]
@@ -11,11 +11,11 @@
     [cdq.core :refer [atom-session]]
     [cdq.core :refer [active]]
     [cdq.core :refer [is-cooling-down?]]
-    [game.player.skill.skillmanager :refer [create-skill-icon get-selected-skill get-skills-for-mousebutton mousebuttons set-selected-skill]]))
+    [cdq.core :refer [create-skill-icon get-selected-skill get-skills-for-mousebutton skill-mousebuttons set-selected-skill]]))
 
 (declare selected-skill-buttons skill-selection-hotkeys)
 
-(intern 'game.player.skill.skillmanager
+(intern 'cdq.core
         'change-selected-skill-button-images
   (fn [mousebutton new-icon]
     (swap! (get selected-skill-buttons mousebutton) assoc :image new-icon)))
@@ -61,18 +61,18 @@
     (when (is-cooling-down? (get-selected-skill mouse))
       (fill-rect g (gui-get-bounds (get selected-skill-buttons mouse)) transparent-red))))
 
-(defn some-skill-selection-list-visible? [] (some is-visible-skills-list? mousebuttons))
-(defn close-skill-selection-lists [] (dorun (map #(set-visible-skills-list % false) mousebuttons)))
+(defn some-skill-selection-list-visible? [] (some is-visible-skills-list? skill-mousebuttons))
+(defn close-skill-selection-lists [] (dorun (map #(set-visible-skills-list % false) skill-mousebuttons)))
 
 (ingame-loop-comp :update-skill-selection-buttons
   (rendering [g c]
-    (doseq [button mousebuttons]
+    (doseq [button skill-mousebuttons]
       (render-button-cooldown-overlay g button)
       (render-button-hotkeys g button))))
 
 (ingame-loop-comp :skill-selection-list-tooltips
   (rendering :tooltips [g c]
-    (dorun (map #(render-button-tooltip g %) mousebuttons))))
+    (dorun (map #(render-button-tooltip g %) skill-mousebuttons))))
 
 (defn- create-selected-skill-button [mousebutton x]
   (let [button (make-imgbutton :image (create-skill-icon "icons/stomp.png") ; this icon will be replaced during create-player-skillmanager and the correct icon for each mouse
@@ -153,7 +153,7 @@
               :when (is-key-pressed? k)]
         (update-skill-hotkeys (Integer/parseInt (name k))))))
 
-(intern 'game.player.skill.skillmanager 'assign-unused-hotkey-and-open-skillslist
+(intern 'cdq.core 'assign-unused-hotkey-and-open-skillslist
   (fn [skilltype]
     (let [unused-hotkey (first (filter #(not (get-skilltype-with-hotkey %)) [1,2,3,4,5,6,7,8,9,0]))
           mousebutton (if (= skilltype :psi-charger) :left :right)]

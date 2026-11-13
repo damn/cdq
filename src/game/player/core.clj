@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [direction-vector get-vector-to-mouse-coords normalise vector-add vector2f]]
     [cdq.core :refer [red]]
-    [game.components.body-effects-impl :refer [create-armor-reduce-effect slowdown stun]]
+    [cdq.core :refer [create-armor-reduce-effect slowdown stun]]
     [cdq.core :refer [when-chance]]
     [cdq.core :refer [create-image]]
     [cdq.core :refer [create-animation]]
@@ -30,9 +30,8 @@
     [cdq.core :refer [colliding-with-other-solid-bodies? create-body teleport]]
     [cdq.core :refer [get-sub-entities]]
     [cdq.core :refer [get-inventory-cells-with-item-name remove-item-from-cell]]
-    [game.components.movement.ai.potential-field :refer [potential-field-component]]
-    [game.player.skill.skillmanager :refer [create-player-skillmanager get-current-standard-skill]]
-    game.player.skill.learnable
+    [cdq.core :refer [potential-field-component]]
+    [cdq.core :refer [create-player-skillmanager get-current-standard-skill]]
     [cdq.core :refer [player-move-speed]]
     [cdq.core :refer [saved-mouseover-body]]
     cdq.core

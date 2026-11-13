@@ -28,28 +28,27 @@
     [cdq.core :refer [hp-regen-component rotate-to-player rotation-component]]
     [cdq.core :refer [animation-component animation-entity create-line-render-effect create-lines-render-effect image-render-component render-map-indep-order render-on-map-order rendering single-animation-component translate-position]]
     [cdq.core :refer [calc-effective-spell-dmg deal-dmg explosion-frames get-armor get-armor-reduce-info get-destructible-bodies get-hp is-dead? set-hp-to-max]]
-    [game.components.body-effects-impl :refer [add-psi-charge aoe-armor-reducer consume-psi-charges create-bullettime-effects current-psi-charges dmg-effect max-psi-charges slowdown-effect stun stun-collision-effect]]
+    [cdq.core :refer [add-psi-charge aoe-armor-reducer consume-psi-charges create-bullettime-effects current-psi-charges dmg-effect max-psi-charges slowdown-effect stun stun-collision-effect]]
     [cdq.core :refer [blocks-component]]
     [cdq.core :refer [shield-component]]
     [cdq.core :refer [movement-component projectile-movement-component]]
-    [game.components.movement.ai.potential-field :refer [calculate-mouseover-body-colors path-to-player-movement potential-field-player-following render-potential-field-following-mouseover-info render-potential-field-info]]
+    [cdq.core :refer [calculate-mouseover-body-colors path-to-player-movement potential-field-player-following render-potential-field-following-mouseover-info render-potential-field-info]]
     [cdq.core :refer [enough-mana? get-mana get-skill get-skill-use-mouse-tile-pos is-attacking? is-ready? is-usable? skillmanager-component skillmanager-skill standalone-skill]]
     [cdq.core :refer [get-current-player-melee-dmg melee-weapon monster-melee-component monster-melee-props player-melee-props]]
     [cdq.core :refer [wake-up]]
-    [game.entity.projectile :refer [fire-projectile]]
-    [game.entity.nova :refer [nova-effect]]
-    [game.item.instance :refer [create-item-body put-item-on-ground]]
+    [cdq.core :refer [fire-projectile]]
+    [cdq.core :refer [nova-effect]]
+    [cdq.core :refer [create-item-body put-item-on-ground]]
     [game.item.instance-impl :refer [create-rand-item]]
     [cdq.core :refer [get-current-map-data iterating-map-dependent-comps]]
     [cdq.core :refer [render-minimap show-on-minimap]]
     [cdq.core :refer [get-rand-weighted-item if-chance percent-chance rand-int-between]]
     [cdq.core :refer [is-path-blocked? ray-blocked?]]
     [cdq.core :refer [defmonster get-monster-properties]]
-    [game.monster.spawn :refer [try-spawn]]
-    game.components.burrow
+    [cdq.core :refer [try-spawn]]
     game.entity.teleporters
-    [game.components.skills.utils :refer [check-line-of-sight get-player-ranged-vector]]
-    [game.player.skill.learnable :refer [deflearnable-skill]]
+    [cdq.core :refer [check-line-of-sight get-player-ranged-vector]]
+    [cdq.core :refer [deflearnable-skill]]
     [cdq.core :refer [clear-key-pressed-record clear-mouse-pressed-record get-mouse-pos is-key-pressed? is-rightm-consumed? try-consume-leftm-pressed try-consume-rightm-pressed update-mousebutton-state]]
     [cdq.core :refer [gui-visible? make-checkbox make-frame make-guidisplay make-label make-textbutton remove-guicomponent render-guicomponent gui-set-visible update-guicomponent]]
     [cdq.core :as ids]
@@ -70,10 +69,10 @@
     [cdq.core :refer [get-ingame-loop-entities ingame-loop-comp]]
     [cdq.core :refer [add-item-to-cell cell-empty-and-allows-item? cell-filled-and-allows-item? inc-count-of-item? item-in-use? item-not-in-use? remove-item-from-cell remove-one-item]]
     [cdq.core :refer [item-background-icons item-cell-h item-cell-w hks-cells inventory-height inventoryry item-grids]]
-    [game.item.colors :refer [equip-boni-item-color]]
+    [cdq.core :refer [equip-boni-item-color]]
     [cdq.core :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
     [game.player.skill.selection-list :refer [close-skill-selection-lists some-skill-selection-list-visible?]]
-    [game.player.skill.skillmanager :refer [get-selected-skill]]
+    [cdq.core :refer [get-selected-skill]]
     [game.player.core :refer [player-death try-revive-player]])
   (:gen-class))
 
@@ -676,7 +675,7 @@
   (rotation-component)
   (image-render-component (create-image "opponents/burrower.png"))
   (normal-monster-melee)
-  (game.components.burrow/burrow-component))
+  (cdq.core/burrow-component))
 
 (defmonster shield-turret {:hp 1.5 :armor 15 :pxw 15 :pxh 15}
   (path-to-player-movement 13)
@@ -997,7 +996,7 @@
                  :maxrange 8))})
 
 (defn- psi-charge-hit-effect [_]
-  (let [{:keys [attack-bonus movement-bonus]} (:psi-charger game.player.skill.learnable/learnable-skills)]
+  (let [{:keys [attack-bonus movement-bonus]} (:psi-charger cdq.core/learnable-skills)]
     (add-psi-charge player-body attack-bonus movement-bonus)))
 
 (deflearnable-skill psi-charger

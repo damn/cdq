@@ -16,13 +16,12 @@
     [game.entity.teleporters :refer [static-teleporter]]
     game.player.core
     game.player.skill.selection-list
-    [game.monster.spawn :refer [bloodcaves-groups spawn-monsters tech-groups techgy-groups try-spawn]]
+    [cdq.core :refer [bloodcaves-groups spawn-monsters tech-groups techgy-groups try-spawn]]
     cdq.core
     [cdq.core :refer [cell-blocks-changed-update-listeners change-cell-blocks get-cell]]
     [cdq.core :refer [construct-tiledmap create-grid-from-tiled-map get-layer-index get-player-entity-start-position get-tile-property-value get-tileproperties]]
     [cdq.core :refer [show-on-minimap]]
-    game.item.instance
-    [game.item.instance :refer [create-item-body]]
+    [cdq.core :refer [create-item-body]]
     [game.item.instance-impl :refer [create-rand-item]]
     [cdq.core :refer [get-current-map-data]]
     [cdq.core :refer [rand-int-between]]

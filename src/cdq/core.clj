@@ -5634,3 +5634,1179 @@ so the entity can get in melee range.")
 
 ; --> mach prozedural generierte maps mit prostprocessing (fill-singles/set-cells-behind-walls-nil/remove-nads/..?)
 ;& assertions 0 NADS z.b. ...?
+
+;; player skillmanager
+
+(defn get-player-skills []
+  (:skills (:skillmanager @player-body)))
+
+(defn- player-skill-current-selected-type [mousebutton]
+  (mousebutton (:selected-type (:skillmanager @player-body))))
+
+(defn get-selected-skill [mousebutton]
+  ((player-skill-current-selected-type mousebutton) (get-player-skills)))
+
+(declare change-selected-skill-button-images
+         assign-unused-hotkey-and-open-skillslist)
+
+(def skill-mousebuttons #{:left :right})
+
+(defn set-selected-skill [mousebutton skill]
+  {:pre [(skill-mousebuttons mousebutton)]}
+  (change-selected-skill-button-images mousebutton (:icon skill))
+  (swap! player-body assoc-in [:skillmanager :selected-type mousebutton] (:type skill)))
+
+(defn get-skills-for-mousebutton
+  ([mousebutton]
+    (get-skills-for-mousebutton (get-player-skills) mousebutton))
+  ([skills mousebutton]
+    (filter
+      #(#{:both mousebutton} (:mousebutton %))
+      (vals skills))))
+
+(defeffectentity ^:private until-leftm-released-movement-block [body]
+  :target body
+  :dofn   #(swap! body add-block    :movement)
+  :undofn #(swap! body remove-block :movement)
+  (merge {:type :notype}
+         (active [_ c entity]
+           (when-not (is-leftbutton-down?)
+             (add-to-removelist entity)))))
+
+(defn try-set-active-skill-player-skillmanager [new-skill]
+  (let [skillmanager (:skillmanager @player-body)]
+    (if
+      (and
+        (:is-melee new-skill)
+        (not (enough-mana? new-skill skillmanager)))
+      :default-hands
+      (:type new-skill))))
+
+(defn- player-skill-choose-selected [entity skillmanager delta]
+  (cond
+    (let [mouseover-body (get-mouseover-body)]
+      (and
+        (is-leftbutton-down?)
+        mouseover-body
+        (attackable-by-player? mouseover-body)))
+    (let [selected-left (get-selected-skill :left)]
+      (when
+        (and
+          (not (:is-melee selected-left))
+          (empty? (get-certain-effect-entities entity
+                                               :until-leftm-released-movement-block)))
+        (until-leftm-released-movement-block entity))
+      (try-set-active-skill-player-skillmanager selected-left))
+
+    (and (not (is-rightm-consumed?)) (is-rightbutton-down?))
+    (try-set-active-skill-player-skillmanager (get-selected-skill :right))
+
+    :else
+    nil))
+
+(defn is-selected-leftmouse? [skill] (= skill (get-selected-skill :left)))
+
+(defn is-selected-rightmouse? [skill] (= skill (get-selected-skill :right)))
+
+; TODO schau ob der neue skill uberhaupt auf leftmouse / rightmouse passt.
+; oder default skills mussen immer left sein? -> waffen konnen ja auch :right
+(defn- player-skill-assoc-at-index [skills new-skill idx]
+  (let [skill-at-idx (get skills idx)]
+    (when (is-selected-leftmouse? skill-at-idx)
+      (set-selected-skill :left new-skill))
+    (when (is-selected-rightmouse? skill-at-idx)
+      (set-selected-skill :right new-skill))
+    (assoc skills idx new-skill)))
+
+(defn get-current-standard-skill [] (:default-hands (get-player-skills)))
+
+(defn change-standard-attack-skill [skillmanager new-skill]
+  (assoc skillmanager :skills
+    (player-skill-assoc-at-index (:skills skillmanager) new-skill :default-hands)))
+
+(defn reset-standard-attack-skill [skillmanager]
+  (change-standard-attack-skill
+    skillmanager
+    (:default-hands skillmanager)))
+
+; TODO type von player-skills mussen unique sein (item, leanrable,starting) wg hotkeys unter anderem
+(defn add-player-skill [skills new-skill]
+  (assoc skills (:type new-skill) new-skill))
+
+(defn remove-player-skill [skills skill]
+  (let [new-skills (dissoc skills (:type skill))]
+    (if (is-selected-leftmouse? skill)
+      (set-selected-skill
+        :left
+        (first
+          (get-skills-for-mousebutton new-skills :left))))
+    (if (is-selected-rightmouse? skill)
+      (set-selected-skill
+        :right
+        (first
+          (get-skills-for-mousebutton new-skills :right))))
+    new-skills))
+
+(defn- player-skillmanager-rotate [body]
+  (if @saved-mouseover-body
+    (rotate-to-body body @saved-mouseover-body)
+    (rotate-to-mouse body)))
+
+(defn create-skill-icon [data]
+  (create-image data :scale [16 16]))
+
+(defn create-player-skillmanager []
+  (let [default-hands (skillmanager-skill :stype :default-hands
+                                          :cooldown 0
+                                          :cost 0
+                                          (player-melee-props [])
+                                          {:mousebutton :both
+                                           :icon (create-skill-icon "icons/melee.png")
+                                           :info "Standard melee attack."
+                                           :show-info-for [:cost]})]
+    ; same as set-selected-skill, also setting :selected-...-type here
+    ; (but when this component is created the player-body doesnt exist yet)
+    (change-selected-skill-button-images :left  (:icon default-hands))
+    (change-selected-skill-button-images :right (:icon default-hands))
+    (skillmanager-component
+      :rotatefn player-skillmanager-rotate
+      :choosefn player-skill-choose-selected
+      :mana 100
+      :skills [default-hands]
+      :cast-sound "bfxr_cast.wav"
+      (blocks-component {:attacking :movement})
+      ; here and @ :skills a :default-hands skill; the one in :skills will be overwritten
+      ; in case of a new default-hands skill
+      {:default-hands       default-hands
+       :selected-type {:left  (:type default-hands)
+                       :right (:type default-hands)}})))
+; default-hands skill exists two times as a copy ... another way to do it? maybe mark the skill that is the default hands as :default-hands true
+; and all others as :false
+
+;; item instance
+
+;;; glittering
+
+(defn glittering-component []
+  (safe-merge
+    {:type :glittering
+     :counter (make-counter 2000)
+     :active false
+     :animation (folder-animation :folder "effects/itemglitter/"
+                                  :looping false
+                                  :duration 300)}
+    (active [delta {:keys [active counter animation] :as c} entity]
+      (swap! entity assoc-in [(:type c)]
+                 (if active
+                   (let [animation (tick animation delta)]
+                     (if (animation-stopped? animation)
+                       (assoc c :active false :animation (restart-animation animation))
+                       (assoc c :animation animation)))
+                   (tick-finally-merge c :counter delta
+                                         {:active true}))))
+    (render-on-map :air [g _ {:keys [active animation] :as c} render-posi]
+      (when active
+        (render-centered-animation animation render-posi)))))
+
+;;; instance
+
+(def item-create-fns {})
+
+(defmacro defitem [item-name & body]
+  `(let [~'this-name ~item-name]
+     (alter-var-root #'item-create-fns assoc ~item-name
+       (fn ~@body))))
+
+(defn create-item-instance ; TODO & data -> besser? da dann net ne extra map
+  ([item-name]
+    (create-item-instance item-name nil))
+  ([item-name data]
+    (let [create-fn (or (get item-create-fns item-name)
+                        (throw (Error. (str "Could not find item: " item-name))))]
+      (with-meta
+        (assoc (create-fn data) :name item-name)
+        {:pr :item}))))
+
+(defmacro def-usable-item [namestr & {:keys [effect info image use-sound]}]
+  `(defitem ~namestr [{cnt# :count}]
+     {:effect ~effect
+      :use-sound ~use-sound
+      :info (str "Use: Rightclick or in belt with hotkeys.\n" ~info)
+      :type :usable
+      :image ~image
+      :count (or cnt# 1)}))
+
+(defn- item-pressable [item-instance]
+  (pressable-component
+    (or (:pretty-name item-instance) (:name item-instance))
+    (fn [entity]
+      (when-not @item-in-hand
+        (cond
+          (showing-player-inventory?) (do
+                                        (play-sound "bfxr_takeit.wav")
+                                        (add-to-removelist entity)
+                                        (set-item-in-hand item-instance))
+
+          (try-pickup-item item-instance) (do
+                                            (play-sound "bfxr_pickup.wav")
+                                            (add-to-removelist entity))
+
+          :else (do
+                  (play-sound "bfxr_denied.wav")
+                  (show-msg-to-player "Your Inventory is full")))))
+    :color (:color item-instance)))
+
+(comment
+  (do-in-game-loop
+    (create-item-body [42 22] "Cyber-Implant")))
+
+(def ^:private item-body-dimensions [8 8])
+
+(defn- item-entity [position item-instance]
+  (create-entity
+    (position-component position)
+    (create-body :solid false
+                 :dimensions item-body-dimensions
+                 :mouseover-outline true)
+    (item-pressable item-instance)
+    (image-render-component (apply get-scaled-copy (:image item-instance)
+                                   item-body-dimensions)
+                            :order :on-ground :apply-light false)
+    (glittering-component)))
+
+(defn create-item-body [position item]
+  (item-entity position
+               (if (string? item) (create-item-instance item) item)))
+
+(defn put-item-on-ground []
+  {:pre [(is-item-in-hand?)]}
+  (let [{x 0 y 1 :as posi} (:value (:position @player-body))
+        [w _] item-body-dimensions
+        half-size (/ w tile-width 2)
+        below-posi [x (+ 0.7 y)] ; put here so player sees that item is put on ground (confusing trying to put heal pot on player)
+        blocked (blocked-location? below-posi half-size half-size :ground)
+        ; blocked location checks if other solid bodies ... if put under player would block from player
+        ;_ (println "BLOCKED? " (boolean blocked))
+        position (if-not blocked below-posi posi)]
+    (create-item-body position @item-in-hand))
+  (empty-item-in-hand))
+
+;; potential-field
+
+; Assumption: The map contains no not-allowed diagonal cells, diagonal wall cells where both
+; adjacent cells are walls and blocked.
+; (important for wavefront-expansion and field-following)
+
+
+;; Standart Potential Field algorithm (brute force)
+
+(defn- pf-brute-force-field
+  "returns the marked cells"
+  [size entity]
+  (let [start-cell (get-cell (get-entity-tile entity))
+        start-posi (:posi @start-cell)]
+    (for [cell (cells (get-cell-grid))
+          :let [posi (:posi @cell)
+                dist (get-distance start-posi posi)]
+          :when (and
+                  (not (cell-blocked? cell :ground))
+                  (<= dist size))]
+      (do
+        (swap! cell assoc :dist-to-player dist)
+        cell))))
+
+(comment
+  (pf-clear-cells player-body)
+
+  (def marked-cells (doall (pf-brute-force-field 7 player-body)))
+
+  (doseq [cell marked-cells]
+    (swap! cell dissoc :dist-to-player)))
+
+;;
+
+(def ^:private pf-max-iterations 15)
+
+(def ^:private pf-sqrt-of-2 14)
+
+(defn- pf-get-dist [cell] (:dist-to-player @cell))
+
+(defn- pf-wavefront-expansion
+  "returns the new marked-cells"
+  [start-cell]
+  (swap! start-cell assoc :dist-to-player 0) ; first step
+  (loop [last-marked-cells [start-cell]
+         marked-cells [start-cell]
+         iterations 0]
+    (if (= iterations pf-max-iterations)
+      marked-cells
+      (let [new-marked-cells (atom [])]
+        ; sorting important because of diagonal-cell values, flow from lower dist first for correct distance
+        (doseq [marked (sort-by pf-get-dist last-marked-cells)
+                :let [value (pf-get-dist marked)]]
+          (doseq [cell (cached-get-adjacent-cells marked)
+                  :when (not (or
+                               (cell-blocked? cell :ground) ; filters nil cells
+                               (pf-get-dist cell)))]
+            (swap! cell assoc :dist-to-player
+                   (+ value (if (is-diagonal? marked cell) pf-sqrt-of-2 10)))
+            (swap! new-marked-cells conj cell)))
+        (recur
+          @new-marked-cells
+          (concat marked-cells @new-marked-cells)
+          (inc iterations))))))
+
+(defn- pf-clear-cells [entity]
+  (when-let [cells (:marked-cells (:potential-field @entity))]
+    (swap! entity assoc-in [:potential-field :marked-cells] nil)
+    (dorun (map #(swap! % dissoc :dist-to-player) cells))))
+
+(defn- pf-try-generate [entity]
+  (let [component (:potential-field @entity)
+        current-tile (get-entity-tile entity)
+        dirty (not= current-tile (:last-tile component))]
+    (when dirty
+      (swap! entity assoc-in [:potential-field :last-tile] current-tile)
+      (pf-clear-cells entity)
+      (swap! entity assoc-in [:potential-field :marked-cells]
+        (pf-wavefront-expansion (get-cell current-tile))))))
+
+(defn potential-field-component []
+  {:type :potential-field
+   :depends [:position]
+   :posi-changed pf-try-generate
+   :init (fn [entity]
+           (pf-try-generate entity)
+           (add-cell-blocks-changed-listener
+             (fn []
+               (swap! entity assoc-in [:potential-field :last-tile] nil)
+               (pf-try-generate entity))))})
+
+(comment
+  (dotimes [_ 3]
+    (time
+      (dotimes [_ 10]
+        (swap! player-body assoc-in [:potential-field :last-tile] nil)
+        (pf-try-generate player-body)
+        nil))))
+
+;; MOVEMENT AI
+
+(let [order (get-8-neighbour-positions [0 0])]
+  (def ^:private pf-diagonal-check-indizes
+    (into {} (for [[x y] (filter diagonal-direction? order)]
+               [(first (positions #(= % [x y]) order))
+                (vec (positions #(some #{%} [[x 0] [0 y]])
+                                order))]))))
+
+(defn pf-print-cells [cells] ; for debug
+  (doseq [cell cells]
+    (println (:posi @cell) " dist:" (pf-get-dist cell))))
+
+(defn- pf-is-not-allowed-diagonal? [at-idx adjacent-cells]
+  (when-let [[a b] (get pf-diagonal-check-indizes at-idx)]
+    (and (nil? (adjacent-cells a))
+         (nil? (adjacent-cells b)))))
+
+(defn- pf-remove-not-allowed-diagonals [adjacent-cells]
+  (remove nil?
+          (map-indexed
+            (fn [idx cell]
+              (when-not (or (nil? cell)
+                            (pf-is-not-allowed-diagonal? idx adjacent-cells))
+                cell))
+            adjacent-cells)))
+
+(def ^:private pf-movement-type :ground)
+
+; not using filter because nil cells considered @ pf-remove-not-allowed-diagonals
+(defn- pf-filter-viable-cells [body adjacent-cells]
+  (pf-remove-not-allowed-diagonals
+    (mapv #(when-not (or (cell-blocked? % pf-movement-type)
+                         (occupied-by-other? % body))
+             %)
+          adjacent-cells)))
+
+(defn- pf-get-min-dist-cell [cells]
+  (when-seq [cells (filter pf-get-dist cells)]
+    (apply min-key pf-get-dist cells)))
+
+; rarely called -> no performance bottleneck
+(defn- pf-viable-cell? [own-dist body cell]
+  (when-let [best-cell (pf-get-min-dist-cell
+                         (pf-filter-viable-cells body (cached-get-adjacent-cells cell)))]
+    (when (< (pf-get-dist best-cell) own-dist)
+      cell)))
+
+(defn- pf-find-next-cell
+  "returns :near-player-cell; a target cell or nil."
+  [body own-cell]
+  (let [own-dist (pf-get-dist own-cell)
+        adjacent-cells (cached-get-adjacent-cells own-cell)]
+    (if
+      (or
+        (and own-dist (zero? own-dist)) ; already on player cell
+        (some #(when-let [dist (pf-get-dist %)] (zero? dist)) adjacent-cells))  ; next to player cell
+      :near-player-cell
+
+      (let [cells (pf-filter-viable-cells body adjacent-cells)
+            min-key-cell (pf-get-min-dist-cell cells)]
+        (cond
+          (not min-key-cell)  ; red
+          own-cell
+
+          (not own-dist)
+          min-key-cell
+
+          (> (pf-get-dist min-key-cell) own-dist) ; red
+          own-cell
+
+          (< (pf-get-dist min-key-cell) own-dist) ; green
+          min-key-cell
+
+          (= (pf-get-dist min-key-cell) own-dist) ; yellow
+          (or
+            (some #(pf-viable-cell? own-dist body %) cells)
+            own-cell))))))
+
+(defn potential-field-player-following [body]
+  (let [posi (:value (:position @body))
+        own-cell (get-cell posi)
+        result (pf-find-next-cell body own-cell)]
+    (cond
+      (= result :near-player-cell)
+      (direction-vector posi (:value (:position @player-body)))
+
+      (not result)
+      nil
+
+      :else
+      (let [cell result]
+        (when-not (and (= cell own-cell)
+                       (occupied-by-other? own-cell body)) ; verhindere reibereien 2 bewegen sich auf mitte
+          (when-not (inside-cell? body cell)
+            (direction-vector posi (:middle @cell))))))))
+
+(defn path-to-player-movement [speed]
+  (movement-component
+    {:control-update (fn [body _ _]
+                       (potential-field-player-following body))} ; so damit man das redeffen kann
+    speed
+    :ground)) ; works only with ground (expands to ground and checks ground)
+
+;; DEBUG RENDER
+
+(defn render-potential-field-info [g leftx topy xrect yrect cell]
+  (when-let [dist (pf-get-dist cell)]
+    (comment (let [ratio (/ dist pf-max-iterations)]
+      (fill-rect g leftx topy tile-width tile-height
+        (rgbcolor :r (- 1 ratio) :a 0.5))))
+    (set-color g white)
+    (draw-string g xrect yrect (int dist))))
+
+(let [a 0.5]
+  (def pf-transp-red (rgbcolor :r 1 :a a))
+  (def pf-transp-green (rgbcolor :g 1 :a a))
+  (def pf-transp-orange (rgbcolor :r 1 :g 0.34 :a a))
+  (def pf-transp-yellow (rgbcolor :r 1 :g 1 :a a)))
+
+(def ^:private pf-adjacent-cells-colors (atom nil))
+
+(defn calculate-mouseover-body-colors [mouseoverbody]
+  (when-let [body mouseoverbody]
+    (let [occupied-cell (get-cell (:value (:position @body)))
+          own-dist (pf-get-dist occupied-cell)
+          adj-cells (cached-get-adjacent-cells occupied-cell)
+          potential-cells (filter pf-get-dist
+                                  (pf-filter-viable-cells body adj-cells))
+          adj-cells (remove nil? adj-cells)]
+      (reset! pf-adjacent-cells-colors
+        (genmap adj-cells
+          (fn [cell]
+            (cond
+              (not-any? #{cell} potential-cells)
+              pf-transp-red
+
+              (not own-dist) ; die andre hat eine dist da sonst potential-cells rausgefiltert -> besser als jetzige cell.
+              pf-transp-green
+
+              (< own-dist (pf-get-dist cell))
+              pf-transp-red
+
+              (= own-dist (pf-get-dist cell))
+              pf-transp-yellow
+
+              :else pf-transp-green)))))))
+
+(defn render-potential-field-following-mouseover-info
+  [g leftx topy xrect yrect cell mouseoverbody]
+  (when-let [body mouseoverbody]
+    (when-let [color (get @pf-adjacent-cells-colors cell)]
+      (fill-rect g leftx topy tile-width tile-height color))))
+
+
+;; monster spawn
+
+(defn try-spawn [posi monster-type & {debug :debug}]
+  {:pre [(get-monster-properties monster-type)]}
+  (let [{:keys [half-w half-h movement-type create]} (get-monster-properties monster-type)
+        blocked (blocked-location? posi half-w half-h movement-type)
+        spawned (when-not blocked (create posi))]
+    (when debug
+      (println (str "try-spawn " monster-type " at " @current-map " " posi " spawned? " (boolean spawned))))
+    spawned))
+
+(comment
+
+  (do-in-game-loop
+      (try-spawn [12.5 5.5] :first-boss))
+  )
+
+(def test-group {:test-hunter 1})
+
+(def drones {:xploding-drone 1})
+(def bloodcaves3 {:xploding-drone 1
+                  :slowdown-caster 1
+                  :nova-melee 6
+                  :armored-skull2 10})
+(def bloodcaves2 {:xploding-drone 1
+                  :slowdown-caster 1
+                  :armored-skull 12})
+(def bloodcaves1 {:xploding-drone 1
+                  :slowdown-caster 1
+                  :healer 1
+                  :mage-skull 5})
+(def bloodcaves-groups [{:healer 1
+                         :big-teleporting-melee 10
+                         :xploding-drone 10
+                         :ranged 1}
+                        {:burrower 10
+                         :ray-shooter 1}
+                        {:armored-skull 5
+                         :mage-skull 5
+                         :healer 1}])
+
+(def flies {:nova-melee 1 :fly 9 :mine 1})
+(def healer-group {:nova-melee 5
+                   :mine 1
+                   :slowdown-caster 1
+                   :healer 1
+                   :skull-chainsaw 10})
+(def big-skulls {:nova-melee 5
+                 :mine 1
+                 :slowdown-caster 4
+                 :big-skull-chainsaw 3})
+(def shield-turrets {:nova-melee 2
+                     :shield-turret 14
+                     :healer 1})
+(def tech-groups [flies healer-group big-skulls shield-turrets])
+
+(def techgy1 {:skull-chainsaw 4 :littlespider 2 :armored-skull2 1})
+(def techgy2 {:instant-healer 1 :littlespider 6 :ranged 4})
+(def techgy3 {:nova-melee 1 :ray-shooter 4})
+(def techgy-groups [techgy1 techgy2 techgy3])
+
+; function is for monsters with width&height <1 tile
+(defn spawn-group [group posis & {maxno :maxno :or {maxno 9}}]
+  (let [posis (map translate-to-tile-middle (take maxno posis))
+        ;; dont spawn monsters near the start locations of the levels ... so a calm start... start-positions need to be translated to tile middle !!
+        start-position (:start-position (get-current-map-data))
+        posis (remove #(< (get-distance % start-position)
+                          start-position-safezone-radius)
+                      posis)
+        monstertypes (get-rand-weighted-items (count posis) group)]
+    (comment (log "#posis " (count posis)
+                  " group: " group
+                  " frequencies: " (frequencies monstertypes)))
+    (doall ; returning it
+      (remove nil?
+              (map #(try-spawn %1 %2) posis monstertypes)))))
+
+; + verteilt etwas am boden (schau ob net auf blocked gegend?!)
+(let [dropweights {"Mana-Potion" 7
+                   "Heal-Potion" 7
+                   "Big-Mana-Potion" 3
+                   "Big-Heal-Potion" 3}]
+  (defn- spawn-champion-drop [body]
+    (let [p (:value (:position @body))]
+      (doseq [itemname (get-rand-weighted-items (rand-int-between 2 4) dropweights)]
+        (create-item-body p itemname)))))
+
+(defn championize-monster [monster]
+  (swap! monster update-in [:destructible :hp] inc-or-dec-max * 5) ; same code @ item-boni
+  (add-component monster
+                 {:type :extra-loot :destruct spawn-champion-drop})
+  (add-component monster
+                 (assoc (single-animation-component (folder-animation :folder "effects/champion/" :looping true)
+                                             :order :on-ground)
+                        :type
+                        :championized-animation))) ; not two :animation types allowed in one entity!
+
+(defn spawn-monsters [group-definitions & {champions :champions :or {champions true} :as more}]
+  (doseq [posis (get-spawn-positions-groups (get-cell-grid))]
+    (let [monsters (apply spawn-group (rand-nth group-definitions) posis (apply concat more))]  ; concat so the map is a sequence of its elements
+      (when champions
+        (when-chance 5
+                     ;(log "monsters at posi " (first posis) "championized" " in map " @current-map)
+                     ;(dorun (map championize-monster monsters))
+                     ; deactivated because problem with 'current-animation' in game.render and because
+                     ; sleeping monsters with blocks fails because new components added dont have blocks
+                     )))))
+
+;; burrow
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private burrow-dust-frames (spritesheet-frames "effects/dust.png" 15 15))))
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private burrow-dark-dust-frames (spritesheet-frames "effects/darkdust.png" 30 30))))
+
+(defn- do-burrow [entity & {audiovisual :audiovisual :or {audiovisual true}}]
+  (when audiovisual
+    (play-sound "bfxr_burrow.wav")
+    (animation-entity :position (:value (:position @entity))
+                      :animation (create-animation burrow-dust-frames :frame-duration 100)
+                      :order :is-ground))
+  (swap! entity #(-> % 
+       block-active-components
+       (assoc-in [:body :solid] false)
+       (assoc-in [:burrow :burrowed] true)))
+  (reset-component-state-after-blocked entity))
+
+(defn- burrow-try-unburrow [entity]
+  (when (and (is-burrowed? entity)
+             (not (colliding-with-other-solid-bodies? entity)))
+    (play-sound "bfxr_unburrow.wav")
+    (animation-entity :position (:value (:position @entity))
+                      :animation (create-animation burrow-dark-dust-frames))
+    (swap! entity #(-> % 
+         unblock-active-components
+         (assoc-in [:body :solid] true)
+         (assoc-in [:burrow :burrowed] false)))
+    (->> entity
+      get-other-bodies-in-adjacent-cells
+      (filter is-burrowed?)
+      (map burrow-try-unburrow)
+      dorun)))
+
+(defn burrow-component []
+  {:type :burrow
+   :burrowed false
+   :init (fn [entity]
+           (assert (:solid (:body @entity))) ; must be solid because burrow/unburrow switches the solid flag
+           (assert (not (:is-multiple-cell (:body @entity)))) ; also single cell body because using get-occupied-cell @ get-dist-to-player and not -cell (s)
+           (do-burrow entity :audiovisual false))
+   :depends [:body]})
+
+; Tested:
+; -> too little maxdist and you can burrow monster piece by piece and pick out some loner monsters... -> faster or only @ max 120 dist / no dist works better
+; -> for island maps no dist very good when jumping to another island -> safe from player harrassment
+
+(defn- burrow-check-entity [entity]
+  (let [dist (get-dist-to-player entity)]
+    (if (is-burrowed? entity)
+      (when (and dist (<= dist 30))  ; 30 = 3x tiledist
+        (burrow-try-unburrow entity))
+      (when-not dist ; out of range -> hide
+        (do-burrow entity)))))
+
+(def ^:private burrow-counter (create-counter 300))
+(def burrow-session (atom-session burrow-counter :save-session false))
+
+(ingame-loop-comp :burrow-check
+    (active [delta _ _]
+      (when (update-counter burrow-counter delta)
+        (dorun (map burrow-check-entity
+          (filter #(:burrow @%)
+                  (get-entities-in-active-content-fields)))))))
+
+;; body-effects-impl
+
+(defeffectentity ^:private battle-drugs-entity [seconds speedup]
+  :target player-body
+  :duration (* seconds 1000)
+  :dofn (fn []
+          (swap! player-body #(-> % 
+               (incr-casting-speed speedup)
+               (incr-attack-speed  speedup)
+               (incr-move-speed    speedup))))
+  :undofn (fn []
+            (swap! player-body #(-> % 
+                 (incr-casting-speed (- speedup))
+                 (incr-attack-speed  (- speedup))
+                 (incr-move-speed    (- speedup)))))
+  (single-animation-component (folder-animation :folder "effects/redpulse/"
+                                                :looping true)
+                              :order :on-ground))
+
+(defn battle-drugs [seconds] ; argument ms, then dont have to (* 1000 2 times here)!
+  (let [entity player-body]
+    (if-let [existing (first (get-certain-effect-entities entity :battle-drugs-entity))]
+      (swap! entity update-in [:delete-after-duration :counter :maxcnt] + (* seconds 1000))
+      (battle-drugs-entity seconds 0.5))))
+
+;;
+
+; only when active components!
+(defeffectentity stun [body milliseconds]
+  :target body
+  :duration milliseconds
+  (let [stunned-comps (filter :updatefn (vals @body))
+        stunned-comp-types (map :type stunned-comps)]
+    {:type :do-and-undo
+     :init (fn [_]
+             (reset-component-state-after-blocked body)
+             (swap! body add-blocks stunned-comp-types))
+     :destruct (fn [_]
+                 (swap! body remove-blocks stunned-comp-types))})
+  (circle-around-body-render-comp body (rgbcolor :a 0.6) :on-ground))
+
+;; Curses
+
+(defn- body-effect-icon-over-body
+  "target entity is not the entity of this component (used at sub-entities that only share position)"
+  [target image]
+  (merge {:type :visuals}
+         (render-on-map :air [g _ c render-posi]
+           (render-above-body g target render-posi image :ypuffer 2))))
+
+(defn- body-effect-remove-curses [body]
+  (dorun (map add-to-removelist
+              (filter #(:is-curse @%)
+                      (get-sub-entities body)))))
+
+; only when active components!
+; slows the components of body - not the effect-entities
+(defeffectentity ^:private slowdown-entity [body seconds]
+  :target body
+  :duration (* seconds 1000)
+  :dofn (fn []
+          (body-effect-remove-curses body)
+          (swap! body mapvals mark-slowed))
+  :undofn #(swap! body mapvals unmark-slowed)
+  {:type :is-curse}
+  (body-effect-icon-over-body body (create-image "effects/bullettime.png")))
+
+(defn slowdown [body seconds]
+  (if-let [existing (first (get-certain-effect-entities player-body :slowdown-entity))]
+    (swap! existing update-in [:delete-after-duration :counter] reset-counter)
+    (slowdown-entity body seconds)))
+
+(defn create-bullettime-effects [posi radius seconds]
+  (dorun (map #(slowdown % seconds) (get-destructible-bodies posi radius :monster))))
+
+; for save/load order of changed-armor .. ? first item armor or this @ player? ..
+; need to put calculation for changed armor @ defeffectentity?
+(defeffectentity ^:private armor-reduce [body changed-armor seconds]
+  :target body
+  :duration (* seconds 1000)
+  :dofn (fn []
+          (body-effect-remove-curses body)
+          (swap! body update-in [:destructible :armor] - changed-armor))
+  :undofn #(swap! body update-in [:destructible :armor] + changed-armor)
+  {:type :is-curse}
+  (body-effect-icon-over-body body (create-image "effects/armorreduce.png")))
+
+(defn create-armor-reduce-effect [body percent seconds]
+  (if-let [existing (first (get-certain-effect-entities body :armor-reduce))]
+    (swap! existing update-in [:delete-after-duration :counter] reset-counter)
+    (let [armor (get-armor body)
+          changed-armor (min armor (* armor (/ percent 100)))]
+      (armor-reduce body changed-armor seconds))))
+
+(defn aoe-armor-reducer [posi radius percent seconds]
+  (dorun (map #(create-armor-reduce-effect % percent seconds)
+    (get-destructible-bodies posi radius :monster))))
+
+;; PSI-CHARGER
+
+(defn- psi-equip-charge-bonus [attack-speedup move-speedup]
+  (swap! player-body #(-> % 
+       (incr-attack-speed attack-speedup)
+       (incr-move-speed move-speedup))))
+
+(defn- psi-unequip-charge-bonus [attack-speedup move-speedup]
+  (swap! player-body #(-> % 
+       (incr-attack-speed (- attack-speedup))
+       (incr-move-speed (- move-speedup)))))
+
+(def max-psi-charges 3)
+(def ^:private psi-charge-duration (* 20 1000))
+
+(defn current-psi-charges [body]
+  (count (get-certain-effect-entities body :psi-charge)))
+
+(defn- psi-charge-set-durations
+  "Every 'duration' one charge disappears"
+  [body]
+  (dorun
+    (map-indexed (fn [n entity]
+                   (swap! entity update-in [:delete-after-duration :counter]
+                               assoc :cnt 0 :maxcnt (* psi-charge-duration (inc n))))
+                 (get-certain-effect-entities body :psi-charge))))
+
+(defn get-psi-charge-degrees [body]
+  {:post [(degrees? %)]}
+  (let [degrees (map #(:degree (:psi-charge-visuals @%)) (get-certain-effect-entities body :psi-charge))
+        cnt (count degrees) p1 (first degrees) p2 (second degrees)]
+    (case cnt
+      0 0
+      1 (degree-add p1 120)
+      ; epsilon bei approx-numbers: mindestens 7:  = (* 20 (/ 360 1000)) bei max. 60 FPS => max. 16.7 delta sagen wir 20
+      2 (if (approx-numbers p2 (degree-add p1 120) 30)
+          (degree-minus p1 120)
+          (degree-add p1 120)))))
+; case 2: zwei P1 und P2 mit ca. 120 abstand; gesucht P3 im abstand 120 von P1 und P2
+; falls P2 im UZS rechts von P1 (durch addition) ist P3 dann entgegen den UZS von P1 ansonsten ist P3 im UZS rechts von P1
+
+(def ^:private psi-charge-body-distance 10)
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private psi-charge-frames (map #(get-scaled-copy % 7 7) (folder-frames "effects/psicharges/")))))
+
+(defeffectentity ^:private psi-charge [body attackinc moveinc]
+  :target body
+  :duration psi-charge-duration
+  :dofn (fn []
+          (psi-equip-charge-bonus attackinc moveinc))
+  :undofn (fn []
+            (psi-charge-set-durations body)
+            (psi-unequip-charge-bonus attackinc moveinc))
+  (merge {:type :psi-charge-visuals
+          :degree (get-psi-charge-degrees body)
+          :animation (create-animation psi-charge-frames :looping true)}
+         (active [delta c entity]
+           (swap! entity update-in [(:type c)]
+                       #(-> %
+                            (update-in [:animation] tick delta)
+                            (update-in [:degree] degree-add (* delta (/ 360 1000))))))
+         (render-on-map :on-ground [g _ c [x y]]
+           (let [v (vector-from-angle (:degree c))
+                 [vx vy] (vec-posi
+                           (scale-vector v psi-charge-body-distance))
+                 render-position [(+ x vx)
+                                  (+ y vy)]]
+             (render-centered-animation (:animation c) render-position)))))
+
+(defn add-psi-charge [body attackinc moveinc]
+  {:pre [(is-player? body)]}
+  (when (< (current-psi-charges body) max-psi-charges)
+    (psi-charge body attackinc moveinc))
+  (psi-charge-set-durations body))
+; first add a new charge, then set durations according to number of charges
+
+(defn consume-psi-charges [body]
+  (let [charges (get-certain-effect-entities body :psi-charge)]
+    (dorun (map add-to-removelist charges))
+    (count charges)))
+
+(comment
+  (.getSpeed (:casting (:animation @player-body)))
+  (.getSpeed (:sword (:animation @player-body)))
+  (:speed (:movement @player-body))
+
+  (defn- get-durations []
+    (clojure.string/join "\n"(map (fn [entity]
+                                    (let [counter (:counter (:delete-after-duration @entity))]
+                                      [(str (:cnt counter) "/" (:maxcnt counter))
+                                       (:id (meta entity))]))
+                                  (get-certain-effect-entities player-body :psi-charge))))
+  (defn test-component []
+    (safe-merge
+      {:type :test}
+      (render-on-map :air [g _ c [x y]]
+        (render-readable-text g x (- y 20)
+                              :shift false
+                              (get-durations)))))
+
+  (defn debug-render-component []
+    (safe-merge
+      {:type :debug-render}
+      (render-on-map :air [g entity c [x y]]
+        (render-readable-text g x (- y 20)
+                              :shift false
+                                  (get-in (:delete-after-duration @entity)
+                                          [:counter :cnt])))))
+  )
+
+; Hit Effects
+; can use 'partial'
+
+(defn dmg-effect [dmg & {is-player-spell :is-player-spell}]
+  (fn [affected-body]
+    (deal-dmg dmg affected-body :is-player-spell is-player-spell)))
+
+(defn stun-collision-effect [chance duration]
+  (fn [affected-body]
+    (if-chance chance (stun affected-body duration))))
+
+(defn slowdown-effect [seconds]
+  (fn [affected-body]
+    (slowdown affected-body seconds)))
+
+;; learnable skills / skillmenu
+
+; This section is skillmenu & learnable-skills
+
+(def ^:private skillmenu-x frame-screenborder-distance)
+(def ^:private skillmenu-y frame-screenborder-distance)
+
+(defn learn-skill [skill]
+  ; TODO assert not learned yet?
+  (reset! (:learned-this skill) true)
+  (swap! player-body update-in [:skillmanager :skills] add-player-skill skill))
+; TODO add-player-skill doch net pure machen? da assoc in player-body egtl zu add-player-skill gehort?
+
+; TODO jede menu-posi; skill-type nur 1x erlaubt?
+(defn learnable-skill
+  "Accepts a sequence of :key vals and then any number of additional props maps."
+  [skill-type & more]
+  (let [[{:keys [menu-posi manacost mousebutton icon info cooldown]
+          :or {cooldown 0}
+          :as m}
+         props] (split-key-val-and-maps more)]
+    (assert (set/subset? #{:menu-posi :mousebutton :icon :info} (.keySet m)))
+    (skillmanager-skill
+      :stype skill-type
+      :cooldown cooldown
+      :cost manacost
+      {:learned-this (atom false) ; new or load character overwrites this
+       :menu-posi menu-posi
+       :mousebutton mousebutton
+       :icon (create-skill-icon icon)
+       :info info}
+      props)))
+
+(def learnable-skill-init-fns (atom []))
+
+(defmacro deflearnable-skill [skill-type & more]
+  `(swap! learnable-skill-init-fns
+          conj
+          (fn [] (learnable-skill ~(keyword skill-type) ~@more))))
+
+(defn- init-learnable-skills []
+  (def learnable-skills
+    (into {} (for [skill (map #(%) @learnable-skill-init-fns)]
+               [(:type skill) skill]))))
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private skillmenu-frame (make-frame :name :skillmenu
+                                      :bounds [skillmenu-x skillmenu-y 100 95]
+                                      :hotkey skillmenu-hotkey
+                                      :visible false
+                                      :parent ingamestate-display))))
+
+(defn- init-skillmenu-buttons []
+  (let [x 5
+        y 20 ; 30 == fontheight?! wg. free-sk-pt str
+        puffer 2]
+    (def ^:private skillmenu-buttons
+      (for [{[menux menuy] :menu-posi :as skill} (vals learnable-skills)]
+          {:skill skill
+           :button (make-imgbutton :image (:icon skill)
+                                   :location [(+ x puffer (* menux 25))
+                                              (+ y puffer (* menuy 25))]
+                                   :pressed (fn []
+                                              (when (and (pos? (:free-skill-points (:skillmanager @player-body)))
+                                                         (not @(:learned-this skill)))
+                                                (swap! player-body update-in [:skillmanager :free-skill-points] dec)
+                                                (learn-skill skill)
+                                                (assign-unused-hotkey-and-open-skillslist (:type skill))))
+                                   :parent skillmenu-frame)}))))
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (init-learnable-skills)
+    (init-skillmenu-buttons)))
+
+(defn- learnable-properties-str [props-map]
+  (apply str (for [[k v] props-map]
+               (if (= :dmg k)
+                 (str "damage: " (variance-val-str v) "\n")
+                 (str (name k) ": " (readable-number v) "\n")))))
+
+(def learnable-infostr-color (rgbcolor :r 0.3 :g 1 :b 0.6))
+
+(defn- get-skillmenu-skill-info-textseq
+  "for learnable skills and skillmanager skills with :info"
+  [skill]
+  [learnable-infostr-color
+   (:info skill)
+   (rgbcolor :r 1 :g 1 :b 1)
+   (when-let [info-keyseq (:show-info-for skill)]
+     (learnable-properties-str (select-keys skill info-keyseq)))])
+
+(defn render-skillbutton-tooltip [g {:keys [button skill]}]
+  (when (gui-mouseover? @button)
+    (let [[x y w h] (gui-get-bounds button)]
+      (apply render-readable-text g x (+ y h)
+             (get-skillmenu-skill-info-textseq skill)))))
+
+(ingame-loop-comp :skillmenu
+  (rendering [g c]
+    (when (gui-visible? skillmenu-frame)
+      (let [x skillmenu-x
+            y skillmenu-y]
+        (render-readable-text g (+ x 5) (+ y 5) :background false (str "Free points: " (:free-skill-points (:skillmanager @player-body))))
+        (doseq [{:keys [button skill]} skillmenu-buttons
+                :when (not @(:learned-this skill))]
+          (fill-rect g (gui-get-bounds button) (rgbcolor :r 0.5 :g 0.5 :b 0.5 :a 0.8)))))))
+
+; TODO use gui (add-tooltip ?) -> vlt. :above :below angebbar? und auch get-infostr funkt angebbar?..
+(ingame-loop-comp :skill-tooltips
+  (rendering :tooltips [g c]
+    (when (gui-visible? skillmenu-frame)
+      (dorun (map #(render-skillbutton-tooltip g %) skillmenu-buttons)))))
+
+(def learnable-session (reify Session
+               (load-session [_ {:keys [free-points learned]}]
+                 (swap! player-body assoc-in [:skillmanager :free-skill-points] free-points)
+                 (doseq [[skilltype learned-this] learned
+                         :let [skill (get learnable-skills skilltype)]]
+                   (if-not skill
+                     (log "Savegame skill " skilltype " not known to engine.")
+                     (if learned-this
+                       (learn-skill skill)
+                       (reset! (:learned-this skill) false))))) ; new character session all set to false
+               (save-session [_]
+                 {:free-points (:free-skill-points (:skillmanager @player-body))
+                  :learned (for [[skilltype skill] learnable-skills]
+                             [skilltype @(:learned-this skill)])})
+               (new-session-data [_]
+                 {:free-points 1
+                  :learned (for [[skilltype skill] learnable-skills]
+                             [skilltype false])})))
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private freeskillpointsbutton
+      (make-imgbutton
+        :image (create-image "icons/skills_free.png" :scale buttonscale)
+        :location [(+ buttonx-start (* ingame-gui-x-dist -1)) (- screen-height 18)]
+        :pressed #(gui-switch-visible skillmenu-frame)
+        :tooltip "You have free skill points"
+        :parent ingamestate-display
+        :visible false))))
+
+(ingame-loop-comp :update-button-visibility
+  (active [delta c _]
+    (gui-set-visible freeskillpointsbutton (pos? (:free-skill-points (:skillmanager @player-body))))))
+
+;; projectile
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private projectile-hits-wall-frames (folder-frames "effects/ember/"))))
+
+(defn- projectile-wall-hit-plop [position]
+  (animation-entity
+    :position position
+    :animation (create-animation projectile-hits-wall-frames)))
+
+; separate movement and projectile-collision ?
+(defn fire-projectile
+  [& {:keys [startbody px-size animation side hits-side movement hit-effects
+             piercing maxrange maxtime]}]
+  {:pre [(xor maxrange maxtime)]}
+  (create-entity
+    (position-component (:value (:position @startbody)))
+    (create-body :solid false
+                 :side side
+                 :pxw px-size
+                 :pxh px-size)
+    movement
+    {:type :projectile-collision
+     :piercing piercing
+     :hits-side hits-side
+     :hit-effects hit-effects
+     :already-hit-bodies #{}
+     :hits-wall-effect (fn [posi]
+                         (play-sound "bfxr_projectile_wallhit.wav")
+                         (projectile-wall-hit-plop posi))}
+    (single-animation-component animation :order :air :apply-light false)
+    (delete-after-duration-component (or maxtime (/ maxrange (:speed movement)))
+                                     ;:duration-over (comp projectile-wall-hit-plop #(:value (:position @%)))
+                                     )))
+
+;; nova
+
+(defn- nova-circle-debug-comp []
+  (let [color (rgbcolor :r 0.6 :a 0.6)]
+    (merge {:type :circle-debug
+            :shape (circle [-1 -1] 0)}
+           (render-on-map [g _ {:keys [shape color]} render-posi]
+             (render-centered-shape g shape render-posi color))
+           (active [delta c entity]
+             (set-radius (:shape c)
+                              (in-pixel
+                               (:radius (:nova-effect @entity))))))))
+
+(defn nova-effect
+  [& {:keys [position duration maxradius affects-side dmg animation is-player-spell]}]
+  (create-entity
+    ;(nova-circle-debug-comp)
+    (position-component position)
+    {:type :always-in-sight} ; because affects entities behind walls
+    (merge {:type :nova-effect
+            :radius 0
+            :already-hit #{}
+            :counter (make-counter duration)}
+           (active [delta {:keys [counter already-hit] :as c} entity]
+             (let [radius (* (counter-ratio counter) maxradius) ; erst ratio danach update-counter, sonst beim letzten update => ratio=0
+                   hits (remove
+                          #(contains? already-hit %)
+                          (get-destructible-bodies position radius affects-side))]
+               (dorun (map #(deal-dmg dmg % :is-player-spell is-player-spell) hits))
+               (swap! entity update-in [(:type c)]
+                           #(-> %
+                                (assoc :radius radius)
+                                (update-in [:already-hit] set/union (set hits))))
+               (when (update-counter! entity delta c)
+                 (add-to-removelist entity)))))
+    (single-animation-component animation :order :air :apply-light false)))
+
+;; item colors
+
+; diablo 2 gold:  144 136 88
+; blue:           72 80 184
+(def equip-boni-item-color (rgbcolor :r 0.28 :g 0.31 :b 0.72 :brighter 0.5))
+(def gold-item-color (rgbcolor :r 0.56 :g 0.53 :b 0.34 :brighter 0.5))
+
+;; skills utils
+
+(defn- skill-forbidden-cross [position image]
+  (create-entity
+    (position-component position)
+    {:type :always-in-sight} ; because used where not in sight f.e.
+    (merge {:type :render}
+           (render-on-map :top-level [g _ c render-posi]
+             (render-centered-image image render-posi)))
+    (delete-after-duration-component 1000)))
+
+(def ^:private skill-old-forbidden-cross (atom nil))
+
+(defn- skill-not-allowed-position-effect [position]
+  (when (and @skill-old-forbidden-cross (get @id-entity-map (:id (meta @skill-old-forbidden-cross))))
+    (add-to-removelist @skill-old-forbidden-cross))
+  (reset! skill-old-forbidden-cross
+          (skill-forbidden-cross position
+                 (create-image "effects/forbidden.png" :transparent white :scale [32 32]))))
+
+(defn check-line-of-sight [entity _]
+  (let [target (get-skill-use-mouse-tile-pos)]
+    (if (ray-blocked? (:value (:position @entity)) target)
+      (do
+        (show-msg-to-player "No line of sight to target!")
+        (skill-not-allowed-position-effect target)
+        false)
+      true)))
+
+;;
+
+(defn get-player-ranged-vector []
+  (if-let [mouseover-body @saved-mouseover-body]
+    (direction-vector (:value (:position @player-body)) (:value (:position @mouseover-body)))
+    (get-vector-to-mouse-coords (get-skill-use-mouse-pos))))

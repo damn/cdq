@@ -2,7 +2,6 @@
   (:require
     [cdq.core :refer [inc-or-dec-max readable-number]]
     [cdq.core :refer [rand-int-between]]
-    game.components.body-effects-impl
     [cdq.core :refer [get-player-armor]]
     [cdq.core :refer [incr-attack-speed incr-casting-speed incr-move-speed]]))
 

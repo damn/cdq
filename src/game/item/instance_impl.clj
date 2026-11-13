@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [current-map]]
     [cdq.core :refer [projectile-movement-component]]
-    [game.components.body-effects-impl :refer [battle-drugs dmg-effect]]
+    [cdq.core :refer [battle-drugs dmg-effect]]
     [cdq.core :refer [player-body]]
     [cdq.core :refer [melee-weapon]]
     [cdq.core :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals variance-val-str]]
@@ -11,24 +11,24 @@
     [cdq.core :refer [create-animation get-animation-duration]]
     [cdq.core :refer [folder-frames]]
     [cdq.core :refer [get-itemsprite]]
-    [game.entity.nova :refer [nova-effect]]
-    [game.entity.projectile :refer [fire-projectile]]
+    [cdq.core :refer [nova-effect]]
+    [cdq.core :refer [fire-projectile]]
 
     [cdq.core :refer [get-rand-weighted-item rand-int-between]]
     [cdq.core :refer [show-msg-to-player]]
     [cdq.core :refer [show-gains-hp-effect show-gains-mana-effect]]
     [cdq.core :refer [get-hp get-player-armor]]
     [cdq.core :refer [get-mana get-skill-use-mouse-tile-pos skillmanager-skill]]
-    [game.components.skills.utils :refer [check-line-of-sight get-player-ranged-vector]]
+    [cdq.core :refer [check-line-of-sight get-player-ranged-vector]]
     [cdq.core :refer [cells]]
     [cdq.core :refer [remove-one-item-from try-pickup-item]]
     [cdq.core :refer [item-grids]]
-    [game.item.colors :refer [equip-boni-item-color]]
+    [cdq.core :refer [equip-boni-item-color]]
     [cdq.core :refer [item-in-hand]]
     [game.item.boni :refer [create-item-bonus create-random-boni]]
-    [game.item.instance :refer [create-item-body create-item-instance def-usable-item defitem]]
-    [game.player.skill.skillmanager :refer [add-player-skill change-standard-attack-skill remove-player-skill reset-standard-attack-skill set-selected-skill]]
-    [game.player.skill.learnable :refer [learn-skill learnable-skills]]))
+    [cdq.core :refer [create-item-body create-item-instance def-usable-item defitem]]
+    [cdq.core :refer [add-player-skill change-standard-attack-skill remove-player-skill reset-standard-attack-skill set-selected-skill]]
+    [cdq.core :refer [learn-skill learnable-skills]]))
 
 ;; Random Items
 

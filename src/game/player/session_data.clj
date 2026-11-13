@@ -2,23 +2,21 @@
   (:require
     [clojure.walk :refer [postwalk]]
     [cdq.core :as session :refer [load-session new-session-data save-session]]
-    game.components.burrow
     cdq.core
     [cdq.core :refer [add-item-to-cell empty-all-item-grids]]
     [cdq.core :refer [item-grids]]
     [cdq.core :refer [item-in-hand set-item-in-hand]]
-    [game.item.instance :refer [create-item-instance]]
+    [cdq.core :refer [create-item-instance]]
     [game.item.boni :refer [create-equip-boni-save load-equip-boni-save]]
     [cdq.core :refer [cells]]
     [cdq.core :as data]
     cdq.core
     cdq.core
     game.player.core
-    game.player.skill.learnable
     game.player.skill.selection-list
     [cdq.core :refer [log translate-to-tile-middle]]
     [cdq.core :refer [distinct-seq?]]
-    [game.monster.spawn :refer [try-spawn]]
+    [cdq.core :refer [try-spawn]]
     [cdq.core :refer [get-tileproperties]]
     [cdq.core :refer [version]]
     [cdq.core :refer [status-options-session]]))
@@ -161,14 +159,14 @@
 
         ; now the order of initialisation does not matter anymore
         [#'game.player.skill.selection-list/hotkeys-session]
-        [#'game.player.skill.learnable/session] ; depends on player-body/learnable-skills already initialised
+        [#'cdq.core/learnable-session] ; depends on player-body/learnable-skills already initialised
         [#'item-save-session "item.save/session"] ; depends on player-body (apply item bonis)
         [#'cdq.core/status-options-session]
         [#'cdq.core/mouseover-cache-session]
         [#'cdq.core/saved-mouseover-body-session]
         [#'cdq.core/update-session]
         [#'cdq.core/sleeping-session]
-        [#'game.components.burrow/session]
+        [#'cdq.core/burrow-session]
         [#'cdq.core/lightning-session]
         [#'cdq.core/msg-to-player-counter-session]
         [#'cdq.core/msg-to-player-message-session]]))
