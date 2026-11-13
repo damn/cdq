@@ -2,7 +2,7 @@
   (:require
     [game.player.session-data :refer [save-game]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
-    [game.components.core :refer [player-body]]
+    [cdq.core :refer [player-body]]
     [game.components.body :refer [teleport]]
     [game.components.skills.core :refer [is-attacking?]]
     [cdq.core :refer [get-pretty-name set-map!]]))

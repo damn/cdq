@@ -1,6 +1,6 @@
 (ns game.monster.defmonster
   (:require
-    [game.components.core :refer [create-entity]]
+    [cdq.core :refer [create-entity]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [create-body]]
     [game.components.destructible :refer [monster-destructible]]

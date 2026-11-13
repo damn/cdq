@@ -1,12 +1,12 @@
 (ns game.ingame-gui
   (:require
-    [engine.render.color :as color]
-    [engine.render.image :refer [create-image]]
+    [cdq.core :refer [lightGray]]
+    [cdq.core :refer [create-image]]
     cdq.core
-    [engine.statebasedgame :refer [enter-state]]
+    [cdq.core :refer [enter-state]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]
-    [game.components.core :refer [active]]
+    [cdq.core :refer [active]]
     [cdq.core :refer [get-text-height]]
     [cdq.core :refer [get-setting screen-height]]
     [game.gui :refer [is-visible? make-frame make-guidisplay make-imgbutton make-label mouseover? render-guicomponent set-visible switch-visible update-guicomponent]]))
@@ -25,7 +25,7 @@
   (rendering :selfmade-gui [g c]
     (render-guicomponent g ingamestate-display)))
 
-(def background-color color/lightGray)
+(def background-color lightGray)
 (def foreground-color (.brighter background-color 0.5))
 
 (def frame-screenborder-distance 5)

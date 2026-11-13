@@ -5,7 +5,7 @@
     game.utils.lightning
     [cdq.core :refer [log translate-to-tile-middle xor]]
     cdq.core
-    [game.maps.cell-grid :refer [create-grid-from-gen-grid create-jcell-grid]]
+    [cdq.core :refer [create-grid-from-gen-grid create-jcell-grid]]
     [game.maps.contentfields :refer [create-mapcontentfields]]
     [game.maps.minimap :refer [create-minimap-image]]
     [game.maps.tiledmaps :refer [construct-tiledmap create-cell-grid-from-tiled-map get-player-entity-start-position]]

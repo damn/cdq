@@ -4,13 +4,13 @@
     [cdq.core :refer [make-counter play-sound tick tick-finally-merge]]
     [engine.render.animation :refer [is-stopped? render-centered-animation restart]]
     [engine.render.assets :refer [folder-animation]]
-    [engine.render.image :refer [get-scaled-copy]]
+    [cdq.core :refer [get-scaled-copy]]
     [cdq.core :refer [safe-merge]]
     cdq.core
     [game.item.cells :refer [try-pickup-item]]
     [game.item.grids :refer [showing-player-inventory?]]
     [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
-    [game.components.core :refer [active add-to-removelist create-entity player-body]]
+    [cdq.core :refer [active add-to-removelist create-entity player-body]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [blocked-location? create-body]]
     game.components.misc

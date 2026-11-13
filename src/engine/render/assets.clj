@@ -1,7 +1,7 @@
 (ns engine.render.assets
   (:require
-    [engine.settings :refer [jar-file?]]
-    [engine.render.image :refer [create-image]]
+    [cdq.core :refer [jar-file? transparent]]
+    [cdq.core :refer [create-image]]
     [engine.render.animation :refer [create-animation default-frame-duration]])
   (:import java.io.File
            java.util.zip.ZipInputStream

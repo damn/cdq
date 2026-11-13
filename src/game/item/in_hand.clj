@@ -1,7 +1,7 @@
 (ns game.item.in-hand
   (:require
     [cdq.core :refer [set-mouse-cursor]]
-    [engine.render.image :refer [get-scaled-copy]]
+    [cdq.core :refer [get-scaled-copy]]
     [cdq.core :refer [screen-scale]]
     [cdq.core :refer [deflazygetter]])
   (:import org.newdawn.slick.opengl.CursorLoader))

@@ -1,6 +1,6 @@
 (ns game.components.ingame-loop
   (:require
-    [game.components.core :refer [active add-to-removelist create-entity id-entity-map]]))
+    [cdq.core :refer [active add-to-removelist create-entity id-entity-map]]))
 
 (def ^:private ids (atom #{}))
 

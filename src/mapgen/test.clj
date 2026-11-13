@@ -1,25 +1,24 @@
 (ns mapgen.test
   (:require
-    [engine.render.color :as color :refer [rgbcolor set-color]]
-    [engine.render.image :refer [create-empty-image]]
+    [cdq.core :refer [black blue darkGray red rgbcolor set-color white]]
+    [cdq.core :refer [create-empty-image]]
     [engine.render.graphics :refer [draw-grid draw-string fill-rect]]
     [cdq.core :refer [height posis width]]
     [cdq.core :refer [assoc-ks]]
     [cdq.core :refer [start-slick-basicgame]]
     [cdq.core :refer [get-mouse-pos is-key-pressed?]]
     [cdq.core :refer [create-seed]]
-    [mapgen.cave :refer [cave-gridgen]]
-    mapgen.spawn-spaces
-    [mapgen.cellular :refer [calculate-regions cellular-automata-gridgen connect-regions flood-fill]]
-    [mapgen.nad :refer [fix-not-allowed-diagonals get-nads mark-nads]]
+    [cdq.core :refer [cave-gridgen]]
+    [cdq.core :refer [calculate-regions cellular-automata-gridgen connect-regions flood-fill]]
+    [cdq.core :refer [fix-not-allowed-diagonals get-nads mark-nads]]
     [cdq.core :refer [fill-single-cells wall-at?]]
-    [mapgen.populate :refer [get-populated-grid-posis get-rand-end-posi]])
+    [cdq.core :refer [get-populated-grid-posis get-rand-end-posi]])
   (:import java.util.Random))
 
 (def ^:private grid-colors {:wall      (rgbcolor :r 0.2 :g 0.2)
                    :ground    (rgbcolor :r 0.5 :g 0.5)
-                   :room      color/white
-                   :undefined color/black})
+                   :room      white
+                   :undefined black})
 
 (defn- load-grid-on-image [grid scale]
   (let [image (create-empty-image (* scale (width grid))
@@ -36,7 +35,7 @@
 (defn- colorize-nads []
   (let [nads (get-nads @current-grid)]
     (println "found " (count nads) " NADs." )
-    (mark-nads @current-grid nads color/red)))
+    (mark-nads @current-grid nads red)))
 
 (def ^:private gridw 50)
 (def ^:private gridh 50)
@@ -114,21 +113,22 @@
 (defn- flood-fill-distances-heatmap []
   (color-flood-fill-heatmap @current-grid (get-mouse-tile-pos)))
 
-(require '[mapgen.populate :refer [find-path]])
+(require '[cdq.core :refer [astar-find-path]])
 
 (defn- flood-fill-from-start-to-end-path []
   (let [start-posi (get-mouse-tile-pos)
         end-posi (get-rand-end-posi @current-grid start-posi)
-        pathposis (find-path start-posi end-posi @current-grid wall-at?)]
-    (color-flood-fill-heatmap (swap! current-grid assoc-ks pathposis color/white) pathposis)))
+        pathposis (astar-find-path start-posi end-posi @current-grid wall-at?)]
+    (color-flood-fill-heatmap (swap! current-grid assoc-ks pathposis white) pathposis)))
 
 (defn- populate []
   (let [{:keys [end path-posis stuff-posis]} (get-populated-grid-posis @current-grid (get-mouse-tile-pos) 20)]
     (-> @current-grid
-      (assoc-ks path-posis color/white)
-      (assoc-ks stuff-posis color/red))))
+      (assoc-ks path-posis white)
+      (assoc-ks stuff-posis red))))
 
-(require '[mapgen.prebuilt-placement :refer [is-5x5-walls-entrance?]])
+(require '[cdq.core :refer [is-5x5-walls-entrance?]])
+
 
 (defn- show-possible-room-locations []
   (let [[room entrance] (rand-nth
@@ -136,12 +136,12 @@
                                   (map #(is-5x5-walls-entrance? % @current-grid)
                                        (posis @current-grid))))]
     (-> @current-grid
-      (assoc-ks room color/red)
-      (assoc-ks [entrance] color/blue)))
+      (assoc-ks room red)
+      (assoc-ks [entrance] blue)))
 ;  (transform @current-grid
 ;                        (fn [posi value]
 ;                          (if (is-5x5-walls-entrance? posi value @current-grid)
-;                            color/red
+;                            red
 ;                            value)))
   )
 
@@ -149,8 +149,8 @@
   (let [mouse-tile-pos (get-mouse-tile-pos)
         random-end-posis (repeatedly 100 #(get-rand-end-posi @current-grid mouse-tile-pos))]
     (-> @current-grid
-      (assoc mouse-tile-pos color/blue)
-      (assoc-ks random-end-posis color/red))))
+      (assoc mouse-tile-pos blue)
+      (assoc-ks random-end-posis red))))
 
 (defn- colorize-grid [grid]
   (reduce #(assoc-ks %1 %2 (rand-color)) grid (calculate-regions grid)))
@@ -193,9 +193,9 @@
               (when (is-key-pressed? k)
                 (update-grid (f)))))
   :render (fn [container g]
-            (fill-rect g 0 0 screenw screenh color/darkGray)
+            (fill-rect g 0 0 screenw screenh darkGray)
             (.drawCentered @current-image (/ screenw 2) (/ screenh 2)) ; TODO
-            (set-color g color/white)
+            (set-color g white)
             (draw-string g 0 0 (get-mouse-tile-pos))
             ;(draw-spawn-field-grid g (/ border 2) (/ border 2) w h)
             ))

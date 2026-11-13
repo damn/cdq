@@ -1,9 +1,10 @@
 (ns game.player.core
   (:require
+    [cdq.core :refer [direction-vector get-vector-to-mouse-coords normalise vector-add vector2f]]
+    [cdq.core :refer [red]]
     [game.components.body-effects-impl :refer [create-armor-reduce-effect slowdown stun]]
     [cdq.core :refer [when-chance]]
-    [engine.render.color :as color]
-    [engine.render.image :refer [create-image]]
+    [cdq.core :refer [create-image]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation]]
     [engine.render.graphics :refer [render-readable-text]]
@@ -19,7 +20,7 @@
     [cdq.core :refer [is-key-down? is-leftbutton-down? is-leftm-consumed?]]
     cdq.core
     game.maps.contentfields
-    [game.components.core :refer [add-to-removelist create-entity player-body]]
+    [cdq.core :refer [add-to-removelist create-entity player-body]]
     [cdq.core :refer [switch-state]]
     [game.components.position :refer [position-component]]
     [game.components.movement :refer [movement-component]]
@@ -39,8 +40,7 @@
     [game.mouseoverbody :refer [saved-mouseover-body]]
     cdq.core
     [cdq.core :as debug]
-    [game.utils.geom :refer [add direction-vector get-vector-to-mouse-coords normalise vector2f]]
-    game.utils.geom
+
     [game.utils.msg-to-player :refer [show-msg-to-player]]))
 
 ; use require and remove the -player prefixes or suffixes here
@@ -48,7 +48,7 @@
 ;;; movement (was game.player.settings + game.player.movement)
 
 (defn- add-vs [vs]
-  (normalise (reduce add (vector2f [0 0]) vs)))
+  (normalise (reduce vector-add (vector2f [0 0]) vs)))
 
 (defn- calc-movement-v [body]
   (let [r (when (is-key-down? :RIGHT) [1 0])
@@ -194,8 +194,8 @@
     (mana-regen-component 5)
     (light-component :intensity 1 :radius 12 :falloff 5) ; (/ screen-height 2 16) = 9
     (player-animation)
-    (show-on-minimap color/red)
+    (show-on-minimap red)
     (potential-field-component)))
 
 (defn init-player [position]
-  (intern 'game.components.core 'player-body (create-player-body position)))
+  (intern 'cdq.core 'player-body (create-player-body position)))

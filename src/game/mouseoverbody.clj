@@ -5,13 +5,13 @@
     [cdq.core :refer [is-leftbutton-down?]]
     [cdq.core :refer [debug-mode]]
     [cdq.core :refer [atom-session]]
-    [game.components.core :refer [active id-entity-map is-player?]]
+    [cdq.core :refer [active id-entity-map is-player?]]
     [game.components.body :refer [get-bodies-at-position on-screen-and-in-sight?]]
     [game.components.destructible :refer [attackable-by-player?]]
     [game.components.render :refer [render-on-map-order]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
-    game.maps.cell-grid
-    game.utils.geom
+    cdq.core
+
     [game.utils.tilemap :refer [get-mouse-tile-pos]]))
 
 (defn- get-current-mouseover-body []

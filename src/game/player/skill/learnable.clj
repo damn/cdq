@@ -1,12 +1,12 @@
 (ns game.player.skill.learnable
   (:require
+    [cdq.core :refer [rgbcolor]]
     clojure.set
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [cdq.core :refer [log split-key-val-and-maps]]
     [cdq.core :refer [readable-number variance-val-str]]
-    [engine.render.color :refer [rgbcolor]]
-    [engine.render.image :refer [create-image]]
+    [cdq.core :refer [create-image]]
     [engine.render.graphics :refer [fill-rect render-readable-text]]
     [cdq.core :refer [screen-height]]
     game.media
@@ -14,7 +14,7 @@
     [game.ingame-gui :refer [buttonscale buttonx-start frame-screenborder-distance ingamestate-display skillmenu-hotkey x-dist]]
     cdq.core
     [game.player.skill.skillmanager :refer [add-player-skill assign-unused-hotkey-and-open-skillslist create-skill-icon]]
-    [game.components.core :refer [active player-body]]
+    [cdq.core :refer [active player-body]]
     [game.components.skills.core :refer [skillmanager-skill]]
     game.components.skills.melee))
 

@@ -1,8 +1,8 @@
 (ns game.utils.pathfinding
   (:require
     [game.utils.tilemap :refer [get-mouse-tile-pos]]
-    [game.maps.cell-grid :refer [cell-blocked? get-cell get-map-h get-map-w]]
-    [game.components.core :refer [player-body]])
+    [cdq.core :refer [cell-blocked? get-cell get-map-h get-map-w]]
+    [cdq.core :refer [player-body]])
   (:import
     (org.newdawn.slick.util.pathfinding TileBasedMap AStarPathFinder Mover Path)))
 

@@ -1,13 +1,13 @@
 (ns game.components.movement
   (:require
+    [cdq.core :refer [get-touched-tiles normalise normalised? vec-posi vector-length vector2f]]
     [cdq.core :refer [tile-width]]
     [cdq.core :refer [max-delta]]
         [cdq.core :refer [safe-merge]]
-        [game.components.core :refer [active add-to-removelist is-player?]]
+        [cdq.core :refer [active add-to-removelist is-player?]]
     [game.components.body :refer [calc-touched-cells get-body-bounds get-other-solid-bodies get-to-check-tiles min-solid-pxsize update-occupied-cell update-touched-cells]]
     [game.components.position :refer [swap-position!]]
-    [game.maps.cell-grid :refer [cell-blocked? get-cells]]
-    [game.utils.geom :refer [get-touched-tiles length normalise normalised? vec-posi vector2f]]
+    [cdq.core :refer [cell-blocked? get-cells]]
     game.utils.raycast))
 
 (defn- create-new-position
@@ -122,10 +122,10 @@
   [delta {:keys [control-update speed] :as c} body]
   (let [v (control-update body c delta)]
     (assert (or (nil? v)
-                (zero? (length v))
+                (zero? (vector-length v))
                 (normalised? v)))
     (when (and v
-               (not (zero? (length v))))
+               (not (zero? (vector-length v))))
       (let [{vx 0 vy 1 :as v} (vec-posi v)
             xdir (Math/signum (float vx))
             ydir (Math/signum (float vy))

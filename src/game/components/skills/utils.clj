@@ -1,15 +1,15 @@
 (ns game.components.skills.utils
   (:require
-    [engine.render.color :as color]
-    [engine.render.image :refer [create-image render-centered-image]]
+    [cdq.core :refer [direction-vector get-vector-to-mouse-coords]]
+    [cdq.core :refer [white]]
+    [cdq.core :refer [create-image render-centered-image]]
     [game.components.position :refer [position-component]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
     [game.utils.raycast :refer [ray-blocked?]]
     [game.mouseoverbody :refer [saved-mouseover-body]]
-    [game.components.core :refer [add-to-removelist create-entity id-entity-map player-body]]
+    [cdq.core :refer [add-to-removelist create-entity id-entity-map player-body]]
     [game.components.render :refer [render-on-map]]
     [game.components.misc :refer [delete-after-duration-component]]
-    [game.utils.geom :refer [direction-vector get-vector-to-mouse-coords]]
     [game.components.skills.core :refer [get-skill-use-mouse-pos get-skill-use-mouse-tile-pos]]))
 
 (defn- cross [position image]
@@ -28,7 +28,7 @@
     (add-to-removelist @old-cross))
   (reset! old-cross
           (cross position
-                 (create-image "effects/forbidden.png" :transparent color/white :scale [32 32]))))
+                 (create-image "effects/forbidden.png" :transparent white :scale [32 32]))))
 
 (defn check-line-of-sight [entity _]
   (let [target (get-skill-use-mouse-tile-pos)]

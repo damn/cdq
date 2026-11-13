@@ -1,7 +1,7 @@
 (ns engine.tests.copy-image
   (:require
     [cdq.core :refer [start-slick-basicgame]]
-    [engine.render.image :refer [get-scaled-copy]]
+    [cdq.core :refer [get-scaled-copy]]
     [engine.render.assets :refer [spritesheet-frames]]
     [engine.render.graphics :refer [fill-rect]])
   (:import (org.newdawn.slick Image Color)))

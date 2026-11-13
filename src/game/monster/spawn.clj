@@ -1,12 +1,13 @@
 (ns game.monster.spawn
   (:require
+    [cdq.core :refer [get-distance]]
     [game.item.instance :refer [create-item-body]]
     [cdq.core :refer [posis]]
     [cdq.core :refer [log translate-to-tile-middle]]
     [cdq.core :refer [inc-or-dec-max]]
     [engine.render.assets :refer [folder-animation]]
     [game.monster.defmonster :refer [get-monster-properties]]
-    [game.components.core :refer [add-component]]
+    [cdq.core :refer [add-component]]
     [game.components.body :refer [blocked-location?]]
     [game.components.render :refer [single-animation-component]]
     [cdq.core :refer [get-current-map-data]]
@@ -77,7 +78,7 @@
   (let [posis (map translate-to-tile-middle (take maxno posis))
         ;; dont spawn monsters near the start locations of the levels ... so a calm start... start-positions need to be translated to tile middle !!
         start-position (:start-position (get-current-map-data))
-        posis (remove #(< (game.utils.geom/get-distance % start-position)
+        posis (remove #(< (get-distance % start-position)
                           game.components.sleeping/start-position-safezone-radius)
                       posis)
         monstertypes (get-rand-weighted-items (count posis) group)]
@@ -88,8 +89,8 @@
       (remove nil?
               (map #(try-spawn %1 %2) posis monstertypes)))))
 
-(require '[mapgen.spawn-spaces :refer [get-spawn-positions-groups]])
-(require '[game.maps.cell-grid :refer [get-cell-grid]])
+(require '[cdq.core :refer [get-spawn-positions-groups]])
+(require '[cdq.core :refer [get-cell-grid]])
 
 ; + verteilt etwas am boden (schau ob net auf blocked gegend?!)
 (let [dropweights {"Mana-Potion" 7

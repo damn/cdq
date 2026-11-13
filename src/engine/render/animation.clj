@@ -1,7 +1,7 @@
 (ns engine.render.animation
   (:require
     [cdq.core :refer [Updateable]]
-    [engine.render.image :refer [render-centered-image]]))
+    [cdq.core :refer [render-centered-image]]))
 
 (defprotocol Animation
   (is-stopped?  [_])

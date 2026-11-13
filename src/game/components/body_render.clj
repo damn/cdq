@@ -1,9 +1,9 @@
 (ns game.components.body-render
   (:require
+    [cdq.core :refer [circle]]
+    [cdq.core :refer [black blue green red rgbcolor set-color white]]
     [cdq.core :as debug]
-    [game.utils.geom :as geom]
-    [engine.render.color :as color :refer [rgbcolor set-color]]
-    [engine.render.image :refer [create-image draw-image]]
+    [cdq.core :refer [create-image draw-image]]
     [engine.render.animation :refer [get-frame]]
     [engine.render.graphics :refer [draw-rect draw-shape fill-rect render-readable-text]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
@@ -11,7 +11,7 @@
     [cdq.core :refer [counter-ratio]]
     [cdq.core :refer [debug-mode in-pixel]]
     [game.mouseoverbody :refer [get-mouseover-body]]
-    [game.components.core :refer [id-entity-map is-player?]]
+    [cdq.core :refer [id-entity-map is-player?]]
     game.components.body
     [game.components.destructible :refer [destructible? get-hp]]
     [game.components.render :refer [current-animation rendering]]
@@ -27,9 +27,9 @@
           start-attack-puffer (in-pixel (+ start-melee-puffer (:half-width (:body @body))))
           hit-puffer (in-pixel (+ melee-puffer (:half-width (:body @body))))]
       (when target-body
-        (set-color g (if (body-in-melee-range? body target-body false) color/red color/green))
-        (draw-shape g (geom/circle p start-attack-puffer))
-        (draw-shape g (geom/circle p hit-puffer))))))
+        (set-color g (if (body-in-melee-range? body target-body false) red green))
+        (draw-shape g (circle p start-attack-puffer))
+        (draw-shape g (circle p hit-puffer))))))
 
 (defn- render-body-debug-info [g [x y] body]
   (when (and @debug-mode debug/show-body-debug-info)
@@ -64,7 +64,7 @@
 
 (defn render-bar
   ([g x y w h ratio color]
-    (fill-rect g x y w h color/black)
+    (fill-rect g x y w h black)
     (fill-rect g (inc x) (inc y) (* ratio (- w 2)) (- h 2) color))
   ([g x y w h current-val max-val color]
     (render-bar g x y w h (get-ratio current-val max-val) color)))
@@ -93,13 +93,13 @@
     (render-body-info-bar g body render-position ratio color body-info-bars-h)))
 
 (defn- render-attacking-bar [g body skill render-position]
-  (render-body-info-bar g body render-position (counter-ratio (:attack-counter skill)) color/blue (* 2 body-info-bars-h)))
+  (render-body-info-bar g body render-position (counter-ratio (:attack-counter skill)) blue (* 2 body-info-bars-h)))
 
 (defn body-renderfn [g body component {x 0 y 1 :as render-position}]
   (let [tile-posi (:value (:position @body))]
     (when @debug-mode
       (when debug/show-body-bounds
-        (render-body-bounds g body render-position color/white))
+        (render-body-bounds g body render-position white))
       (render-body-debug-info g render-position body))
     (when (not (is-player? body))
       (when (destructible? body)

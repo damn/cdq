@@ -1,15 +1,15 @@
 (ns game.player.skill.selection-list
   (:require
+    [cdq.core :refer [rgbcolor]]
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.player.skill.learnable :refer [render-skillbutton-tooltip]]
-        [engine.render.color :refer [rgbcolor]]
         [engine.render.graphics :refer [fill-rect render-readable-text]]
     [cdq.core :refer [is-key-pressed? screen-height]]
     [game.gui :refer [get-absolute-posi get-bounds is-visible? make-imgbutton mouseover? remove-guicomponent set-visible]]
     [game.ingame-gui :refer [ingamestate-display]]
     [cdq.core :refer [atom-session]]
-    [game.components.core :refer [active]]
+    [cdq.core :refer [active]]
     [game.components.skills.core :refer [is-cooling-down?]]
     [game.player.skill.skillmanager :refer [create-skill-icon get-selected-skill get-skills-for-mousebutton mousebuttons set-selected-skill]]))
 

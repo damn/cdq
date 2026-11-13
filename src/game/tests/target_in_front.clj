@@ -1,6 +1,6 @@
 (ns game.tests.target-in-front
   (:require
-    [engine.render.color :as color :refer [set-color]]
+    [cdq.core :refer [green red set-color]]
     [engine.render.graphics :refer [draw-shape]]
     [cdq.core :refer [tile-width]]
     [cdq.core :refer [safe-merge]]
@@ -15,7 +15,7 @@
     (in-front-of-body-shape posi hbodyw height (:angle (:rotation @body)))))
 
 (defn- render-it [g body c]
-  (set-color g (if (get-attackable-target-in-front body) color/red color/green))
+  (set-color g (if (get-attackable-target-in-front body) red green))
   (draw-shape g (make-render-shape body)))
 
 (defn target-in-front-rect-render-component []

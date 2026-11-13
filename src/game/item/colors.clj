@@ -1,6 +1,6 @@
 (ns game.item.colors
   (:require
-    [engine.render.color :refer [rgbcolor]]))
+    [cdq.core :refer [rgbcolor]]))
 
 ; diablo 2 gold:  144 136 88
 ; blue:           72 80 184

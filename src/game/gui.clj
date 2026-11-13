@@ -1,9 +1,9 @@
 (ns game.gui
   (:require
-    [engine.render.color :as color :refer [rgbcolor]]
-    [engine.render.image :refer [create-image draw-image get-dimensions]]
+    [cdq.core :refer [point-in-rect?]]
+    [cdq.core :refer [rgbcolor white]]
+    [cdq.core :refer [create-image draw-image get-dimensions]]
     [engine.render.graphics :refer [draw-rect fill-rect render-readable-text]]
-    [game.utils.geom :refer [point-in-rect?]]
     [cdq.core :refer [deflazygetter]]
     [cdq.core :refer [get-mouse-pos is-key-pressed? is-leftm-consumed? try-consume-leftm-pressed]]
     [cdq.core :refer [get-defaultfont get-text-height get-text-width]]))
@@ -32,7 +32,7 @@
   (let [[x y w h] bounds]
     (when (mouseover? component)
       (fill-rect g (dec x) (dec y) (+ w 1) (+ h 1) (if (is-leftm-consumed?) mouseover-lightgray mouseover-darkgray)))
-    (draw-rect g (dec x) (dec y) (+ w 1) (+ h 1) color/white)))
+    (draw-rect g (dec x) (dec y) (+ w 1) (+ h 1) white)))
 
 (defn- render-textbutton [g component]
   (render-label g component)

@@ -1,11 +1,11 @@
 (ns engine.render.graphics
   (:require
+    [cdq.core :refer [circle]]
+    [cdq.core :refer [set-color transparent-black white]]
     [clojure.string :refer [split-lines]]
     [cdq.core :refer [split-kvs-and-more]]
     [cdq.core :refer [when-seq]]
-    [game.utils.geom :as geom]
-    [cdq.core :as core :refer [allowed-characters get-defaultfont get-screen-height get-screen-width get-text-height get-text-width reset-font]]
-    [engine.render.color :refer [set-color transparent-black white]])
+    [cdq.core :as core :refer [allowed-characters get-defaultfont get-screen-height get-screen-width get-text-height get-text-width reset-font]])
   (:import (org.newdawn.slick Graphics Color)
            org.newdawn.slick.geom.Shape))
 
@@ -121,7 +121,7 @@
 
 (defn fill-centered-circle [^Graphics g radius position color]
   (set-color g color)
-  (let [^Shape shape (geom/circle [-1 -1] radius)]
+  (let [^Shape shape (circle [-1 -1] radius)]
     (center-shape shape position)
     (.fill g shape)))
 

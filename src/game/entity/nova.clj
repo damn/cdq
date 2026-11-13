@@ -1,24 +1,24 @@
 (ns game.entity.nova
   (:require
+    [cdq.core :refer [circle set-radius]]
+    [cdq.core :refer [rgbcolor]]
     [cdq.core :refer [make-counter counter-ratio]]
-    [game.utils.geom :as geom]
     [game.components.position :refer [position-component]]
     [game.components.destructible :refer [deal-dmg get-destructible-bodies]]
     [clojure.set :refer [union]]
-        [engine.render.color :refer [rgbcolor]]
         [engine.render.graphics :refer [render-centered-shape]]
     [cdq.core :refer [in-pixel]]
-    [game.components.core :refer [active add-to-removelist create-entity update-counter!]]
+    [cdq.core :refer [active add-to-removelist create-entity update-counter!]]
     [game.components.render :refer [render-on-map single-animation-component]]))
 
 (defn- circle-debug-comp []
   (let [color (rgbcolor :r 0.6 :a 0.6)]
     (merge {:type :circle-debug
-            :shape (geom/circle [-1 -1] 0)}
+            :shape (circle [-1 -1] 0)}
            (render-on-map [g _ {:keys [shape color]} render-posi]
              (render-centered-shape g shape render-posi color))
            (active [delta c entity]
-             (geom/set-radius (:shape c)
+             (set-radius (:shape c)
                               (in-pixel
                                (:radius (:nova-effect @entity))))))))
 

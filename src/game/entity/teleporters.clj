@@ -1,7 +1,7 @@
 (ns game.entity.teleporters
   (:require
-    [engine.render.color :as color]
-    [engine.render.image :refer [get-dimensions]]
+    [cdq.core :refer [blue]]
+    [cdq.core :refer [get-dimensions]]
     [engine.render.animation :refer [create-animation get-frame]]
     [engine.render.assets :refer [spritesheet-frames]]
     [cdq.core :refer [current-map do-in-map get-pretty-name]]
@@ -11,7 +11,7 @@
     game.utils.lightning
     [game.maps.minimap :refer [show-on-minimap]]
     [game.maps.mapchange :refer [queue-map-change]]
-    [game.components.core :refer [create-entity]]
+    [cdq.core :refer [create-entity]]
     [game.components.position :refer [position-component]]
     [game.components.body :refer [create-body]]
     [game.components.render :refer [single-animation-component]]
@@ -27,7 +27,7 @@
                  :mouseover-outline true)
     ;(light-component :intensity 0.8 :radius 2)
     {:type :always-in-sight}
-    (show-on-minimap color/blue)
+    (show-on-minimap blue)
     (pressable-component
       (str "Teleport to " (get-pretty-name target-map))
       (fn [this-body]

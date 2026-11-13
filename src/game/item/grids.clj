@@ -1,6 +1,6 @@
 (ns game.item.grids
   (:require
-    [engine.render.image :refer [create-image]]
+    [cdq.core :refer [create-image]]
     [cdq.core :refer [screen-height screen-width]]
     [game.gui :refer [is-visible? make-frame]]
     [game.ingame-gui :refer [frame-screenborder-distance ingamestate-display inventory-hotkey]]

@@ -1,18 +1,18 @@
 (ns game.components.sleeping
   (:require
-    [game.utils.geom :as geom]
+    [cdq.core :refer [circle rect-collision? rectangle]]
     [engine.render.graphics :refer [render-centered-shape render-readable-text]]
     [cdq.core :refer [create-counter update-counter]]
     [cdq.core :refer [atom-session]]
     [cdq.core :refer [in-pixel screen-height screen-width]]
-    [game.components.core :refer [active block-active-components unblock-active-components]]
+    [cdq.core :refer [active block-active-components unblock-active-components]]
     cdq.core
     [game.components.render :refer [rendering]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.body :refer [get-body-bounds get-other-bodies-in-adjacent-cells]]
     [game.maps.camera :refer [get-camera-position]]
     [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
-    game.maps.cell-grid))
+    cdq.core))
 
 (def ^:private half-aggro-width-tiles 11)
 (def ^:private half-aggro-height-tiles 8.5)
@@ -25,7 +25,7 @@
 (def start-position-safezone-radius (+ 2.2 half-aggro-width-tiles))
 
 (defn- in-wakeup-range? [body]
-  (geom/rect-collision? (get-body-bounds body)
+  (rect-collision? (get-body-bounds body)
                         [(get-camera-position)
                          half-aggro-width-tiles
                          half-aggro-height-tiles]))
@@ -67,13 +67,13 @@
     (when show-range
       (render-centered-shape
         g
-       (geom/rectangle 0 0
+       (rectangle 0 0
                   (in-pixel (* 2 half-aggro-width-tiles))
                   (in-pixel (* 2 half-aggro-height-tiles)))
         [(/ screen-width 2)
          (/ screen-height 2)])
 ;      (render-centered-shape g
-;                             (geom/circle [0 0]
+;                             (circle [0 0]
       ;                             (in-pixel start-position-safezone-radius))
 ;                             [(/ screen-width 2)
 ;                              (/ screen-height 2)])

@@ -2,7 +2,7 @@
   (:require
     [clojure.test :refer [deftest is]]
     [game.test.utils :refer [with-private-fns]]
-    [game.components.core :refer [create-entity get-component]]
+    [cdq.core :refer [create-entity get-component]]
     [game.components.position :refer [position-component]]
     [game.components.render :refer [animation-component current-animation]]
     [engine.render.animation :refer [create-animation]]))

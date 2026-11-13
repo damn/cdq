@@ -1,10 +1,10 @@
 (ns game.components.misc
   (:require
+    [cdq.core :refer [direction-vector get-angle-from-vector get-vector-to-mouse-coords]]
     [cdq.core :refer [make-counter]]
     [cdq.core :refer [safe-merge]]
     [cdq.core :refer [increase-min-max-val]]
-    [game.utils.geom :refer [direction-vector get-angle-from-vector get-vector-to-mouse-coords]]
-    [game.components.core :refer [active add-to-removelist player-body update-counter!]]))
+    [cdq.core :refer [active add-to-removelist player-body update-counter!]]))
 
 (defn delete-after-duration-component [duration & {:keys [duration-over]}]
   (safe-merge

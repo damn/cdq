@@ -1,10 +1,11 @@
 (ns game.test.session
-  (:require [clojure.test :refer [is use-fixtures]]
+  (:require
+    [cdq.core :refer [red]] [clojure.test :refer [is use-fixtures]]
             [game.test.helper :refer [deftest-ingame start-game-once-fixture]]
             [game.components.render :refer [create-circle-render-effect]]
             
             [game.maps.contentfields :refer [get-all-entities-of-current-map]]
-            [game.components.core :refer [get-component get-position]]
+            [cdq.core :refer [get-component get-position]]
             [game.components.position :refer [swap-position!]]
             game.player.session-data))
 
@@ -23,7 +24,7 @@
   (let [old-posi [30 15]
         new-posi [35 13]
 
-        entity (create-circle-render-effect old-posi 1 color/red 3500)
+        entity (create-circle-render-effect old-posi 1 red 3500)
         get-entity #(-> entity get-constructor get-all-entities-with-constructor first)
 
         get-posi #(get-position (get-entity))

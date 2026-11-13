@@ -3,7 +3,7 @@
     [cdq.core :as grid]
         cdq.core
     [cdq.core :refer [get-current-map-data]]
-    [game.components.core :refer [player-body]]))
+    [cdq.core :refer [player-body]]))
 
 ; Contentfield Entities
 ; -> :position sollten sie haben

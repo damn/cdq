@@ -1,15 +1,16 @@
 (ns game.components.body-effects-impl
   (:require
+    [cdq.core :refer [degree-add degree-minus degrees? scale-vector vec-posi vector-from-angle]]
+    [cdq.core :refer [rgbcolor]]
     [cdq.core :refer [mapvals safe-merge]]
     [cdq.core :refer [approx-numbers]]
     [cdq.core :refer [reset-counter tick]]
-    [engine.render.color :refer [rgbcolor]]
-    [engine.render.image :refer [create-image get-scaled-copy]]
+    [cdq.core :refer [create-image get-scaled-copy]]
     [engine.render.animation :refer [create-animation render-centered-animation]]
     [engine.render.assets :refer [folder-animation folder-frames]]
     [engine.render.graphics :refer [render-readable-text]]
     cdq.core
-    [game.components.core :refer [active add-to-removelist is-player? player-body reset-component-state-after-blocked]]
+    [cdq.core :refer [active add-to-removelist is-player? player-body reset-component-state-after-blocked]]
     game.components.misc
     game.components.body
     [game.components.body-effects :refer [defeffectentity get-certain-effect-entities get-sub-entities]]
@@ -18,7 +19,6 @@
     game.components.movement
     [cdq.core :refer [add-blocks mark-slowed remove-blocks unmark-slowed]]
     [cdq.core :refer [if-chance]]
-    [game.utils.geom :refer [degree-add degree-minus degrees? scale vec-posi vector-from-angle]]
     game.item.instance
     [game.player.speed :refer [incr-attack-speed incr-casting-speed incr-move-speed]]))
 
@@ -184,7 +184,7 @@
          (render-on-map :on-ground [g _ c [x y]]
            (let [v (vector-from-angle (:degree c))
                  [vx vy] (vec-posi
-                           (scale v charge-body-distance))
+                           (scale-vector v charge-body-distance))
                  render-position [(+ x vx)
                                   (+ y vy)]]
              (render-centered-animation (:animation c) render-position)))))

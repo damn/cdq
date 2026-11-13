@@ -1,18 +1,17 @@
 (ns game.player.skill.skillmanager
   (:require
-    [engine.render.image :refer [create-image get-scaled-copy]]
+    [cdq.core :refer [create-image get-scaled-copy]]
         [cdq.core :refer [is-leftbutton-down? is-rightbutton-down? is-rightm-consumed?]]
     cdq.core
     [game.mouseoverbody :refer [get-mouseover-body saved-mouseover-body]]
     [game.components.skills.core :refer [enough-mana? skillmanager-component skillmanager-skill]]
     [game.components.skills.melee :refer [player-melee-props]]
-    [game.components.core :refer [active add-to-removelist player-body]]
+    [cdq.core :refer [active add-to-removelist player-body]]
     [cdq.core :refer [add-block blocks-component remove-block]]
     game.components.body
     [game.components.destructible :refer [attackable-by-player?]]
     [game.components.misc :refer [rotate-to-body rotate-to-mouse]]
-    [game.components.body-effects :refer [defeffectentity get-certain-effect-entities]]
-    game.utils.geom))
+    [game.components.body-effects :refer [defeffectentity get-certain-effect-entities]]))
 
 (defn get-player-skills []
   (:skills (:skillmanager @player-body)))

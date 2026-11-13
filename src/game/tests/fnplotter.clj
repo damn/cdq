@@ -1,6 +1,6 @@
 (ns game.tests.fnplotter
   (:require
-    [engine.render.color :as color]
+    [cdq.core :refer [black red white]]
     [engine.render.graphics :refer [draw-rect fill-rect]]
     [cdq.core :refer [start-slick-basicgame]]
     [cdq.core :refer [high-weighted]]))
@@ -25,8 +25,8 @@
           (doseq [f cdq.core/init-fns]
             (f)))
   :render (fn [container g]
-            (fill-rect g 0 0 800 600 color/black)
+            (fill-rect g 0 0 800 600 black)
             (doseq [[x y] points]
-              (draw-rect g (+ leftx (* x width)) (- bottomy (* y height)) 0 0 color/red))
-            (draw-rect g leftx topy width height color/white)))
+              (draw-rect g (+ leftx (* x width)) (- bottomy (* y height)) 0 0 red))
+            (draw-rect g leftx topy width height white)))
 

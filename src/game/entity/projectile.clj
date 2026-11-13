@@ -5,7 +5,7 @@
     [cdq.core :refer [play-sound]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-frames]]
-    [game.components.core :refer [create-entity]]
+    [cdq.core :refer [create-entity]]
     [game.components.position :refer [position-component]]
     [game.components.render :refer [animation-entity single-animation-component]]
     [game.components.misc :refer [delete-after-duration-component]]))

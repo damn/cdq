@@ -1,16 +1,16 @@
 (ns game.components.render
   (:require
+    [cdq.core :refer [circle rectangle]]
+    [cdq.core :refer [green rgbcolor set-color]]
     [cdq.core :refer [make-counter counter-ratio tick]]
-    [engine.render.color :as color :refer [rgbcolor set-color]]
-    [engine.render.image :refer [get-dimensions render-centered-image render-rotated-centered-image]]
+    [cdq.core :refer [get-dimensions render-centered-image render-rotated-centered-image]]
     [engine.render.animation :refer [get-frame is-stopped? restart]]
     [engine.render.graphics :refer [draw-line fill-centered-circle render-centered-shape render-readable-text]]
-    [game.utils.geom :as geom]
     [cdq.core :refer [define-order int-posi make-fn order-contains?]]
     [cdq.core :refer [safe-merge]]
     [cdq.core :refer [readable-number]]
     [cdq.core :refer [in-pixel tile-height tile-width]]
-    [game.components.core :refer [active add-to-removelist create-entity create-entity-no-init update-counter!]]
+    [cdq.core :refer [active add-to-removelist create-entity create-entity-no-init update-counter!]]
     [game.components.misc :refer [delete-after-duration-component]]
     [game.components.position :refer [position-component]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
@@ -62,7 +62,7 @@
 (defn rect-render-component [pxw pxh]
   (safe-merge
     {:type :rect-render
-     :shape (geom/rectangle -1 -1 pxw pxh)}
+     :shape (rectangle -1 -1 pxw pxh)}
     (render-on-map [g _ c render-posi]
       (render-centered-shape g (:shape c) render-posi))))
 
@@ -141,7 +141,7 @@
 ;;;
 
 (defn- circle-render-effect-components [position radius color duration]
-  (let [shape (geom/circle [-1 -1] (in-pixel radius))] ; TODO shape rendering component?
+  (let [shape (circle [-1 -1] (in-pixel radius))] ; TODO shape rendering component?
     [{:type :session
       :constructor "game.components.render/create-circle-render-effect*"
       :args [position radius color duration]}
@@ -171,7 +171,7 @@
     {:type :always-in-sight}
     (merge {:type :visual}
            (render-on-map :air [g _ component start]
-                          (set-color g color/green)
+                          (set-color g green)
                           (doseq [end (map #(translate-position (:value (:position @%))) healed-bodies)]
                             (drawfatline g start end))))))
 

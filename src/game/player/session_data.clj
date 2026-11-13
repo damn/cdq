@@ -3,7 +3,6 @@
     [clojure.walk :refer [postwalk]]
     game.mouseoverbody
     [cdq.core :as session :refer [load-session new-session-data save-session]]
-    game.components.core
     game.components.sleeping
     game.components.burrow
     cdq.core
@@ -14,7 +13,7 @@
     [game.item.boni :refer [create-equip-boni-save load-equip-boni-save]]
     [cdq.core :refer [cells]]
     [cdq.core :as data]
-    game.maps.cell-grid
+    cdq.core
     cdq.core
     game.maps.add
     game.player.core
@@ -155,15 +154,15 @@
         [#'game.maps.add/session]
 
         ; resets all entity data -> do it before addding entities
-        [#'game.components.core/clear-entities-session]
+        [#'cdq.core/clear-entities-session]
 
         ; reset cell-change-listeners before adding entities, because entities are listeners
-        [#'game.maps.cell-grid/listeners-session]
+        [#'cdq.core/cell-listeners-session]
 
         ; adding entities
         [#'maps-load-session "maps.load/session"]
         ; comment this out for normal gameplay as of alpha3 (no quicksave)
-        ;#'game.components.core/entities-session
+        ;#'cdq.core/entities-session
 
         ; now the order of initialisation does not matter anymore
         [#'game.player.skill.selection-list/hotkeys-session]

@@ -1,8 +1,8 @@
 (ns game.utils.lightning
   (:require
-    [engine.render.color :as color]
+    [cdq.core :refer [get-distance tiles-inside-rect]]
+    [cdq.core :refer [rgbcolor white]]
     cdq.core
-    [game.utils.geom :refer [get-distance tiles-inside-rect]]
     [game.utils.raycast :refer [ray-blocked?]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.maps.minimap :refer [update-minimap]]
@@ -10,16 +10,16 @@
     [cdq.core :refer [genmap]]
     [cdq.core :refer [atom-session]]
     [cdq.core :refer [debug-mode in-pixel]]
-    [game.components.core :refer [active create-entity player-body]]
+    [cdq.core :refer [active create-entity player-body]]
     [game.components.position :refer [position-component]]
     [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
-    [game.maps.cell-grid :refer [add-cell-blocks-changed-listener inside-map?]])
+    [cdq.core :refer [add-cell-blocks-changed-listener inside-map?]])
   (:import org.newdawn.slick.tiled.LightManager
            (org.newdawn.slick Color Image)))
 
 (def ^:private entity-ambient 0.4)
 (def ^:private tile-ambient 0.4)
-(def ^:private explored-tile-color (color/rgbcolor :r tile-ambient :g tile-ambient :b tile-ambient))
+(def ^:private explored-tile-color (rgbcolor :r tile-ambient :g tile-ambient :b tile-ambient))
 
 ; Currently only light sources of player allowed because
 ; - lightmap is simultaneously exploring (would need a check is this player light source or something else)
@@ -226,7 +226,7 @@
                            (set-cached-brightness image [x y]))))
 
 (defn light-component [& {:keys [intensity radius falloff color]
-                          :or {color color/white}}]
+                          :or {color white}}]
   {:type :light
    :color color
    :i intensity

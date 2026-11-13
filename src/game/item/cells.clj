@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [thread-through]]
     [cdq.core :refer [cells]]
-    [game.components.core :refer [player-body]]
+    [cdq.core :refer [player-body]]
     [game.components.skills.core :refer [get-active-skill is-attacking?]]
     [game.item.grids :refer [item-grids]]))
 

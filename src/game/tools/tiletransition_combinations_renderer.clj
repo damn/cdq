@@ -1,6 +1,6 @@
 (ns game.tools.tiletransition-combinations-renderer
   (:require
-    [engine.render.color :as color]
+    [cdq.core :refer [black gray white]]
     [engine.render.graphics :refer [fill-rect render-readable-text]]
     [cdq.core :refer [get-8-neighbour-positions]]
     [cdq.core :refer [boolperm]]
@@ -51,14 +51,14 @@
 (def scale 13)
 
 (defn render-combination [g sx sy c]
-  (fill-rect g (+ sx scale) (+ sy scale) scale scale color/black)
+  (fill-rect g (+ sx scale) (+ sy scale) scale scale black)
   (doseq [[[posx posy] v] (map #(vector (mapv inc (% 0)) (% 1)) c)]
     (fill-rect g
                (+ sx (* posx scale))
                (+ sy (* posy scale))
                scale
                scale
-               (if v color/black color/white))))
+               (if v black white))))
 
 (def screenw 800)
 
@@ -73,7 +73,7 @@
         (fn [idx combination]
           (let [xrender (+ sx (* @x step))
                 yrender (+ sy (* @y step))]
-            (render-readable-text g xrender (- yrender 15) :background false color/black idx)
+            (render-readable-text g xrender (- yrender 15) :background false black idx)
             (render-combination g xrender yrender combination))
           (if (> (+ sx (* (+ @x 2) step)) screenw)
             (do (reset! x 0) (swap! y inc))
@@ -87,7 +87,7 @@
           (doseq [f cdq.core/init-fns]
             (f)))
   :render (fn [container g]
-            (fill-rect g 0 0 800 600 color/gray)
+            (fill-rect g 0 0 800 600 gray)
             (render g)))
 
 

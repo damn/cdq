@@ -1,9 +1,9 @@
 (ns game.tools.image-center-pxdist
   (:require
-    [game.utils.geom :as geom]
+    [cdq.core :refer [rectangle]]
     [cdq.core :refer [start-slick-basicgame]]
     [cdq.core :refer [get-mouse-pos is-leftm-pressed? update-mousebutton-state]]
-    [engine.render.image :refer [create-image]]
+    [cdq.core :refer [create-image]]
     [engine.render.graphics :refer [render-centered-shape render-readable-text]]))
 
 (def posis (atom []))
@@ -27,7 +27,7 @@
               (println (swap! posis conj (get-center-dist)))))
 
   :render (fn [container g]
-            (let [shape (geom/rectangle 0 0
+            (let [shape (rectangle 0 0
                                         (.getWidth image)
                                         (.getHeight image))]
               (.drawCentered image x y) ; TODO

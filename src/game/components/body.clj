@@ -1,14 +1,14 @@
 (ns game.components.body
-  (:require [cdq.core :as debug]
-            [game.utils.geom :as geom]
+  (:require
+    [cdq.core :refer [circle collides? does-not-fit-in-a-tile? get-touched-tiles in-range? point-in-rect? rect-collision? rectangle]] [cdq.core :as debug]
             [game.maps.camera :refer [get-camera-position]]
             [cdq.core :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
             [cdq.core :refer [safe-merge]]
-            [game.components.core :refer [id-entity-map player-body]]
+            [cdq.core :refer [id-entity-map player-body]]
             [game.components.render :refer [render-on-map]]
             [game.components.position :refer [swap-position!]]
             game.components.misc
-            [game.maps.cell-grid :refer [add-body cached-get-adjacent-cells cell-blocked? get-bodies-from-cells get-body-ids get-cell get-cells remove-body]]
+            [cdq.core :refer [cell-add-body cached-get-adjacent-cells cell-blocked? get-bodies-from-cells get-body-ids get-cell get-cells cell-remove-body]]
             game.maps.contentfields
             [game.utils.raycast :refer [ray-blocked?]]))
 
@@ -20,7 +20,7 @@
     (apply calc-touched-cells (get-body-bounds body)))
   ([position half-w half-h]
     (get-cells
-      (geom/get-touched-tiles position half-w half-h))))
+      (get-touched-tiles position half-w half-h))))
 
 (defn inside-cell? [body cell]
   (let [touched-cells (calc-touched-cells body)]
@@ -52,13 +52,13 @@
   ([body new-cells]
     {:pre [(not-any? nil? new-cells)]}
     (swap! body assoc-in [:body :cached-touched-cells] new-cells)
-    (dorun (map #(add-body % body) new-cells))))
+    (dorun (map #(cell-add-body % body) new-cells))))
 
 (defn- remove-from-touched-cells
   ([body]
     (remove-from-touched-cells body (:cached-touched-cells (:body @body))))
   ([body cached-cells]
-    (dorun (map #(remove-body % body) cached-cells))))
+    (dorun (map #(cell-remove-body % body) cached-cells))))
 
 (defn update-touched-cells
   ([body]
@@ -95,7 +95,7 @@
        :mouseover-outline mouseover-outline
        :half-width half-w
        :half-height half-h
-       :is-multiple-cell (geom/does-not-fit-in-a-tile? half-w half-h)
+       :is-multiple-cell (does-not-fit-in-a-tile? half-w half-h)
        :depends [:position]
        :init (if-not solid
                set-touched-cells
@@ -132,19 +132,19 @@
      (* 2 half-h)]))
 
 ; cache in body and update @ :posi-changed?
-(def rect-shape (comp geom/rectangle body-rect))
+(def rect-shape (comp rectangle body-rect))
 
 (defn circle-collides? [p radius body]
-  (geom/collides? (geom/circle p radius)
+  (collides? (circle p radius)
                   (rect-shape body)))
 
 (defn get-bodies-at-position [position]
   (when-let [cell (get-cell position)]
-    (filter #(geom/point-in-rect? position (body-rect %))
+    (filter #(point-in-rect? position (body-rect %))
             (map #(get @id-entity-map %) (get-body-ids cell)))))
 
 (defn bodies-in-range? [b1 b2 range-sqr]
-  (geom/in-range? (:value (:position @b1)) (:value (:position @b2)) range-sqr))
+  (in-range? (:value (:position @b1)) (:value (:position @b2)) range-sqr))
 
 ; circle-collides creates a new Circle shape for every check -> could be optimized
 (defn get-touched-bodies
@@ -159,7 +159,7 @@
       #(and
          (not= (:id (meta %)) body-id)
          (:solid (:body @%))
-         (geom/rect-collision? [position half-w half-h] (get-body-bounds %)))
+         (rect-collision? [position half-w half-h] (get-body-bounds %)))
       (get-bodies-from-cells touched-cells)))
   ([position half-w half-h touched-cells]
     (get-other-solid-bodies position half-w half-h -1 touched-cells))

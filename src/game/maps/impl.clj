@@ -1,17 +1,16 @@
 (ns game.maps.impl
   (:require
+    [cdq.core :refer [green magenta]]
     game.maps.add
     cdq.core
     [cdq.core :as grid :refer [get-4-neighbour-positions mapgrid->vectorgrid posis transform height width]]
     [cdq.core :refer [log translate-to-tile-middle]]
     [cdq.core :refer [play-sound]]
     [engine.render.assets :refer [get-sprite spritesheet]]
-    [engine.render.color :as color]
     cdq.core
     game.media
     [game.media :refer [get-itemsprite]]
-    game.components.core
-    [game.components.core :refer [add-to-removelist create-entity]]
+    [cdq.core :refer [add-to-removelist create-entity]]
     game.components.position
     [game.components.position :refer [position-component]]
     [game.components.body :refer [create-body]]
@@ -21,8 +20,8 @@
     game.player.core
     game.player.skill.selection-list
     [game.monster.spawn :refer [bloodcaves-groups spawn-monsters tech-groups techgy-groups try-spawn]]
-    game.maps.cell-grid
-    [game.maps.cell-grid :refer [cell-blocks-changed-update-listeners change-cell-blocks get-cell]]
+    cdq.core
+    [cdq.core :refer [cell-blocks-changed-update-listeners change-cell-blocks get-cell]]
     [game.maps.tiledmaps :refer [construct-tiledmap create-grid-from-tiled-map get-layer-index get-player-entity-start-position get-tile-property-value get-tileproperties]]
     [game.maps.minimap :refer [show-on-minimap]]
     game.item.instance
@@ -33,12 +32,12 @@
     game.utils.lightning
     [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi get-spriteidx]]
     [cdq.core :refer [border-position? fill-single-cells scalegrid undefined-value-behind-walls wall-at?]]
-    [mapgen.cave :refer [cave-gridgen]]
-    mapgen.spawn-spaces
-    [mapgen.populate :refer [get-populated-grid-posis]]
-    [mapgen.nad :refer [fix-not-allowed-diagonals]]
-    [mapgen.cellular :refer [cellular-automata-gridgen connect-regions]]
-    [mapgen.prebuilt-placement :refer [is-5x5-walls-entrance?]])
+    [cdq.core :refer [cave-gridgen]]
+    [cdq.core :refer [get-populated-grid-posis]]
+    [cdq.core :refer [fix-not-allowed-diagonals]]
+    [cdq.core :refer [cellular-automata-gridgen connect-regions]]
+    [cdq.core :refer [is-5x5-walls-entrance?]])
+
   (:import java.util.Random))
 
 ;;; entity.chest (inlined)
@@ -57,7 +56,7 @@
                            (if item-name
                              (create-item-body position item-name)
                              (create-rand-item position :max-lvl (:rand-item-max-lvl (get-current-map-data))))))
-    (show-on-minimap color/magenta)
+    (show-on-minimap magenta)
     {:type :always-in-sight}
     (image-render-component (get-itemsprite [1 4]))))
 
@@ -82,7 +81,7 @@
                  :dimensions [16 16]
                  :mouseover-outline true)
     {:type :always-in-sight}
-    (show-on-minimap color/green)
+    (show-on-minimap green)
     (image-render-component closed-image :order :air)
     {:type :clicked :is? false}
     (pressable-component ""

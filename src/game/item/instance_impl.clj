@@ -3,18 +3,18 @@
     [cdq.core :refer [current-map]]
     [game.components.movement :refer [projectile-movement-component]]
     [game.components.body-effects-impl :refer [battle-drugs dmg-effect]]
-    [game.components.core :refer [player-body]]
+    [cdq.core :refer [player-body]]
     [game.components.skills.melee :refer [melee-weapon]]
     [cdq.core :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals variance-val-str]]
     [cdq.core :refer [create-sound]]
-    [engine.render.image :refer [create-image]]
+    [cdq.core :refer [create-image]]
     [engine.render.animation :refer [create-animation get-duration]]
     [engine.render.assets :refer [folder-frames]]
     [game.media :refer [get-itemsprite]]
     game.mouseoverbody
     [game.entity.nova :refer [nova-effect]]
     [game.entity.projectile :refer [fire-projectile]]
-    game.utils.geom
+
     [cdq.core :refer [get-rand-weighted-item rand-int-between]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
     [game.components.render :refer [show-gains-hp-effect show-gains-mana-effect]]

@@ -1,13 +1,13 @@
 (ns game.components.shield
   (:require
+    [cdq.core :refer [degree-add]]
+    [cdq.core :refer [rgbcolor]]
     [cdq.core :refer [make-counter tick-finally-merge]]
-        [engine.render.color :refer [rgbcolor]]
-        [engine.render.image :refer [create-image render-rotated-centered-image]]
+        [cdq.core :refer [create-image render-rotated-centered-image]]
     [cdq.core :refer [safe-merge]]
-    [game.components.core :refer [active]]
+    [cdq.core :refer [active]]
     [game.components.render :refer [circle-around-body-render-comp render-on-map]]
-    [game.components.body-effects :refer [defeffectentity]]
-    [game.utils.geom :refer [degree-add]]))
+    [game.components.body-effects :refer [defeffectentity]]))
 
 (def ^:private rotation-speed (/ 360 2000)) ; 360 degrees in 2 seconds = 2000 ms
 

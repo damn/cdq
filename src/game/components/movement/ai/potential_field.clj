@@ -3,7 +3,8 @@
   adjacent cells are walls and blocked.
   (important for wavefront-expansion and field-following)"
   (:require
-    [engine.render.color :as color :refer [rgbcolor set-color]]
+    [cdq.core :refer [direction-vector get-distance]]
+    [cdq.core :refer [rgbcolor set-color white]]
     [engine.render.graphics :refer [draw-string fill-rect]]
     [game.components.position :refer [get-tile]]
     [game.components.movement :refer [movement-component]]
@@ -11,10 +12,9 @@
     [cdq.core :refer [diagonal-direction?]]
     [cdq.core :refer [genmap positions when-seq]]
     [cdq.core :refer [tile-height tile-width]]
-    [game.components.core :refer [player-body]]
+    [cdq.core :refer [player-body]]
     [game.components.body :refer [inside-cell?]]
-    [game.maps.cell-grid :refer [add-cell-blocks-changed-listener cached-get-adjacent-cells cell-blocked? get-cell get-cell-grid is-diagonal? occupied-by-other?]]
-    [game.utils.geom :refer [direction-vector get-distance]]))
+    [cdq.core :refer [add-cell-blocks-changed-listener cached-get-adjacent-cells cell-blocked? get-cell get-cell-grid is-diagonal? occupied-by-other?]]))
 
 ;; Standart Potential Field algorithm (brute force)
 
@@ -219,7 +219,7 @@
     (comment (let [ratio (/ dist max-iterations)]
       (fill-rect g leftx topy tile-width tile-height
         (rgbcolor :r (- 1 ratio) :a 0.5))))
-    (set-color g color/white)
+    (set-color g white)
     (draw-string g xrect yrect (int dist))))
 
 (let [a 0.5]

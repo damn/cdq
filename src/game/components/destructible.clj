@@ -1,14 +1,14 @@
 (ns game.components.destructible
   (:require
+    [cdq.core :refer [rgbcolor]]
     [game.components.shield :refer [shield-try-consume-damage]]
     [cdq.core :refer [increase-min-max-val lower-than-max? min-max-val rest-to-max set-to-max variance-val variance-val-str]]
     [cdq.core :refer [play-sound]]
-    [engine.render.color :refer [rgbcolor]]
-    [engine.render.image :refer [create-image]]
+    [cdq.core :refer [create-image]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [spritesheet-frames]]
     [game.screenshake :refer [shake-screen]]
-    [game.components.core :refer [add-to-removelist is-player? player-body]]
+    [cdq.core :refer [add-to-removelist is-player? player-body]]
     game.components.position
     game.components.misc
     [game.components.body :refer [get-touched-bodies is-affectable?]]

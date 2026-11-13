@@ -7,14 +7,19 @@
            (org.lwjgl.opengl Display)
            (org.newdawn.slick AppGameContainer
                               BasicGame
+                              Color
                               Font
                               GameContainer
                               Graphics
+                              Image
                               Input
                               ScalableGame
                               Sound
                               SpriteSheet
-                              SpriteSheetFont))
+                              SpriteSheetFont)
+           (org.newdawn.slick.geom Circle Rectangle Shape Transform Vector2f)
+           (org.newdawn.slick.state StateBasedGame)
+           (org.newdawn.slick.util.pathfinding AStarPathFinder Mover Path TileBasedMap))
   (:require [clojure.string :as str]))
 
 (defn indexed ; from clojure.contrib.seq-utils (discontinued in 1.3)
@@ -318,8 +323,6 @@
     (switch-blocking (ctype entity) new-state)))
 
 (comment
-
-  (require '[game.components.core :refer [player-body]])
   (map
     (fn [c] [(:type c) (:blocks c)])
     (filter :updatefn (vals @player-body)))
@@ -1130,3 +1133,1073 @@
 
 (defn try-consume-rightm-pressed []
   (try-consume-mouse-pressed :right))
+
+;; settings
+
+(defn- running-as-jar? []
+  (= "jar" (.getProtocol (clojure.java.io/resource "splash.gif"))))
+
+(def jar-file? (running-as-jar?))
+
+;; state-based game
+
+(defn init-state-based-game [title states]
+  (def state-based-game
+    (proxy [StateBasedGame] [title]
+      (initStatesList [_]
+        (dorun (map #(.addState this %) states))))))
+
+(defn enter-state [state]
+  (.enterState state-based-game
+    (if (number? state)
+      (do (assert (integer? state)) state)
+      (.getID state))))
+
+;; colors
+
+(def transparent Color/transparent)
+(def white Color/white)
+(def yellow Color/yellow)
+(def red Color/red)
+(def blue Color/blue)
+(def green Color/green)
+(def black Color/black)
+(def gray Color/gray)
+(def cyan Color/cyan)
+(def darkGray Color/darkGray)
+(def lightGray Color/lightGray)
+(def pink Color/pink)
+(def orange Color/orange)
+(def magenta Color/magenta)
+
+(defn rgbcolor [& {:keys [r g b a darker brighter]
+                   :or {r 0 g 0 b 0 a 1 darker 0 brighter 0}}]
+  (-> (Color. (float r) (float g) (float b) (float a))
+      (.darker darker)
+      (.brighter brighter)))
+
+(defn set-color [^Graphics g color]
+  (.setColor g color))
+
+(def transparent-black (rgbcolor :a 0.8))
+
+;; images
+
+(defn get-dimensions [^Image image]
+  [(.getWidth image)
+   (.getHeight image)])
+
+(defn draw-image
+  ([image x y]
+    (.draw ^Image image x y))
+  ([image ^Float x ^Float y ^Float w ^Float h]
+    (.draw ^Image image x y w h)))
+
+(defn render-centered-image [image [x y]]
+  (.drawCentered ^Image image x y))
+
+(defn render-rotated-centered-image [^Graphics g image angle {x 0 y 1 :as position}]
+  (.rotate g x y angle)
+  (render-centered-image image position)
+  (.rotate g x y  (- angle)))
+
+(defn get-sub-image [^Image i x y w h]
+  (.getSubImage i x y w h))
+
+(defn get-scaled-copy
+  ([^Image i value] (.getScaledCopy i value))
+  ([^Image i w h]   (.getScaledCopy i w h)))
+
+(defn create-image
+  "org.newdawn.slick.Image data is cached(?) so if the same image path is loaded x2
+  the second time it loads from the cached data much faster."
+  [file & {:keys [transparent scale]}]
+  ; Image constructor: String ref, boolean flipped, int f, Color transparent
+  ; set this filter so there is no antialiasing effect when images are not at a perfect pixel position or rotated
+  ; set in constructor not later in .setFilter so the image will not be loaded (deferred loading)
+  (let [image (if transparent
+                (Image. (str file) false Image/FILTER_NEAREST ^Color transparent)
+                (Image. (str file) false Image/FILTER_NEAREST))]
+
+    (cond
+      (vector? scale) (apply get-scaled-copy image scale)
+      (number? scale) (get-scaled-copy image scale)
+      :else image)))
+
+(defn create-empty-image [w h]
+  (Image. (int w) (int h)))
+
+;; cave generation
+
+;Cave Algorithmus.
+;http://properundead.com/2009/03/cave-generator.html
+;http://properundead.com/2009/07/procedural-generation-3-cave-source.html
+;http://forums.tigsource.com/index.php?topic=5174.0
+
+(defn- cave-create-order [random]
+  (sshuffle (range 4) random))
+
+(defn- cave-get-in-order [v order]
+  (map #(get v %) order))
+
+(def ^:private cave-current-order (atom nil))
+
+(def ^:private cave-turn-ratio 0.5)
+
+(defn- cave-create-rand-4-neighbour-posis [posi n random] ; TODO does more than 1 thing
+  (when (< (srand random) cave-turn-ratio)
+    (reset! cave-current-order (cave-create-order random)))
+  (take n
+        (cave-get-in-order (get-4-neighbour-positions posi) @cave-current-order)))
+
+(defn- cave-get-default-adj-num [open-paths random]
+  (if (= open-paths 1)
+    (case (int (srand-int 4 random))
+      0 1
+      1 1
+      2 1
+      3 2
+      1)
+    (case (int (srand-int 4 random))
+      0 0
+      1 1
+      2 1
+      3 2
+      1)))
+
+(defn- cave-get-thin-adj-num [open-paths random]
+  (if (= open-paths 1)
+    1
+    (case (int (srand-int 7 random))
+      0 0
+      1 2
+      1)))
+
+(defn- cave-get-wide-adj-num [open-paths random]
+  (if (= open-paths 1)
+    (case (int (srand-int 3 random))
+      0 1
+      2)
+    (case (int (srand-int 4 random))
+      0 1
+      1 2
+      2 3
+      3 4
+      1)))
+
+(def ^:private cave-get-adj-num
+  {:wide cave-get-wide-adj-num
+   :thin cave-get-thin-adj-num    ; höhle mit breite 1 überall nur -> cave-turn-ratio verringern besser
+   :default cave-get-default-adj-num}) ; etwas breiter als 1 aber immernoch zu dünn für m ein game -> cave-turn-ratio verringern besser
+
+; gute ergebnisse: :wide / 500-4000 max-cells / cave-turn-ratio 0.5
+; besser 150x150 anstatt 100x100 w h
+; TODO glaubich einziger unterschied noch: openpaths wird bei jeder cell neu berechnet?
+; TODO max-tries wenn er nie über min-cells kommt? -> im let dazu definieren vlt max 30 sekunden -> in tries umgerechnet??
+(defn cave-gridgen [random min-cells max-cells adjnum-type]
+  (reset! cave-current-order (cave-create-order random))
+  (let [start-posi [0 0]
+        start-grid (assoc {} start-posi :ground) ; grid of posis to :ground or no entry for walls
+        finished (fn [grid end-posi cell-cnt]
+                   ;(println "Reached cells: " cell-cnt) ; TODO cell-cnt stimmt net genau
+                   (if (< cell-cnt min-cells)
+                     (cave-gridgen random min-cells max-cells adjnum-type) ; recur?
+                     (let [[grid convert] (mapgrid->vectorgrid grid #(if (nil? %) :wall :ground))]
+                       {:grid  grid
+                        :start (convert start-posi)
+                        :end   (convert end-posi)})))]
+    (loop [posi-seq [start-posi]
+           grid start-grid
+           cell-cnt 0]
+      (if (>= cell-cnt max-cells)
+        (finished grid (last posi-seq) cell-cnt)
+        (let [try-carve-posis (cave-create-rand-4-neighbour-posis
+                                (last posi-seq)
+                                ((cave-get-adj-num adjnum-type) (count posi-seq) random)
+                                random)
+              carve-posis (filter #(nil? (get grid %)) try-carve-posis)
+              new-pos-seq (concat (drop-last posi-seq) carve-posis)]
+          (if (not-empty new-pos-seq)
+            (recur
+              new-pos-seq
+              (if (seq carve-posis)
+                (assoc-ks grid carve-posis :ground)
+                grid)
+              (+ cell-cnt (count carve-posis)))
+            (finished grid (last posi-seq) cell-cnt)))))))
+
+;; cellular automata mapgen
+
+(comment
+"The basic idea is to fill the first map randomly, then repeatedly create new maps using the 4-5 rule:
+a tile becomes a wall if it was a wall and 4 or more of its nine neighbors were walls,
+or if it was not a wall and 5 or more neighbors were.
+Put more succinctly, a tile is a wall if the 3x3 region centered on it contained at least 5 walls.
+ Each iteration makes each tile more like its neighbors,
+and the amount of overall 'noise' is gradually reduced: ")
+; http://roguebasin.roguelikedevelopment.org/index.php?title=Cellular_Automata_Method_for_Generating_Random_Cave-Like_Levels
+
+(defn- cellular-make-randmap [w h fillprob random]
+  (create-grid w h (fn [_] (if (percent-chance fillprob random) :wall :ground))))
+
+(defn- cellular-cached-get-adjacent-cells [grid cell]
+  (if-let [result (:adjacent-cells @cell)]
+    result
+    (let [result (map grid (get-8-neighbour-positions (:posi @cell)))]
+      (swap! cell assoc :adjacent-cells result)
+      result)))
+
+(defn- cellular-do-generation [grid wall-borders? generation]
+  (let [k-access (if (zero? generation) :type (dec generation))]
+    (doseq [[p cell] grid]
+      (when-not (and wall-borders? (border-position? p grid))
+        (swap! cell assoc generation
+               (if (>
+                     (count
+                       (filter (fn [cell]
+                                 (let [v @cell
+                                       value (or (get v k-access) (get v :type))] ; border positions dont update their generations.. so access :type
+                                   (or (= :wall value) (nil? value))))
+                               (conj (cellular-cached-get-adjacent-cells grid cell) cell)))
+                     5)
+                 :wall
+                 :ground))))))
+
+; cool maps: 60/3
+; a lot of islands: 70/3
+; bigger islands 65/4
+; even bigger islands 62/4
+(defn cellular-automata-gridgen
+  [w h & {:keys [fillprob generations wall-borders random]
+          :or {random (java.util.Random.)}}]
+  (let [randmap (cellular-make-randmap w h fillprob random)
+        grid (if wall-borders
+               (assoc-ks randmap (create-borders-positions randmap) :wall)
+               randmap)
+        grid (transform grid (fn [position value]
+                               (atom {:type value
+                                      :posi position})))]
+    (dotimes [n generations]
+      (cellular-do-generation grid wall-borders n))
+    (transform grid (fn [p value] (let [v @value]
+                                    (or
+                                      (get v (dec generations))
+                                      (get v :type))))))) ; border posis dont have generation key
+
+;; regions/connecting
+
+(defn flood-fill [grid start & {:keys [steps label]}]
+  (loop [next-positions (if (coll? (first start)) start (list start)) ; collection of posis or just a posi
+         labeled []
+         labeled-ordered []
+         grid grid]
+    (if (and (seq next-positions)
+             (not (and steps (= (count labeled-ordered) steps))))
+      (recur (filter #(= (get grid %) :ground)
+                     (distinct
+                       (mapcat get-4-neighbour-positions next-positions)))
+             (concat labeled next-positions)
+             (conj labeled-ordered next-positions)
+             (assoc-ks grid next-positions label))
+      [grid labeled labeled-ordered])))
+
+
+(defn calculate-regions [grid]
+  (loop [next-positions (posis grid)
+         grid grid
+         label 0       ; does not need unique labels -> because if not ground is already unlabeled
+         labeled-positions []]
+    (if-not (seq next-positions)
+      labeled-positions
+      (let [posi (first next-positions)
+            rest-posis (rest next-positions)]
+        (if (= :ground (get grid posi))
+          (let [[grid labeled _] (flood-fill grid posi :label label)]
+            (recur rest-posis grid (inc label) (conj labeled-positions labeled)))
+          (recur rest-posis grid label labeled-positions))))))
+
+(defn- cellular-calc-path [[x1 y1] [x2 y2]]
+  (concat
+    (let [step (if (< x2 x1) -1 1)]
+        (for [x (range (+ x1 step) x2 step)] ; + because starting step not part of path
+          [x y1]))
+      (let [step (if (< y2 y1) -1 1)] ; if no x movement then starting y step here inclusive at path
+        (for [y (range y1 y2 step)]
+          [x2 y]))))
+
+(defn- cellular-pos-distance [[x1 y1] [x2 y2]]
+  (Math/hypot (double (- x2 x1)) (double (- y2 y1))))
+
+(defn- cellular-make-path [grid [a b] color]
+  (assoc-ks grid (cellular-calc-path a b) color))
+
+(defn- cellular-connect-two-close-regions [grid regions label]
+  (let [regions (shuffle regions)
+        posi-one (rand-nth (first regions))
+        potential-points (map rand-nth (rest regions))
+        posi-two (apply min-key #(cellular-pos-distance posi-one %) potential-points)]
+    (cellular-make-path grid [posi-one posi-two] label)))
+
+(defn rand-connect-two-regions [grid]
+  (let [regions (calculate-regions grid)]
+    (if-not (> (count regions) 1)
+      grid
+      (cellular-connect-two-close-regions grid regions white))))
+
+(defn connect-regions [grid]
+  (let [regions (calculate-regions grid)
+        pairs (loop [regions (zipmap (range) (calculate-regions grid))
+                     pairs []]
+                (if (> (count regions) 1)
+                  (let [label (rand-nth (keys regions))
+                        posi-one (rand-nth (get regions label))
+                        [closest-label posis] (apply min-key #(cellular-pos-distance posi-one (rand-nth (% 1)))
+                                                     (dissoc regions label))]
+                    (recur
+                      (dissoc (update-in regions [label] concat posis) closest-label)
+                      (conj pairs [posi-one (rand-nth posis)])))
+                  pairs))]
+    (reduce
+      #(cellular-make-path %1 %2 :ground)
+      grid pairs)))
+
+;; nad = not-allowed-diagonals
+; lead to problems:
+; - melee attack goes through the wall because of range check only not wall-check
+; - potential field generation must check for it; following must cut it
+; - light shines through the edges
+
+(defn- nad-corner? [grid [fromx fromy] [tox toy]]
+  (and
+    (= :ground (get grid [tox toy])) ; also filters nil/out of map
+    (wall-at? grid [tox fromy])
+    (wall-at? grid [fromx toy])))
+
+(def ^:private nad-diagonal-steps [[-1 -1] [-1 1] [1 -1] [1 1]])
+
+; TODO could be made faster because accessing the same posis oftentimes at nad-corner? check
+(defn get-nads [grid]
+  (loop [checkposis (filter (fn [{y 1 :as posi}]
+                              (and (even? y)
+                                   (= :ground (get grid posi))))
+                            (posis grid))
+         result []]
+    (if (seq checkposis)
+      (let [position (first checkposis)
+            diagonal-posis (map #(mapv + position %) nad-diagonal-steps)
+            nads (map (fn [nad] [position nad])
+                      (filter #(nad-corner? grid position %) diagonal-posis))]
+        (recur
+          (rest checkposis)
+          (doall (concat result nads)))) ; doall else stackoverflow error
+      result)))
+
+(defn- get-tiles-needing-fix-for-nad [grid [[fromx fromy]
+                                           [tox toy]]]
+  (let [xstep (- tox fromx)
+        ystep (- toy fromy)
+        cell1x (+ fromx xstep)
+        cell1y fromy
+        cell1 [cell1x cell1y]
+        cell11 [(+ cell1x xstep) (+ cell1y (- ystep))]
+        cell2x (+ cell1x xstep)
+        cell2y cell1y
+        cell2 [cell2x cell2y]
+        cell21 [(+ cell2x xstep) (+ cell2y ystep)]
+        cell3 [cell2x (+ cell2y ystep)]]
+;    (println "from: " [fromx fromy] " to: " [tox toy])
+;    (println "xstep " xstep " ystep " ystep)
+;    (println "cell1 " cell1)
+;    (println "cell11 " cell11)
+;    (println "cell2 " cell2)
+;    (println "cell21 " cell21)
+;    (println "cell3 " cell3)
+    (if-not (nad-corner? grid cell1 cell11)
+      [cell1]
+      (if-not (nad-corner? grid cell2 cell21)
+        [cell1 cell2]
+        [cell1 cell2 cell3]))))
+
+(defn mark-nads [grid nads label]
+  (assoc-ks grid (mapcat #(get-tiles-needing-fix-for-nad grid %) nads) label))
+
+(defn fix-not-allowed-diagonals [grid]
+  (mark-nads grid (get-nads grid) :ground))
+
+;; populate / astar pathfinding
+
+(defn- astar-pathposi-seq [^Path thepath]
+  (map
+    #(let [step (.getStep thepath %)]
+       [(.getX step)
+        (.getY step)])
+    (range (.getLength thepath))))
+
+(defn astar-find-path [start target grid pathblocked?]
+  {:pre [(not (pathblocked? grid start))
+         (not (pathblocked? grid target))]}
+  (let [tilebasedmap (reify TileBasedMap
+                       (getWidthInTiles [this] (width grid))
+                       (getHeightInTiles [this] (height grid))
+                       (pathFinderVisited [this x y] false)
+                       (getCost [this context tx ty] (float 1))
+                       (blocked [this context tx ty] (boolean (pathblocked? grid [tx ty]))))
+        astarpathfinder (let [maxsearchdist (* (width grid) (height grid))
+                              allowdiagmovement false]
+                          (proxy [AStarPathFinder] [tilebasedmap maxsearchdist allowdiagmovement]))
+
+        mover (reify Mover)
+        [sx sy] start
+        [tx ty] target]
+    (astar-pathposi-seq (.findPath astarpathfinder mover sx sy tx ty))))
+
+
+;;; populate
+
+(defn get-rand-end-posi [grid start]
+  (let [[_ _ labeled-ordered] (flood-fill grid start)]
+    ; rest because start-posi should not marked as end-posi
+    (rand-nth (high-weighted-rand-nth (rest labeled-ordered)))))
+
+; TODO beim pfad genau nebeneinander die stuff-posis..
+(defn get-populated-grid-posis [grid start-posi no-stuff]
+  (let [end-posi (get-rand-end-posi grid start-posi)
+        path-posis (set ; for checking.. if contains?
+                     (astar-find-path start-posi end-posi grid wall-at?))
+        [_ _ labeled-ordered] (flood-fill grid path-posis)
+        stuff-posis (loop [labeled-ordered (rest labeled-ordered) ; dont put stuff directly on the path (first element)
+                           stuff-cnt no-stuff
+                           stuff-posis []]
+                      (if (or (zero? stuff-cnt) (empty? labeled-ordered))
+                        stuff-posis
+                        (let [stuff-position (rand-nth (high-weighted-rand-nth labeled-ordered))
+                              [_ posis _] (flood-fill grid stuff-position :steps 24) ; TODO flood-fill with 8 instead of 4 neighbours?
+                              need-to-be-removed (set posis)
+                              labeled-ordered (remove empty? (map (fn [posis]
+                                                                    (remove #(contains? need-to-be-removed %) posis))
+                                                                  labeled-ordered))]
+                          (when (contains? path-posis stuff-position)
+                            ; triggered at the end of a loop!
+                            (println "stuff-position on path-posi - should not be !!"))
+                          (recur labeled-ordered
+                                 (dec stuff-cnt)
+                                 (conj stuff-posis stuff-position)))))]
+    {:end end-posi
+     :path-posis path-posis
+     :stuff-posis stuff-posis}))
+
+;; geometry
+
+(defn vec-posi
+  "Takes Vector2f or [x y] and returns [x y]."
+  [v]
+  (if (instance? Vector2f v)
+    [(.x ^Vector2f v)
+     (.y ^Vector2f v)]
+    v))
+
+(defn rectangle
+  ([[x y w h]]
+   (rectangle x y w h))
+  ([x y w h]
+   (Rectangle. x y w h)))
+
+(defn circle [[x y] radius]
+  (Circle. x y radius))
+
+(defn set-radius [circle pixels]
+  (.setRadius ^Circle circle pixels))
+
+(defn rotate-shape [shape angle x y]
+  (.transform
+   shape
+   (Transform/createRotateTransform (Math/toRadians angle) x y)))
+
+(defn vector2f
+  ([x y]
+   (Vector2f. x y))
+  ([p]
+   (if (instance? Vector2f p)
+     p
+     (let [[x y] p]
+       (Vector2f. x y)))))
+
+(defn scale-vector     [v n]   (.scale    ^Vector2f v n))
+(defn normalise [v]     (.normalise ^Vector2f v))
+(defn vector-add       [v1 v2] (.add ^Vector2f v1 ^Vector2f v2))
+(defn vector-length    [v]     (.length ^Vector2f v))
+
+(defn normalised? [v]
+  (approx-numbers 1 (.length ^Vector2f v) 0.001))
+
+(defn get-distance [p1 p2]
+  (.distance ^Vector2f (vector2f p1) (vector2f p2)))
+
+(defn get-normal-vectors [^Vector2f v]
+  (let [x (.x v),y (.y v)]
+    [(Vector2f. (- y) x)
+     (Vector2f. y (- x))]))
+
+(defn direction-vector [source target]
+  {:post [(or (normalised? %) (zero? (.length ^Vector2f %)))]}
+  (let [[sx sy] source
+        [tx ty] target]
+    (.normalise (Vector2f. (- tx sx) (- ty sy)))))
+
+(defn get-angle-from-vector
+  "converts theta of slick Vector2f to angle from top (top is 0 degree, moving right is 90 degree etc.)"
+  [v]
+  (let [angle (+ 90 (.getTheta ^Vector2f (vector2f v)))]
+    (if (> angle 360)
+      (- angle 360)
+      angle)))
+
+(defn vector-from-angle [angle]
+  {:post [(normalised? %)]}
+  (.add (Vector2f. 0 -1) (double angle)))
+
+(defn collides? [^Shape a ^Shape b]
+  (or (.intersects a b) (.contains a b) (.contains b a)))
+
+(defn point-in-rect?
+  ([posi [x y w h]]
+    (point-in-rect? posi x y w h))
+  ([[x y] rectx recty rectw recth]
+    (point-in-rect? x y rectx recty rectw recth))
+  ([x y rectx recty rectw recth]
+    (and
+      (>= x rectx)
+      (>= y recty)
+      (<= x (+ rectx rectw))
+      (<= y (+ recty recth)))))
+
+(defn rect-collision?
+  "x,y centerposition."
+  [[[x1 y1] half-w1 half-h1]
+   [[x2 y2] half-w2 half-h2]]
+  (and
+    (let [x1 (float x1),x2 (float x2),half-w1 (float half-w1),half-w2 (float half-w2)]
+      (< (Math/abs (- x1 x2)) (+ half-w1 half-w2)))
+    (let [y1 (float y1),y2 (float y2),half-h1 (float half-h1),half-h2 (float half-h2)]
+      (< (Math/abs (- y1 y2)) (+ half-h1 half-h2)))))
+
+(defn tiles-inside-rect
+  "x,y centerposition. tiles are integer positions. First tile is top left tile!"
+  ; top left first ... because used in such a way @ prebuilt placement
+  [[[x y] half-w half-h]]
+  (let [topy (- y half-h)
+        bottomy (+ y half-h)
+        leftx (- x half-w)
+        rightx (+ x half-w)
+        top-tile (Math/floor topy)
+        bottom-tile (Math/floor bottomy)
+        left-tile (Math/floor leftx)
+        right-tile (Math/floor rightx)]
+    (for [x (range left-tile (inc right-tile)) ;include end-tile
+          y (range top-tile (inc bottom-tile))]
+      [(int x) (int y)]))) ; da sonst [3.0 4.0] z.B.
+
+; noch schneller:
+; test of xdist > range
+; test ob ydist > range
+; -> gar kein sqrd erstmal?
+; TODO : ber�cksichtige gr�sse der bodies mit ein
+(defn in-range?
+  "collision of two circles."
+  [[x1 y1] [x2 y2] range-square]
+  (let [x1 (float x1)
+        x2 (float x2)
+        xdist (Math/abs (- x1 x2))
+        xdist-sqr (* xdist xdist)]
+    (if (> xdist-sqr range-square)
+      false
+      (let [y1 (float y1)
+            y2 (float y2)
+            ydist (Math/abs (- y1 y2))
+            ydist-sqr (* ydist ydist)]
+        (if (> ydist-sqr range-square)
+          false
+          (<= (+ xdist-sqr ydist-sqr) range-square))))))
+
+(defn- get-touched-tiles-small
+  "for <1 cell bodies, touching maximum 4 tiles"
+  [[x y] half-w half-h]
+  (let [x (float x)
+        y (float y)
+        half-w (float half-w)
+        half-h (float half-h)
+        r (int (+ x half-w))
+        l (int (- x half-w))
+        t (int (- y half-h))
+        b (int (+ y half-h))]
+    (distinct [[l t] [l b] [r t] [r b]])))
+
+(defn- get-touched-tiles-big
+  "iterates from top-left to bottom-right tile. works for >1 cell bodies"
+  [[x y] half-w half-h]
+  (let [x (float x)
+        y (float y)
+        half-w (float half-w)
+        half-h (float half-h)
+        r (int (+ x half-w))
+        l (int (- x half-w))
+        t (int (- y half-h))
+        b (int (+ y half-h))]
+    (distinct (for [x (range l (inc r))
+                    y (range t (inc b))]
+                [x y]))))
+
+(defn does-not-fit-in-a-tile? [half-w half-h]
+  (or
+    (>= half-w 0.5)
+    (>= half-h 0.5)))
+
+(defn get-touched-tiles [posi half-w half-h]
+  (if (does-not-fit-in-a-tile? half-w half-h)
+    (get-touched-tiles-big posi half-w half-h)
+    (get-touched-tiles-small posi half-w half-h)))
+
+(defn add-or-subtract-angle
+  "man will current in richtung new rotieren. muss man dazu add or subtract machen f�r den k�rzesten weg?
+  returns add or subtract-function"
+  [current-angle new-angle]
+	(if (<= current-angle 180)
+   (if (or (<= new-angle current-angle) (>= new-angle (+ 180 current-angle)))
+     -
+     +)
+   (if (and (>= new-angle (- current-angle 180)) (<= new-angle current-angle))
+     -
+     +)))
+
+(defn get-angle-to-position
+  "Treat Position a the middle of the coordinate sytem and the angle is from the top
+  so if target is right of origin -> 90� below origin -> 180�"
+  [{originx 0 :as origin} {targetx 0 :as target}]
+  (let [v (Vector2f. 0 -1)
+        originv (vector2f origin)
+        targetv (vector2f target)
+        differencev (.normalise (.sub ^Vector2f targetv ^Vector2f originv))
+        angle (int (Math/toDegrees (Math/acos (.dot v differencev))))]
+     ; 0-180� ok -> target rechts von origin ansonsten adjust
+    (if (< targetx originx)
+      (- 360 angle)
+      angle)))
+
+(defn degrees? [n] (and (>= n 0) (<= n 360)))
+
+(defn smallest-distance [a b]
+	{:pre [(degrees? a) (degrees? b)]
+	 :post [(degrees? %)]}
+  (let [dist (Math/abs (float (- a b)))]
+    (if (> dist 180) (- 360 dist) dist)))
+
+(defn rotate-angle-to-angle [current-angle new-angle rotationspeed delta]
+  (let [adjustment (* delta rotationspeed)]
+    (if (>=
+          adjustment
+          (smallest-distance current-angle new-angle))
+      new-angle
+      (let [change-fn (add-or-subtract-angle current-angle new-angle)
+            adjusted-angle (change-fn current-angle adjustment)]
+        (cond
+          (< adjusted-angle 0) (+ 360 adjusted-angle)
+          (> adjusted-angle 360) (- adjusted-angle 360)
+          :else adjusted-angle)))))
+
+(defn degree-add [degree by] (rem (+ degree by) 360))
+
+(defn degree-minus [degree by] (rem (+ 360 (- degree by)) 360))
+
+(defn get-vector-to-mouse-coords
+  ([]
+    (get-vector-to-mouse-coords (get-mouse-pos)))
+  ([posi]
+    (direction-vector [half-screen-w half-screen-h] posi)))
+
+;; prebuilt placement
+
+(defn- prebuilt-is-5x5-walls-space? [center grid]
+  (let [tiles (tiles-inside-rect [center 2 2])] ; room half width&height = 2 => 5x5
+    (when (every? #(wall-at? grid %) tiles)
+      tiles)))
+
+(defn- prebuilt-flipy [data]
+  (map #(vec (reverse %)) data))
+
+(defn- prebuilt-rotate-grid-90-degrees [grid]
+  (VectorGrid. (vec (reverse (apply map vector (.data ^VectorGrid grid))))))
+
+(defn- prebuilt-rotate-grid-180-degrees [grid]
+  (VectorGrid. (vec (reverse (prebuilt-flipy (.data ^VectorGrid grid))))))
+
+(defn- prebuilt-rotate-grid-270-degrees [grid]
+  (VectorGrid. (vec (prebuilt-flipy (apply map vector (.data ^VectorGrid grid))))))
+
+(comment
+  (let [grid (VectorGrid.[[1 4 7]
+                          [2 5 8]
+                          [3 6 9]])]
+    (print-grid grid :print-cell print)
+    (println)
+    (print-grid (prebuilt-rotate-grid-90-degrees grid) :print-cell print)
+    (println)
+    (print-grid (prebuilt-rotate-grid-180-degrees grid) :print-cell print)
+    (println)
+    (print-grid (prebuilt-rotate-grid-270-degrees grid) :print-cell print)))
+
+(defn is-5x5-walls-entrance?
+  "returns false or a vector of [5x5-tiles open-entrance-tile center-tile rotatefn]"
+  [[x y] grid]
+  (let [a [x (- y 3)]
+        b [x (+ y 3)]
+        c [(- x 3) y]
+        d [(+ x 3) y]]
+    (if (wall-at? grid [x y])
+      false
+      (if-let [tiles (prebuilt-is-5x5-walls-space? a grid)]    ; 1. konfiguration => a => so wie das tiled file => eingang nach oben
+        [tiles [x (dec y)] a identity]
+        (if-let [tiles (prebuilt-is-5x5-walls-space? b grid)]
+          [tiles [x (inc y)] b prebuilt-rotate-grid-180-degrees]
+          (if-let [tiles (prebuilt-is-5x5-walls-space? c grid)]
+            [tiles [(dec x) y] c prebuilt-rotate-grid-270-degrees]
+            (if-let [tiles (prebuilt-is-5x5-walls-space? d grid)]
+              [tiles [(inc x) y] d prebuilt-rotate-grid-90-degrees]
+              false)))))))
+
+
+;; entity components
+
+(def id-entity-map (atom {}))
+
+;; Component
+; Component = map with :type. Special keys:
+; :depends [:a :b :c] -> entity checks at creation if those components exist.
+; :init, :destruct -> (fn [entity]) at creation / removal.
+
+;; Entity
+
+(defn- entity-dependency-ok? [component types]
+  (if-let [dependencies (:depends component)]
+    (every? #(some #{%} types) dependencies)
+    true))
+
+(defn- entity-dependencies-ok? [components]
+  (let [types (map :type components)]
+    (every? #(entity-dependency-ok? % types) components)))
+
+(defn add-component [entity component]
+  {:pre [component (:type component)]}
+  (let [ctype (:type component)
+        types (map :type (vals @entity))]
+    (assert (not-any? #{ctype} types))
+    (assert (entity-dependency-ok? component types))
+    (swap! entity assoc-in [ctype] component)
+    (when-apply (:init component) entity)
+    entity))
+
+(defn- entity-init! [entity]
+  (swap! id-entity-map assoc (:id (meta entity)) entity)
+  (doseq [c (vals @entity)]
+    (when-let [init (:init c)]
+      (init entity)))
+  entity)
+
+(defn create-entity-no-init [& components]
+  (let [components (remove nil? components)]
+    (assert (seq components))
+    (assert (every? :type components))
+    (assert (distinct-seq? (map :type components)))
+    (assert (entity-dependencies-ok? components))
+    (atom (zipmap (map :type components) components)
+          :meta {:id (get-unique-number)})))
+
+(defn create-entity [& components]
+  (entity-init!
+    (apply create-entity-no-init components)))
+
+;; Removelist
+
+(def ^:private entity-removelist (atom nil))
+
+(defn- entity-munge-id [entity]
+  (if (number? entity) entity (:id (meta entity))))
+
+(defn add-to-removelist [entity]  ; arglist entity-or-id
+  (swap! entity-removelist conj (entity-munge-id entity)))
+
+(defn destruct-entity
+  "do not call this while update-components is active - use add-to-removelist instead.
+  because calling this while update-components is running could lead to NullPointerE"
+  [entity]
+  (when (and entity (get @id-entity-map (:id (meta entity))))
+    (swap! id-entity-map dissoc (:id (meta entity)))
+    (dorun (map #(when-apply (:destruct %) entity) (vals @entity)))))
+
+(defn update-removelist []
+  (dorun (map #(destruct-entity (get @id-entity-map %)) @entity-removelist))
+  (reset! entity-removelist #{}))
+
+(declare player-body)
+
+(defn is-player? [entity]
+  (= (:id (meta entity)) (:id (meta player-body))))
+
+(defmacro active
+  "Use: (active updatefn) or (active [delta component] fbody)
+  Should be independent of update-order and changes will probably take effect in next frame
+  because of snapshot order."
+  [& args]
+  `(let [f# ~(make-fn args)]
+     (assert (fn? f#))
+     {:updatefn f#}))
+
+(defn- entity-get-active-component-types [mapentity]
+  (map :type (filter :updatefn (vals mapentity))))
+
+(defn block-active-components [entity]
+  (add-blocks entity (entity-get-active-component-types entity)))
+
+(defn unblock-active-components [entity]
+  (remove-blocks entity (entity-get-active-component-types entity)))
+
+(defn reset-component-state-after-blocked [entity]
+  (doseq [{:keys [block-effect-reset-state] :as c} (vals @entity)
+          :when block-effect-reset-state]
+    (block-effect-reset-state entity c)))
+
+;;
+
+(comment
+  (let [a (create-entity {:type :a :updatefn 1}
+                         {:type :b :updatefn 1})]
+    (println @a)
+    (unblock-active-components
+      (block-active-components @a))))
+
+;;
+
+(defn update-counter! [entity delta c & [counterkey & _]]
+  (let [k (or counterkey :counter)
+        counter (tick (k c) delta)]
+    (swap! entity assoc-in [(:type c) k] counter)
+    (:stopped? counter)))
+
+;;
+
+(defn- entity-save-single-session [entity]
+  (when-let [{:keys [constructor args]} (:session @entity)]
+    {:constructor constructor
+     :args args
+     :components (for [{:keys [type serialize] :as component} (vals @entity)
+                       :when serialize]
+                   [type (select-keys component serialize)])}))
+
+(def entities-session
+  (reify Session
+    (save-session [_]
+      (->> id-entity-map
+           deref
+           vals
+           (keep entity-save-single-session)))
+
+    (load-session [_ entity-saves]
+      (doseq [{:keys [constructor args components]} entity-saves
+              :let [f (resolve (symbol constructor))
+                    entity (apply f args)]]
+        (doseq [[ctype m] components]
+          (swap! entity update-in [ctype] merge m))
+        (entity-init! entity)))
+
+    (new-session-data [_])))
+
+;; -> all entities are loaded in the first-map currently and this will not work with rand generated maps
+;; because the random generation would also be done with the same random seed so the same map is generated
+
+;; order of initialisation ok? -> listeners befire entitiy add?
+;;
+;; also be careful with randomisation -> create-item-body with argument string creates a random image for the cyber implants for example!
+;; properties INITIAL & COMPONENT SESSION SHOULD 100% re-create same values.
+;; -> for entities that you want to save write down documentation for example input completely defines the state no randomisation (same item instance same img etc)
+
+(def clear-entities-session (reify
+                              Session
+                              (load-session [_ _]
+                                (reset! entity-removelist #{})
+                                (swap! id-entity-map filter-map
+                                       #(:ingame-loop-entity @%)))
+                              (save-session [_])
+                              (new-session-data [_])))
+
+;; cell grid
+
+(defn get-cell-grid [] (:cell-grid (get-current-map-data)))
+(defn get-jcell-grid [] (force (:j-cell-grid (get-current-map-data))))
+
+(defn create-cell [position blocks]
+  {:pre [(#{#{}
+            #{:ground}
+            #{:ground :air}} blocks)]}
+  (atom
+    {:posi position
+     :middle (translate-to-tile-middle position)
+     :blocks blocks
+     :body-ids #{}
+     :occupied #{}}))
+
+(defn occupied-by-other?
+  "returns true if there is some solid body with center-tile = this cell
+   or a multiple-cell-size body which touches this cell."
+  [cell body]
+  (seq (filter #(:solid (:body @%)) (disj (:occupied @cell) body))))
+
+(defn cell-blocked? [cell movement-type] ; TODO cell-blocks?
+  (or
+    (not cell)
+    (contains? (:blocks @cell) movement-type)))
+
+(defn get-cell
+  "returns nil when not existing cell (outside map bounds or undefined area (behind walls))"
+  [posi]
+  (get (get-cell-grid) (int-posi posi)))
+
+(defn get-cells
+  "see (doc get-cell). Use int-posis for this! Faster than (map get-cell posis)"
+  [posis]
+  (map (get-cell-grid) posis))
+
+;TODO just use a delay/force?
+(defn cached-get-adjacent-cells [cell]
+  (if-let [result (:adjacent-cells @cell)]
+    result
+    (let [result (-> @cell :posi get-8-neighbour-positions get-cells)]
+      (swap! cell assoc :adjacent-cells result)
+      result)))
+
+(def ^:private cell-jcell-movement-type :air)
+
+(defn create-jcell-grid [grid]
+  (let [j-cell-grid (make-array Boolean/TYPE (width grid) (height grid))]
+    (doseq [[[x y] cell] grid]
+      (aset j-cell-grid x y
+            (boolean (cell-blocked? cell cell-jcell-movement-type))))
+    j-cell-grid))
+
+(defn get-map-w [] (width (get-cell-grid)))
+(defn get-map-h [] (height (get-cell-grid)))
+
+(defn inside-map? [tile] (get-cell tile))
+
+(def ^:private cell-blocks-listeners (atom []))
+(def cell-listeners-session (atom-session cell-blocks-listeners :save-session false))
+
+(defn add-cell-blocks-changed-listener [f] (swap! cell-blocks-listeners conj f))
+
+(defn cell-blocks-changed-update-listeners [] (dorun (map #(%) @cell-blocks-listeners))) ; TODO dorun/map eval ? memfn invoke
+
+(defn change-cell-blocks
+  "do not change to blocking while game running or bodies may be walled in.
+   after changing update the listeners!!" ; vlt cell-seq ubergeben und danach wird hier update-listeners gecallt.
+  [cell new-blocks]
+  (swap! cell assoc-in [:blocks] new-blocks)
+  (let [[x y] (:posi @cell)]
+    (aset (get-jcell-grid) x y (boolean (cell-blocked? cell cell-jcell-movement-type))))) ; TODO same code as in create-jcell-grid
+
+(defn get-body-ids [cell]
+  (if cell (:body-ids @cell) #{}))
+
+(defn- cell-get-body-ids-from-cells [cells]
+  (distinct (mapcat get-body-ids cells)))
+
+(defn get-bodies-from-cells [cells]
+  (map #(get @id-entity-map %) (cell-get-body-ids-from-cells cells)))
+
+;;
+
+(defn- cell-contains-body? [cell body]
+  (get (get-body-ids cell) (:id (meta body))))
+
+(defn cell-add-body [cell body]
+  {:pre [(not (cell-contains-body? cell body))]}
+  (swap! cell update-in [:body-ids] conj (:id (meta body))))
+
+(defn cell-remove-body [cell body]
+  {:pre [(cell-contains-body? cell body)]}
+  (swap! cell update-in [:body-ids] disj (:id (meta body))))
+
+;;
+
+; TODO use nad code?
+(defn is-diagonal? [from to]
+  (let [[fx fy] (:posi @from)
+        [tx ty] (:posi @to)
+        xdir (- tx fx)
+        ydir (- ty fy)]
+    (diagonal-direction? [xdir ydir])))
+
+(def ^:private cell-allowed-gridkeys #{:undefined :ground :wall :airwalkable})
+
+(defn create-grid-from-gen-grid
+  "blockprops-map is a map of {:undefined :wall :ground} to the blocks like #{:wall :ground},
+  can also be nil - then no cell is created."
+  [grid blockprops-map calc-sprite-idx details-calc-sprite-idx]
+  {:pre [(= cell-allowed-gridkeys (set (keys blockprops-map)))]}
+  (let [ks (set (cells grid))]
+    (assert (every? cell-allowed-gridkeys ks)
+            (str "Allowed ks: " cell-allowed-gridkeys "\n and keys in grid: " ks)))
+  (transform
+    grid
+    (fn [posi value]
+      (when-let [blocks (get blockprops-map value)]
+        (let [cell (create-cell posi blocks)]
+          (swap! cell assoc
+                 :sprite-posi (calc-sprite-idx grid posi value)
+                 :details-sprite-posi (when details-calc-sprite-idx
+                                        (details-calc-sprite-idx grid posi value)))
+          cell)))))
+
+;; spawn spaces
+
+(defn- spawn-ground?
+  "used so that get-spawn-spaces / get-spawn-space works for randgen-maps and realized maps"
+  [cell]
+  (if cell
+    (if (keyword? cell)
+      (= :ground cell)
+      (not (cell-blocked? cell :ground)))))
+
+(defn- spawn-is-3x3-space? [grid position]
+  (every? spawn-ground? (get-3x3-cellvalues grid position)))
+
+(defn- spawn-get-rand-3x3-space [quadranten-posis grid]
+  (when quadranten-posis
+    (first
+      (filter #(spawn-is-3x3-space? grid %) (shuffle quadranten-posis)))))
+
+(defn- get-spawn-spaces
+  "partitions the grid in fields and tries to find a 'space' in every field."
+  [grid]
+  (let [field-w 13 ; displ-w-in-tiles
+        field-h 10 ; displ-h-in-tiles
+        get-field-of-posi (fn [[x y]] [(int (/ x field-w))
+                                       (int (/ y field-h))])
+        ; grid that tells for every position in original grid the field-position index
+        field-posis-grid (create-grid (width grid) (height grid) get-field-of-posi)
+        ; now create for every cell/quadrant in the fields the seq of positions
+        quadranten-posis (atom {})]
+    (doseq [[posi quadrant] field-posis-grid]
+      (swap! quadranten-posis update-in [quadrant] conj posi))
+    (remove nil?
+      (map #(spawn-get-rand-3x3-space % grid)
+        (vals @quadranten-posis)))))
+
+(defn get-spawn-positions-groups
+  "Returns a coll of positions and their adjacent-positions == 9 positions every item"
+  [grid]
+  (map #(cons % (get-8-neighbour-positions %)) (get-spawn-spaces grid)))
+
+(defn mark-spawn-spaces [grid]
+  (assoc-ks grid (get-spawn-spaces grid) :room))
+
+(defn mark-3x3-spaces [grid]
+  (let [rooms (filter #(spawn-is-3x3-space? grid %) (posis grid))]
+    (assoc-ks grid rooms :room)))

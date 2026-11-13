@@ -1,8 +1,8 @@
 (ns engine.tests.render
   (:require
+    [cdq.core :refer [white]]
     [cdq.core :refer [start-slick-basicgame]]
-    [engine.render.color :as color]
-    [engine.render.image :refer [create-image]]
+    [cdq.core :refer [create-image]]
     [engine.render.graphics :refer [fill-rect render-readable-text]])
   (:import (org.newdawn.slick Image Color)))
 
@@ -15,7 +15,7 @@
       (some
         (fn [x]
           (when (pos? (.getAlpha (.getColor image x y)))
-            (fill-rect g x y 2 2 color/white)
+            (fill-rect g x y 2 2 white)
             true))
         xrange))
     yrange)))
@@ -27,7 +27,7 @@
       (some
         (fn [y]
           (when (pos? (.getAlpha (.getColor image x y)))
-            (fill-rect g x y 2 2 color/white)
+            (fill-rect g x y 2 2 white)
             true))
         yrange))
     xrange)))

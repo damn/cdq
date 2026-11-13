@@ -8,21 +8,22 @@
            (org.newdawn.slick.loading LoadingList)
            org.newdawn.slick.state.BasicGameState)
   (:require
-    [engine.render.image :as g :refer [create-image draw-image get-dimensions get-scaled-copy get-sub-image]]
+    [cdq.core :refer [direction-vector get-angle-to-position get-touched-tiles in-range? normalise rotate-angle-to-angle vector-from-angle vector2f]]
+    [cdq.core :refer [black green lightGray orange red rgbcolor set-color white yellow]]
+    [cdq.core :refer [create-image draw-image get-dimensions get-scaled-copy get-sub-image]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation folder-frames get-sprite spritesheet-frames]]
-    [engine.render.color :as color :refer [black green orange red rgbcolor set-color white yellow]]
     [engine.render.graphics :refer [draw-grid fill-rect render-readable-text reset-transform translate]]
     [cdq.core :refer [height width]]
-    [engine.statebasedgame :as state :refer [enter-state init-state-based-game state-based-game]]
-    [engine.settings :refer [jar-file?]]
+    [cdq.core :refer [enter-state init-state-based-game state-based-game]]
+    [cdq.core :refer [jar-file?]]
     [cdq.core :refer [app-game-container create-and-start-app-game-container create-sound fullscreen-supported? get-defaultfont get-line-height get-screen-height get-screen-width make-counter play-sound]]
     [cdq.core :as utils :refer [get-unique-number int-posi sort-by-order translate-to-tile-middle]]
     [cdq.core :refer [get-ratio lower-than-max? readable-number variance-val-str]]
     [cdq.core :refer [safe-merge]]
     [cdq.core :as sess]
     [cdq.core :refer [debug-mode display-height-in-tiles display-width-in-tiles get-setting half-display-h-in-tiles half-display-w-in-tiles half-screen-h half-screen-w in-tiles init-config! left-offset-in-tiles screen-height screen-scale screen-width tile-height tile-width top-offset-in-tiles version]]
-    [game.components.core :refer [active add-to-removelist id-entity-map is-player? player-body update-counter! update-removelist]]
+    [cdq.core :refer [active add-to-removelist id-entity-map is-player? player-body update-counter! update-removelist]]
     [game.components.body :refer [blocked-location? bodies-in-range? circle-collides? get-bodies-at-position get-dist-to-player on-screen-and-in-sight? teleport]]
     [game.components.misc :refer [hp-regen-component rotate-to-player rotation-component]]
     [game.components.render :refer [animation-component animation-entity create-line-render-effect create-lines-render-effect image-render-component render-map-indep-order render-on-map-order rendering single-animation-component translate-position]]
@@ -41,7 +42,6 @@
     [game.item.instance-impl :refer [create-rand-item]]
     [cdq.core :refer [get-current-map-data iterating-map-dependent-comps]]
     [game.maps.minimap :refer [render-minimap show-on-minimap]]
-    [game.utils.geom :refer [direction-vector get-angle-to-position get-touched-tiles in-range? normalise rotate-angle-to-angle vector-from-angle vector2f]]
     [cdq.core :refer [get-rand-weighted-item if-chance percent-chance rand-int-between]]
     [game.utils.raycast :refer [is-path-blocked? ray-blocked?]]
     [game.monster.defmonster :refer [defmonster get-monster-properties]]
@@ -67,7 +67,7 @@
     [game.mouseoverbody :refer [get-mouseover-body]]
     [game.ingame-gui :refer [background-color char-hotkey close-all-frames foreground-color frame-screenborder-distance ingamestate-display mouse-inside-some-gui-component? options-hotkey some-visible-frame?]]
     [game.maps.contentfields :refer [get-entities-in-active-content-fields get-player-content-field-idx]]
-    [game.maps.cell-grid :refer [cell-blocked? get-body-ids get-cell get-cell-grid get-map-h get-map-w]]
+    [cdq.core :refer [cell-blocked? get-body-ids get-cell get-cell-grid get-map-h get-map-w]]
     [game.maps.camera :refer [get-camera-position]]
     [game.maps.tiledmaps :refer [get-layer-index]]
     [game.components.ingame-loop :refer [get-ingame-loop-entities ingame-loop-comp]]
@@ -85,13 +85,13 @@
 (defn- get-item-textseq [cell]
   (let [item @(:item cell)
         itemname (or (:pretty-name item) (:name item))
-        color (or (:color item) color/lightGray)]
+        color (or (:color item) lightGray)]
     (concat
       [color
        (str itemname
             (when-let [cnt (:count item)]
               (str " (" cnt ")")))
-       color/white
+       white
        (:info item)
        equip-boni-item-color]
       (when-let [boni (:equip-boni item)]
@@ -164,7 +164,7 @@
 
 (defn- render-item-in-cell [g item cell rx ry]
   (when (item-in-use? cell)
-    (fill-rect g rx ry cell-w cell-h color/red))
+    (fill-rect g rx ry cell-w cell-h red))
   (draw-image (:image item) rx ry)
   (when-let [cnt (:count item)]
     (render-readable-text g rx ry cnt)))
@@ -1204,9 +1204,9 @@ PSI-Explosion
                         transparent-color :transparent-color
                         [sx sy sw sh]     :sub-bounds
                         [width height]    :bounds}]
-  (-> (g/create-image iref :transparent transparent-color)
-      (g/get-sub-image sx sy sw sh)
-      (g/get-scaled-copy width height)))
+  (-> (create-image iref :transparent transparent-color)
+      (get-sub-image sx sy sw sh)
+      (get-scaled-copy width height)))
 
 (defmethod sess/write-to-disk Image [^Image i]
   (with-meta (save-image-data i)
@@ -1220,7 +1220,7 @@ PSI-Explosion
              {:pr :color}))
 
 (defmethod sess/load-from-disk :color [[r g b a]]
-  (color/rgbcolor :r r :g g :b b :a a))
+  (rgbcolor :r r :g g :b b :a a))
 
 ;;; resolution setup (was game.resolutionsetup)
 
@@ -1306,7 +1306,7 @@ PSI-Explosion
           (utils/log "Loading new session")
           (game.player.session-data/init @is-loaded-character)
           (utils/log "Finished loading new session")
-          (state/enter-state ids/ingame)))
+          (enter-state ids/ingame)))
 
       (render [container statebasedgame g]
         (reset! loading-render-once true)
@@ -1553,10 +1553,10 @@ PSI-Explosion
       (some-visible-frame?) (close-all-frames)
       (some-skill-selection-list-visible?) (close-skill-selection-lists)
       (is-dead? player-body) (when-not (try-revive-player)
-                               (state/enter-state mainmenu-gamestate))
-      :else (state/enter-state ids/options)))
+                               (enter-state mainmenu-gamestate))
+      :else (enter-state ids/options)))
   (when (is-key-pressed? :TAB)
-    (state/enter-state ids/minimap))
+    (enter-state ids/minimap))
   (when (and (get-setting :debug-mode)
              (is-key-pressed? :D))
     (swap! debug-mode not))

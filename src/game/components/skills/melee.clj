@@ -1,17 +1,17 @@
 (ns game.components.skills.melee
   (:require
+    [cdq.core :refer [collides? rectangle rotate-shape]]
     [cdq.core :refer [create-sound]]
     [cdq.core :refer [in-tiles]]
     [cdq.core :refer [max-delta]]
     [game.item.cells :refer [get-equiped-hands-item]]
         [game.mouseoverbody :refer [get-mouseover-body]]
-    [game.utils.geom :as geom :refer [collides?]]
     game.components.body
-    [game.components.core :refer [id-entity-map is-player? player-body]]
+    [cdq.core :refer [id-entity-map is-player? player-body]]
     [game.components.body :refer [calc-touched-cells circle-collides? is-affectable? rect-shape]]
     [game.components.destructible :refer [attackable-by-player? calc-effective-melee-dmg deal-dmg]]
     [game.components.skills.core :refer [get-active-skill get-skill-use-mouse-button standalone-skill]]
-    [game.maps.cell-grid :refer [get-bodies-from-cells]]))
+    [cdq.core :refer [get-bodies-from-cells]]))
 
 ;;; front-of-body-shape
 
@@ -22,8 +22,8 @@
                            height
                            (:angle (:rotation @body))))
   ([[x y] half-w height angle]
-   (geom/rotate
-    (geom/rectangle (- x half-w)
+   (rotate-shape
+    (rectangle (- x half-w)
                     (- y half-w height)
                     (* 2 half-w)
                     height)

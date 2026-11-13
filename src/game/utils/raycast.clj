@@ -1,13 +1,13 @@
 (ns game.utils.raycast
   (:require
-    [engine.render.color :as color :refer [set-color]]
+    [cdq.core :refer [direction-vector get-normal-vectors scale-vector vec-posi vector-add vector2f]]
+    [cdq.core :refer [green red set-color]]
     [engine.render.graphics :refer [draw-line]]
     [cdq.core :refer [get-mouse-pos]]
     [cdq.core :refer [half-screen-h half-screen-w]]
-    [game.components.core :refer [player-body]]
-    [game.utils.geom :refer [add direction-vector get-normal-vectors scale vec-posi vector2f]]
+    [cdq.core :refer [player-body]]
     [game.utils.tilemap :refer [get-mouse-tile-pos screenpos-of-tilepos]]
-    [game.maps.cell-grid :refer [get-jcell-grid get-map-h get-map-w]]
+    [cdq.core :refer [get-jcell-grid get-map-h get-map-w]]
     cdq.core)
   (:import game.utils.RayCaster))
 
@@ -35,12 +35,12 @@
   (let [path-w (+ path-w 0.02) ;etwas gr�sser damit z.b. projektil nicht an ecken anst�sst
         v (direction-vector [start-x start-y] [target-y target-y])
         [normal1 normal2] (get-normal-vectors v)
-        normal1 (scale normal1 (/ path-w 2))
-        normal2 (scale normal2 (/ path-w 2))
-        start1  (add (vector2f start-x  start-y)  normal1)
-        start2  (add (vector2f start-x  start-y)  normal2)
-        target1 (add (vector2f target-x target-y) normal1)
-        target2 (add (vector2f target-x target-y) normal2)]
+        normal1 (scale-vector normal1 (/ path-w 2))
+        normal2 (scale-vector normal2 (/ path-w 2))
+        start1  (vector-add (vector2f start-x  start-y)  normal1)
+        start2  (vector-add (vector2f start-x  start-y)  normal2)
+        target1 (vector-add (vector2f target-x target-y) normal1)
+        target2 (vector-add (vector2f target-x target-y) normal2)]
     [start1,target1,start2,target2]))
 
 (defn is-path-blocked?
@@ -99,8 +99,8 @@
   (let [[start-x start-y] (:value (:position @player-body))
         [target-x target-y] (get-mouse-tile-pos)
         color (if (ray-blocked? start-x start-y target-x target-y)
-                color/red
-                color/green)]
+                red
+                green)]
     (render-line-middle-to-mouse g color)))
 
 ; PATH BLOCKED TEST
@@ -114,7 +114,7 @@
         [target1screenx,target1screeny] (screenpos-of-tilepos target1)
         [start2screenx,start2screeny] (screenpos-of-tilepos start2)
         [target2screenx,target2screeny] (screenpos-of-tilepos target2)]
-    (set-color g (if (is-path-blocked? start1 target1 start2 target2) color/red color/green))
+    (set-color g (if (is-path-blocked? start1 target1 start2 target2) red green))
     (doto g
       (draw-line start1screenx start1screeny target1screenx target1screeny)
       (draw-line start2screenx start2screeny target2screenx target2screeny))))

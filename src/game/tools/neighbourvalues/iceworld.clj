@@ -58,7 +58,7 @@
    :wall #{:ground}
    :ground #{}})
 
-(require '[mapgen.nad :refer [fix-not-allowed-diagonals]] '[mapgen.cave :refer [cave-gridgen]] '[cdq.core :refer [fill-single-cells scalegrid undefined-value-behind-walls]])
+(require '[cdq.core :refer [fix-not-allowed-diagonals]] '[cdq.core :refer [cave-gridgen]] '[cdq.core :refer [fill-single-cells scalegrid undefined-value-behind-walls]])
 
 (comment
   (make-tiledmap-file 48

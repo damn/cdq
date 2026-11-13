@@ -5,7 +5,7 @@
     [game.components.render :refer [rendering]]
     [cdq.core :refer [create-counter reset-counter! update-counter]]
     [cdq.core :refer [atom-session]]
-    [game.components.core :refer [active]]
+    [cdq.core :refer [active]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]))
 
 (def ^:private message (atom nil))

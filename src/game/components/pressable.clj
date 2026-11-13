@@ -1,13 +1,13 @@
 (ns game.components.pressable
   (:require
-    [engine.render.color :as color]
+    [cdq.core :refer [white]]
     [engine.render.graphics :refer [render-readable-text]]
     [game.components.body-render :refer [body-outline-height]]
     [cdq.core :refer [try-consume-leftm-pressed]]
     cdq.core
     [game.mouseoverbody :refer [get-mouseover-body]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
-    [game.components.core :refer [active player-body]]
+    [cdq.core :refer [active player-body]]
     [game.components.body :refer [bodies-in-range?]]
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]))
@@ -29,7 +29,7 @@
                                   (- body-y (:half-pxh (:body @mouseover-body)) body-outline-height)
                                   :centerx true
                                   :above true
-                                  (or color color/white)
+                                  (or color white)
                                   mouseover-text)))))))
 
 (def ^:private click-distance-tiles 1.5)

@@ -3,7 +3,7 @@
     [cdq.core :refer [get-8-neighbour-positions]]
     [cdq.core :refer [start-slick-basicgame]]
     [cdq.core :refer [if-chance]]
-    [mapgen.populate :refer [find-path]]
+    [cdq.core :refer [astar-find-path]]
     [game.maps.tiledmaps :refer [construct-tiledmap create-grid-from-tiled-map]]
     [cdq.core :refer [get-transition-tile-value]]
     [game.tools.tiledmap-grid-convert :refer [make-tiledmap-file resource]]))
@@ -35,7 +35,7 @@
           (doseq [f cdq.core/init-fns]
             (f))
           (let [grid (create-grid-from-tiled-map (construct-tiledmap (resource "tech.tmx")))
-                pathposis (find-path [10 10] [5 73] grid pathblocked?)
+                pathposis (astar-find-path [10 10] [5 73] grid pathblocked?)
                 is-path-posi? (fn [p] (some #{p} pathposis))
                 is-transition-posi? (fn [posi value] (and (= :ground value)
                                                           (not (is-path-posi? posi))

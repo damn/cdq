@@ -1,17 +1,17 @@
 (ns game.maps.minimap
   (:require
-    [engine.render.color :as color :refer [rgbcolor]]
-    [engine.render.image :refer [draw-image get-dimensions get-scaled-copy get-sub-image]]
+    [cdq.core :refer [point-in-rect?]]
+    [cdq.core :refer [gray rgbcolor]]
+    [cdq.core :refer [draw-image get-dimensions get-scaled-copy get-sub-image]]
     [engine.render.graphics :refer [draw-rect fill-rect]]
-    [game.utils.geom :as geom]
     [clojure.set :refer [select union]]
     cdq.core
     [cdq.core :refer [int-posi]]
     [cdq.core :refer [mapvals]]
     [cdq.core :refer [half-screen-h half-screen-w]]
-    [game.components.core :refer [id-entity-map]]
+    [cdq.core :refer [id-entity-map]]
     [cdq.core :refer [get-current-map-data]]
-    [game.maps.cell-grid :refer [get-bodies-from-cells get-cells]]
+    [cdq.core :refer [get-bodies-from-cells get-cells]]
     [game.maps.camera :refer [get-camera-position]])
   (:import (org.newdawn.slick Graphics Image)))
 
@@ -48,7 +48,7 @@
           :let [{bodyx 0 bodyy 1 :as body-posi} (int-posi (:value (:position @body)))
                 body-render-x (+ x (* scale (- bodyx start-leftx)))
                 body-render-y (+ y (* scale (- bodyy start-topy)))]
-          :when (geom/point-in-rect? body-posi start-leftx start-topy width-in-tiles height-in-tiles)]
+          :when (point-in-rect? body-posi start-leftx start-topy width-in-tiles height-in-tiles)]
     (fill-rect g (- body-render-x 0.5) (- body-render-y 0.5) 2 2 (:color (:minimap-icon @body)))))
 
 (defn- cut-sub-image
@@ -88,7 +88,7 @@
         subimage (get-scaled-copy subimg scale)]
     (fill-rect g x y px-width px-height (rgbcolor :r 1 :g 1 :b 1 :a 0.3))
     (draw-image subimage (+ x (* scale shift-right)) (+ y (* scale shift-down)))
-    (draw-rect g x y px-width px-height color/gray)
+    (draw-rect g x y px-width px-height gray)
     (render-bodies g x y start-leftx start-topy width-in-tiles height-in-tiles)))
 
 (defn update-minimap [sensed-tiles]

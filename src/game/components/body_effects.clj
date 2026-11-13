@@ -3,7 +3,7 @@
     [game.components.sleeping :refer [wake-up]]
     [game.components.misc :refer [delete-after-duration-component]]
     [cdq.core :refer [split-kvs-and-more]]
-    [game.components.core :refer [add-component create-entity destruct-entity id-entity-map]]
+    [cdq.core :refer [add-component create-entity destruct-entity id-entity-map]]
     [game.components.position :refer [position-component swap-position!]]))
 
 (defn get-sub-entities [entity]

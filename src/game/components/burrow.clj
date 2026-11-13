@@ -6,13 +6,13 @@
     [engine.render.assets :refer [spritesheet-frames]]
     [cdq.core :refer [atom-session]]
     cdq.core
-    [game.components.core :refer [active block-active-components reset-component-state-after-blocked unblock-active-components]]
+    [cdq.core :refer [active block-active-components reset-component-state-after-blocked unblock-active-components]]
     [game.components.render :refer [animation-entity]]
     [game.components.body :refer [colliding-with-other-solid-bodies? get-dist-to-player get-other-bodies-in-adjacent-cells is-burrowed?]]
     game.components.position
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
-    game.maps.cell-grid))
+    cdq.core))
 
 (alter-var-root #'cdq.core/init-fns conj
   (fn []
