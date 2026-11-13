@@ -11,10 +11,9 @@
     [cdq.core :refer [render-readable-text]]
     cdq.core
     [cdq.core :refer [active add-to-removelist is-player? player-body reset-component-state-after-blocked]]
-    [game.components.body-effects :refer [defeffectentity get-certain-effect-entities get-sub-entities]]
+    [cdq.core :refer [defeffectentity get-certain-effect-entities get-sub-entities]]
     [cdq.core :refer [circle-around-body-render-comp render-above-body render-on-map single-animation-component]]
-    [game.components.destructible :refer [deal-dmg get-armor get-destructible-bodies]]
-    game.components.movement
+    [cdq.core :refer [deal-dmg get-armor get-destructible-bodies]]
     [cdq.core :refer [add-blocks mark-slowed remove-blocks unmark-slowed]]
     [cdq.core :refer [if-chance]]
     game.item.instance

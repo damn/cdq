@@ -1,5 +1,5 @@
 (ns game.player.speed
-  (:require [game.components.movement :refer [in-tiles-per-ms]]))
+  (:require [cdq.core :refer [in-tiles-per-ms]]))
 
 (def player-move-speed 70) ; px/s
 

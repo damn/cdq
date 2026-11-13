@@ -10,12 +10,12 @@
     [cdq.core :refer [fill-rect render-readable-text]]
     [cdq.core :refer [screen-height]]
     game.media
-    [game.gui :refer [get-bounds is-visible? make-frame make-imgbutton mouseover? set-visible switch-visible]]
-    [game.ingame-gui :refer [buttonscale buttonx-start frame-screenborder-distance ingamestate-display skillmenu-hotkey x-dist]]
+    [cdq.core :refer [gui-get-bounds gui-visible? make-frame make-imgbutton gui-mouseover? gui-set-visible gui-switch-visible]]
+    [cdq.core :refer [buttonscale buttonx-start frame-screenborder-distance ingamestate-display skillmenu-hotkey ingame-gui-x-dist]]
     cdq.core
     [game.player.skill.skillmanager :refer [add-player-skill assign-unused-hotkey-and-open-skillslist create-skill-icon]]
     [cdq.core :refer [active player-body]]
-    [game.components.skills.core :refer [skillmanager-skill]]
+    [cdq.core :refer [skillmanager-skill]]
     game.components.skills.melee))
 
 ; This ns is skillmenu & learnable-skills
@@ -110,25 +110,25 @@
      (properties-str (select-keys skill info-keyseq)))])
 
 (defn render-skillbutton-tooltip [g {:keys [button skill]}]
-  (when (mouseover? @button)
-    (let [[x y w h] (get-bounds button)]
+  (when (gui-mouseover? @button)
+    (let [[x y w h] (gui-get-bounds button)]
       (apply render-readable-text g x (+ y h)
              (get-skillmenu-skill-info-textseq skill)))))
 
 (ingame-loop-comp :skillmenu
   (rendering [g c]
-    (when (is-visible? skillmenu-frame)
+    (when (gui-visible? skillmenu-frame)
       (let [x skillmenu-x
             y skillmenu-y]
         (render-readable-text g (+ x 5) (+ y 5) :background false (str "Free points: " (:free-skill-points (:skillmanager @player-body))))
         (doseq [{:keys [button skill]} skillmenu-buttons
                 :when (not @(:learned-this skill))]
-          (fill-rect g (get-bounds button) (rgbcolor :r 0.5 :g 0.5 :b 0.5 :a 0.8)))))))
+          (fill-rect g (gui-get-bounds button) (rgbcolor :r 0.5 :g 0.5 :b 0.5 :a 0.8)))))))
 
-; TODO use game.gui (add-tooltip ?) -> vlt. :above :below angebbar? und auch get-infostr funkt angebbar?..
+; TODO use gui (add-tooltip ?) -> vlt. :above :below angebbar? und auch get-infostr funkt angebbar?..
 (ingame-loop-comp :skill-tooltips
   (rendering :tooltips [g c]
-    (when (is-visible? skillmenu-frame)
+    (when (gui-visible? skillmenu-frame)
       (dorun (map #(render-skillbutton-tooltip g %) skillmenu-buttons)))))
 
 (def session (reify cdq.core/Session
@@ -155,12 +155,12 @@
     (def ^:private freeskillpointsbutton
       (make-imgbutton
         :image (create-image "icons/skills_free.png" :scale buttonscale)
-        :location [(+ buttonx-start (* x-dist -1)) (- screen-height 18)]
-        :pressed #(switch-visible skillmenu-frame)
+        :location [(+ buttonx-start (* ingame-gui-x-dist -1)) (- screen-height 18)]
+        :pressed #(gui-switch-visible skillmenu-frame)
         :tooltip "You have free skill points"
         :parent ingamestate-display
         :visible false))))
 
 (ingame-loop-comp :update-button-visibility
   (active [delta c _]
-    (set-visible freeskillpointsbutton (pos? (:free-skill-points (:skillmanager @player-body))))))
+    (gui-set-visible freeskillpointsbutton (pos? (:free-skill-points (:skillmanager @player-body))))))

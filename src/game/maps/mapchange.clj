@@ -1,10 +1,10 @@
 (ns game.maps.mapchange  ; TODO just change
   (:require
     [game.player.session-data :refer [save-game]]
-    [game.utils.msg-to-player :refer [show-msg-to-player]]
+    [cdq.core :refer [show-msg-to-player]]
     [cdq.core :refer [player-body]]
     [cdq.core :refer [teleport]]
-    [game.components.skills.core :refer [is-attacking?]]
+    [cdq.core :refer [is-attacking?]]
     [cdq.core :refer [get-pretty-name set-map!]]))
 
 (def ^:private queued (atom nil))

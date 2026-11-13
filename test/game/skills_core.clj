@@ -3,31 +3,30 @@
     [game.test.utils :refer [with-private-fns]]
     [cdq.core :refer [mapvals]]
     [cdq.core :refer [make-counter]]
-    [clojure.test :refer [deftest is]]
-    game.components.skills.core))
+    [clojure.test :refer [deftest is]]))
 
-(with-private-fns [game.components.skills.core [update-cooldown
-                                                update-cooldowns]]
+(with-private-fns [cdq.core [skill-update-cooldown
+                                                skill-update-cooldowns]]
   (deftest test-update-cooldown
     (is
       (->
         {:cooldown-counter (make-counter 0)
          :state :attacking}
-        (update-cooldown 3)
+        (skill-update-cooldown 3)
         :state
         (= :attacking)))
     (is
       (->
         {:cooldown-counter (make-counter 0)
          :state :cooldown}
-        (update-cooldown 3)
+        (skill-update-cooldown 3)
         :state
         (= :ready)))
     (is
       (->
         {:cooldown-counter (make-counter 4)
          :state :cooldown}
-        (update-cooldown 3)
+        (skill-update-cooldown 3)
         :cooldown-counter
         :cnt
         (= 3)))
@@ -36,7 +35,7 @@
         {0 :cooldown, 1 :ready, 2 :ready}
         (mapvals
           (:skills
-            (update-cooldowns
+            (skill-update-cooldowns
               {:skills
                {0 {:cooldown-counter (make-counter 2)
                    :state :cooldown}
@@ -47,15 +46,15 @@
               1))
           :state)))))
 
-(with-private-fns [game.components.skills.core [try-set-active-skill-cooldown]]
+(with-private-fns [cdq.core [skill-try-set-active-cooldown]]
   (deftest test-set-active-skill-cooldown
     (is
       (let [skillmanager {:active-type :melee :skills {}}]
         (=
-          (try-set-active-skill-cooldown skillmanager)
+          (skill-try-set-active-cooldown skillmanager)
           skillmanager)))
     (is
       (let [skillmanager {:active-type :melee, :skills {:melee {:state :ready}}}]
         (=
-          (try-set-active-skill-cooldown skillmanager)
+          (skill-try-set-active-cooldown skillmanager)
           {:active-type :melee, :skills {:melee {:state :cooldown}}})))))

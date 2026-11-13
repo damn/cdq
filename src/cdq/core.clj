@@ -3673,3 +3673,1123 @@ assert lastindexOf slash is the same for names in a folder?
   "only works for single cell bodies, may return nil when outside of potential-field"
   [entity]
   (:dist-to-player @(:occupied-cell (:body @entity))))
+
+;; msg-to-player
+
+(def ^:private msg-to-player-message (atom nil))
+(def msg-to-player-message-session (atom-session msg-to-player-message :save-session false))
+
+(def ^:private msg-to-player-counter (create-counter 4000))
+(def msg-to-player-counter-session (atom-session msg-to-player-counter :save-session false))
+
+(defn show-msg-to-player [& more]
+  (reset-counter! msg-to-player-counter)
+  (reset! msg-to-player-message (apply str more)))
+
+(ingame-loop-comp :msg-to-player
+                  ; noch 1 stufe hoher als :above-gui -> uber den tooltips! ->:tooltip / :above-gui?
+                  ; -> call it the way it is not "above-gui" but "important messages"
+  (rendering :above-gui [g _]
+    (when-let [msg @msg-to-player-message]
+      (render-readable-text g half-screen-w (/ half-screen-h 2) :centerx true :background false :bigfont true msg)))
+  (active [delta _ _]
+    (when (and @msg-to-player-message (update-counter msg-to-player-counter delta))
+      (reset! msg-to-player-message nil))))
+
+;; sleeping
+
+(def ^:private sleeping-half-aggro-width-tiles 11)
+(def ^:private sleeping-half-aggro-height-tiles 8.5)
+
+; > wakeup-range-rectangle
+; (because wakeup checks with rectangle collision..
+; and this is center to center distance ...)
+; RADIUS needs to be at least half the diagonal of the rectangle!
+; so no entities will be awoken which are at corner...
+(def start-position-safezone-radius (+ 2.2 sleeping-half-aggro-width-tiles))
+
+(defn- sleeping-in-wakeup-range? [body]
+  (rect-collision? (get-body-bounds body)
+                        [(get-camera-position)
+                         sleeping-half-aggro-width-tiles
+                         sleeping-half-aggro-height-tiles]))
+; TODO not camera but player ... if we seperate them at some point...
+
+(defn- sleeping-entity? [entity] (:sleeping (:sleeping @entity)))
+
+(defn sleeping-component []
+  {:type :sleeping
+   :depends [:body]
+   :sleeping true
+   :init #(swap! % block-active-components)})
+
+(defn wake-up [entity]
+  (when (sleeping-entity? entity)
+    (swap! entity #(-> % 
+         unblock-active-components
+         (assoc-in [:sleeping :sleeping] false)))
+    (->> entity
+      get-other-bodies-in-adjacent-cells
+      (filter sleeping-entity?)
+      (map wake-up)
+      dorun)))
+
+(def ^:private sleeping-counter (create-counter 1000))
+(def sleeping-session (atom-session sleeping-counter :save-session false))
+
+(def ^:private sleeping-show-range false)
+
+(ingame-loop-comp :wakeup
+
+  (active [delta c _]
+    (when (update-counter sleeping-counter delta)
+      (dorun (map wake-up
+              (filter sleeping-in-wakeup-range?
+                      (filter sleeping-entity?
+                              (get-entities-in-active-content-fields)))))))
+  (rendering :above-gui [g c]
+    (when sleeping-show-range
+      (render-centered-shape
+        g
+       (rectangle 0 0
+                  (in-pixel (* 2 sleeping-half-aggro-width-tiles))
+                  (in-pixel (* 2 sleeping-half-aggro-height-tiles)))
+        [(/ screen-width 2)
+         (/ screen-height 2)])
+;      (render-centered-shape g
+;                             (circle [0 0]
+      ;                             (in-pixel start-position-safezone-radius))
+;                             [(/ screen-width 2)
+;                              (/ screen-height 2)])
+      (render-readable-text g 50 100
+                            (->> (get-entities-in-active-content-fields)
+                                 (filter sleeping-entity?)
+                                 (filter sleeping-in-wakeup-range?)
+                                 count
+                                 (str "In wakeup range&sleeping: "))))))
+
+;; body-effects
+
+(defn get-sub-entities [entity]
+  (when-let [subids (:ids (:sub-entities @entity))]
+    (map #(get @id-entity-map %) subids)))
+
+(defn sub-entities-component []
+  {:type :sub-entities
+   :depends [:position]
+   :ids #{}
+   :destruct (fn [entity]
+              (dorun (map destruct-entity (get-sub-entities entity))))
+   :posi-changed (fn [entity]
+                   (let [p (:value (:position @entity))]
+                     (dorun (map #(swap-position! % p) (get-sub-entities entity)))))})
+
+(defn body-effect-entity
+  "Effect-entities are deleted when target entity is deleted.
+  They have a position component that is getting updated when the target position changes.
+  They also call 'wake-up' on the target."
+  [& args]
+  (let [[{:keys [target duration type undofn dofn]
+          :or {type :no-type
+               undofn (fn [])
+               dofn (fn [])}}
+         additional-components] (split-kvs-and-more args)]
+    (wake-up target)
+    (apply create-entity
+           (position-component (:value (:position @target)))
+           {:type :body-effect
+            :target target
+            :effect-type type
+            :init (fn [this]
+                    (dofn)
+                    (when-not (:sub-entities @target)
+                      (add-component target (sub-entities-component)))
+                    (swap! target update-in [:sub-entities :ids] conj (:id (meta this))))
+            ; first disj id before undofn is called!
+            ; undofn may access get-effect-entities and this one is already not existing!
+            :destruct (fn [this]
+                        (swap! target update-in [:sub-entities :ids] disj (:id (meta this)))
+                        (undofn))}
+           (when duration
+             (delete-after-duration-component duration))
+           additional-components)))
+; -> could move delete-after-duration/wake-up(as obligatory-key)/undo/do to implementation
+
+; fix psi-charger set-durations @ undo -> remove this 'first disj' comment
+; -> set-durations of psi-charger?? index 0,1,2 even if only 1 less?
+; better: durations not set when one is undo but at creation ? 20/40/60?
+
+(defmacro defeffectentity [namesym argvec & more]
+  `(defn ~namesym ~argvec
+     (body-effect-entity :type ~(keyword namesym)
+                         ~@more)))
+
+(defn get-certain-effect-entities [entity effect-type]
+  (filter #(= (:effect-type (:body-effect @%)) effect-type)
+          (get-sub-entities entity)))
+
+(comment
+  (map #(:effect-type (:body-effect @%))
+       (get-sub-entities (get @id-entity-map 31))))
+
+(comment
+  (with-redefs [position-component (fn [p] {:type :position :p p})
+                get-other-bodies-in-adjacent-cells (fn [entity] ())]
+
+    (let [testcoll (atom [])
+          entity (create-entity {:type :position}
+                                {:type :body}
+                                (sleeping-component))]
+      (println "sleep? " (#'sleeping-entity? entity))
+      (body-effect-entity :target entity
+                          :dofn #(swap! testcoll conj 1)
+                          :undofn #(swap! testcoll conj 2))
+      (destruct-entity entity)
+      (println "sleep? " (#'sleeping-entity? entity))
+      @testcoll)))
+
+;; shield
+
+(def ^:private shield-rotation-speed (/ 360 2000)) ; 360 degrees in 2 seconds = 2000 ms
+
+(defn shield-component [regeneration-duration]
+  (safe-merge
+    {:type :shield
+     :is-active true
+     :image (create-image "effects/shield.png")
+     :angle 0
+     :counter (make-counter regeneration-duration)}
+    (render-on-map :on-ground [g _ {:keys [is-active image angle] :as c} render-posi]
+      (when is-active
+        (render-rotated-centered-image g image angle render-posi)))
+    (active [delta {:keys [is-active counter] :as c} entity]
+      (swap! entity assoc-in [(:type c)]
+                 (if is-active
+                   (update-in c [:angle] degree-add (* delta shield-rotation-speed))
+                   (tick-finally-merge c :counter delta
+                                         {:angle 0 :is-active true}))))))
+
+(defeffectentity ^:private shield-hit [body]
+  :target body
+  :duration 100
+  (circle-around-body-render-comp body (rgbcolor :g 1 :r 0.5 :a 0.5) :air))
+
+(defn shield-try-consume-damage [body]
+  (when-let [shield (:shield @body)]
+    (when (:is-active shield)
+      (swap! body assoc-in [:shield :is-active] false)
+      (shield-hit body)
+      true)))
+
+;; gui
+
+; Nett:
+; variable characterframe textlabel (text) function or jsut when text=function (text) instead of text
+; also free skill points : ...
+; is-visible check of frame deutet auf guicomponent mit :parent benutzen hin!
+; z.b. ausgrauen == enabled false/true !
+; also skill tooltips!
+; mixup of refcomponent/component ...
+; leftm consume auf button A und dann move auf button B => B hat is-leftm-consumed color!
+
+(defn gui-mouseover? [component] (point-in-rect? (get-mouse-pos) (:bounds component)))
+
+;;;;;;;;;;;
+
+(def ^:private gui-mouseover-darkgray (rgbcolor :r 0.3 :g 0.3 :b 0.3 :a 0.5))
+(def ^:private gui-mouseover-lightgray (rgbcolor :r 0.7 :g 0.7 :b 0.7 :a 0.5))
+
+(defn- gui-render-label [g {:keys [text bounds]}]
+  (let [[x y w h] bounds]
+    (render-readable-text g x y :background false :shift false text)))
+
+(defn- gui-render-pressable-rect [g {:keys [bounds] :as component}]
+  (let [[x y w h] bounds]
+    (when (gui-mouseover? component)
+      (fill-rect g (dec x) (dec y) (+ w 1) (+ h 1) (if (is-leftm-consumed?) gui-mouseover-lightgray gui-mouseover-darkgray)))
+    (draw-rect g (dec x) (dec y) (+ w 1) (+ h 1) white)))
+
+(defn- gui-render-textbutton [g component]
+  (gui-render-label g component)
+  (gui-render-pressable-rect g component))
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private gui-selected-img (create-image "selected.png"))))
+
+(defn- gui-render-checkbox [g {:keys [bounds] :as component}]
+  (let [[x y w h] bounds]
+    (gui-render-textbutton g component)
+    (when (:selected component)
+      (draw-image gui-selected-img (+ x (+ w 2)) y))))
+
+(defn- gui-render-imgbutton [g {:keys [bounds image] :as component}]
+  (let [[x y w h] bounds]
+    (draw-image image x y))
+  (gui-render-pressable-rect g component))
+
+(def ^:private gui-framebg (rgbcolor :r 0.05 :g 0.05 :b 0.05 :a 1))
+(def ^:private gui-frameborder (rgbcolor :r 0.2 :g 0.2 :b 0.2 :a 1))
+
+(defn- gui-render-frame [g {:keys [bounds] :as component}]
+  (fill-rect g bounds gui-framebg)
+  (draw-rect g bounds gui-frameborder))
+
+;;;;;;;;;
+
+(defn gui-set-visible [component bool] (swap! component assoc :visible bool))
+
+(defn gui-switch-visible [component] (swap! component update-in [:visible] not))
+
+(defn gui-visible? [component] (:visible @component))
+
+(defn gui-get-absolute-posi [component]
+  (let [[x y w h] (:bounds @component)]
+    [x y]))
+
+(defn gui-get-bounds [component] (:bounds @component))
+
+;;;;;;;
+
+(defn- gui-checkbox? [component] (contains? component :selected))
+
+(defn- gui-update-button [refcomponent]
+  (let [{:keys [pressed visible] :as component} @refcomponent]
+    (when (and visible
+               (gui-mouseover? @refcomponent)
+               (try-consume-leftm-pressed))
+      (if (gui-checkbox? @refcomponent)
+        (pressed (:selected (swap! refcomponent update-in [:selected] not)))
+        (pressed)))))
+
+(defn- gui-update-frame [refcomponent]
+  (when (is-key-pressed? (:hotkey @refcomponent))
+    (gui-switch-visible refcomponent)))
+
+;;;;;;;;;;
+
+(defn make-guidisplay [] (atom {:children (list)}))
+
+(defn remove-guicomponent [display component]
+  (swap! display update-in [:children] (fn [children] (remove #(= % component) children))))
+
+(defn- gui-translate-by-parent-bounds [[x y w h] [px py pw ph]]
+  [(+ px x) (+ py y) w h])
+
+(defn- gui-component
+  "Can also have :name"
+  [{:keys [parent visible] :or {visible true} :as data}]
+  {:pre [(every? #(contains? data %) [:parent :bounds])]}
+  (let [component (atom (assoc data :visible visible))]
+    (swap! parent update-in [:children] conj component)
+    (when (:bounds @parent)
+      (swap! component update-in [:bounds] gui-translate-by-parent-bounds (:bounds @parent)))
+    component))
+
+(defn- gui-get-textbounds [{x 0 y 1} text]
+  [x y (get-text-width text (get-defaultfont)) (get-text-height text (get-defaultfont))])
+
+(defn make-label [& {:keys [text location] :as data}]
+  {:pre [(every? #(contains? data %) [:location :text])]}
+  (gui-component (merge data
+                       {:render gui-render-label
+                        :bounds (gui-get-textbounds location text)})))
+
+(defn make-textbutton [& {:keys [text location] :as data}]
+  {:pre [(every? #(contains? data %) [:location :text :pressed])]}
+  (gui-component (merge data
+                       {:render gui-render-textbutton
+                        :update gui-update-button
+                        :bounds (gui-get-textbounds location text)})))
+
+(defn make-checkbox [& {:keys [text location] :as data}]
+  {:pre [(every? #(contains? data %) [:location :text :pressed :selected])]}
+  (gui-component (merge data
+                       {:render gui-render-checkbox
+                        :update gui-update-button
+                        :bounds (gui-get-textbounds location text)})))
+
+(defn make-imgbutton [& {:keys [image location] :as data}]
+  {:pre [(every? #(contains? data %) [:location :image :pressed])]}
+  (gui-component (merge data
+                       {:render gui-render-imgbutton
+                        :update gui-update-button
+                        :bounds (let [[x y] location
+                                      [w h] (get-dimensions image)]
+                                  [x y w h])})))
+
+(deflazygetter ^:private gui-get-closeimg (create-image "close.png"))
+; using lazygetter instead of preload because other preload depends on this (make-frame)
+
+(defn make-frame [& data]
+  (let [data (apply hash-map data)]
+    (assert (every? #(contains? data %) [:bounds :hotkey]))
+    (let [[x y w h] (:bounds data)
+          frame (gui-component (merge data
+                                     {:is-frame true
+                                      :render gui-render-frame
+                                      :update gui-update-frame}))]
+      (make-imgbutton :image (gui-get-closeimg)
+                      :location [(- w 6) 2]
+                      :pressed #(gui-set-visible frame false)
+                      :parent frame)
+      frame)))
+
+;;;;
+
+(defn render-guicomponent [g display]
+  (doseq [refcomponent (reverse (sort-by #(:is-frame @%) (:children @display)))
+          :let [{:keys [tooltip visible render] :as component} @refcomponent]
+          :when visible]
+    (render g component)
+    (when (and tooltip (gui-mouseover? component))
+      (let [[x y] (gui-get-absolute-posi refcomponent)]
+        (render-readable-text g x (dec y) :shift true :background true :above true tooltip)))
+    (when (:children component)
+      (render-guicomponent g refcomponent))))
+
+(defn update-guicomponent [display]
+  (doseq [refcomponent (:children @display)
+          :let [{:keys [update children]} @refcomponent]
+          :when update]
+    (update refcomponent)
+    (when children
+      (update-guicomponent refcomponent))))
+
+;; screenshake
+
+(def ^:private screenshake-delay 45) ; Delay in ms between each new shake.
+
+(def ^:private screenshake-decay 0.25) ; The rate at which the shake "dies down." 0.01 = 1 percent every new shake
+
+(def ^:private screenshake-intensity 6) ; How far the shake should extend in pixels.
+
+(def ^:private screenshake-snap false)  ; Whether to snap pixels to integers (translating to a decimal number
+                       ; will result in subtle blurring!).
+
+; screenshake-snap is not required when we set the shakex shakey translations to 0 after a finished shaking
+; else they will be at values shakex = 0,00..something and the image is blurred permanently after screenshakes
+; because we always translate-shake-before-render...
+
+(def ^:private screenshake-time (atom screenshake-delay))
+(def ^:private screenshake-amt (atom 0))
+(def ^:private screenshake-x (atom 0))
+(def ^:private screenshake-y (atom 0))
+
+(defn- screenshake-step []
+  (reset! screenshake-x (* @screenshake-amt (Math/random)))
+  (reset! screenshake-y (* @screenshake-amt (Math/random)))
+  (when screenshake-snap
+    (swap! screenshake-x int)
+    (swap! screenshake-y int))
+  (reset! screenshake-time screenshake-delay)
+  (swap! screenshake-amt - (* screenshake-decay screenshake-intensity))
+  (when (<= @screenshake-amt 0)
+    (reset! screenshake-x 0)
+    (reset! screenshake-y 0)
+    (reset! screenshake-amt 0)))
+
+(defn shake-screen []
+  (reset! screenshake-amt screenshake-intensity)
+  (screenshake-step))
+
+(defn update-shake [delta]
+;  (when (is-key-pressed? :M)
+;    (shake-screen))
+  (when (> @screenshake-amt 0)
+    (swap! screenshake-time - delta)
+    (when (<= @screenshake-time 0)
+      (screenshake-step))))
+
+(defn translate-shake-before-render [g]
+  (when (and
+          (not= 0 @screenshake-x)
+          (not= 0 @screenshake-y))
+    (graphics-translate g @screenshake-x @screenshake-y)))
+
+(defn translate-shake-after-render [g]
+  (when (and
+          (not= 0 @screenshake-x)
+          (not= 0 @screenshake-y))
+    (graphics-translate g (- @screenshake-x) (- @screenshake-y))))
+
+;; skills
+
+(defn is-ready?        [{state :state}] (= state :ready))
+(defn is-attacking?    [{state :state}] (= state :attacking))
+(defn is-cooling-down? [{state :state}] (= state :cooldown))
+
+(defn get-skill [body skilltype]
+  (or
+    (skilltype @body)
+    (-> (:skillmanager @body) :skills skilltype)))
+
+(defn get-mana [entity] (:mana (:skillmanager @entity)))
+
+(defn enough-mana? [{cost :cost :as skill} {mana :mana :as skillmanager}]
+  (<= cost (:current mana)))
+
+(defn set-mana-to-max [body]
+  (when (lower-than-max? (get-mana body))
+    (show-gains-mana-effect body (rest-to-max (get-mana body))))
+  (swap! body update-in [:skillmanager :mana] set-to-max))
+
+(defn- skill-update-cooldown [skill delta]
+  (if (is-cooling-down? skill)
+    (tick-finally-merge skill :cooldown-counter delta
+                          {:state :ready})
+    skill))
+
+(defn- skill-update-cooldowns [skillmanager delta]
+  (update-in skillmanager [:skills] mapvals #(skill-update-cooldown % delta)))
+
+(defn reset-skills [skills]
+  (mapvals skills
+           #(-> %
+                (update-in [:cooldown-counter] reset-counter)
+                (assoc :state :ready))))
+
+(defn- skill-update-counter! [entity delta skill & [counterkey & _]]
+  (let [k (or counterkey :counter)
+        counter (tick (k skill) delta)]
+    (swap! entity assoc-in [:skillmanager :skills (:type skill) k] counter)
+    (:stopped? counter)))
+
+; Warning:
+; entities which attacktime is driven through their animation and .isStopped
+; check they dont have an :attack-counter!
+; and entities which attack through :attack-counter and have :animation component are ok because first :Attack-counter is checked
+(defn- skill-attack-finished? [entity skill delta]
+  (if (:attack-counter skill)
+    (if (:skillmanager @entity)
+      (skill-update-counter! entity delta skill :attack-counter)
+      (update-counter! entity delta skill :attack-counter))
+    (animation-stopped? (current-animation entity))))
+
+(defn- skill-do-effect [entity {:keys [do-skill] :as skill}]
+  (do-skill entity skill))
+
+(defn- skill-try-attack [entity skill delta]
+  (when (skill-attack-finished? entity skill delta)
+    (skill-do-effect entity skill)
+    (when-let [s (:shoot-sound skill)]
+      (play-sound s))
+    true))
+
+(defn is-usable? [entity skill]
+  (if-let [check-usable (:check-usable skill)]
+    (check-usable entity skill)
+    true))
+
+(defn get-active-skill [{:keys [active-type skills] :as skillmanager}]
+  (get skills active-type))
+
+(let [skill-casting-mouse-state (atom nil)]
+
+  (defn- skill-save-casting-mouse-state []
+    (reset! skill-casting-mouse-state {:position (get-mouse-pos)
+                   :tile-position (get-mouse-tile-pos)
+                   :button (cond
+                             (is-leftbutton-down?) :left
+                             (is-rightbutton-down?) :right)}))
+
+  (defn get-skill-use-mouse-pos [] (:position @skill-casting-mouse-state))
+  (defn get-skill-use-mouse-tile-pos [] (:tile-position @skill-casting-mouse-state))
+  (defn get-skill-use-mouse-button [] (:button @skill-casting-mouse-state)))
+
+(defn- skill-pay-cost [component cost]
+  (update-in component [:mana :current] - cost))
+
+(defn- skill-try-set-active-cooldown
+  "Check contains because grenade may remove skill from skillmanager and assoc-in does assoc
+   all keys that are not there, which would lead to a skill with just {:state :cooldown}"
+  [{active-type :active-type :as skillmanager}]
+  (if (contains? (:skills skillmanager) active-type)
+    (assoc-in skillmanager [:skills active-type :state] :cooldown)
+    skillmanager))
+
+(def ^:private skill-denied-sound (create-sound "bfxr_denied.wav"))
+
+; skillmanager:        READY <-> ATTACKING
+; skillmanager skills: READY <-> COOLDOWN
+(defn update-component-skillmanager
+  [delta {:keys [state choose-skill rotate-after-attack cast-sound] :as component} entity]
+  (swap! entity update-in [:skillmanager] skill-update-cooldowns delta)
+  (let [is-player (is-player? entity)
+        skillmanager (:skillmanager @entity)] ; after update cooldowns.
+    (case state
+      :ready
+      (let [active-type (choose-skill entity skillmanager delta)
+            active-skill (get (:skills skillmanager) active-type)]
+        (when
+          (and
+            active-skill
+            (if is-player (skill-save-casting-mouse-state) true)
+            (is-ready? active-skill)
+            (is-usable? entity active-skill)
+            (let [enough (enough-mana? active-skill skillmanager)]
+              (if (and (not enough) is-player)
+                (do
+                  (playonce skill-denied-sound)
+                  (show-msg-to-player "Not enough mana!")))
+              enough))
+          (when (and cast-sound (not (:is-melee active-skill)))
+            (play-sound cast-sound))
+          (swap! entity #(-> % 
+            (assoc-in [:skillmanager :active-type] active-type)
+            (update-in [:skillmanager] skill-pay-cost (:cost active-skill))
+            (switch-state :skillmanager :attacking)))
+          (when rotate-after-attack
+            (rotate-after-attack entity))))
+      :attacking
+      (when (skill-try-attack entity (get-active-skill skillmanager) delta)
+        (swap! entity #(-> % 
+          (update-in [:skillmanager] skill-try-set-active-cooldown)
+          (switch-state :skillmanager :ready)))))))
+
+(defn skillmanager-component
+  "rotatefn may be nil"
+  [& args]
+  (let [[{:keys [rotatefn choosefn mana skills cast-sound]} props] (split-key-val-and-maps args)]
+    (merge {:type :skillmanager
+            :rotate-after-attack rotatefn
+            :choose-skill choosefn    ; must return not-nil if attack should be tried
+            :mana (min-max-val mana)
+            :skills (zipmap (map :type skills) skills)
+            :state :ready
+            :active-type nil
+            :cast-sound cast-sound
+            :block-effect-reset-state (fn [entity skillm]
+                                        (when (is-attacking? skillm)
+                                          (when (:attack-counter (get-active-skill skillm))
+                                            (swap! entity update-in [:skillmanager :skills (:active-type skillm) :attack-counter] reset-counter))
+                                          (swap! entity #(-> %
+                                               (assoc-in [:skillmanager :skills (:active-type skillm) :state] :cooldown)
+                                               (switch-state :skillmanager :ready)))))}
+           (active update-component-skillmanager)
+           props)))
+
+(defn update-component-skill
+  [delta {:keys [state] :as skill} entity]
+  (when-let [new-state (case state
+                         :ready (when (is-usable? entity skill)
+                                  :attacking)
+                         :attacking (when (skill-try-attack entity skill delta)
+                                      :cooldown)
+                         :cooldown (when (update-counter! entity delta skill :cooldown-counter)
+                                     :ready))]
+    (swap! entity switch-state (:type skill) new-state)))
+
+(defn- skill-create-props [cooldown attacktime]
+  (merge
+    {:state :ready
+     :cooldown-counter (make-counter cooldown)}
+    (when attacktime
+      {:attack-counter (make-counter attacktime)})))
+
+(defn standalone-skill
+  [& {:keys [stype cooldown props attacktime state-blocks]}]
+  (merge {:type stype
+          :block-effect-reset-state (fn [entity skill]
+                                      (when (is-attacking? skill)
+                                        (when (:attack-counter skill)
+                                          (swap! entity update-in [(:type skill) :attack-counter] reset-counter))
+                                        (swap! entity switch-state (:type skill) :cooldown)))}
+         (active update-component-skill)
+         (if state-blocks (blocks-component state-blocks) {})
+         (skill-create-props cooldown attacktime)
+         props))
+
+; TODO player-skillmanager-skill mit : animation, mousebutton, icon
+; (einfach das was benotigt WIRD und was optional ist bei allen item , skillmanager, learnable-skills)
+(defn skillmanager-skill [& more]
+  (let [[{:keys [stype cooldown cost attacktime]} props] (split-key-val-and-maps more)]
+    ; assert has stype cooldown cost? obligatory keys
+    ; assert all keys are stype cooldown cost or attacktime? all keys in obligatory or optional?
+    (merge {:type stype :cost cost}
+           (skill-create-props cooldown attacktime)
+           props)))
+
+;; destructible
+
+(defeffectentity create-leech-visuals [body img]
+  :target body
+  :duration 150
+  (image-render-component img :order :air))
+
+(defn calc-effective-spell-dmg [[basemin basemax] percent-modify]
+  {:pre [(number? basemin) (number? basemax)]}
+  (let [modifier (/ percent-modify 100)]
+    [(int (* modifier basemin))
+     (int (* modifier basemax))]))
+
+(defn calc-effective-melee-dmg [[basemin basemax] {:keys [min-inc max-inc percent-modify]}]
+  {:pre [(number? basemin) (number? basemax)]}
+  (let [new-min (+ basemin min-inc)
+        new-max (+ basemax max-inc)
+        modifier (/ percent-modify 100)]
+    [(int (* modifier new-min))
+     (int (* modifier (max new-min new-max)))]))
+
+(defn- destructible-try-leech [dmg-dealt]
+  (let [{:keys [hp-leech mana-leech]} (:item-boni @player-body)]
+
+    (when-not (zero? hp-leech)
+      (let [value (* (/ hp-leech 100) dmg-dealt)]
+        (show-gains-hp-effect player-body value)
+        (swap! player-body update-in [:destructible :hp] increase-min-max-val value)) ; same code as in hp pot
+      (create-leech-visuals player-body (create-image "effects/hp_leech.png")))
+
+    (when-not (zero? mana-leech)
+      (let [value (* (/ mana-leech 100) dmg-dealt)]
+        (show-gains-mana-effect player-body value)
+        (swap! player-body update-in [:skillmanager :mana] increase-min-max-val value)) ; same code as in mana pot
+      (create-leech-visuals player-body (create-image "effects/mana_leech.png")))))
+
+;;
+
+(def player-standard-dmg 10) ; entspricht 1.0 multiplier monster hp also 1 schlag tot (durchschnitt)
+
+(def player-start-hp 100)
+
+(def monster-standard-dmg 5) ; 20 default hits to kill player
+
+(let [armor-point-avg-reduce 0.1]
+
+  (defn- destructible-armor-variant-dmg-reduce [armor]
+    (variance-val
+      (* armor-point-avg-reduce armor)
+      0.2))
+
+  (defn get-armor-reduce-info [armor]
+    (str "Damage reduced by "
+      (variance-val-str
+        (destructible-armor-variant-dmg-reduce armor))))
+
+  (defn- destructible-monster-armor [perc-reduce]
+    (int ; TODO wieso int hier und bei player-armor net?
+      (*
+        (/ perc-reduce 100)
+        player-standard-dmg
+        (/ 1 armor-point-avg-reduce))))
+
+  (defn get-player-armor "Reduces perc of standard-monsterdmg"
+    [perc-reduce]
+    (*
+      (/ perc-reduce 100)
+      monster-standard-dmg
+      (/ 1 armor-point-avg-reduce))))
+
+; TODO depends body because destructible are applied body-hit-effects?
+(defn destructible-component [hp armor]
+  {:pre [(>= hp 0) (>= armor 0)]}
+  {:type :destructible
+   :hp (min-max-val hp)
+   :armor armor
+   :init (fn [entity]
+           ; hp-bar brightness corresponds to image corner brightness
+           (assert (or
+                     (:image-render @entity)
+                     (:animation @entity))))})
+
+(defn destructible? [body] (:destructible @body))
+
+(defn deal-dmg-allowed? [body affected-side] ; TODO also the same @ get-destructible-bodies... -> side always only 1 ??
+  (and (destructible? body)
+       (= (:side (:body @body)) affected-side)
+       (is-affectable? body)))
+
+(defn attackable-by-player? [body]
+  (deal-dmg-allowed? body :monster))
+
+; TODO is-affectable ... why here? I want destructible bodies.,.. does too many things...
+(defn get-destructible-bodies [position radius side]
+  (let [affects-side (if (keyword? side) #{side} (set side))]
+    (filter #(and (destructible? %)
+                  (affects-side (:side (:body @%)))
+                  (is-affectable? %))
+      (get-touched-bodies position radius))))
+
+(defn get-hp [body] (:hp (:destructible @body)))
+(defn get-armor [body] (:armor (:destructible @body)))
+
+(defn is-dead? [body] (:is-dead (:destructible @body)))
+
+; TODO make 2 functions -> simpler? like this more complected
+(defn set-hp-to-max [body]
+  (when (lower-than-max? (get-hp body))
+    (show-gains-hp-effect body (rest-to-max (get-hp body))))
+  (swap! body update-in [:destructible :hp] set-to-max))
+
+(defn monster-destructible [hp-multiplier armor-perc-reduce]
+  (destructible-component
+    (rand-float-between
+      (variance-val (* hp-multiplier player-standard-dmg) 0.5))
+    (destructible-monster-armor armor-perc-reduce)))
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def explosion-frames (spritesheet-frames "effects/expsmall.png" 20 20))))
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private destructible-blood-frames (spritesheet-frames "effects/blood.png" 20 20))))
+
+(defn- destructible-create-hit-effect [body]
+  (if-let [{trigger :trigger} (:hit-effect @body)]
+    (trigger body)
+    (animation-entity
+      :position (:value (:position @body))
+      :animation (create-animation (if (is-player? body)
+                                     destructible-blood-frames
+                                     explosion-frames)))))
+
+(defn- destructible-show-dmg-effect [body dmg]
+  (show-string-effect body 1000 (rgbcolor :r 1) (str (int dmg) "!")))
+
+(defn- destructible-dealt-dmg-triggers [target-body actual-dmg is-crit-hit? lethal is-player-melee]
+
+  ; hit something else triggers
+  (when is-player-melee
+    ((:dealt-melee-dmg-effect (:item-boni @player-body)) target-body)
+    (destructible-try-leech actual-dmg))
+
+  ; being hit by something else triggers
+  (when-let [{trigger :do} (:dealt-dmg-trigger @target-body)]
+    (trigger target-body lethal))
+  (when-not lethal
+    (when (is-player? target-body)
+      (shake-screen))
+    (destructible-create-hit-effect target-body)
+    (play-sound
+      (cond (is-player? target-body) "bfxr_playerhit.wav"
+            is-crit-hit? "kabloom.wav"
+            :else "bfxr_normalhit.wav"))))
+
+(defn- destructible-critical-hit-dmg [dmg target-body]
+  (let [dmg (* dmg 3)]
+    (destructible-show-dmg-effect target-body dmg) ; TODO belongs to dealt-dmg-triggers & unexpected side effect ?
+    dmg))
+
+(defn- destructible-dmg-data-ok? [{mi 0 mx 1 :as dmg}]
+  (and (vector? dmg)
+       (= (count dmg) 2)
+       (integer? mi)
+       (integer? mx)
+       (>= mi 0)
+       (>= mx 0)
+       (>= mx mi)))
+
+(defn- destructible-calc-deal-dmg [dmg is-player-melee is-player-spell target-body]
+  (let [dmg (cond (destructible-dmg-data-ok? dmg) dmg
+                  (number? dmg) [dmg dmg]
+                  :else (println "Dmg-data notokay: " dmg))
+        {:keys [melee-crit spell-crit percent-modify-spell] :as item-boni} (:item-boni @player-body)
+        ; +percent% increases
+        dmg (if is-player-spell (calc-effective-spell-dmg dmg percent-modify-spell) dmg)
+        dmg (if is-player-melee (calc-effective-melee-dmg dmg item-boni) dmg)
+        ; random dmg
+        dmg (rand-int-between dmg)
+        ; critical hit check
+        is-melee-crit (and is-player-melee (percent-chance melee-crit))
+        dmg (if is-melee-crit (destructible-critical-hit-dmg dmg target-body) dmg)
+        is-spell-crit (and is-player-spell (percent-chance spell-crit))
+        dmg (if is-spell-crit (destructible-critical-hit-dmg dmg target-body) dmg)]
+    [dmg (or is-melee-crit is-spell-crit)]))
+
+(defn- destructible-apply-armors [dmg target-body]
+  (if (shield-try-consume-damage target-body)
+    (play-sound "bfxr_shield_consume.wav")
+    (let [rest-dmg (->> target-body get-armor destructible-armor-variant-dmg-reduce rand-float-between (- dmg) (max 0))]
+      (if (and (not (zero? dmg)) (zero? rest-dmg))
+        (play-sound "bfxr_armorhit.wav")
+        rest-dmg))))
+
+(defn deal-dmg [dmg target-body & {:keys [is-player-melee is-player-spell]}]
+  {:pre [(destructible? target-body)]}
+  (when-not (is-dead? target-body) ; kill only once, call triggers only once
+    (wake-up target-body)  ; hit-trigger even if armor absorbs dmg
+    (let [[dmg is-crit-hit?] (destructible-calc-deal-dmg dmg is-player-melee is-player-spell target-body)]
+      (when-let [dmg (destructible-apply-armors dmg target-body)]
+        (let [current-hp (:current (get-hp target-body))
+              new-hp (- current-hp dmg)
+              lethal (<= new-hp 0)
+              actual-dmg (if lethal current-hp dmg)]
+          ; (show-dmg-effect target-body actual-dmg)
+          (swap! target-body assoc-in [:destructible :hp :current] (max 0 new-hp))
+          (destructible-dealt-dmg-triggers target-body actual-dmg is-crit-hit? lethal is-player-melee)
+          (when lethal
+            (swap! target-body assoc-in [:destructible :is-dead] true)
+            (when-not (is-player? target-body)
+              (add-to-removelist target-body))))))))
+
+;; movement
+
+(defn- movement-create-new-position
+  [delta [vx vy] [old-x old-y] speed]
+  [(+ old-x (* vx speed delta))
+   (+ old-y (* vy speed delta))])
+
+(defn try-move-projectile
+  "returns true if blocked, nil if moved."
+  [new-posi projectile]
+  (let [id (:id (meta projectile))
+        half-w (:half-width (:body @projectile))
+        half-h (:half-height (:body @projectile))
+        {:keys [hit-effects hits-side already-hit-bodies piercing hits-wall-effect]} (:projectile-collision @projectile)
+        touched-cells (calc-touched-cells new-posi half-w half-h)
+        hit-body (first (filter #(and (not (contains? already-hit-bodies %))
+                                   (= hits-side (:side (:body @%))))
+                             (get-other-solid-bodies new-posi half-w half-h id touched-cells)))
+        movement-type (:movement-type (:movement @projectile))
+        ; TODO PROJECTILE COLLISION to entityPROJECTILE and out of movement logic?
+        blocked (cond hit-body
+                      (do
+                        (swap! projectile update-in [:projectile-collision :already-hit-bodies] conj hit-body)
+                        (dorun (map #(% hit-body) hit-effects))
+                        (not piercing))
+
+                      (some #(cell-blocked? % movement-type) touched-cells) ; TODO mit x-axis und y-axis -> 2-3 abfragen anstatt 4. Lohnt?
+                      (do
+                        (hits-wall-effect new-posi)
+                        true))]
+    (when blocked (add-to-removelist projectile) true)))
+
+(defn- movement-update-position-projectile
+  [delta v x-direction y-direction speed body]
+  (let [new-position (movement-create-new-position delta v (:value (:position @body)) speed)
+        blocked (try-move-projectile new-position body)]
+    (when-not blocked
+      (swap-position! body new-position))
+    blocked))
+
+; TODO gleicher code wie bei components.body/blocked-location? -> fuge zusammen
+(defn- movement-blocked-for-body? [body movement-type noclip position touched-cells]
+  (or
+    (some #(cell-blocked? % movement-type) touched-cells)
+    (if-not noclip
+      ; checks if colliding with other solid bodies -> rename?
+      (seq (get-other-solid-bodies position body touched-cells)))))
+
+(comment
+  ; fur testen wie oft try-moved/update-posi-def average ist. -> so 1.4 ca.
+  (def try-moved (atom 0))
+  (def update-posi-def (atom 0))
+  (require '[cdq.core :refer [ingame-loop-comp]])
+  (require '[cdq.core :refer [rendering]])
+  (ingame-loop-comp :debug-infos
+    (rendering :above-gui [g c]
+      (render-readable-text g 50 90 (str "try-moved  " @try-moved))
+      (render-readable-text g 50 110 (str "update-posi-def " @update-posi-def))
+      (render-readable-text g 50 130 (str "avg " (if-not (zero? @update-posi-def) (float (/ @try-moved @update-posi-def))))))))
+
+; TODO get-cells performance... -> mit cached-adj-cells ersetzen wenns sein soll
+; ~ 1,7 1,8 % der runtime ... _> could be improved...
+
+; auch vlt testen ob dieses remaining... zeug nen unterschied macht
+; ebenfalls testen ob threshhold nen unterschied macht...
+; -> best. anzahl an gegnern spawnen und auch vorgegebenem weg den spieler bewegen & messen?
+; -> um vergleichen zu konnen ... also erst 3x schauen ob gleiche ergebnisse ...
+; oder erstmal so lassen .... und auf wichtigeres konzentrieren
+(defn- movement-try-move [body v xdir ydir delta speed movement-type noclip]
+  (let [new-posi (movement-create-new-position delta v (:value (:position @body)) speed)
+        to-check-tiles (get-to-check-tiles body new-posi xdir ydir) ; rename new-tiles, new-cells ?
+        to-check-cells (get-cells to-check-tiles)
+        blocked (movement-blocked-for-body? body movement-type noclip new-posi to-check-cells)]
+    (when-not blocked
+      ; manual :posi-changed of solid body because of performance issues (calc-touched-cells)
+      (let [all-tiles (apply get-touched-tiles (get-body-bounds body)) ; == all-previously-touched-tiles?
+            remaining (get-cells (set/difference (set all-tiles) to-check-tiles))] ; == all that remain to be checked?
+        ; to-check-cells not nil because not blocked
+        ; remaining not nil because not moving there -> update-touched-cells
+        (update-touched-cells body (concat remaining to-check-cells)))
+      (swap-position! body new-posi :filter-body true) ; TODO does more than swap-position also calls posi-changed..
+      (update-occupied-cell body) ; update after body has changed position! touched cells already uses cells corresponding to new position
+      v)))
+
+(defn- movement-calc-threshold
+  "Until entity is in the tile next to target and does not need to slide anymore"
+  [half-size] ; assert entity half-w = half-h
+  (Math/abs (.y (normalise (vector2f
+                              (- 0.5 (inc half-size))
+                              (- 0.5 half-size))))))
+
+(defn- movement-update-position-solid [delta {vx 0 vy 1 :as v} xdir ydir speed body]
+  (let [threshold (movement-calc-threshold (:half-width (:body @body)))
+        movement-type (:movement-type (:movement @body))
+        noclip (:noclip (:movement @body))
+        success (or
+                  (movement-try-move body v xdir ydir delta speed movement-type noclip)
+                  (when (or (is-player? body) (> (Math/abs (float vx)) threshold))
+                    (movement-try-move body [xdir 0] xdir ydir delta speed movement-type noclip))
+                  (when (or (is-player? body) (> (Math/abs (float vy)) threshold))
+                    (movement-try-move body [0 ydir] ydir ydir delta speed movement-type noclip)))]
+    (when success
+      ; hier nicht rotiert um bewegten vektor(success) sondern um gewunschten vektor da sonst zittern die monster herum
+      (when-let [rotation (:rotation @body)]
+        ((:moved rotation) body v))
+      (when (is-player? body)
+          (swap! body assoc-in [:movement :play-move-animation] true)))))
+
+(defn- movement-update-component
+  [delta {:keys [control-update speed] :as c} body]
+  (let [v (control-update body c delta)]
+    (assert (or (nil? v)
+                (zero? (vector-length v))
+                (normalised? v)))
+    (when (and v
+               (not (zero? (vector-length v))))
+      (let [{vx 0 vy 1 :as v} (vec-posi v)
+            xdir (Math/signum (float vx))
+            ydir (Math/signum (float vy))
+            update-position (if (:projectile-collision @body)
+                              movement-update-position-projectile
+                              movement-update-position-solid)]
+        (update-position delta v xdir ydir speed body)))))
+
+; max speed damit kleinere bodies beim direkten druberfliegen nicht ubersprungen werden (an den ecken werden sie trotzdem ubersprungen..)
+; schnellere speeds mussten in mehreren steps sich bewegen.
+; 0.0108 tile/ms
+; 520 px/s
+(def max-speed (* 1000 (/ min-solid-pxsize max-delta)))
+
+(defn in-tiles-per-ms [px-per-s] (/ px-per-s 1000 tile-width))
+
+; speed is pixels/s
+(defn movement-component [control speed movement-type]
+  {:pre [(#{:air :ground} movement-type)
+         (>= speed 1) ; just to check that its now in px/s
+         (<= speed max-speed)]}
+  (safe-merge
+    {:type :movement
+     :movement-type movement-type
+;   :init (fn [entity]
+;           ;  (not asserted becuz burrowed are burrowing @init... so not solid anymore)
+;           (assert (or (:projectile-collision @entity) ;update-position-projectile
+;                       (is-solid? entity)))) ;update-position-solid
+     :play-move-animation false
+     :speed (in-tiles-per-ms speed)}
+    (active movement-update-component)
+    control))
+
+(defn projectile-movement-component [move-vector speed]
+  (movement-component
+    {:control-update (constantly move-vector)}
+    speed
+    :air))
+
+;; ingame-gui
+
+(def ^:private ingame-gui-controls-hotkey :H)
+(def skillmenu-hotkey :S)
+(def char-hotkey :C)
+(def inventory-hotkey :I)
+(def options-hotkey :ESCAPE) ; ist nicht nur options sondern auch wenn tod / throw item away hotkey
+
+(def ingamestate-display (make-guidisplay))
+
+(ingame-loop-comp :display
+  (active [delta c _]
+   (update-guicomponent ingamestate-display))
+  (rendering :selfmade-gui [g c]
+    (render-guicomponent g ingamestate-display)))
+
+(def ingame-gui-background-color lightGray)
+(def ingame-gui-foreground-color (.brighter ingame-gui-background-color 0.5))
+
+(def frame-screenborder-distance 5)
+
+(defn- ingame-gui-find-component [display name]
+  (first (filter #(= (:name @%) name) (:children @display))))
+
+(defn- ingame-gui-get-all-frames []
+  (filter #(:is-frame @%) (:children @ingamestate-display)))
+
+(defn some-visible-frame? []
+  (some gui-visible? (ingame-gui-get-all-frames)))
+
+(defn close-all-frames []
+  (dorun (map #(gui-set-visible % false) (ingame-gui-get-all-frames))))
+
+(defn mouse-inside-some-gui-component? []
+  (some
+    #(and (gui-visible? %) (gui-mouseover? @%))
+    (:children @ingamestate-display)))
+
+;; Help/Controls
+
+; -> only open for first starting of the game or for every character only one time and save with save-game
+
+(def ^:private ingame-gui-controls-text
+  "* Moving: Leftmouse
+* Use skills: Left & right mouse
+* Set Skill hotkey: Press 0-9 while hovering
+over a skill at the bottom left selection lists.
+* Use items in actionbar: Q,W and E.
+* Minimap: TAB")
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private ingame-gui-controlsframe (let [w ;(+ 10 (get-text-width ingame-gui-controls-text)) TODO FIXME
+                              320]
+                          (make-frame :name :controls
+                                      :bounds [frame-screenborder-distance
+                                               212
+                                               w
+                                               (+ 2 (get-text-height ingame-gui-controls-text))]
+                                      :hotkey ingame-gui-controls-hotkey
+                                      :visible (get-setting :show-controls-frame)
+                                      :parent ingamestate-display)))
+    (make-label :location [2 2]
+                :text ingame-gui-controls-text
+                :parent ingame-gui-controlsframe)))
+
+(def buttonx-start 60) ; rechts neben skill-selection-buttons
+(def ingame-gui-x-dist 18) ; mit get-mouse-pos rausgefunden
+
+(def buttonscale [16 16])
+
+(defn- ingame-gui-hotkey-str [hotkey s]
+  (let [hkname (name hotkey)
+        markedhkname (str "[" hkname "]")]
+    (if (.contains s hkname)
+      (.replace s hkname markedhkname)
+      (str markedhkname s))))
+
+; -1 location: free sp button
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (make-imgbutton
+      :image (create-image "icons/character.png" :scale buttonscale)
+      :location [(+ buttonx-start (* ingame-gui-x-dist 0)) (- screen-height 18)]
+      :pressed #(gui-switch-visible (ingame-gui-find-component ingamestate-display :character))
+      :tooltip (ingame-gui-hotkey-str char-hotkey "Character Attributes")
+      :parent ingamestate-display)
+
+    (make-imgbutton
+      :image (create-image "icons/skills.png" :scale buttonscale)
+      :location [(+ buttonx-start (* ingame-gui-x-dist 1)) (- screen-height 18)]
+      :pressed #(gui-switch-visible (ingame-gui-find-component ingamestate-display :skillmenu))
+      :tooltip (ingame-gui-hotkey-str skillmenu-hotkey "Skills")
+      :parent ingamestate-display)
+
+    (make-imgbutton
+      :image (create-image "icons/inventory.png" :scale buttonscale)
+      :location [(+ buttonx-start (* ingame-gui-x-dist 2)) (- screen-height 18)]
+      :pressed #(gui-switch-visible (ingame-gui-find-component ingamestate-display :inventory))
+      :tooltip (ingame-gui-hotkey-str inventory-hotkey "Inventory")
+      :parent ingamestate-display)
+
+    (make-imgbutton
+      :image (create-image "icons/controls.png" :scale buttonscale)
+      :location [(+ buttonx-start (* ingame-gui-x-dist 3)) (- screen-height 18)]
+      :pressed #(gui-switch-visible (ingame-gui-find-component ingamestate-display :controls))
+      :tooltip (ingame-gui-hotkey-str ingame-gui-controls-hotkey "Game Controls/Hotkeys")
+      :parent ingamestate-display)
+
+    (make-imgbutton
+      :image (create-image "icons/options.png" :scale buttonscale)
+      :location [(+ buttonx-start (* ingame-gui-x-dist 4)) (- screen-height 18)]
+      :pressed #(enter-state options)
+      :tooltip (ingame-gui-hotkey-str options-hotkey "Options/Exit")
+      :parent ingamestate-display)))

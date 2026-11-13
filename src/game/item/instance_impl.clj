@@ -1,7 +1,7 @@
 (ns game.item.instance-impl
   (:require
     [cdq.core :refer [current-map]]
-    [game.components.movement :refer [projectile-movement-component]]
+    [cdq.core :refer [projectile-movement-component]]
     [game.components.body-effects-impl :refer [battle-drugs dmg-effect]]
     [cdq.core :refer [player-body]]
     [game.components.skills.melee :refer [melee-weapon]]
@@ -16,10 +16,10 @@
     [game.entity.projectile :refer [fire-projectile]]
 
     [cdq.core :refer [get-rand-weighted-item rand-int-between]]
-    [game.utils.msg-to-player :refer [show-msg-to-player]]
+    [cdq.core :refer [show-msg-to-player]]
     [cdq.core :refer [show-gains-hp-effect show-gains-mana-effect]]
-    [game.components.destructible :refer [get-hp get-player-armor]]
-    [game.components.skills.core :refer [get-mana get-skill-use-mouse-tile-pos skillmanager-skill]]
+    [cdq.core :refer [get-hp get-player-armor]]
+    [cdq.core :refer [get-mana get-skill-use-mouse-tile-pos skillmanager-skill]]
     [game.components.skills.utils :refer [check-line-of-sight get-player-ranged-vector]]
     [cdq.core :refer [cells]]
     [game.item.cells :refer [remove-one-item-from try-pickup-item]]

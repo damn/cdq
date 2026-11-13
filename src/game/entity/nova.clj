@@ -4,7 +4,7 @@
     [cdq.core :refer [rgbcolor]]
     [cdq.core :refer [make-counter counter-ratio]]
     [cdq.core :refer [position-component]]
-    [game.components.destructible :refer [deal-dmg get-destructible-bodies]]
+    [cdq.core :refer [deal-dmg get-destructible-bodies]]
     [clojure.set :refer [union]]
         [cdq.core :refer [render-centered-shape]]
     [cdq.core :refer [in-pixel]]

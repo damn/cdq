@@ -3,7 +3,6 @@
     [clojure.walk :refer [postwalk]]
     game.mouseoverbody
     [cdq.core :as session :refer [load-session new-session-data save-session]]
-    game.components.sleeping
     game.components.burrow
     cdq.core
     [game.item.cells :refer [add-item-to-cell empty-all-item-grids]]
@@ -19,7 +18,6 @@
     game.player.core
     game.player.skill.learnable
     game.player.skill.selection-list
-    game.utils.msg-to-player
     [cdq.core :refer [log translate-to-tile-middle]]
     [cdq.core :refer [distinct-seq?]]
     [game.monster.spawn :refer [try-spawn]]
@@ -171,11 +169,11 @@
         [#'game.mouseoverbody/cache-session]
         [#'game.mouseoverbody/saved-mouseover-body-session]
         [#'cdq.core/update-session]
-        [#'game.components.sleeping/session]
+        [#'cdq.core/sleeping-session]
         [#'game.components.burrow/session]
         [#'cdq.core/lightning-session]
-        [#'game.utils.msg-to-player/counter-session]
-        [#'game.utils.msg-to-player/message-session]]))
+        [#'cdq.core/msg-to-player-counter-session]
+        [#'cdq.core/msg-to-player-message-session]]))
 
 (assert (distinct-seq? (session-components)))
 ; The types need to be distinct, so load-session-component can get the data from the savegame-file that corresponds to the right session-component

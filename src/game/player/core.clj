@@ -11,7 +11,7 @@
     cdq.core
     cdq.core
     [cdq.core :refer [show-on-minimap]]
-    [game.components.skills.core :refer [is-attacking? reset-skills]]
+    [cdq.core :refer [is-attacking? reset-skills]]
     [game.components.skills.melee :refer [get-player-skill-animation-key]]
     [cdq.core :refer [light-component]]
     [cdq.core :refer [set-to-max]]
@@ -22,14 +22,13 @@
     [cdq.core :refer [add-to-removelist create-entity player-body]]
     [cdq.core :refer [switch-state]]
     [cdq.core :refer [position-component]]
-    [game.components.movement :refer [movement-component]]
-    game.components.movement
+    [cdq.core :refer [movement-component]]
     [cdq.core :refer [mana-regen-component rotation-component set-rotation-angle]]
     [cdq.core :refer [ingame-loop-comp]]
     [cdq.core :refer [animation-component rendering]]
-    [game.components.destructible :refer [destructible-component is-dead? player-start-hp]]
+    [cdq.core :refer [destructible-component is-dead? player-start-hp]]
     [cdq.core :refer [colliding-with-other-solid-bodies? create-body teleport]]
-    [game.components.body-effects :refer [get-sub-entities]]
+    [cdq.core :refer [get-sub-entities]]
     [game.item.cells :refer [get-inventory-cells-with-item-name remove-item-from-cell]]
     [game.components.movement.ai.potential-field :refer [potential-field-component]]
     [game.player.skill.skillmanager :refer [create-player-skillmanager get-current-standard-skill]]
@@ -39,7 +38,7 @@
     cdq.core
     [cdq.core :as debug]
 
-    [game.utils.msg-to-player :refer [show-msg-to-player]]))
+    [cdq.core :refer [show-msg-to-player]]))
 
 ; use require and remove the -player prefixes or suffixes here
 

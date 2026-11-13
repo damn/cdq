@@ -27,15 +27,15 @@
     [cdq.core :refer [blocked-location? bodies-in-range? circle-collides? get-bodies-at-position get-dist-to-player on-screen-and-in-sight? teleport]]
     [cdq.core :refer [hp-regen-component rotate-to-player rotation-component]]
     [cdq.core :refer [animation-component animation-entity create-line-render-effect create-lines-render-effect image-render-component render-map-indep-order render-on-map-order rendering single-animation-component translate-position]]
-    [game.components.destructible :refer [calc-effective-spell-dmg deal-dmg explosion-frames get-armor get-armor-reduce-info get-destructible-bodies get-hp is-dead? set-hp-to-max]]
+    [cdq.core :refer [calc-effective-spell-dmg deal-dmg explosion-frames get-armor get-armor-reduce-info get-destructible-bodies get-hp is-dead? set-hp-to-max]]
     [game.components.body-effects-impl :refer [add-psi-charge aoe-armor-reducer consume-psi-charges create-bullettime-effects current-psi-charges dmg-effect max-psi-charges slowdown-effect stun stun-collision-effect]]
     [cdq.core :refer [blocks-component]]
-    [game.components.shield :refer [shield-component]]
-    [game.components.movement :refer [movement-component projectile-movement-component]]
+    [cdq.core :refer [shield-component]]
+    [cdq.core :refer [movement-component projectile-movement-component]]
     [game.components.movement.ai.potential-field :refer [calculate-mouseover-body-colors path-to-player-movement potential-field-player-following render-potential-field-following-mouseover-info render-potential-field-info]]
-    [game.components.skills.core :refer [enough-mana? get-mana get-skill get-skill-use-mouse-tile-pos is-attacking? is-ready? is-usable? skillmanager-component skillmanager-skill standalone-skill]]
+    [cdq.core :refer [enough-mana? get-mana get-skill get-skill-use-mouse-tile-pos is-attacking? is-ready? is-usable? skillmanager-component skillmanager-skill standalone-skill]]
     [game.components.skills.melee :refer [get-current-player-melee-dmg melee-weapon monster-melee-component monster-melee-props player-melee-props]]
-    [game.components.sleeping :refer [wake-up]]
+    [cdq.core :refer [wake-up]]
     [game.entity.projectile :refer [fire-projectile]]
     [game.entity.nova :refer [nova-effect]]
     [game.item.instance :refer [create-item-body put-item-on-ground]]
@@ -54,7 +54,7 @@
     [game.components.skills.utils :refer [check-line-of-sight get-player-ranged-vector]]
     [game.player.skill.learnable :refer [deflearnable-skill]]
     [cdq.core :refer [clear-key-pressed-record clear-mouse-pressed-record get-mouse-pos is-key-pressed? is-rightm-consumed? try-consume-leftm-pressed try-consume-rightm-pressed update-mousebutton-state]]
-    [game.gui :refer [is-visible? make-checkbox make-frame make-guidisplay make-label make-textbutton remove-guicomponent render-guicomponent set-visible update-guicomponent]]
+    [cdq.core :refer [gui-visible? make-checkbox make-frame make-guidisplay make-label make-textbutton remove-guicomponent render-guicomponent gui-set-visible update-guicomponent]]
     [cdq.core :as ids]
     [game.status-options :refer [get-state get-text set-state status-check-boxes]]
     [cdq.core :as debug]
@@ -63,9 +63,9 @@
     [game.player.session-data :refer [current-character-name get-session-file-character-names]]
     [cdq.core :refer [image-corners set-cached-brightness]]
     [cdq.core :refer [get-mouse-tile-pos mouse-int-tile-pos]]
-    [game.screenshake :refer [translate-shake-after-render translate-shake-before-render update-shake]]
+    [cdq.core :refer [translate-shake-after-render translate-shake-before-render update-shake]]
     [game.mouseoverbody :refer [get-mouseover-body]]
-    [game.ingame-gui :refer [background-color char-hotkey close-all-frames foreground-color frame-screenborder-distance ingamestate-display mouse-inside-some-gui-component? options-hotkey some-visible-frame?]]
+    [cdq.core :refer [ingame-gui-background-color char-hotkey close-all-frames ingame-gui-foreground-color frame-screenborder-distance ingamestate-display mouse-inside-some-gui-component? options-hotkey some-visible-frame?]]
     [cdq.core :refer [get-entities-in-active-content-fields get-player-content-field-idx]]
     [cdq.core :refer [cell-blocked? get-body-ids get-cell get-cell-grid get-map-h get-map-w]]
     [cdq.core :refer [get-camera-position]]
@@ -150,8 +150,8 @@
   (rendering :tooltips [g c]
     (render-item-tooltip g)))
 
-(def ^:private item-cells-bg-color (.darker background-color 0.5))
-(def ^:private item-cells-fg-color foreground-color)
+(def ^:private item-cells-bg-color (.darker ingame-gui-background-color 0.5))
+(def ^:private item-cells-fg-color ingame-gui-foreground-color)
 
 (def ^:private droppable-color (rgbcolor :g 0.6 :a 0.8))
 (def ^:private not-allowed-color (rgbcolor :r 0.6 :a 0.8))
@@ -1409,10 +1409,10 @@ PSI-Explosion
                   :credits   [true false false false]}]
   (defn- set-visiblity-state [vis-state]
     (let [current (vis-state visibility)]
-      (set-visible credits-label (current 0))
+      (gui-set-visible credits-label (current 0))
       (reset! textfield-visible (current 1))
-      (set-visible create-char-button (current 2))
-      (dorun (map #(set-visible % (current 3)) load-saved-game-components)))))
+      (gui-set-visible create-char-button (current 2))
+      (dorun (map #(gui-set-visible % (current 3)) load-saved-game-components)))))
 
 (defn- reset-menu-state []
   (init-load-saved-game-textbuttons)
@@ -1672,7 +1672,7 @@ PSI-Explosion
 
 (ingame-loop-comp :player-character-status
   (rendering [g c]
-    (when (is-visible? character-frame)
+    (when (gui-visible? character-frame)
       (let [[leftx topy] (:bounds @character-frame)]
         (render-readable-text g (+ leftx 2) (+ topy 2) :background false
           (str "Name: " @current-character-name)

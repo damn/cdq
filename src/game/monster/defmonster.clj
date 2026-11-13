@@ -3,8 +3,8 @@
     [cdq.core :refer [create-entity]]
     [cdq.core :refer [position-component]]
     [cdq.core :refer [create-body]]
-    [game.components.destructible :refer [monster-destructible]]
-    [game.components.sleeping :refer [sleeping-component]]
+    [cdq.core :refer [monster-destructible]]
+    [cdq.core :refer [sleeping-component]]
     [cdq.core :refer [tile-height tile-width]]))
 
 (defn create-monster

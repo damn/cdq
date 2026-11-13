@@ -7,7 +7,7 @@
     [cdq.core :refer [rgbcolor set-color white]]
     [cdq.core :refer [draw-string fill-rect]]
     [cdq.core :refer [get-entity-tile]]
-    [game.components.movement :refer [movement-component]]
+    [cdq.core :refer [movement-component]]
     [cdq.core :refer [cells get-8-neighbour-positions]]
     [cdq.core :refer [diagonal-direction?]]
     [cdq.core :refer [genmap positions when-seq]]

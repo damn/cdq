@@ -15,7 +15,7 @@
     [cdq.core :refer [blocked-location? create-body]]
     [cdq.core :refer [image-render-component render-on-map]]
     [game.components.pressable :refer [pressable-component]]
-    [game.utils.msg-to-player :refer [show-msg-to-player]]))
+    [cdq.core :refer [show-msg-to-player]]))
 
 ;;; glittering
 

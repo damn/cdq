@@ -79,7 +79,7 @@
         ;; dont spawn monsters near the start locations of the levels ... so a calm start... start-positions need to be translated to tile middle !!
         start-position (:start-position (get-current-map-data))
         posis (remove #(< (get-distance % start-position)
-                          game.components.sleeping/start-position-safezone-radius)
+                          cdq.core/start-position-safezone-radius)
                       posis)
         monstertypes (get-rand-weighted-items (count posis) group)]
     (comment (log "#posis " (count posis)

@@ -8,8 +8,8 @@
         [game.mouseoverbody :refer [get-mouseover-body]]
     [cdq.core :refer [id-entity-map is-player? player-body]]
     [cdq.core :refer [calc-touched-cells circle-collides? is-affectable? rect-shape]]
-    [game.components.destructible :refer [attackable-by-player? calc-effective-melee-dmg deal-dmg]]
-    [game.components.skills.core :refer [get-active-skill get-skill-use-mouse-button standalone-skill]]
+    [cdq.core :refer [attackable-by-player? calc-effective-melee-dmg deal-dmg]]
+    [cdq.core :refer [get-active-skill get-skill-use-mouse-button standalone-skill]]
     [cdq.core :refer [get-bodies-from-cells]]))
 
 ;;; front-of-body-shape

@@ -1,13 +1,13 @@
 (ns game.mouseoverbody
   (:require
-    [game.ingame-gui :refer [mouse-inside-some-gui-component?]]
+    [cdq.core :refer [mouse-inside-some-gui-component?]]
     [cdq.core :refer [sort-by-order]]
     [cdq.core :refer [is-leftbutton-down?]]
     [cdq.core :refer [debug-mode]]
     [cdq.core :refer [atom-session]]
     [cdq.core :refer [active id-entity-map is-player?]]
     [cdq.core :refer [get-bodies-at-position on-screen-and-in-sight?]]
-    [game.components.destructible :refer [attackable-by-player?]]
+    [cdq.core :refer [attackable-by-player?]]
     [cdq.core :refer [render-on-map-order]]
     [cdq.core :refer [ingame-loop-comp]]
     cdq.core

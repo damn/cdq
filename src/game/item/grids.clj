@@ -2,8 +2,8 @@
   (:require
     [cdq.core :refer [create-image]]
     [cdq.core :refer [screen-height screen-width]]
-    [game.gui :refer [is-visible? make-frame]]
-    [game.ingame-gui :refer [frame-screenborder-distance ingamestate-display inventory-hotkey]]
+    [cdq.core :refer [gui-visible? make-frame]]
+    [cdq.core :refer [frame-screenborder-distance ingamestate-display inventory-hotkey]]
     [cdq.core :refer [cells create-grid height width]]))
 
 (defn- create-empty-item-cell [posi allows-type grid equipment]
@@ -68,7 +68,7 @@
                                      :visible false
                                      :parent ingamestate-display))))
 
-(defn showing-player-inventory? [] (is-visible? inventory-frame))
+(defn showing-player-inventory? [] (gui-visible? inventory-frame))
 
 (add-item-grid
   :grid-type :belt

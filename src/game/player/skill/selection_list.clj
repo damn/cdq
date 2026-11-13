@@ -6,11 +6,11 @@
     [game.player.skill.learnable :refer [render-skillbutton-tooltip]]
         [cdq.core :refer [fill-rect render-readable-text]]
     [cdq.core :refer [is-key-pressed? screen-height]]
-    [game.gui :refer [get-absolute-posi get-bounds is-visible? make-imgbutton mouseover? remove-guicomponent set-visible]]
-    [game.ingame-gui :refer [ingamestate-display]]
+    [cdq.core :refer [gui-get-absolute-posi gui-get-bounds gui-visible? make-imgbutton gui-mouseover? remove-guicomponent gui-set-visible]]
+    [cdq.core :refer [ingamestate-display]]
     [cdq.core :refer [atom-session]]
     [cdq.core :refer [active]]
-    [game.components.skills.core :refer [is-cooling-down?]]
+    [cdq.core :refer [is-cooling-down?]]
     [game.player.skill.skillmanager :refer [create-skill-icon get-selected-skill get-skills-for-mousebutton mousebuttons set-selected-skill]]))
 
 (declare selected-skill-buttons skill-selection-hotkeys)
@@ -34,11 +34,11 @@
                                       :right xrightselectedskillbutton)
                         button-y))
   (doseq [{:keys [button]} (mousebutton select-skills-list)]
-    (set-visible button bool)))
+    (gui-set-visible button bool)))
 
 (defn- is-visible-skills-list? [mousebutton]
   (when-let [buttons (mousebutton select-skills-list)]
-    (-> buttons first :button is-visible?)))
+    (-> buttons first :button gui-visible?)))
 
 (defn- render-button-hotkeys [g mousebutton]
   (when (is-visible-skills-list? mousebutton)
@@ -46,7 +46,7 @@
       (when-let [{:keys [mouse digit] :as hotkey}
                  (get @skill-selection-hotkeys (:type skill))]
         (when (= mousebutton mouse)
-          (let [[x y] (get-absolute-posi button)]
+          (let [[x y] (gui-get-absolute-posi button)]
             (render-readable-text g x y digit)))))))
 
 (defn- render-button-tooltip [g mousebutton] ;TODO rename skillbutton...
@@ -59,7 +59,7 @@
 
   (defn- render-button-cooldown-overlay [g mouse]
     (when (is-cooling-down? (get-selected-skill mouse))
-      (fill-rect g (get-bounds (get selected-skill-buttons mouse)) transparent-red))))
+      (fill-rect g (gui-get-bounds (get selected-skill-buttons mouse)) transparent-red))))
 
 (defn some-skill-selection-list-visible? [] (some is-visible-skills-list? mousebuttons))
 (defn close-skill-selection-lists [] (dorun (map #(set-visible-skills-list % false) mousebuttons)))
@@ -80,7 +80,7 @@
                                :pressed #(set-visible-skills-list mousebutton true)
                                :tooltip (str "Select " (name mousebutton) "-mouse skill")
                                :parent ingamestate-display)
-        [x y w h] (get-bounds button)]
+        [x y w h] (gui-get-bounds button)]
     (def ^:private button-height h)
     (def ^:private button-y y)
     button))
@@ -128,7 +128,7 @@
 
 (defn- try-set-skill-hotkey [mousebutton digit]
   (when (is-visible-skills-list? mousebutton)
-    (when-let [selected-skill-button (first (filter #(mouseover? @(:button %)) (mousebutton select-skills-list)))]
+    (when-let [selected-skill-button (first (filter #(gui-mouseover? @(:button %)) (mousebutton select-skills-list)))]
       (when-let [same-digit-hotkeyed-skilltype (get-skilltype-with-hotkey digit)]
         (swap! skill-selection-hotkeys dissoc same-digit-hotkeyed-skilltype))
       (set-skill-hotkey (:type (:skill selected-skill-button)) digit mousebutton))))

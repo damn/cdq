@@ -6,7 +6,7 @@
     [cdq.core :refer [ingame-loop-comp]]
     [cdq.core :refer [rendering]]
     [cdq.core :refer [id-entity-map]]
-    [game.components.destructible :refer [get-destructible-bodies]]
+    [cdq.core :refer [get-destructible-bodies]]
     [cdq.core :refer [screenpos-of-tilepos]]
     [cdq.core :refer [ray-blocked?]]))
 ; monsters live in game.start

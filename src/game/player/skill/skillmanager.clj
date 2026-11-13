@@ -4,13 +4,13 @@
         [cdq.core :refer [is-leftbutton-down? is-rightbutton-down? is-rightm-consumed?]]
     cdq.core
     [game.mouseoverbody :refer [get-mouseover-body saved-mouseover-body]]
-    [game.components.skills.core :refer [enough-mana? skillmanager-component skillmanager-skill]]
+    [cdq.core :refer [enough-mana? skillmanager-component skillmanager-skill]]
     [game.components.skills.melee :refer [player-melee-props]]
     [cdq.core :refer [active add-to-removelist player-body]]
     [cdq.core :refer [add-block blocks-component remove-block]]
-    [game.components.destructible :refer [attackable-by-player?]]
+    [cdq.core :refer [attackable-by-player?]]
     [cdq.core :refer [rotate-to-body rotate-to-mouse]]
-    [game.components.body-effects :refer [defeffectentity get-certain-effect-entities]]))
+    [cdq.core :refer [defeffectentity get-certain-effect-entities]]))
 
 (defn get-player-skills []
   (:skills (:skillmanager @player-body)))
