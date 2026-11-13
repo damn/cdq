@@ -39,14 +39,13 @@
     [cdq.core :refer [fire-projectile]]
     [cdq.core :refer [nova-effect]]
     [cdq.core :refer [create-item-body put-item-on-ground]]
-    [game.item.instance-impl :refer [create-rand-item]]
+    [cdq.core :refer [create-rand-item]]
     [cdq.core :refer [get-current-map-data iterating-map-dependent-comps]]
     [cdq.core :refer [render-minimap show-on-minimap]]
     [cdq.core :refer [get-rand-weighted-item if-chance percent-chance rand-int-between]]
     [cdq.core :refer [is-path-blocked? ray-blocked?]]
     [cdq.core :refer [defmonster get-monster-properties]]
     [cdq.core :refer [try-spawn]]
-    game.entity.teleporters
     [cdq.core :refer [check-line-of-sight get-player-ranged-vector]]
     [cdq.core :refer [deflearnable-skill]]
     [cdq.core :refer [clear-key-pressed-record clear-mouse-pressed-record get-mouse-pos is-key-pressed? is-rightm-consumed? try-consume-leftm-pressed try-consume-rightm-pressed update-mousebutton-state]]
@@ -55,8 +54,8 @@
     [cdq.core :refer [status-get-state status-get-text status-set-state status-check-boxes]]
     [cdq.core :as debug]
     [cdq.core :as cupd]
-    [game.maps.mapchange :refer [check-change-map]]
-    [game.player.session-data :refer [current-character-name get-session-file-character-names]]
+    [cdq.core :refer [check-change-map]]
+    [cdq.core :refer [current-character-name get-session-file-character-names]]
     [cdq.core :refer [image-corners set-cached-brightness]]
     [cdq.core :refer [get-mouse-tile-pos mouse-int-tile-pos]]
     [cdq.core :refer [translate-shake-after-render translate-shake-before-render update-shake]]
@@ -71,7 +70,7 @@
     [cdq.core :refer [item-background-icons item-cell-h item-cell-w hks-cells inventory-height inventoryry item-grids]]
     [cdq.core :refer [equip-boni-item-color]]
     [cdq.core :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
-    [game.player.skill.selection-list :refer [close-skill-selection-lists some-skill-selection-list-visible?]]
+    [cdq.core :refer [close-skill-selection-lists some-skill-selection-list-visible?]]
     [cdq.core :refer [get-selected-skill]]
     [cdq.core :refer [player-death try-revive-player]])
   (:gen-class))
@@ -1300,7 +1299,7 @@ PSI-Explosion
       (update [container statebasedgame delta]
         (when @loading-render-once
           (utils/log "Loading new session")
-          (game.player.session-data/init @is-loaded-character)
+          (cdq.core/init-session @is-loaded-character)
           (utils/log "Finished loading new session")
           (enter-state ids/ingame)))
 

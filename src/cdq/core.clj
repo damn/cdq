@@ -26,7 +26,8 @@
            (org.newdawn.slick.util.pathfinding AStarPathFinder Mover Path TileBasedMap)
            (org.newdawn.slick.opengl CursorLoader))
   (:require [clojure.set :as set]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.walk :refer [postwalk]]))
 
 (defn indexed ; from clojure.contrib.seq-utils (discontinued in 1.3)
   "Returns a lazy sequence of [index, item] pairs, where items come
@@ -6969,3 +6970,867 @@ so the entity can get in melee range.")
 
 (defn init-player [position]
   (def player-body (create-player-body position)))
+
+;; item boni
+
+
+; lvl-stats mit count 3 hier überall explizit -> mach von variable abhängig
+
+(def item-bonuses {})
+
+(defmacro ^:private defbonus [k lvl-stats f]
+  `(alter-var-root #'item-bonuses assoc ~k
+     {:create ~f
+      :lvl-stats ~lvl-stats}))
+
+(def ^:private item-type-boni
+  {"Armor" [:mana :hp :move-speed :cast-speed :spell-crit :perc-dmg-spell]
+   "Sword" [:perc-dmg :min-dmg :max-dmg :attack-speed :hp-leech :mana-leech :melee-crit :spell-crit
+            :melee-chance-reduce-armor :melee-chance-slow :melee-chance-stun :perc-dmg-spell]
+   "Cyber-Implant" [:armor :mana-reg :attack-speed :move-speed :hp-leech :mana-leech :melee-crit :spell-crit]})
+
+;; Armor
+
+(defbonus :mana
+  [[15 25] [35 45] [55 65]]
+  (fn [adds-mana]
+    {:info (str "+" adds-mana " MP")
+     :unequip #(update-in % [:skillmanager :mana] inc-or-dec-max - adds-mana)
+     :equip #(update-in % [:skillmanager :mana] inc-or-dec-max + adds-mana)}))
+
+(defbonus :hp
+  [[15 25] [35 45] [55 65]]
+  (fn [adds-hp]
+    {:info (str "+" adds-hp " HP")
+     :unequip #(update-in % [:destructible :hp] inc-or-dec-max - adds-hp)
+     :equip #(update-in % [:destructible :hp] inc-or-dec-max + adds-hp)}))
+
+(defbonus :move-speed
+  [[8 20] [25 35] [40 50]]
+  (fn [perc-diff]
+    (let [modifier (/ perc-diff 100)]
+      {:info (str "+" perc-diff "% Movement-Speed")
+       :unequip #(incr-move-speed %  (- modifier))
+       :equip #(incr-move-speed % modifier)})))
+
+(defbonus :cast-speed
+  [[15 25] [35 45] [50 60]]
+  (fn [percent]
+    (let [diff (/ percent 100)]
+      {:info (str "+" percent "% Casting-Speed")
+       :unequip #(incr-casting-speed % (- diff))
+       :equip   #(incr-casting-speed % diff)})))
+
+;; Implant
+
+(defbonus :armor
+  [[5 15] [16 25] [26 35]]
+  (fn [percent-consume]
+    (let [armor (get-player-armor percent-consume)]
+      {:info (str "+" (readable-number armor) " Armor")
+       :unequip #(update-in % [:destructible :armor] - armor)
+       :equip #(update-in % [:destructible :armor] + armor)})))
+
+; Don't use this bonus, player has no :hp-regen component!
+;(defbonus :hp-reg
+;  [[5 15] [16 25] [26 35]]
+;  (fn [tenth-percentile]
+;    (let [adds-reg-rate (/ tenth-percentile 10)]
+;      {:info (str "+" (readable-number adds-reg-rate) "% HP-Reg-per-second")
+;       :unequip #(update-in % [:hp-regen :reg-per-second] - adds-reg-rate)
+;       :equip #(update-in % [:hp-regen :reg-per-second] + adds-reg-rate)})))
+
+(defbonus :mana-reg
+  [[10 30] [31 50] [51 75]]
+  (fn [tenth-percentile]
+    (let [adds-reg-rate (/ tenth-percentile 10)]
+      {:info (str "+" (readable-number adds-reg-rate) "% MP-Reg-per-second")
+       :unequip #(update-in % [:mana-regen :reg-per-second] - adds-reg-rate)
+       :equip #(update-in % [:mana-regen :reg-per-second] + adds-reg-rate)})))
+
+(defbonus :attack-speed
+  [[15 25] [35 45] [50 60]]
+  (fn [percent]
+    (let [diff (/ percent 100)]
+      {:info (str "+" percent "% Attack-Speed")
+       :unequip #(incr-attack-speed % (- diff))
+       :equip   #(incr-attack-speed % diff)})))
+
+;; Weapon
+
+(defbonus :mana-leech
+  [[40 60] [61 80] [81 100]]
+  (fn [percent]
+    {:info (str "+" percent "% Mana-Leech")
+     :unequip #(update-in % [:item-boni :mana-leech] - percent)
+     :equip #(update-in % [:item-boni :mana-leech] + percent)}))
+
+(defbonus :hp-leech
+  [[20 30] [31 40] [41 50]]
+  (fn [percent]
+    {:info (str "+" percent "% HP-Leech")
+     :unequip #(update-in % [:item-boni :hp-leech] - percent)
+     :equip #(update-in % [:item-boni :hp-leech] + percent)}))
+
+(defbonus :perc-dmg
+  [[15 25] [45 55] [65 75]]
+  (fn [percent]
+    {:info (str "+" percent "% Damage")
+     :unequip #(update-in % [:item-boni :percent-modify] - percent)
+     :equip #(update-in % [:item-boni :percent-modify] + percent)}))
+
+(defbonus :perc-dmg-spell
+  [[15 25] [45 55] [65 75]]
+  (fn [percent]
+    {:info (str "+" percent "% Spell-Damage")
+     :unequip #(update-in % [:item-boni :percent-modify-spell] - percent)
+     :equip #(update-in % [:item-boni :percent-modify-spell] + percent)}))
+
+(defbonus :max-dmg
+  [[2 6] [7 11] [12 16]]
+  (fn [inc-by]
+    {:info (str "+" inc-by " Maximum-Damage")
+     :unequip #(update-in % [:item-boni :max-inc] - inc-by)
+     :equip #(update-in % [:item-boni :max-inc] + inc-by)}))
+
+(defbonus :min-dmg
+  [[1 3] [4 6] [7 9]]
+  (fn [inc-by]
+    {:info (str "+" inc-by " Minimum-Damage")
+     :unequip #(update-in % [:item-boni :min-inc] - inc-by)
+     :equip #(update-in % [:item-boni :min-inc] + inc-by)}))
+
+(defbonus :melee-crit
+  [[2 6] [7 11] [12 16]]
+  (fn [inc-by]
+    {:info (str "+" inc-by "% Critical-Hit Chance (Melee)")
+     :unequip #(update-in % [:item-boni :melee-crit] - inc-by)
+     :equip #(update-in % [:item-boni :melee-crit] + inc-by)}))
+
+(defbonus :spell-crit
+  [[2 6] [7 11] [12 16]]
+  (fn [inc-by]
+    {:info (str "+" inc-by "% Critical-Hit Chance (Spells)")
+     :unequip #(update-in % [:item-boni :spell-crit] - inc-by)
+     :equip #(update-in % [:item-boni :spell-crit] + inc-by)}))
+
+(defbonus :melee-chance-stun
+  [[20 30] [31 40] [41 50]]
+  (fn [inc-by]
+    {:info (str "+" inc-by "% Chance to Stun on Hit")
+     :unequip #(update-in % [:item-boni :chance-stun] - inc-by)
+     :equip #(update-in % [:item-boni :chance-stun] + inc-by)}))
+
+(defbonus :melee-chance-slow
+  [[20 30] [31 40] [41 50]]
+  (fn [inc-by]
+    {:info (str "+" inc-by "% Chance to Slow on Hit")
+     :unequip #(update-in % [:item-boni :chance-slow] - inc-by)
+     :equip #(update-in % [:item-boni :chance-slow] + inc-by)}))
+
+(defbonus :melee-chance-reduce-armor
+  [[20 30] [31 40] [41 50]]
+  (fn [inc-by]
+    {:info (str "+" inc-by "% Chance to Reduce Armor on Hit")
+     :unequip #(update-in % [:item-boni :chance-reduce-armor] - inc-by)
+     :equip #(update-in % [:item-boni :chance-reduce-armor] + inc-by)}))
+
+;;
+
+(defn create-item-bonus [lvl bonus-type & {value :value}]  ; TODO assert alles richtigem lvl ?
+  (let [{:keys [create lvl-stats]} (or (get item-bonuses bonus-type)
+                                       (throw (Error. (str "Could not find bonus for type: " bonus-type))))
+        value (or value (rand-int-between (nth lvl-stats lvl)))]
+    (merge (create value)
+      {:type bonus-type :lvl lvl :value value})))
+
+(defn create-random-boni [itemname cnt & {max-level :max-level :or {max-level 3}}] ; TODO 3 hardcoded
+  (map
+    #(create-item-bonus (rand-int max-level) %)
+    (take cnt (shuffle (get item-type-boni itemname)))))
+
+(defn create-equip-boni-save [equip-boni]
+  (map #(select-keys % [:lvl :type :value]) equip-boni))
+
+(defn load-equip-boni-save [data]
+  (map #(create-item-bonus (:lvl %) (:type %) :value (:value %)) data))
+
+;; skill selection list
+
+(declare selected-skill-buttons skill-selection-hotkeys)
+
+(defn change-selected-skill-button-images [mousebutton new-icon]
+  (swap! (get selected-skill-buttons mousebutton) assoc :image new-icon))
+
+(def ^:private skill-selection-lists {})
+
+(declare skill-selection-create-list skill-selection-button-y)
+
+(def ^:private skill-selection-x-left 2)
+(def ^:private skill-selection-x-right 20)
+
+(defn- skill-selection-set-visible [mousebutton bool]
+  (when bool
+    (skill-selection-create-list mousebutton (case mousebutton
+                                      :left skill-selection-x-left
+                                      :right skill-selection-x-right)
+                        skill-selection-button-y))
+  (doseq [{:keys [button]} (mousebutton skill-selection-lists)]
+    (gui-set-visible button bool)))
+
+(defn- skill-selection-visible? [mousebutton]
+  (when-let [buttons (mousebutton skill-selection-lists)]
+    (-> buttons first :button gui-visible?)))
+
+(defn- skill-selection-render-hotkeys [g mousebutton]
+  (when (skill-selection-visible? mousebutton)
+    (doseq [{:keys [button skill]} (mousebutton skill-selection-lists)]
+      (when-let [{:keys [mouse digit] :as hotkey}
+                 (get @skill-selection-hotkeys (:type skill))]
+        (when (= mousebutton mouse)
+          (let [[x y] (gui-get-absolute-posi button)]
+            (render-readable-text g x y digit)))))))
+
+(defn- skill-selection-render-tooltip [g mousebutton] ;TODO rename skillbutton...
+  (when (skill-selection-visible? mousebutton)
+    (dorun (map
+      #(render-skillbutton-tooltip g %)
+      (mousebutton skill-selection-lists)))))
+
+(let [transparent-red (rgbcolor :r 0.9 :a 0.7)]
+
+  (defn- skill-selection-render-cooldown [g mouse]
+    (when (is-cooling-down? (get-selected-skill mouse))
+      (fill-rect g (gui-get-bounds (get selected-skill-buttons mouse)) transparent-red))))
+
+(defn some-skill-selection-list-visible? [] (some skill-selection-visible? skill-mousebuttons))
+(defn close-skill-selection-lists [] (dorun (map #(skill-selection-set-visible % false) skill-mousebuttons)))
+
+(ingame-loop-comp :update-skill-selection-buttons
+  (rendering [g c]
+    (doseq [button skill-mousebuttons]
+      (skill-selection-render-cooldown g button)
+      (skill-selection-render-hotkeys g button))))
+
+(ingame-loop-comp :skill-selection-list-tooltips
+  (rendering :tooltips [g c]
+    (dorun (map #(skill-selection-render-tooltip g %) skill-mousebuttons))))
+
+(defn- skill-selection-create-selected-button [mousebutton x]
+  (let [button (make-imgbutton :image (create-skill-icon "icons/stomp.png") ; this icon will be replaced during create-player-skillmanager and the correct icon for each mouse
+                               :location [x (- screen-height 18)]
+                               :pressed #(skill-selection-set-visible mousebutton true)
+                               :tooltip (str "Select " (name mousebutton) "-mouse skill")
+                               :parent ingamestate-display)
+        [x y w h] (gui-get-bounds button)]
+    (def ^:private skill-selection-button-height h)
+    (def ^:private skill-selection-button-y y)
+    button))
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private selected-skill-buttons
+      {:left (skill-selection-create-selected-button :left skill-selection-x-left)
+       :right (skill-selection-create-selected-button :right skill-selection-x-right)})))
+
+(defn- skill-selection-create-list [mousebutton buttonx buttony]
+  (doseq [button (map :button (mousebutton skill-selection-lists))]
+    (remove-guicomponent ingamestate-display button))
+  (alter-var-root #'skill-selection-lists assoc-in [mousebutton]
+                  (let [puffer 5
+                        starty (- buttony skill-selection-button-height puffer)]
+                    (map-indexed
+                      (fn [idx skill]
+                        {:skill skill
+                         :button (make-imgbutton
+                                   :image (:icon skill)
+                                   :location [buttonx
+                                              (- starty (* idx (inc skill-selection-button-height)))]
+                                   :pressed (fn []
+                                              (skill-selection-set-visible mousebutton false)
+                                              (set-selected-skill mousebutton skill))
+                                   :parent ingamestate-display)})
+                      (get-skills-for-mousebutton mousebutton)))))
+
+;; Hotkeys
+
+(def ^:private skill-selection-hotkeys (atom {}))
+; for example {:default-hands {:digit 1 :mouse :left}}
+
+(def skill-selection-hotkeys-session (atom-session skill-selection-hotkeys :save-session true))
+
+(defn- skill-selection-get-skilltype-with-hotkey [digit]
+  (first (filter
+    #(= (:digit (get @skill-selection-hotkeys %)) digit)
+    (keys @skill-selection-hotkeys))))
+
+(defn- skill-selection-set-hotkey [skilltype digit mousebutton]
+  {:pre [(not (skill-selection-get-skilltype-with-hotkey digit))]}
+  (swap! skill-selection-hotkeys assoc skilltype {:digit digit :mouse mousebutton}))
+
+(defn- skill-selection-try-set-hotkey [mousebutton digit]
+  (when (skill-selection-visible? mousebutton)
+    (when-let [selected-skill-button (first (filter #(gui-mouseover? @(:button %)) (mousebutton skill-selection-lists)))]
+      (when-let [same-digit-hotkeyed-skilltype (skill-selection-get-skilltype-with-hotkey digit)]
+        (swap! skill-selection-hotkeys dissoc same-digit-hotkeyed-skilltype))
+      (skill-selection-set-hotkey (:type (:skill selected-skill-button)) digit mousebutton))))
+
+(defn- skill-selection-update-hotkeys [digit]
+  (cond
+    (skill-selection-try-set-hotkey :left digit) nil
+    (skill-selection-try-set-hotkey :right digit) nil
+    :else
+    (when-let [skilltype (skill-selection-get-skilltype-with-hotkey digit)]
+      (let [mousebutton (:mouse (get @skill-selection-hotkeys skilltype))]
+        (when-let [skill (first (filter #(= (:type %) skilltype)
+                                     (get-skills-for-mousebutton mousebutton)))]
+          (set-selected-skill mousebutton skill)
+          (skill-selection-set-visible mousebutton false))))))
+
+(def ^:private skill-selection-numberkeys (map #(keyword (str %)) (range 10)))
+
+(ingame-loop-comp :up-skill-hotkeys
+    (active [delta c _]
+      (doseq [k skill-selection-numberkeys
+              :when (is-key-pressed? k)]
+        (skill-selection-update-hotkeys (Integer/parseInt (name k))))))
+
+(defn assign-unused-hotkey-and-open-skillslist [skilltype]
+  (let [unused-hotkey (first (filter #(not (skill-selection-get-skilltype-with-hotkey %)) [1,2,3,4,5,6,7,8,9,0]))
+        mousebutton (if (= skilltype :psi-charger) :left :right)]
+    (skill-selection-set-hotkey skilltype unused-hotkey mousebutton)
+    (skill-selection-set-visible mousebutton true)))
+
+;; player session-data
+
+(def current-character-name (atom nil))
+
+;;
+
+(def ^:private session-save-file (str "cdq_savegame" version ".clj"))
+
+(defn- session-read-file []
+  (try (read-string (slurp session-save-file))
+    (catch java.io.FileNotFoundException e {})))
+
+(defn- session-pr-str-with-meta [x]
+  (binding [*print-meta* true]
+    (pr-str x)))
+
+(defn- session-write-file [data]
+  (->> (postwalk write-to-disk data)
+       (assoc (session-read-file) @current-character-name)
+       session-pr-str-with-meta
+       (spit session-save-file)))
+
+(defn get-session-file-character-names []
+  (keys (session-read-file)))
+
+(defn get-session-file-data []
+  (->> (get (session-read-file) @current-character-name)
+       (postwalk load-from-disk)))
+
+;;
+
+;;; maps.load (inlined) — keep save type "maps.load/session"
+
+(defn- session-place-entities [tiled-map]
+  ; looping through all tiles of the map 3 times. but dont do it in 1 loop because player needs to be initialized before all monsters!
+  (doseq [[posi _] (get-tileproperties tiled-map "entities" "light")]
+    (map-lightsource (translate-to-tile-middle posi)))
+  (doseq [[posi value] (get-tileproperties tiled-map "entities" "monster")]
+    (try-spawn (translate-to-tile-middle posi) (keyword value) :debug false)))
+
+(defn load-maps-content
+  "loads the map content in the right order"
+  []
+  (init-player (:start-position (get-current-map-data)))
+  (doseq [map-name added-map-order]
+    (do-in-map map-name
+                    (let [{:keys [load-content spawn-monsters tiled-map]} (get-map-data map-name)]
+                      (when tiled-map (session-place-entities tiled-map))
+                      (load-content)
+                      (when spawn-monsters (spawn-monsters))))
+    (log "Loaded " map-name " content!")))
+
+(def maps-load-session (reify Session
+                         (load-session [_ mapkey]
+                           (set-map! mapkey)
+                           (load-maps-content))
+                         (save-session [_]
+                           @current-map)
+                         (new-session-data [_]
+                           (first added-map-order))))
+
+;;; item.save (inlined) — keep save type "item.save/session"
+
+; maybe have this information in the items
+(def ^:private item-save-keys [:name :sprite-idx :count :lvl :base-armor :base-dmg
+                      ; need to merge color manually.
+                      :color])
+
+(defmethod write-to-disk :item [item]
+  (merge
+    (select-keys item item-save-keys)
+    (when-let [boni (:equip-boni item)]
+      {:equip-boni (create-equip-boni-save boni)})))
+
+(defmethod load-from-disk :item [saved-item]
+  (merge
+    (create-item-instance (:name saved-item)
+                          (select-keys saved-item item-save-keys))
+    (when-let [boni (:equip-boni saved-item)]
+      {:equip-boni (load-equip-boni-save boni)})
+    (select-keys saved-item [:color])))
+
+(def item-save-session (reify Session
+                         (load-session [_ data]
+                           (empty-all-item-grids)
+                           (doseq [{:keys [posi grid-type item]} (:items data)]
+                             (add-item-to-cell
+                               item
+                               (get (grid-type item-grids) posi)))
+                           (when-let [item (:item-in-hand data)]
+                             (set-item-in-hand item)))
+                         (save-session [_]
+                           (let [item-cells-with-item (filter (comp deref :item)
+                                                              (mapcat cells (vals item-grids)))]
+                             {:items (doall ; needed?
+                                       (map
+                                         (fn [cell]
+                                           (merge
+                                             (select-keys cell [:posi :grid-type])
+                                             {:item @(:item cell)}))
+                                         item-cells-with-item))
+                              :item-in-hand @item-in-hand}))
+                         (new-session-data [_]
+                           {:items
+                            [{:posi [0 0]
+                              :grid-type :belt
+                              :item (create-item-instance "Heal-Potion" {:count 4})}
+                             {:posi [0 0]
+                              :grid-type :hands
+                              :item (create-item-instance "Sword")}
+                             {:posi [0 0]
+                              :grid-type :inventory
+                              :item (create-item-instance "Restoration")}]})))
+
+;;; session-data
+
+(defn- session-make-type [v]
+  (.replace (str (ns-name (:ns (meta v))) "/" (:name (meta v))) "game." ""))
+
+; TODO dont need vars here, because this is a function? why is it a function anyway?
+(defn- session-components []
+  (map (fn [[v stype]] [(deref v) (or stype (session-make-type v))])
+       [; resets all map data -> do it before creating maps => TODO put both in one maps-session-component?
+        [#'maps-data-session]
+        ; create maps before putting entities in them
+        [#'maps-add-session]
+
+        ; resets all entity data -> do it before addding entities
+        [#'clear-entities-session]
+
+        ; reset cell-change-listeners before adding entities, because entities are listeners
+        [#'cell-listeners-session]
+
+        ; adding entities
+        [#'maps-load-session "maps.load/session"]
+        ; comment this out for normal gameplay as of alpha3 (no quicksave)
+        ;#'entities-session
+
+        ; now the order of initialisation does not matter anymore
+        [#'skill-selection-hotkeys-session]
+        [#'learnable-session] ; depends on player-body/learnable-skills already initialised
+        [#'item-save-session "item.save/session"] ; depends on player-body (apply item bonis)
+        [#'status-options-session]
+        [#'mouseover-cache-session]
+        [#'saved-mouseover-body-session]
+        [#'update-session]
+        [#'sleeping-session]
+        [#'burrow-session]
+        [#'lightning-session]
+        [#'msg-to-player-counter-session]
+        [#'msg-to-player-message-session]]))
+
+(assert (distinct-seq? (session-components)))
+; The types need to be distinct, so load-session-component can get the data from the savegame-file that corresponds to the right session-component
+
+(defn save-game []
+  (->> (for [[component stype] (session-components)]
+         (when-let [savedata (save-session component)]
+           [stype savedata]))
+       (into {})
+       session-write-file))
+
+(defn init-session [is-loaded-character]
+  (let [session-file-data (when is-loaded-character
+                            (get-session-file-data))]
+    (doseq [[component stype] (session-components)]
+      (load-session component
+                    (if is-loaded-character
+                      (get session-file-data stype)
+                      (new-session-data component))))))
+
+;; mapchange
+
+(def ^:private mapchange-queued (atom nil))
+
+(defn queue-map-change
+  "for calling @ update-components loop."
+  [position new-map-file save-game?]
+  (when-not (or
+              @mapchange-queued
+              ; teleport skill in new map can crash game with skill-use-tileposi of old-map
+              (is-attacking? (:skillmanager @player-body)))
+    (reset! mapchange-queued [new-map-file position save-game?])))
+
+(defn change-map
+  "Never call while updating components because then components of one map suddenly operate on the current-map-data of another map!
+  Use queue-map-change instead."
+  ([new-map new-posi]
+    (change-map new-map new-posi false))
+  ([new-map new-posi save-game?]
+    (set-map! new-map)
+    (teleport player-body new-posi)
+    (when save-game?
+      (save-game)
+      (show-msg-to-player  (get-pretty-name new-map) "\nSaved progress..."))))
+
+(defn check-change-map []
+  (when-let [data @mapchange-queued]
+    (reset! mapchange-queued nil)
+    (apply change-map data)))
+
+;; item instance-impl
+
+
+;; Random Items
+
+(let [item-names {"Cyber-Implant" 1, "Sword" 1, "Armor" 1}
+      boni-counts {1 80, 2 15, 3 5}]
+
+  (defn create-rand-item [position & {:keys [max-lvl]}]
+    (create-item-body position
+                      (let [itemname (get-rand-weighted-item item-names)]
+                        (assoc (create-item-instance itemname {:lvl (rand-int max-lvl)})
+                               :equip-boni (create-random-boni itemname (get-rand-weighted-item boni-counts) :max-level max-lvl)
+                               :color equip-boni-item-color)))))
+
+(alter-var-root #'init-fns conj
+  (fn []
+    (def ^:private item-grenade-frames (folder-frames "effects/grenade/"))))
+
+; TODO auch defusable aber net damit gemacht -> vlt mit split-kvs-and-more und unten equip/unequip zuf�hren?
+(defitem "Grenade" [{cnt :count}]
+  (let [dmg [10 10]
+        image (get-itemsprite [1 1])
+        contains-skill? (fn [components skill]
+                          (contains? (-> components :skillmanager :skills) (:type skill)))
+        skill (skillmanager-skill
+                :stype :grenade
+                :cooldown 0
+                :cost 0
+                {:shoot-sound "bfxr_grenade.wav"
+                 :animation :casting
+                 :mousebutton :right
+                 :icon image
+                 :radius 2.5
+                 :item-name this-name
+                 :dmg dmg
+                 :dmg-info (fn [skill] dmg)
+                 :check-usable check-line-of-sight
+                 :do-skill (fn [_ {:keys [item-name radius dmg] :as component}]
+                             (remove-one-item-from :belt item-name)
+                             (nova-effect
+                               :position (get-skill-use-mouse-tile-pos)
+                               :duration 300
+                               :maxradius radius
+                               :affects-side :monster
+                               :dmg dmg
+                               :animation (create-animation item-grenade-frames)))})]
+    {:type :usable
+     :skill skill
+     :effect (fn [] (set-selected-skill :right skill) false)
+     :use-sound "bfxr_click.wav"
+     :unequip (fn [components]
+                {:pre [(contains-skill? components skill)]}
+                (if
+                  (not-any?
+                    #{this-name}
+                    (map #(:name @(:item %)) (cells (:belt item-grids))))
+                  (update-in components [:skillmanager :skills] remove-player-skill skill)
+                  components))
+     :equip (fn [components]
+              (if-not (contains-skill? components skill)
+                (update-in components [:skillmanager :skills] add-player-skill skill)
+                components))
+     :info (str "Put into belt to use.\nThrows a grenade. Deals " dmg " Area of Effect Dmg")
+     :image image
+     :count (or cnt (rand-int-between 2 4))}))
+
+(let [seconds 30]
+  (def-usable-item "Battle-Drugs"
+    :effect (fn [] (battle-drugs seconds))
+    :use-sound "bfxr_drugsuse.wav"
+    :info (str "Gives +50% casting,attack and movement speed for " seconds " seconds.")
+    :image (get-itemsprite [1 6])))
+
+(let [adds-hp 40]
+  (def-usable-item "Heal-Potion"
+    :effect #(when (lower-than-max? (get-hp player-body))
+               (show-gains-hp-effect player-body (min adds-hp (rest-to-max (get-hp player-body))))
+               (swap! player-body update-in [:destructible :hp] increase-min-max-val adds-hp))
+    :use-sound "bfxr_potionuse.wav"
+    :info (str "Gives " adds-hp " hitpoints")
+    :image (get-itemsprite [0 3])))
+
+(let [adds-hp 80] ; TODO ... same code as above...
+  (def-usable-item "Big-Heal-Potion"
+    :effect #(when (lower-than-max? (get-hp player-body))
+               (show-gains-hp-effect player-body (min adds-hp (rest-to-max (get-hp player-body))))
+               (swap! player-body update-in [:destructible :hp] increase-min-max-val adds-hp))
+    :use-sound "bfxr_potionuse.wav"
+    :info (str "Gives " adds-hp " hitpoints")
+    :image (get-itemsprite [0 0])))
+
+(let [adds-mana 20]
+  (def-usable-item "Mana-Potion"
+    :effect #(when (lower-than-max? (get-mana player-body))
+               (show-gains-mana-effect player-body (min adds-mana (rest-to-max (get-mana player-body))))
+               (swap! player-body update-in [:skillmanager :mana] increase-min-max-val adds-mana))
+    :use-sound "bfxr_potionuse.wav"
+    :info (str "Gives " adds-mana " mana")
+    :image (get-itemsprite [0 4])))
+
+(let [adds-mana 40] ; TODO ... same code as above...; also @ meditation skill
+  (def-usable-item "Big-Mana-Potion"
+    :effect #(when (lower-than-max? (get-mana player-body))
+               (show-gains-mana-effect player-body (min adds-mana (rest-to-max (get-mana player-body))))
+               (swap! player-body update-in [:skillmanager :mana] increase-min-max-val adds-mana))
+    :use-sound "bfxr_potionuse.wav"
+    :info (str "Gives " adds-mana " mana")
+    :image (get-itemsprite [0 1])))
+
+(def-usable-item "Cyborg Brain Booster"
+  :effect (fn [] (swap! player-body update-in [:skillmanager :free-skill-points] inc))
+  :use-sound "fanfare10.wav"
+  :info ""
+  :image (get-itemsprite [1 0]))
+
+(def-usable-item "The Golden Banana"
+  :effect (fn [] (show-msg-to-player "THE END"))
+  :use-sound "fanfare10.wav"
+  :info ""
+  :image (get-itemsprite [5 5]))
+
+(defn- item-in-seconds "in float just for presentation not correct calculation."
+  [ms]
+  (float (/ ms 1000)))
+
+(defn- item-gun-infostr [weapon]
+  (str
+    (:dmg weapon) " Damage\n"
+    (item-in-seconds (:maxcnt (:cooldown-counter weapon))) "s cooldown"))
+
+; lang nicht mehr benutzt; m�glicherweise funzt nicht mehr, nicht getestet.
+(defitem "Gun" [_]
+  (let [image (create-image "items/gun.png")
+        dmg [10 10]
+        cooldown 1000
+        skill (skillmanager-skill
+                :stype :gun
+                :cooldown cooldown
+                :cost 0
+                {:sound (create-sound "shoot.wav")
+                 :animation :shooting
+                 :mousebutton :both
+                 :icon image
+                 :dmg dmg
+                 :do-skill (fn [entity component]
+                             (fire-projectile
+                               :startbody entity
+                               :px-size 5
+                               :side :player
+                               :hits-side :monster
+                               :movement (projectile-movement-component (get-player-ranged-vector) 480)
+                               :hit-effects [(dmg-effect (:dmg component))]))})]
+    {:skill skill
+     :unequip #(update-in % [:skillmanager] reset-standard-attack-skill)
+     :equip #(update-in % [:skillmanager] change-standard-attack-skill skill)
+     :info (item-gun-infostr skill)
+     :type :hands
+     :image image}))
+
+(defn- item-get-dps [[mi mx] seconds]
+  (round-n-decimals (/ (+ mi mx) 2 seconds) 2))
+
+(defn- item-sword-infostr [{:keys [animation base-dmg] :as weapon}]
+  (let [seconds (-> (:animation @player-body) animation get-animation-duration item-in-seconds)]
+    (str
+      (variance-val-str base-dmg) " Damage\n"
+      (case animation :sword-small "Fast" :sword "Normal" :sword-big "Slow") " Attack-Speed\n"
+      (str "DPS: " (item-get-dps base-dmg seconds)))))
+
+(let [base-dmg-per-lvl [[[3 5] [5 7]]
+                        [[8 10] [11 18]]
+                        [[16 26] [35 50]]]
+      calc-base-dmg #(let [[mi mx] (base-dmg-per-lvl %)] [(rand-int-between mi) (rand-int-between mx)])
+      sprite-idx-per-lvl [[[2 2]]
+                          [[2 0] [2 6]]
+                          [[3 0] [3 5]]]]
+  (defitem "Sword" [{:keys [lvl sprite-idx base-dmg] :or {lvl 0}}]
+    (let [sprite-idx (or sprite-idx (rand-nth (sprite-idx-per-lvl lvl)))
+          base-dmg (or base-dmg (calc-base-dmg lvl))
+          melee-weapon (melee-weapon base-dmg (create-sound "slash.wav") (case lvl 0 :sword-small 1 :sword 2 :sword-big))]
+      {:pretty-name (case lvl 0 "Light Sword" 1 "Normal Sword" 2 "Heavy Sword")
+       :lvl lvl
+       :base-dmg base-dmg
+       :melee-weapon melee-weapon
+       :info (item-sword-infostr melee-weapon)
+       :type :hands
+       :image (get-itemsprite sprite-idx)
+       :sprite-idx sprite-idx})))
+
+(let [armor-per-lvl [[10 30] [31 50] [51 75]]
+      calc-base-armor #(get-player-armor (rand-int-between (armor-per-lvl %)))
+      sprite-idx-per-lvl [[[6 3] [6 4]]
+                          [[6 1] [6 2]]
+                          [[6 0]]]]
+
+  (defitem "Armor" [{:keys [lvl sprite-idx base-armor] :or {lvl 0}}]
+    (let [sprite-idx (or sprite-idx (rand-nth (sprite-idx-per-lvl lvl)))
+          base-armor (or base-armor (calc-base-armor lvl))]
+      {:pretty-name (case lvl 0 "Light Armor" 1 "Normal Armor" 2 "Heavy Armor")
+       :lvl lvl
+       :base-armor base-armor
+       :unequip #(update-in % [:destructible :armor] - base-armor)
+       :equip #(update-in % [:destructible :armor] + base-armor)
+       :info (str (readable-number base-armor)  " Base-Armor")
+       :type :torso
+       :image (get-itemsprite sprite-idx)
+       :sprite-idx sprite-idx})))
+
+(defitem "Cyber-Implant" [{:keys [sprite-idx] :or {sprite-idx [4 (rand-int 5)]}}]
+  {:type :implant
+   :image (get-itemsprite sprite-idx)
+   :sprite-idx sprite-idx})
+
+(defitem "Restoration" [_]
+  {:image (get-itemsprite [4 6])
+   :info "If you die this item will be used to\n revive you one time and teleport you to the start of the level."})
+
+;;
+;; DEBUG/CHEAT items
+
+(defn- item-pickup-cheat-items "does not work anymore" []
+    (try-pickup-item
+      (create-item-instance
+        "Sword"
+        {:equip-boni [(create-item-bonus 2 :mana-leech)
+                      (create-item-bonus 2 :melee-chance-stun)
+                      (create-item-bonus 2 :hp-reg)
+                      (create-item-bonus 2 :mana-reg)
+                      (create-item-bonus 2 :perc-dmg)
+                      (create-item-bonus 2 :min-dmg)
+                      (create-item-bonus 2 :max-dmg)
+                      (create-item-bonus 2 :attack-speed)
+                      (create-item-bonus 2 :move-speed)]}))
+    (try-pickup-item
+      (create-item-instance
+        "Armor"
+        {:equip-boni [(create-item-bonus 2 :mana-reg)
+                      (create-item-bonus 2 :hp-reg)
+                      (create-item-bonus 2 :armor)
+                      (create-item-bonus 2 :cast-speed)
+                      (create-item-bonus 2 :move-speed)]}))
+    (try-pickup-item
+      (create-item-instance
+        "Cyber-Implant"
+        {:equip-boni [(create-item-bonus 2 :mana-reg)
+                      (create-item-bonus 2 :hp-reg)
+                      (create-item-bonus 2 :armor)
+                      (create-item-bonus 2 :cast-speed)
+                      (create-item-bonus 2 :move-speed)]})))
+
+
+(comment
+  (do
+    (learn-skill (:meditation learnable-skills))
+    (learn-skill (:player-ranged learnable-skills))
+    (learn-skill (:nova learnable-skills))
+    (learn-skill (:teleport learnable-skills))
+    nil))
+
+(comment
+
+
+  (require 'clojure.pprint)
+  (swap! item-in-hand assoc :equip-boni
+    [(create-item-bonus 2 :move-speed)
+     (create-item-bonus 2 :mana-leech)
+     (create-item-bonus 2 :hp-leech)
+     (create-item-bonus 2 :mana-reg)
+     (create-item-bonus 2 :cast-speed)
+     (create-item-bonus 2 :perc-dmg-spell)
+     (create-item-bonus 2 :spell-crit)
+     (create-item-bonus 2 :armor)])
+
+  (try-pickup-item
+    (assoc (create-item-instance "Sword")
+      :equip-boni [(create-item-bonus 2 :melee-chance-slow)]))
+
+  (dotimes [_ 10]
+    (try-pickup-item
+      (create-item-instance "Grenade")))
+
+  (do-in-game-loop
+    (try-pickup-item
+      (create-item-instance "Battle-Drugs")))
+
+  (item-pickup-cheat-items)
+
+  (create-rand-item (:value (:position @player-body)) :max-lvl 3)
+
+  (try-pickup-item
+    (create-item-instance "Gun"
+      {:equip-boni [(create-item-bonus 0 :armor)]}))
+)
+
+;; entity teleporters
+
+
+(defn create-teleporter
+  [& {:keys [position target-map target-posi animation do-after-use save-game]}]
+  (create-entity
+    (position-component position)
+    (create-body :solid false
+                 :dimensions (get-dimensions (get-animation-frame animation))
+                 :mouseover-outline true)
+    ;(light-component :intensity 0.8 :radius 2)
+    {:type :always-in-sight}
+    (show-on-minimap blue)
+    (pressable-component
+      (str "Teleport to " (get-pretty-name target-map))
+      (fn [this-body]
+        (play-sound "bfxr_teleport.wav")
+        (queue-map-change target-posi target-map save-game)
+        (when do-after-use (do-after-use))))
+    (single-animation-component animation :order :is-ground)))
+
+(defn static-teleporter
+  [& {[start-map start-posi] :from
+      [target-map target-posi] :to
+      save-game :save-game}]
+  (do-in-map start-map
+    (create-teleporter
+      :position start-posi
+      :target-map target-map
+      :target-posi target-posi
+      :animation (create-animation (spritesheet-frames "teleporter/teleporter.png" 20 10) :frame-duration 100 :looping true)
+      :save-game save-game)))
+
+(defn connect-static-teleporters [& {start :from target :to}]
+  (static-teleporter :from start :to target)
+  (static-teleporter :from target :to start))
+

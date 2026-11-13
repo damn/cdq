@@ -7,7 +7,7 @@
             [cdq.core :refer [get-all-entities-of-current-map]]
             [cdq.core :refer [get-component get-position]]
             [cdq.core :refer [swap-position!]]
-            game.player.session-data))
+            ))
 
 (use-fixtures :once start-game-once-fixture)
 
@@ -39,8 +39,8 @@
     (cdq.core/update-component new-count (get-component entity :delete-after-duration) entity)
     (is (= new-count (get-count)))
 
-    (game.player.session-data/save-game)
-    (game.player.session-data/init true)
+    (cdq.core/save-game)
+    (cdq.core/init-session true)
 
     (is (= new-count (get-count)))
     (is (= new-posi (get-posi)))))
