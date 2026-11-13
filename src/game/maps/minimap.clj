@@ -8,7 +8,6 @@
     cdq.core
     [cdq.core :refer [int-posi]]
     [cdq.core :refer [mapvals]]
-    engine.core
     [cdq.core :refer [half-screen-h half-screen-w]]
     [game.components.core :refer [id-entity-map]]
     [cdq.core :refer [get-current-map-data]]

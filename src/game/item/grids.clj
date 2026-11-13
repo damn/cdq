@@ -57,7 +57,7 @@
 (def ^:private inventoryrx (- screen-width inventory-width frame-screenborder-distance))
 (def inventoryry frame-screenborder-distance)
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def inventory-frame (make-frame :name :inventory
                                      :bounds [inventoryrx
@@ -90,7 +90,7 @@
   :is-equipment-cell false
   :visible-check showing-player-inventory?)
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def background-icons {:torso (create-image "items/armorbg.png")
                            :hands (create-image "items/handsbg.png")

@@ -2,7 +2,7 @@
   (:require
     [engine.render.assets :refer [get-sprite spritesheet]]))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private sheet (spritesheet "items/items.png" 16 16))))
 

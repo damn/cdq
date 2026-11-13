@@ -1,6 +1,6 @@
 (ns engine.tests.input
   (:require
-    [engine.core :refer [start-slick-basicgame]]
+    [cdq.core :refer [start-slick-basicgame]]
     [engine.input :refer [get-mouse-pos is-key-down? is-key-pressed? is-leftbutton-down? is-leftm-consumed? is-leftm-pressed? is-rightbutton-down? is-rightm-consumed? is-rightm-pressed? try-consume-leftm-pressed try-consume-rightm-pressed update-mousebutton-state]]
     [engine.render.graphics :refer [render-readable-text]]))
 
@@ -40,7 +40,7 @@
   (start-slick-basicgame
     :title "Input Test"
     :init (fn [container]
-            (doseq [f engine.core/fns]
+            (doseq [f cdq.core/init-fns]
               (f)))
     :update (fn [container delta]
               (update-mousebutton-state)

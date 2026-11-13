@@ -1,7 +1,7 @@
 (ns game.components.burrow
   (:require
     [cdq.core :refer [create-counter update-counter]]
-    [engine.core :refer [play-sound]]
+    [cdq.core :refer [play-sound]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [spritesheet-frames]]
     [cdq.core :refer [atom-session]]
@@ -14,10 +14,10 @@
     [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
     game.maps.cell-grid))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private dust-frames (spritesheet-frames "effects/dust.png" 15 15))))
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private dark-dust-frames (spritesheet-frames "effects/darkdust.png" 30 30))))
 

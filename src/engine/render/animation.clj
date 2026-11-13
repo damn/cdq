@@ -1,6 +1,6 @@
 (ns engine.render.animation
   (:require
-    [engine.core :refer [Updateable]]
+    [cdq.core :refer [Updateable]]
     [engine.render.image :refer [render-centered-image]]))
 
 (defprotocol Animation
@@ -11,7 +11,7 @@
 
 (defrecord ImmutableAnimation [frames frame-duration looping speed cnt maxcnt]
   Updateable
-  (update [this delta]
+  (tick [this delta]
     (let [newcnt (+ cnt (* speed delta))]
       (assoc this :cnt (cond (< newcnt maxcnt) newcnt
                              looping           (min maxcnt (- newcnt maxcnt))

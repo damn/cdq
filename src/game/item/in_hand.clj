@@ -1,6 +1,6 @@
 (ns game.item.in-hand
   (:require
-    [engine.core :refer [set-mouse-cursor]]
+    [cdq.core :refer [set-mouse-cursor]]
     [engine.render.image :refer [get-scaled-copy]]
     [cdq.core :refer [screen-scale]]
     [cdq.core :refer [deflazygetter]])
@@ -17,7 +17,7 @@
   (defn reset-default-mouse-cursor []
     (set-mouse-cursor (get-default-mouse-cursor) hotspotx hotspoty)))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (reset-default-mouse-cursor)))
 

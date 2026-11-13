@@ -5,7 +5,7 @@
     [cdq.core :refer [get-8-neighbour-positions]]
     [cdq.core :refer [boolperm]]
     [cdq.core :refer [mapvals]]
-    [engine.core :refer [start-slick-basicgame]]))
+    [cdq.core :refer [start-slick-basicgame]]))
 
 (def posis (get-8-neighbour-positions [0 0]))
 
@@ -84,7 +84,7 @@
   :width screenw
   :height 600
   :init (fn [container]
-          (doseq [f engine.core/fns]
+          (doseq [f cdq.core/init-fns]
             (f)))
   :render (fn [container g]
             (fill-rect g 0 0 800 600 color/gray)

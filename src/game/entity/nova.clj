@@ -1,6 +1,6 @@
 (ns game.entity.nova
   (:require
-    [engine.core :refer [make-counter ratio]]
+    [cdq.core :refer [make-counter counter-ratio]]
     [game.utils.geom :as geom]
     [game.components.position :refer [position-component]]
     [game.components.destructible :refer [deal-dmg get-destructible-bodies]]
@@ -33,7 +33,7 @@
             :already-hit #{}
             :counter (make-counter duration)}
            (active [delta {:keys [counter already-hit] :as c} entity]
-             (let [radius (* (ratio counter) maxradius) ; erst ratio danach update-counter, sonst beim letzten update => ratio=0
+             (let [radius (* (counter-ratio counter) maxradius) ; erst ratio danach update-counter, sonst beim letzten update => ratio=0
                    hits (remove
                           #(contains? already-hit %)
                           (get-destructible-bodies position radius affects-side))]

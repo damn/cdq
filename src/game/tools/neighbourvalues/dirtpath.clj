@@ -1,7 +1,7 @@
 (ns game.tools.dirtpath
   (:require
     [cdq.core :refer [get-8-neighbour-positions]]
-    [engine.core :refer [start-slick-basicgame]]
+    [cdq.core :refer [start-slick-basicgame]]
     [cdq.core :refer [if-chance]]
     [mapgen.populate :refer [find-path]]
     [game.maps.tiledmaps :refer [construct-tiledmap create-grid-from-tiled-map]]
@@ -32,7 +32,7 @@
 
 (start-slick-basicgame
   :init (fn [container]
-          (doseq [f engine.core/fns]
+          (doseq [f cdq.core/init-fns]
             (f))
           (let [grid (create-grid-from-tiled-map (construct-tiledmap (resource "tech.tmx")))
                 pathposis (find-path [10 10] [5 73] grid pathblocked?)

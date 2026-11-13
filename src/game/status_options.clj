@@ -1,6 +1,6 @@
 (ns game.status-options
   (:require
-    [engine.core :refer [app-game-container fullscreen-supported?]]
+    [cdq.core :refer [app-game-container fullscreen-supported?]]
     [cdq.core :refer [get-setting]]
     [game.utils.lightning :refer [active-lightning]]
     cdq.core))

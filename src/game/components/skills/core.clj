@@ -1,6 +1,6 @@
 (ns game.components.skills.core
   (:require
-    [engine.core :refer [create-sound make-counter play-sound playonce reset update update-finally-merge]]
+    [cdq.core :refer [create-sound make-counter play-sound playonce reset-counter tick tick-finally-merge]]
     [engine.input :refer [get-mouse-pos is-leftbutton-down? is-rightbutton-down?]]
     [cdq.core :refer [split-key-val-and-maps]]
     [cdq.core :refer [mapvals]]
@@ -33,7 +33,7 @@
 
 (defn- update-cooldown [skill delta]
   (if (is-cooling-down? skill)
-    (update-finally-merge skill :cooldown-counter delta
+    (tick-finally-merge skill :cooldown-counter delta
                           {:state :ready})
     skill))
 
@@ -43,12 +43,12 @@
 (defn reset-skills [skills]
   (mapvals skills
            #(-> %
-                (update-in [:cooldown-counter] reset)
+                (update-in [:cooldown-counter] reset-counter)
                 (assoc :state :ready))))
 
 (defn- update-counter-skill! [entity delta skill & [counterkey & _]]
   (let [k (or counterkey :counter)
-        counter (update (k skill) delta)]
+        counter (tick (k skill) delta)]
     (swap! entity assoc-in [:skillmanager :skills (:type skill) k] counter)
     (:stopped? counter)))
 
@@ -159,7 +159,7 @@
             :block-effect-reset-state (fn [entity skillm]
                                         (when (is-attacking? skillm)
                                           (when (:attack-counter (get-active-skill skillm))
-                                            (swap! entity update-in [:skillmanager :skills (:active-type skillm) :attack-counter] reset))
+                                            (swap! entity update-in [:skillmanager :skills (:active-type skillm) :attack-counter] reset-counter))
                                           (swap! entity #(-> %
                                                (assoc-in [:skillmanager :skills (:active-type skillm) :state] :cooldown)
                                                (switch-state :skillmanager :ready)))))}
@@ -190,7 +190,7 @@
           :block-effect-reset-state (fn [entity skill]
                                       (when (is-attacking? skill)
                                         (when (:attack-counter skill)
-                                          (swap! entity update-in [(:type skill) :attack-counter] reset))
+                                          (swap! entity update-in [(:type skill) :attack-counter] reset-counter))
                                         (swap! entity switch-state (:type skill) :cooldown)))}
          (active update-component-skill)
          (if state-blocks (blocks-component state-blocks) {})

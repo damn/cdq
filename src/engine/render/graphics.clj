@@ -4,7 +4,7 @@
     [cdq.core :refer [split-kvs-and-more]]
     [cdq.core :refer [when-seq]]
     [game.utils.geom :as geom]
-    [engine.core :as core :refer [allowed-characters get-defaultfont get-screen-height get-screen-width get-text-height get-text-width reset-font]]
+    [cdq.core :as core :refer [allowed-characters get-defaultfont get-screen-height get-screen-width get-text-height get-text-width reset-font]]
     [engine.render.color :refer [set-color transparent-black white]])
   (:import (org.newdawn.slick Graphics Color)
            org.newdawn.slick.geom.Shape))

@@ -7,7 +7,7 @@
     [game.components.ingame-loop :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]
     [game.components.core :refer [active]]
-    [engine.core :refer [get-text-height]]
+    [cdq.core :refer [get-text-height]]
     [cdq.core :refer [get-setting screen-height]]
     [game.gui :refer [is-visible? make-frame make-guidisplay make-imgbutton make-label mouseover? render-guicomponent set-visible switch-visible update-guicomponent]]))
 
@@ -59,7 +59,7 @@ over a skill at the bottom left selection lists.
 * Use items in actionbar: Q,W and E.
 * Minimap: TAB")
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private controlsframe (let [w ;(+ 10 (get-text-width controls)) TODO FIXME
                               320]
@@ -89,7 +89,7 @@ over a skill at the bottom left selection lists.
 
 ; -1 location: free sp button
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (make-imgbutton
       :image (create-image "icons/character.png" :scale buttonscale)

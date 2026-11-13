@@ -5,7 +5,7 @@
     [engine.render.graphics :refer [draw-grid draw-string fill-rect]]
     [cdq.core :refer [height posis width]]
     [cdq.core :refer [assoc-ks]]
-    [engine.core :refer [start-slick-basicgame]]
+    [cdq.core :refer [start-slick-basicgame]]
     [engine.input :refer [get-mouse-pos is-key-pressed?]]
     [cdq.core :refer [create-seed]]
     [mapgen.cave :refer [cave-gridgen]]
@@ -184,7 +184,7 @@
   :width screenw
   :height screenh
   :init (fn [container]
-          (doseq [f engine.core/fns]
+          (doseq [f cdq.core/init-fns]
             (f))
           (update-grid (generate-cave)))
   :update (fn [container delta]

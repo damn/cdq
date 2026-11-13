@@ -15,7 +15,7 @@
     [game.utils.lightning :refer [light-component]]
     [cdq.core :refer [set-to-max]]
     [cdq.core :refer [when-seq]]
-    [engine.core :refer [play-sound]]
+    [cdq.core :refer [play-sound]]
     [engine.input :refer [is-key-down? is-leftbutton-down? is-leftm-consumed?]]
     engine.input
     game.maps.contentfields

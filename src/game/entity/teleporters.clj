@@ -5,7 +5,7 @@
     [engine.render.animation :refer [create-animation get-frame]]
     [engine.render.assets :refer [spritesheet-frames]]
     [cdq.core :refer [current-map do-in-map get-pretty-name]]
-    [engine.core :refer [play-sound]]
+    [cdq.core :refer [play-sound]]
     game.media
     cdq.core
     game.utils.lightning

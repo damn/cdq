@@ -85,7 +85,7 @@
     (def ^:private button-y y)
     button))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private selected-skill-buttons
       {:left (create-selected-skill-button :left xleftselectedskillbutton)

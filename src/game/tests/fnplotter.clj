@@ -2,7 +2,7 @@
   (:require
     [engine.render.color :as color]
     [engine.render.graphics :refer [draw-rect fill-rect]]
-    [engine.core :refer [start-slick-basicgame]]
+    [cdq.core :refer [start-slick-basicgame]]
     [cdq.core :refer [high-weighted]]))
 
 (def width 400)
@@ -22,7 +22,7 @@
   :width 800
   :height 600
   :init (fn [container]
-          (doseq [f engine.core/fns]
+          (doseq [f cdq.core/init-fns]
             (f)))
   :render (fn [container g]
             (fill-rect g 0 0 800 600 color/black)

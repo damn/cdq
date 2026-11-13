@@ -1,6 +1,6 @@
 (ns game.components.skills.melee
   (:require
-    [engine.core :refer [create-sound]]
+    [cdq.core :refer [create-sound]]
     [cdq.core :refer [in-tiles]]
     [cdq.core :refer [max-delta]]
     [game.item.cells :refer [get-equiped-hands-item]]

@@ -1,6 +1,6 @@
 (ns game.components.misc
   (:require
-    [engine.core :refer [make-counter]]
+    [cdq.core :refer [make-counter]]
     [cdq.core :refer [safe-merge]]
     [cdq.core :refer [increase-min-max-val]]
     [game.utils.geom :refer [direction-vector get-angle-from-vector get-vector-to-mouse-coords]]

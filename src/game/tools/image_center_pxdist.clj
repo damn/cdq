@@ -1,7 +1,7 @@
 (ns game.tools.image-center-pxdist
   (:require
     [game.utils.geom :as geom]
-    [engine.core :refer [start-slick-basicgame]]
+    [cdq.core :refer [start-slick-basicgame]]
     [engine.input :refer [get-mouse-pos is-leftm-pressed? update-mousebutton-state]]
     [engine.render.image :refer [create-image]]
     [engine.render.graphics :refer [render-centered-shape render-readable-text]]))
@@ -17,7 +17,7 @@
 
 (start-slick-basicgame
   :init (fn [container]
-          (doseq [f engine.core/fns]
+          (doseq [f cdq.core/init-fns]
             (f))
           (def image (create-image "opponents/station/station01.png")))
 

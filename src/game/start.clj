@@ -16,7 +16,7 @@
     [cdq.core :refer [height width]]
     [engine.statebasedgame :as state :refer [enter-state init-state-based-game state-based-game]]
     [engine.settings :refer [jar-file?]]
-    [engine.core :refer [app-game-container create-and-start-app-game-container create-sound fullscreen-supported? get-defaultfont get-line-height get-screen-height get-screen-width make-counter play-sound]]
+    [cdq.core :refer [app-game-container create-and-start-app-game-container create-sound fullscreen-supported? get-defaultfont get-line-height get-screen-height get-screen-width make-counter play-sound]]
     [cdq.core :as utils :refer [get-unique-number int-posi sort-by-order translate-to-tile-middle]]
     [cdq.core :refer [get-ratio lower-than-max? readable-number variance-val-str]]
     [cdq.core :refer [safe-merge]]
@@ -322,7 +322,7 @@
         path-w (in-tiles projectile-pxsize)]
     (is-path-blocked? sx sy tx ty path-w)))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private redball-frames (folder-frames "effects/red_ball/"))))
 
@@ -356,7 +356,7 @@
     :state-blocks state-blocks
     :props (redball-projectile-skill-props)))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private monsterdie-frames (folder-frames "effects/monsterexplosion/"))))
 
@@ -390,10 +390,10 @@
 
 (defn default-death-trigger [] (death-trigger default-monster-death))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private bigger-explosion-frames (spritesheet-frames "effects/explosn.png" 20 20))))
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private big-explosion-frames (spritesheet-frames "effects/expbig.png" 40 40))))
 
@@ -582,7 +582,7 @@
     (single-animation-component
       (folder-animation :folder "opponents/station/" :duration 500 :looping true))))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private mine-explosion-frames (folder-frames "effects/mine/"))))
 
@@ -774,7 +774,7 @@
       :monster-nova
       :melee)))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private monster-nova-frames (folder-frames "effects/monsternova/"))))
 
@@ -898,7 +898,7 @@
     :hit-effects effects
     :maxtime 12000))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private boss-explosion (folder-frames "effects/bossexplosion/"))))
 
@@ -962,7 +962,7 @@
 
 (def curse-infostr "Curse\nOnly one curse is active at a time\n")
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private curse-frames (map #(get-scaled-copy % 0.3) (folder-frames "effects/curse/")))))
 
@@ -972,7 +972,7 @@
     :position [x (- y (in-tiles (/ 80 3)))]
     :animation (create-animation curse-frames)))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private projectile-frames (folder-frames "effects/energyball/"))))
 
@@ -1025,7 +1025,7 @@ finisher-skills.
    :show-info-for [:cost]}
   (player-melee-props [psi-charge-hit-effect]))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private nova-frames (folder-frames "effects/nova/"))))
 
@@ -1121,7 +1121,7 @@ Stuns and deals damage
                  (dorun (map #(deal-dmg dmg %) hits))))})
 
 (def ^:private psi-bolt-pxradius 17)
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private psi-bolt-frames (folder-frames "effects/psibolt/"))))
 
@@ -1371,7 +1371,7 @@ PSI-Explosion
 
 (declare set-visiblity-state)
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (init-textfield)
     (def ^:private create-char-button (make-textbutton :location [menu-second-column-x (+ menu-buttons-y 30)]
@@ -1422,7 +1422,7 @@ PSI-Explosion
 
 (def ^:private music nil)
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (alter-var-root #'music (constantly
                               (doto (Music. "sounds/dungeon1.xm" true)
@@ -1626,7 +1626,7 @@ PSI-Explosion
                         white
                         infostr))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private rahmen (create-image "gui/rahmen.png"))
     (def ^:private rahmenw (first (get-dimensions rahmen)))
@@ -1657,7 +1657,7 @@ PSI-Explosion
         (render-readable-text g half-screen-w 0 :centerx true
                               (str (readable-number armor) " Armor\n" (get-armor-reduce-info armor)))))))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private character-frame (make-frame :name :character
                                       :bounds [(- screen-width frame-screenborder-distance 160) (+ inventoryry inventory-height 5) 160 30]
@@ -1870,7 +1870,7 @@ PSI-Explosion
 (def ^:private options-by 20)
 (def ^:private options-ypuffer 12)
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private options-display (make-guidisplay))
     (make-textbutton
@@ -1945,7 +1945,7 @@ PSI-Explosion
 
       (init [container statebasedgame]
         (LoadingList/setDeferredLoading true)
-        (doseq [f engine.core/fns]
+        (doseq [f cdq.core/init-fns]
           (f)))
 
       (update [container statebasedgame delta]

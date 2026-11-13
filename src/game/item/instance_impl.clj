@@ -6,7 +6,7 @@
     [game.components.core :refer [player-body]]
     [game.components.skills.melee :refer [melee-weapon]]
     [cdq.core :refer [increase-min-max-val lower-than-max? readable-number rest-to-max round-n-decimals variance-val-str]]
-    [engine.core :refer [create-sound]]
+    [cdq.core :refer [create-sound]]
     [engine.render.image :refer [create-image]]
     [engine.render.animation :refer [create-animation get-duration]]
     [engine.render.assets :refer [folder-frames]]
@@ -43,7 +43,7 @@
                                :equip-boni (create-random-boni itemname (get-rand-weighted-item boni-counts) :max-level max-lvl)
                                :color equip-boni-item-color)))))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private grenade-frames (folder-frames "effects/grenade/"))))
 

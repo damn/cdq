@@ -8,7 +8,7 @@
     [engine.render.graphics :refer [draw-rect draw-shape fill-rect render-readable-text]]
     [game.utils.tilemap :refer [screenpos-of-tilepos]]
     [cdq.core :refer [get-ratio]]
-    [engine.core :refer [ratio]]
+    [cdq.core :refer [counter-ratio]]
     [cdq.core :refer [debug-mode in-pixel]]
     [game.mouseoverbody :refer [get-mouseover-body]]
     [game.components.core :refer [id-entity-map is-player?]]
@@ -93,7 +93,7 @@
     (render-body-info-bar g body render-position ratio color body-info-bars-h)))
 
 (defn- render-attacking-bar [g body skill render-position]
-  (render-body-info-bar g body render-position (ratio (:attack-counter skill)) color/blue (* 2 body-info-bars-h)))
+  (render-body-info-bar g body render-position (counter-ratio (:attack-counter skill)) color/blue (* 2 body-info-bars-h)))
 
 (defn body-renderfn [g body component {x 0 y 1 :as render-position}]
   (let [tile-posi (:value (:position @body))]
@@ -117,7 +117,7 @@
 
 ;;;
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private outlines {:green {:topleft (create-image "outline/tl.png" :scale 0.5)
                                      :topright (create-image "outline/tr.png" :scale 0.5)

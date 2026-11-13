@@ -6,7 +6,7 @@
     [game.utils.geom :refer [point-in-rect?]]
     [cdq.core :refer [deflazygetter]]
     [engine.input :refer [get-mouse-pos is-key-pressed? is-leftm-consumed? try-consume-leftm-pressed]]
-    [engine.core :refer [get-defaultfont get-text-height get-text-width]]))
+    [cdq.core :refer [get-defaultfont get-text-height get-text-width]]))
 
 ; Nett:
 ; variable characterframe textlabel (text) function or jsut when text=function (text) instead of text
@@ -38,7 +38,7 @@
   (render-label g component)
   (render-pressable-rect g component))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private selected-img (create-image "selected.png"))))
 

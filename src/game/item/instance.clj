@@ -1,7 +1,7 @@
 (ns game.item.instance  ; TODO refactor dependencies wg. instance-impl abkapselung
   (:require
     [cdq.core :refer [tile-width]]
-    [engine.core :refer [make-counter play-sound update update-finally-merge]]
+    [cdq.core :refer [make-counter play-sound tick tick-finally-merge]]
     [engine.render.animation :refer [is-stopped? render-centered-animation restart]]
     [engine.render.assets :refer [folder-animation]]
     [engine.render.image :refer [get-scaled-copy]]
@@ -31,11 +31,11 @@
     (active [delta {:keys [active counter animation] :as c} entity]
       (swap! entity assoc-in [(:type c)]
                  (if active
-                   (let [animation (update animation delta)]
+                   (let [animation (tick animation delta)]
                      (if (is-stopped? animation)
                        (assoc c :active false :animation (restart animation))
                        (assoc c :animation animation)))
-                   (update-finally-merge c :counter delta
+                   (tick-finally-merge c :counter delta
                                          {:active true}))))
     (render-on-map :air [g _ {:keys [active animation] :as c} render-posi]
       (when active

@@ -1,9 +1,9 @@
 (ns engine.input
-  "In order to use include engine.input/update-mousebutton-state and run engine.core/fns in your game."
-  (:require [engine.core :refer [app-game-container]])
+  "In order to use include engine.input/update-mousebutton-state and run cdq.core/init-fns in your game."
+  (:require [cdq.core :refer [app-game-container]])
   (:import org.newdawn.slick.Input))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private input
       (.getInput app-game-container))))

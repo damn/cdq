@@ -45,14 +45,14 @@
     (when-let [localid (calc-localid grid posi value)]
       (convert-to-spriteposi localid spritesheet-width))))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def tilesheet (spritesheet "maps/test/greenwalls.png" 48 48))))
 
 ;(use '(mapgen nad cave utils cellular))
 ;(start-slick-basicgame
 ;  :init (fn [container]
-;          (doseq [f engine.core/fns]
+;          (doseq [f cdq.core/init-fns]
 ;            (f))
 ;          (let [grid (cellular-automata-gridgen 50 50
 ;                                                :fillprob 64

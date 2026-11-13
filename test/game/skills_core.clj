@@ -2,7 +2,7 @@
   (:require
     [game.test.utils :refer [with-private-fns]]
     [cdq.core :refer [mapvals]]
-    [engine.core :refer [make-counter]]
+    [cdq.core :refer [make-counter]]
     [clojure.test :refer [deftest is]]
     game.components.skills.core))
 

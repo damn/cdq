@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [mapvals safe-merge]]
     [cdq.core :refer [approx-numbers]]
-    [engine.core :refer [reset update]]
+    [cdq.core :refer [reset-counter tick]]
     [engine.render.color :refer [rgbcolor]]
     [engine.render.image :refer [create-image get-scaled-copy]]
     [engine.render.animation :refer [create-animation render-centered-animation]]
@@ -89,7 +89,7 @@
 
 (defn slowdown [body seconds]
   (if-let [existing (first (get-certain-effect-entities player-body :slowdown-entity))]
-    (swap! existing update-in [:delete-after-duration :counter] reset)
+    (swap! existing update-in [:delete-after-duration :counter] reset-counter)
     (slowdown-entity body seconds)))
 
 (defn create-bullettime-effects [posi radius seconds]
@@ -109,7 +109,7 @@
 
 (defn create-armor-reduce-effect [body percent seconds]
   (if-let [existing (first (get-certain-effect-entities body :armor-reduce))]
-    (swap! existing update-in [:delete-after-duration :counter] reset)
+    (swap! existing update-in [:delete-after-duration :counter] reset-counter)
     (let [armor (get-armor body)
           changed-armor (min armor (* armor (/ percent 100)))]
       (armor-reduce body changed-armor seconds))))
@@ -161,7 +161,7 @@
 
 (def ^:private charge-body-distance 10)
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private psicharge-frames (map #(get-scaled-copy % 7 7) (folder-frames "effects/psicharges/")))))
 
@@ -179,7 +179,7 @@
          (active [delta c entity]
            (swap! entity update-in [(:type c)]
                        #(-> %
-                            (update-in [:animation] update delta)
+                            (update-in [:animation] tick delta)
                             (update-in [:degree] degree-add (* delta (/ 360 1000))))))
          (render-on-map :on-ground [g _ c [x y]]
            (let [v (vector-from-angle (:degree c))

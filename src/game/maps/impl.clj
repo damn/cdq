@@ -4,8 +4,7 @@
     cdq.core
     [cdq.core :as grid :refer [get-4-neighbour-positions mapgrid->vectorgrid posis transform height width]]
     [cdq.core :refer [log translate-to-tile-middle]]
-    engine.core
-    [engine.core :refer [play-sound]]
+    [cdq.core :refer [play-sound]]
     [engine.render.assets :refer [get-sprite spritesheet]]
     [engine.render.color :as color]
     cdq.core
@@ -166,7 +165,7 @@
 ;(use '(mapgen nad cave utils cellular))
 ;(start-slick-basicgame
 ;  :init (fn [container]
-;          (doseq [f engine.core/fns]
+;          (doseq [f cdq.core/init-fns]
 ;            (f))
 ;          (let [grid (cellular-automata-gridgen 100
 ;                                                100

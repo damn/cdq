@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [get-unique-number make-fn when-apply]]
     [cdq.core :refer [distinct-seq? filter-map]]
-    [engine.core :refer [update]]
+    [cdq.core :refer [tick]]
     [cdq.core :as session]
     [cdq.core :refer [add-blocks remove-blocks]]))
 
@@ -117,7 +117,7 @@
 
 (defn update-counter! [entity delta c & [counterkey & _]]
   (let [k (or counterkey :counter)
-        counter (update (k c) delta)]
+        counter (tick (k c) delta)]
     (swap! entity assoc-in [(:type c) k] counter)
     (:stopped? counter)))
 

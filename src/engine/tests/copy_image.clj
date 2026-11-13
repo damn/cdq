@@ -1,6 +1,6 @@
 (ns engine.tests.copy-image
   (:require
-    [engine.core :refer [start-slick-basicgame]]
+    [cdq.core :refer [start-slick-basicgame]]
     [engine.render.image :refer [get-scaled-copy]]
     [engine.render.assets :refer [spritesheet-frames]]
     [engine.render.graphics :refer [fill-rect]])
@@ -8,7 +8,7 @@
 
 ; maybe compress the data so savegame is more readable? 1ASssF9g8aAgsGDGe
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private sheet-frames (map #(get-scaled-copy % 2)
                                      (spritesheet-frames "effects/expbig.png" 40 40)))))
@@ -33,7 +33,7 @@
 (defn start-test []
   (start-slick-basicgame
     :init (fn [container]
-            (doseq [f engine.core/fns]
+            (doseq [f cdq.core/init-fns]
               (f)))
     :render (fn [container g]
               (fill-rect g 0 0 800 600 Color/blue)

@@ -1,6 +1,6 @@
 (ns engine.tests.render
   (:require
-    [engine.core :refer [start-slick-basicgame]]
+    [cdq.core :refer [start-slick-basicgame]]
     [engine.render.color :as color]
     [engine.render.image :refer [create-image]]
     [engine.render.graphics :refer [fill-rect render-readable-text]])
@@ -74,7 +74,7 @@
 (defn start-test []
   (start-slick-basicgame
     :init (fn [container]
-            (doseq [f engine.core/fns]
+            (doseq [f cdq.core/init-fns]
               (f))
             (def image (create-image "opponents/storage1.png")))
     :render (fn [container g]

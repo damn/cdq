@@ -1,6 +1,6 @@
 (ns game.components.render
   (:require
-    [engine.core :refer [make-counter ratio update]]
+    [cdq.core :refer [make-counter counter-ratio tick]]
     [engine.render.color :as color :refer [rgbcolor set-color]]
     [engine.render.image :refer [get-dimensions render-centered-image render-rotated-centered-image]]
     [engine.render.animation :refer [get-frame is-stopped? restart]]
@@ -92,7 +92,7 @@
         _ (assert (keyword? new-akey))
         new-animation (cond-> (new-akey component)
                         (not= last-akey new-akey) restart
-                        :then                     (update delta))]
+                        :then                     (tick delta))]
     (swap! entity update-in [(:type component)]
                 assoc
                 :akey    new-akey
@@ -201,12 +201,12 @@
       {:counter (make-counter duration)
        :color (Color. ^Color color)}  ; copy before changing it @ set!
       (active [delta {:keys [color counter] :as c} entity]
-        (set! (.a ^Color color) (- 1 (ratio counter)))
+        (set! (.a ^Color color) (- 1 (counter-ratio counter)))
         (when (update-counter! entity delta c)
           (add-to-removelist entity)))
       (rendering :below-gui [g {:keys [color counter] :as c}]
         (let [[rx ry] (screenpos-of-tilepos tilepos)]
-          (render-readable-text g rx (- ry (:half-pxh (:body @body)) (* 50 (ratio counter)))
+          (render-readable-text g rx (- ry (:half-pxh (:body @body)) (* 50 (counter-ratio counter)))
             :shift false
             :above true
             :centerx true

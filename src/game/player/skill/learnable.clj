@@ -61,7 +61,7 @@
     (into {} (for [skill (map #(%) @init-fns)]
                [(:type skill) skill]))))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private skillmenu-frame (make-frame :name :skillmenu
                                       :bounds [skillmenu-x skillmenu-y 100 95]
@@ -87,7 +87,7 @@
                                                 (assign-unused-hotkey-and-open-skillslist (:type skill))))
                                    :parent skillmenu-frame)}))))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (init-learnable-skills)
     (init-skillmenu-buttons)))
@@ -150,7 +150,7 @@
                   :learned (for [[skilltype skill] learnable-skills]
                              [skilltype false])})))
 
-(alter-var-root #'engine.core/fns conj
+(alter-var-root #'cdq.core/init-fns conj
   (fn []
     (def ^:private freeskillpointsbutton
       (make-imgbutton

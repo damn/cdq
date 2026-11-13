@@ -1,6 +1,6 @@
 (ns game.components.shield
   (:require
-    [engine.core :refer [make-counter update-finally-merge]]
+    [cdq.core :refer [make-counter tick-finally-merge]]
         [engine.render.color :refer [rgbcolor]]
         [engine.render.image :refer [create-image render-rotated-centered-image]]
     [cdq.core :refer [safe-merge]]
@@ -25,7 +25,7 @@
       (swap! entity assoc-in [(:type c)]
                  (if is-active
                    (update-in c [:angle] degree-add (* delta rotation-speed))
-                   (update-finally-merge c :counter delta
+                   (tick-finally-merge c :counter delta
                                          {:angle 0 :is-active true}))))))
 
 (defeffectentity ^:private shield-hit [body]
