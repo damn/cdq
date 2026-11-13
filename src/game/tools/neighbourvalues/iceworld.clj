@@ -2,7 +2,6 @@
   (:require
     cdq.core
     [engine.render.assets :refer [spritesheet]]
-    game.utils.random
     [cdq.core :refer [get-transition-tile-value]]
     [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi make-tiledmap-file resource]]))
 

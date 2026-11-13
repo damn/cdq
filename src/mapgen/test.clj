@@ -7,7 +7,7 @@
     [cdq.core :refer [assoc-ks]]
     [engine.core :refer [start-slick-basicgame]]
     [engine.input :refer [get-mouse-pos is-key-pressed?]]
-    [game.utils.random :refer [create-seed]]
+    [cdq.core :refer [create-seed]]
     [mapgen.cave :refer [cave-gridgen]]
     mapgen.spawn-spaces
     [mapgen.cellular :refer [calculate-regions cellular-automata-gridgen connect-regions flood-fill]]

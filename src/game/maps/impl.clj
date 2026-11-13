@@ -30,8 +30,7 @@
     [game.item.instance :refer [create-item-body]]
     [game.item.instance-impl :refer [create-rand-item]]
     [cdq.core :refer [get-current-map-data]]
-    [game.utils.random :refer [rand-int-between]]
-    game.utils.random
+    [cdq.core :refer [rand-int-between]]
     game.utils.lightning
     [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi get-spriteidx]]
     [cdq.core :refer [border-position? fill-single-cells scalegrid undefined-value-behind-walls wall-at?]]

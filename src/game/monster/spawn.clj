@@ -10,7 +10,7 @@
     [game.components.body :refer [blocked-location?]]
     [game.components.render :refer [single-animation-component]]
     [cdq.core :refer [get-current-map-data]]
-    [game.utils.random :refer [get-rand-weighted-items rand-int-between when-chance]]))
+    [cdq.core :refer [get-rand-weighted-items rand-int-between when-chance]]))
 
 (defn try-spawn [posi monster-type & {debug :debug}]
   {:pre [(get-monster-properties monster-type)]}

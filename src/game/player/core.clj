@@ -1,7 +1,7 @@
 (ns game.player.core
   (:require
     [game.components.body-effects-impl :refer [create-armor-reduce-effect slowdown stun]]
-    [game.utils.random :refer [when-chance]]
+    [cdq.core :refer [when-chance]]
     [engine.render.color :as color]
     [engine.render.image :refer [create-image]]
     [engine.render.animation :refer [create-animation]]

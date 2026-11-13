@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [wall-at?]]
     [cdq.core :refer [height width]]
-    [game.utils.random :refer [high-weighted-rand-nth]]
+    [cdq.core :refer [high-weighted-rand-nth]]
     [mapgen.cellular :refer [flood-fill]])
   (:import (org.newdawn.slick.util.pathfinding TileBasedMap AStarPathFinder Mover Path)))
 

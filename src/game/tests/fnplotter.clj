@@ -3,7 +3,7 @@
     [engine.render.color :as color]
     [engine.render.graphics :refer [draw-rect fill-rect]]
     [engine.core :refer [start-slick-basicgame]]
-    [game.utils.random :refer [high-weighted]]))
+    [cdq.core :refer [high-weighted]]))
 
 (def width 400)
 (def height width)

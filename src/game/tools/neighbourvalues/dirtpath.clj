@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [get-8-neighbour-positions]]
     [engine.core :refer [start-slick-basicgame]]
-    [game.utils.random :refer [if-chance]]
+    [cdq.core :refer [if-chance]]
     [mapgen.populate :refer [find-path]]
     [game.maps.tiledmaps :refer [construct-tiledmap create-grid-from-tiled-map]]
     [cdq.core :refer [get-transition-tile-value]]

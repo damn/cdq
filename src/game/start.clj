@@ -42,7 +42,7 @@
     [cdq.core :refer [get-current-map-data iterating-map-dependent-comps]]
     [game.maps.minimap :refer [render-minimap show-on-minimap]]
     [game.utils.geom :refer [direction-vector get-angle-to-position get-touched-tiles in-range? normalise rotate-angle-to-angle vector-from-angle vector2f]]
-    [game.utils.random :refer [get-rand-weighted-item if-chance percent-chance rand-int-between]]
+    [cdq.core :refer [get-rand-weighted-item if-chance percent-chance rand-int-between]]
     [game.utils.raycast :refer [is-path-blocked? ray-blocked?]]
     [game.monster.defmonster :refer [defmonster get-monster-properties]]
     [game.monster.spawn :refer [try-spawn]]

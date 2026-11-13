@@ -15,7 +15,7 @@
     [game.components.render :refer [animation-entity image-render-component show-gains-hp-effect show-gains-mana-effect show-string-effect]]
     [game.components.body-effects :refer [defeffectentity]]
     [game.components.sleeping :refer [wake-up]]
-    [game.utils.random :refer [percent-chance rand-float-between rand-int-between]]
+    [cdq.core :refer [percent-chance rand-float-between rand-int-between]]
     game.components.skills.core))
 
 (defeffectentity create-leech-visuals [body img]

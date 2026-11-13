@@ -17,7 +17,7 @@
     [game.components.destructible :refer [deal-dmg get-armor get-destructible-bodies]]
     game.components.movement
     [cdq.core :refer [add-blocks mark-slowed remove-blocks unmark-slowed]]
-    [game.utils.random :refer [if-chance]]
+    [cdq.core :refer [if-chance]]
     [game.utils.geom :refer [degree-add degree-minus degrees? scale vec-posi vector-from-angle]]
     game.item.instance
     [game.player.speed :refer [incr-attack-speed incr-casting-speed incr-move-speed]]))

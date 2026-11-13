@@ -1,7 +1,6 @@
 (ns mapgen.cave
   (:require [cdq.core :as grid]
-            [cdq.core :refer (assoc-ks)]
-            [game.utils.random :as rand]))
+            [cdq.core :refer (assoc-ks sshuffle srand srand-int)]))
 
 ;Cave Algorithmus.
 ;http://properundead.com/2009/03/cave-generator.html
@@ -9,7 +8,7 @@
 ;http://forums.tigsource.com/index.php?topic=5174.0
 
 (defn- create-order [random]
-  (rand/sshuffle (range 4) random))
+  (sshuffle (range 4) random))
 
 (defn- get-in-order [v order]
   (map #(get v %) order))
@@ -19,20 +18,20 @@
 (def ^:private turn-ratio 0.5)
 
 (defn- create-rand-4-neighbour-posis [posi n random] ; TODO does more than 1 thing
-  (when (< (rand/srand random) turn-ratio)
+  (when (< (srand random) turn-ratio)
     (reset! current-order (create-order random)))
   (take n
         (get-in-order (grid/get-4-neighbour-positions posi) @current-order)))
 
 (defn- get-default-adj-num [open-paths random]
   (if (= open-paths 1)
-    (case (int (rand/srand-int 4 random))
+    (case (int (srand-int 4 random))
       0 1
       1 1
       2 1
       3 2
       1)
-    (case (int (rand/srand-int 4 random))
+    (case (int (srand-int 4 random))
       0 0
       1 1
       2 1
@@ -42,17 +41,17 @@
 (defn- get-thin-adj-num [open-paths random]
   (if (= open-paths 1)
     1
-    (case (int (rand/srand-int 7 random))
+    (case (int (srand-int 7 random))
       0 0
       1 2
       1)))
 
 (defn- get-wide-adj-num [open-paths random]
   (if (= open-paths 1)
-    (case (int (rand/srand-int 3 random))
+    (case (int (srand-int 3 random))
       0 1
       2)
-    (case (int (rand/srand-int 4 random))
+    (case (int (srand-int 4 random))
       0 1
       1 2
       2 3

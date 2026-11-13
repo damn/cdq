@@ -5,7 +5,6 @@
     [cdq.core :refer [max-delta]]
     [game.item.cells :refer [get-equiped-hands-item]]
         [game.mouseoverbody :refer [get-mouseover-body]]
-    game.utils.random
     [game.utils.geom :as geom :refer [collides?]]
     game.components.body
     [game.components.core :refer [id-entity-map is-player? player-body]]

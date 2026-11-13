@@ -1,7 +1,7 @@
 (ns game.item.boni
   (:require
     [cdq.core :refer [inc-or-dec-max readable-number]]
-    [game.utils.random :refer [rand-int-between]]
+    [cdq.core :refer [rand-int-between]]
     game.components.body-effects-impl
     game.components.movement
     [game.components.destructible :refer [get-player-armor]]

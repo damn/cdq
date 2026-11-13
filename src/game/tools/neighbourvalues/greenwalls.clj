@@ -2,7 +2,7 @@
   (:require
     cdq.core
     [engine.render.assets :refer [spritesheet]]
-    [game.utils.random :refer [if-chance]]
+    [cdq.core :refer [if-chance]]
     [cdq.core :refer [get-transition-tile-value]]
     [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi]]))
 

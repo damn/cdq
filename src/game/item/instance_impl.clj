@@ -15,7 +15,7 @@
     [game.entity.nova :refer [nova-effect]]
     [game.entity.projectile :refer [fire-projectile]]
     game.utils.geom
-    [game.utils.random :refer [get-rand-weighted-item rand-int-between]]
+    [cdq.core :refer [get-rand-weighted-item rand-int-between]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
     [game.components.render :refer [show-gains-hp-effect show-gains-mana-effect]]
     [game.components.destructible :refer [get-hp get-player-armor]]
