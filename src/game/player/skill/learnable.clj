@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [rgbcolor]]
     clojure.set
-    [game.components.render :refer [rendering]]
+    [cdq.core :refer [rendering]]
     [cdq.core :refer [ingame-loop-comp]]
     [cdq.core :refer [log split-key-val-and-maps]]
     [cdq.core :refer [readable-number variance-val-str]]

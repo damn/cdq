@@ -4,20 +4,20 @@
     [game.test.utils :refer [with-private-fns]]
     [cdq.core :refer [create-entity get-component]]
     [cdq.core :refer [position-component]]
-    [game.components.render :refer [animation-component current-animation]]
+    [cdq.core :refer [animation-component current-animation]]
     [cdq.core :refer [create-animation]]))
 
-(with-private-fns [game.components.render [update-animation]]
+(with-private-fns [cdq.core [render-update-animation]]
   (deftest test-animation-component-update
     (let [entity (create-entity
                    (position-component [0 0])
                    (animation-component (constantly :a)
                                         {:a (assoc (create-animation [:a1 :a2 :a3]) :type :a)
                                          :b (assoc (create-animation [:b1 :b2 :b3]) :type :b)}))
-          update-a #(update-animation %
+          update-a #(render-update-animation %
                                       (get-component entity :animation)
                                       entity)
-          update-b #(update-animation %
+          update-b #(render-update-animation %
                                       (assoc (get-component entity :animation) :control (constantly :b))
                                       entity)
           cnt #(:cnt (current-animation entity))]

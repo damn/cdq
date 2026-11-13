@@ -9,7 +9,7 @@
         [cdq.core :refer [render-centered-shape]]
     [cdq.core :refer [in-pixel]]
     [cdq.core :refer [active add-to-removelist create-entity update-counter!]]
-    [game.components.render :refer [render-on-map single-animation-component]]))
+    [cdq.core :refer [render-on-map single-animation-component]]))
 
 (defn- circle-debug-comp []
   (let [color (rgbcolor :r 0.6 :a 0.6)]

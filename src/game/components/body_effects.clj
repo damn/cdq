@@ -70,7 +70,7 @@
 
 (comment
   (with-redefs [position-component (fn [p] {:type :position :p p})
-                game.components.body/get-other-bodies-in-adjacent-cells (fn [entity] ())]
+                cdq.core/get-other-bodies-in-adjacent-cells (fn [entity] ())]
 
     (let [testcoll (atom [])
           entity (create-entity {:type :position}

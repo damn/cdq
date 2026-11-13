@@ -13,7 +13,7 @@
     [cdq.core :refer [genmap positions when-seq]]
     [cdq.core :refer [tile-height tile-width]]
     [cdq.core :refer [player-body]]
-    [game.components.body :refer [inside-cell?]]
+    [cdq.core :refer [inside-cell?]]
     [cdq.core :refer [add-cell-blocks-changed-listener cached-get-adjacent-cells cell-blocked? get-cell get-cell-grid is-diagonal? occupied-by-other?]]))
 
 ;; Standart Potential Field algorithm (brute force)

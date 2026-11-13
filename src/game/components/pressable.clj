@@ -8,9 +8,9 @@
     [game.mouseoverbody :refer [get-mouseover-body]]
     [cdq.core :refer [screenpos-of-tilepos]]
     [cdq.core :refer [active player-body]]
-    [game.components.body :refer [bodies-in-range?]]
+    [cdq.core :refer [bodies-in-range?]]
     [cdq.core :refer [ingame-loop-comp]]
-    [game.components.render :refer [rendering]]))
+    [cdq.core :refer [rendering]]))
 
 (defn pressable-component [mouseover-text pressed & {color :color}]
   {:type :pressable

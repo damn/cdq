@@ -5,7 +5,7 @@
     [cdq.core :refer [max-delta]]
         [cdq.core :refer [safe-merge]]
         [cdq.core :refer [active add-to-removelist is-player?]]
-    [game.components.body :refer [calc-touched-cells get-body-bounds get-other-solid-bodies get-to-check-tiles min-solid-pxsize update-occupied-cell update-touched-cells]]
+    [cdq.core :refer [calc-touched-cells get-body-bounds get-other-solid-bodies get-to-check-tiles min-solid-pxsize update-occupied-cell update-touched-cells]]
     [cdq.core :refer [swap-position!]]
     [cdq.core :refer [cell-blocked? get-cells]]))
 
@@ -62,7 +62,7 @@
   (def try-moved (atom 0))
   (def update-posi-def (atom 0))
   (require '[cdq.core :refer [ingame-loop-comp]])
-  (require '[game.components.render :refer [rendering]])
+  (require '[cdq.core :refer [rendering]])
   (ingame-loop-comp :debug-infos
     (rendering :above-gui [g c]
       (render-readable-text g 50 90 (str "try-moved  " @try-moved))

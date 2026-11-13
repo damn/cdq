@@ -7,9 +7,9 @@
     [cdq.core :refer [in-pixel screen-height screen-width]]
     [cdq.core :refer [active block-active-components unblock-active-components]]
     cdq.core
-    [game.components.render :refer [rendering]]
+    [cdq.core :refer [rendering]]
     [cdq.core :refer [ingame-loop-comp]]
-    [game.components.body :refer [get-body-bounds get-other-bodies-in-adjacent-cells]]
+    [cdq.core :refer [get-body-bounds get-other-bodies-in-adjacent-cells]]
     [cdq.core :refer [get-camera-position]]
     [cdq.core :refer [get-entities-in-active-content-fields]]
     cdq.core))

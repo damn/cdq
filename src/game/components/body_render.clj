@@ -12,9 +12,8 @@
     [cdq.core :refer [debug-mode in-pixel]]
     [game.mouseoverbody :refer [get-mouseover-body]]
     [cdq.core :refer [id-entity-map is-player?]]
-    game.components.body
     [game.components.destructible :refer [destructible? get-hp]]
-    [game.components.render :refer [current-animation rendering]]
+    [cdq.core :refer [current-animation rendering]]
     [cdq.core :refer [ingame-loop-comp]]
     [game.components.skills.core :refer [get-active-skill get-skill is-attacking?]]
     [game.components.skills.melee :refer [body-in-melee-range? melee-puffer start-melee-puffer]]
@@ -113,7 +112,7 @@
       (when-let [component (first (filter #(and (:show-cast-bar %) (is-attacking? %)) (vals @body)))]
         (render-attacking-bar g body component render-position)))))
 
-(intern 'game.components.body 'body-info-renderfn body-renderfn)
+(intern 'cdq.core 'body-info-renderfn body-renderfn)
 
 ;;;
 

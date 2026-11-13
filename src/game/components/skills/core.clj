@@ -10,7 +10,7 @@
     [game.utils.msg-to-player :refer [show-msg-to-player]]
     [cdq.core :refer [active is-player? update-counter!]]
     [cdq.core :refer [blocks-component switch-state]]
-    [game.components.render :refer [current-animation show-gains-mana-effect]]))
+    [cdq.core :refer [current-animation show-gains-mana-effect]]))
 
 (defn is-ready?        [{state :state}] (= state :ready))
 (defn is-attacking?    [{state :state}] (= state :attacking))

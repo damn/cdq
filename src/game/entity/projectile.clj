@@ -1,13 +1,13 @@
 (ns game.entity.projectile
   (:require
     [cdq.core :refer [xor]]
-    [game.components.body :refer [create-body]]
+    [cdq.core :refer [create-body]]
     [cdq.core :refer [play-sound]]
     [cdq.core :refer [create-animation]]
     [cdq.core :refer [folder-frames]]
     [cdq.core :refer [create-entity]]
     [cdq.core :refer [position-component]]
-    [game.components.render :refer [animation-entity single-animation-component]]
+    [cdq.core :refer [animation-entity single-animation-component]]
     [cdq.core :refer [delete-after-duration-component]]))
 
 (alter-var-root #'cdq.core/init-fns conj

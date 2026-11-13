@@ -8,7 +8,7 @@
     [cdq.core :refer [ray-blocked?]]
     [game.mouseoverbody :refer [saved-mouseover-body]]
     [cdq.core :refer [add-to-removelist create-entity id-entity-map player-body]]
-    [game.components.render :refer [render-on-map]]
+    [cdq.core :refer [render-on-map]]
     [cdq.core :refer [delete-after-duration-component]]
     [game.components.skills.core :refer [get-skill-use-mouse-pos get-skill-use-mouse-tile-pos]]))
 

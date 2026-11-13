@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [create-entity]]
     [cdq.core :refer [position-component]]
-    [game.components.body :refer [create-body]]
+    [cdq.core :refer [create-body]]
     [game.components.destructible :refer [monster-destructible]]
     [game.components.sleeping :refer [sleeping-component]]
     [cdq.core :refer [tile-height tile-width]]))

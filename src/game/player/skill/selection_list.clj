@@ -1,7 +1,7 @@
 (ns game.player.skill.selection-list
   (:require
     [cdq.core :refer [rgbcolor]]
-    [game.components.render :refer [rendering]]
+    [cdq.core :refer [rendering]]
     [cdq.core :refer [ingame-loop-comp]]
     [game.player.skill.learnable :refer [render-skillbutton-tooltip]]
         [cdq.core :refer [fill-rect render-readable-text]]

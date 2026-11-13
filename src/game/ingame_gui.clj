@@ -5,7 +5,7 @@
     cdq.core
     [cdq.core :refer [enter-state]]
     [cdq.core :refer [ingame-loop-comp]]
-    [game.components.render :refer [rendering]]
+    [cdq.core :refer [rendering]]
     [cdq.core :refer [active]]
     [cdq.core :refer [get-text-height]]
     [cdq.core :refer [get-setting screen-height]]

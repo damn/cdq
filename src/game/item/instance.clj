@@ -12,8 +12,8 @@
     [game.item.in-hand :refer [empty-item-in-hand is-item-in-hand? item-in-hand set-item-in-hand]]
     [cdq.core :refer [active add-to-removelist create-entity player-body]]
     [cdq.core :refer [position-component]]
-    [game.components.body :refer [blocked-location? create-body]]
-    [game.components.render :refer [image-render-component render-on-map]]
+    [cdq.core :refer [blocked-location? create-body]]
+    [cdq.core :refer [image-render-component render-on-map]]
     [game.components.pressable :refer [pressable-component]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]))
 

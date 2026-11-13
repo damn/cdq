@@ -6,7 +6,7 @@
         [cdq.core :refer [create-image render-rotated-centered-image]]
     [cdq.core :refer [safe-merge]]
     [cdq.core :refer [active]]
-    [game.components.render :refer [circle-around-body-render-comp render-on-map]]
+    [cdq.core :refer [circle-around-body-render-comp render-on-map]]
     [game.components.body-effects :refer [defeffectentity]]))
 
 (def ^:private rotation-speed (/ 360 2000)) ; 360 degrees in 2 seconds = 2000 ms

@@ -12,9 +12,9 @@
     [game.media :refer [get-itemsprite]]
     [cdq.core :refer [add-to-removelist create-entity]]
     [cdq.core :refer [position-component]]
-    [game.components.body :refer [create-body]]
+    [cdq.core :refer [create-body]]
     [game.components.pressable :refer [pressable-component]]
-    [game.components.render :refer [image-render-component]]
+    [cdq.core :refer [image-render-component]]
     [game.entity.teleporters :refer [static-teleporter]]
     game.player.core
     game.player.skill.selection-list

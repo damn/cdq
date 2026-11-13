@@ -12,8 +12,8 @@
     [game.maps.mapchange :refer [queue-map-change]]
     [cdq.core :refer [create-entity]]
     [cdq.core :refer [position-component]]
-    [game.components.body :refer [create-body]]
-    [game.components.render :refer [single-animation-component]]
+    [cdq.core :refer [create-body]]
+    [cdq.core :refer [single-animation-component]]
     [game.components.pressable :refer [pressable-component]]))
 
 (defn create-teleporter

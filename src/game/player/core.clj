@@ -26,10 +26,9 @@
     game.components.movement
     [cdq.core :refer [mana-regen-component rotation-component set-rotation-angle]]
     [cdq.core :refer [ingame-loop-comp]]
-    [game.components.render :refer [animation-component rendering]]
-    game.components.render
+    [cdq.core :refer [animation-component rendering]]
     [game.components.destructible :refer [destructible-component is-dead? player-start-hp]]
-    [game.components.body :refer [colliding-with-other-solid-bodies? create-body teleport]]
+    [cdq.core :refer [colliding-with-other-solid-bodies? create-body teleport]]
     [game.components.body-effects :refer [get-sub-entities]]
     [game.item.cells :refer [get-inventory-cells-with-item-name remove-item-from-cell]]
     [game.components.movement.ai.potential-field :refer [potential-field-component]]

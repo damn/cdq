@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [red]] [clojure.test :refer [is use-fixtures]]
             [game.test.helper :refer [deftest-ingame start-game-once-fixture]]
-            [game.components.render :refer [create-circle-render-effect]]
+            [cdq.core :refer [create-circle-render-effect]]
             
             [cdq.core :refer [get-all-entities-of-current-map]]
             [cdq.core :refer [get-component get-position]]

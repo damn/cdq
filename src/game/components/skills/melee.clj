@@ -6,9 +6,8 @@
     [cdq.core :refer [max-delta]]
     [game.item.cells :refer [get-equiped-hands-item]]
         [game.mouseoverbody :refer [get-mouseover-body]]
-    game.components.body
     [cdq.core :refer [id-entity-map is-player? player-body]]
-    [game.components.body :refer [calc-touched-cells circle-collides? is-affectable? rect-shape]]
+    [cdq.core :refer [calc-touched-cells circle-collides? is-affectable? rect-shape]]
     [game.components.destructible :refer [attackable-by-player? calc-effective-melee-dmg deal-dmg]]
     [game.components.skills.core :refer [get-active-skill get-skill-use-mouse-button standalone-skill]]
     [cdq.core :refer [get-bodies-from-cells]]))

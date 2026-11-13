@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [render-readable-text]]
     [cdq.core :refer [half-screen-h half-screen-w]]
-    [game.components.render :refer [rendering]]
+    [cdq.core :refer [rendering]]
     [cdq.core :refer [create-counter reset-counter! update-counter]]
     [cdq.core :refer [atom-session]]
     [cdq.core :refer [active]]

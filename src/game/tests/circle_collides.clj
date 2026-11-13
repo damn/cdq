@@ -4,7 +4,7 @@
     [cdq.core :refer [green red]]
     [cdq.core :refer [tile-width]]
     [cdq.core :refer [ingame-loop-comp]]
-    [game.components.render :refer [rendering]]
+    [cdq.core :refer [rendering]]
     [cdq.core :refer [id-entity-map]]
     [game.components.destructible :refer [get-destructible-bodies]]
     [cdq.core :refer [screenpos-of-tilepos]]

@@ -8,8 +8,8 @@
     [cdq.core :refer [folder-animation]]
     [game.monster.defmonster :refer [get-monster-properties]]
     [cdq.core :refer [add-component]]
-    [game.components.body :refer [blocked-location?]]
-    [game.components.render :refer [single-animation-component]]
+    [cdq.core :refer [blocked-location?]]
+    [cdq.core :refer [single-animation-component]]
     [cdq.core :refer [get-current-map-data]]
     [cdq.core :refer [get-rand-weighted-items rand-int-between when-chance]]))
 

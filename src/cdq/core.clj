@@ -3178,3 +3178,498 @@ assert lastindexOf slash is the same for names in a folder?
   (create-entity
     (position-component position)
     (light-component :intensity 1 :radius 4)))
+
+;; render components
+
+(defn- render-make-rendering-props [order fnargs]
+  `{:rendering true
+    :order ~order
+    :renderfn ~(make-fn fnargs)})
+
+; can not check if order is keyword because order might also be a symbol and not a keyword literal
+(defn- render-destructure-args
+  "four cases:
+  order renderfn
+  renderfn
+  order [graphics component] &body
+  [graphics component] &body"
+  [default & more]
+  (cond
+    (= 1 (count more)) [default more]
+    (vector? (first more)) [default more]
+    :else [(first more) (rest more)]))
+
+(def render-on-map-order (define-order [:is-ground :on-ground :default :air :top-level]))
+
+(defmacro render-on-map [& more]
+  (let [[order fnargs] (apply render-destructure-args :default more)]
+    `(do
+       (assert (order-contains? render-on-map-order ~order))
+       ~(render-make-rendering-props order fnargs))))
+
+; :hpmana below gui because tooltips should be over them ... then we have tooltips which is another type of tooltips...
+(def render-map-indep-order (define-order [:below-gui :hpmanabar :selfmade-gui :gui :tooltips :above-gui]))
+
+; maybe rename to match render-on-map -> render-on-gui?
+(defmacro rendering [& more]
+  (let [[order fnargs] (apply render-destructure-args :gui more)]
+    `(do
+       (assert (order-contains? render-map-indep-order ~order))
+       ~(render-make-rendering-props order fnargs))))
+
+;;
+
+(defn translate-position [[x y]]
+  [(* x tile-width),(* y tile-height)])
+
+(defn rect-render-component [pxw pxh]
+  (safe-merge
+    {:type :rect-render
+     :shape (rectangle -1 -1 pxw pxh)}
+    (render-on-map [g _ c render-posi]
+      (render-centered-shape g (:shape c) render-posi))))
+
+(defn- render-rotated-lighted-image [g entity render-posi image apply-light]
+  (when apply-light
+    (if (:always-in-sight @entity)
+      (set-cached-brightness image (int-posi (:value (:position @entity)))) ; brightness like map tiles explored/unexplored
+      (set-brightness image (:value (:position @entity)))))
+  (if-let [angle (:angle (:rotation @entity))]
+    (render-rotated-centered-image g image angle render-posi)
+    (render-centered-image image render-posi)))
+
+(defn image-render-component [image & {:keys [order apply-light]
+                                       :or {order :default apply-light true}}]
+  (safe-merge
+    {:type :image-render
+     :depends [:position]
+     :image image}
+    (render-on-map order [g entity c render-posi]
+      (render-rotated-lighted-image g entity render-posi (:image c) apply-light))))
+
+(defn- render-update-animation
+  "control is a function with (fn [entity]) which must return the new animation key and can also update some stuff"
+  [delta {:keys [akey control] :as component} entity]
+  (let [last-akey akey
+        new-akey (control entity)
+        _ (assert (keyword? new-akey))
+        new-animation (cond-> (new-akey component)
+                        (not= last-akey new-akey) restart-animation
+                        :then                     (tick delta))]
+    (swap! entity update-in [(:type component)]
+                assoc
+                :akey    new-akey
+                new-akey new-animation)))
+
+(defn current-animation [entity]
+  (let [{:keys [akey] :as c} (:animation @entity)]
+    (akey c)))
+
+(defn- render-animation-comp [g entity {:keys [apply-light] :as component} render-posi]
+  ; can be nil when mapchange -> render happends before update for a component (else update happends before render)
+  (when-not (:akey component)
+    (render-update-animation 1 component entity))
+  (render-rotated-lighted-image g entity render-posi (get-animation-frame (current-animation entity)) apply-light))
+
+; types-animations is a map of keyword to animation and control returns a keyword which animation to play next.
+(defn animation-component [control types-animations & {:keys [order apply-light]
+                                                       :or {order :default apply-light true}}]
+  (safe-merge
+    {:type :animation
+     :control control
+     :depends [:position]
+     :akey nil
+     :apply-light apply-light}
+    (render-on-map order render-animation-comp)
+    (active render-update-animation)
+    types-animations))
+
+(defn single-animation-component [animation & more]
+  (apply animation-component (constantly :default) {:default animation} more))
+
+(defn animation-entity
+  [& {:keys [position animation order] :or {order :air}}]
+  (create-entity
+    (position-component position)
+    {:type :always-in-sight}
+    (single-animation-component animation :order order :apply-light false)
+    (merge {:type :delete-after-stopped}
+           (active [_ _ entity]
+             (when (-> (:animation @entity) :default animation-stopped?)
+               (add-to-removelist entity))))))
+
+; FIXME animation that is passed to reload session args == initial one with cnt = 0 ....
+; animation component 'current' ?
+
+;;;
+
+(defn- render-circle-effect-components [position radius color duration]
+  (let [shape (circle [-1 -1] (in-pixel radius))] ; TODO shape rendering component?
+    [{:type :session
+      :constructor "cdq.core/create-circle-render-effect*"
+      :args [position radius color duration]}
+     (position-component position)
+     (delete-after-duration-component duration)
+     (merge {:type :visual}
+            (render-on-map [g _ c render-posi]
+                           (render-centered-shape g shape render-posi color)))]))
+
+(defn create-circle-render-effect* [position radius color duration]
+  (apply create-entity-no-init (render-circle-effect-components position radius color duration)))
+
+(defn create-circle-render-effect [position radius color duration]
+  (apply create-entity (render-circle-effect-components position radius color duration)))
+
+(defn- render-draw-fat-line [g [x y] [ex ey]]
+  (doseq [x  [(dec x)  x  (inc x)]
+          y  [(dec y)  y  (inc y)]
+          ex [(dec ex) ex (inc ex)]
+          ey [(dec ey) ey (inc ey)]]
+    (draw-line g x y ex ey)))
+
+(defn create-lines-render-effect [healer healed-bodies duration]
+  (create-entity
+    (position-component (:value (:position @healer)))
+    (delete-after-duration-component duration)
+    {:type :always-in-sight}
+    (merge {:type :visual}
+           (render-on-map :air [g _ component start]
+                          (set-color g green)
+                          (doseq [end (map #(translate-position (:value (:position @%))) healed-bodies)]
+                            (render-draw-fat-line g start end))))))
+
+(defn- create-line-render-effect* [start end duration color thin]
+  (create-entity
+    (position-component start)
+    (delete-after-duration-component duration)
+    {:type :always-in-sight}
+    (merge {:type :visual}
+           (render-on-map :air [g _ component start]
+                          (set-color g color)
+                          (if thin
+                            (draw-line   g start (translate-position end))
+                            (render-draw-fat-line g start (translate-position end)))))))
+
+(defn create-line-render-effect [start end duration & {color :color thin :thin}]
+  (create-line-render-effect* start end duration color thin))
+
+(defn render-above-body [g body [x y] image & {ypuffer :ypuffer :or {ypuffer 0}}]
+  (let [posi [x
+              (- y (:half-pxh (:body @body)) (/ (second (get-dimensions image)) 2) ypuffer)]]
+    (render-centered-image image posi)))
+
+(defn show-string-effect [body duration color string]
+  (let [tilepos (:value (:position @body))]
+    (ingame-loop-comp :string-effect
+      {:counter (make-counter duration)
+       :color (Color. ^Color color)}  ; copy before changing it @ set!
+      (active [delta {:keys [color counter] :as c} entity]
+        (set! (.a ^Color color) (- 1 (counter-ratio counter)))
+        (when (update-counter! entity delta c)
+          (add-to-removelist entity)))
+      (rendering :below-gui [g {:keys [color counter] :as c}]
+        (let [[rx ry] (screenpos-of-tilepos tilepos)]
+          (render-readable-text g rx (- ry (:half-pxh (:body @body)) (* 50 (counter-ratio counter)))
+            :shift false
+            :above true
+            :centerx true
+            :background false
+            color string))))))
+
+(defn show-gains-hp-effect [body gained]
+  (show-string-effect body 2000 (rgbcolor :g 1 :r 0.2 :b 0.2) (str "+" (readable-number gained))))
+
+(defn show-gains-mana-effect [body gained]
+  (show-string-effect body 2000 (rgbcolor :g 0.2 :r 0.2 :b 1) (str "+" (readable-number gained))))
+
+(defn circle-around-body-render-comp
+  "target entity is not the entity of this component (used at sub-entities that only share position)"
+  [target color order]
+  (merge {:type :visuals}
+         (render-on-map order [g _ c render-posi]
+           (let [radius (+ 2 (:half-pxw (:body @target)))]
+             (fill-centered-circle g radius render-posi color)))))
+
+;; body component
+
+(defn get-body-bounds [body]
+  [(:value (:position @body)) (:half-width (:body @body)) (:half-height (:body @body))])
+
+(defn calc-touched-cells
+  ([body]
+    (apply calc-touched-cells (get-body-bounds body)))
+  ([position half-w half-h]
+    (get-cells
+      (get-touched-tiles position half-w half-h))))
+
+(defn inside-cell? [body cell]
+  (let [touched-cells (calc-touched-cells body)]
+    (and (= 1 (count touched-cells))
+         (= cell (first touched-cells)))))
+
+(defn- body-set-occupied-cell [body]
+  (if (:is-multiple-cell (:body @body))
+    (let [cells (calc-touched-cells body)]
+      (dorun (map #(swap! % update-in [:occupied] conj body) cells))
+      (swap! body assoc-in [:body :occupied-cells] cells))
+    (let [cell (get-cell (:value (:position @body)))]
+      (assert cell)
+      (swap! cell update-in [:occupied] conj body)
+      (swap! body assoc-in [:body :occupied-cell] cell))))
+
+(defn- body-remove-from-occupied-cell [body]
+  (if (:is-multiple-cell (:body @body))
+    (dorun (map #(swap! % update-in [:occupied] disj body) (:occupied-cells (:body @body))))
+    (swap! (:occupied-cell (:body @body)) update-in [:occupied] disj body)))
+
+(defn update-occupied-cell [body]
+  (body-remove-from-occupied-cell body)
+  (body-set-occupied-cell body))
+
+(defn- body-set-touched-cells
+  ([body]
+    (body-set-touched-cells body (calc-touched-cells body)))
+  ([body new-cells]
+    {:pre [(not-any? nil? new-cells)]}
+    (swap! body assoc-in [:body :cached-touched-cells] new-cells)
+    (dorun (map #(cell-add-body % body) new-cells))))
+
+(defn- body-remove-from-touched-cells
+  ([body]
+    (body-remove-from-touched-cells body (:cached-touched-cells (:body @body))))
+  ([body cached-cells]
+    (dorun (map #(cell-remove-body % body) cached-cells))))
+
+(defn update-touched-cells
+  ([body]
+    (update-touched-cells body (calc-touched-cells body)))
+  ([body new-cells]
+    (let [cached-cells (:cached-touched-cells (:body @body))]
+      (when-not (= new-cells cached-cells)
+        (body-remove-from-touched-cells body cached-cells)
+        (body-set-touched-cells body new-cells)))))
+
+; fur mouseoverbodies damit man gut klicken kann
+; solid da fur projektile soll es net gelten
+; entweder dies oder max-speed muss festgelegt werden.
+(def min-solid-pxsize 8)
+(def half-min-solid-pxsize (/ min-solid-pxsize 2))
+
+(declare body-info-renderfn)
+
+(defn body-component [solid side half-pxw half-pxh mouseover-outline]
+  {:pre [(= (class solid) java.lang.Boolean)
+         (#{:monster :player :no-side} side)
+         (>= half-pxw (if solid half-min-solid-pxsize 0))
+         (>= half-pxh (if solid half-min-solid-pxsize 0))
+         (< (/ half-pxw tile-width) 2)
+         (< (/ half-pxh tile-height) 2)]} ; wg. rendering on screen (max ungetestet - ist etwas kleiner als 3 die tatsachliche maximale size)
+  (let [half-w (/ half-pxw tile-width)
+        half-h (/ half-pxh tile-height)]
+    (safe-merge
+      {:type :body
+       :solid solid
+       :side side
+       :half-pxw half-pxw
+       :half-pxh half-pxh
+       :mouseover-outline mouseover-outline
+       :half-width half-w
+       :half-height half-h
+       :is-multiple-cell (does-not-fit-in-a-tile? half-w half-h)
+       :depends [:position]
+       :init (if-not solid
+               body-set-touched-cells
+               (fn [entity]
+                 (body-set-touched-cells entity)
+                 (body-set-occupied-cell entity)))
+       :destruct (if-not solid
+                   body-remove-from-touched-cells
+                   (fn [entity]
+                     (body-remove-from-touched-cells entity)
+                     (body-remove-from-occupied-cell entity)))
+       :posi-changed (if-not solid
+                       update-touched-cells
+                       (fn [entity] ; posi changed of solid entities @ update-movement manually called
+                         (update-touched-cells entity)
+                         (update-occupied-cell entity)))}
+      (render-on-map :air body-info-renderfn))))
+
+(defn create-body
+  [& {:keys [solid pxw pxh dimensions mouseover-outline side]
+      :or {side :no-side}}]
+  (let [pxw (or pxw (dimensions 0))
+        pxh (or pxh (dimensions 1))]
+    (assert (and pxw pxh))
+    (body-component solid side (/ pxw 2) (/ pxh 2) mouseover-outline)))
+
+;; Body Geometry
+
+(defn- body-rect [body] ; cache in body and update @ :posi-changed?
+  (let [[[x y] half-w half-h] (get-body-bounds body)]
+    [(- x half-w) ; 22% faster with 4 float casts
+     (- y half-h)
+     (* 2 half-w)
+     (* 2 half-h)]))
+
+; cache in body and update @ :posi-changed?
+(def rect-shape (comp rectangle body-rect))
+
+(defn circle-collides? [p radius body]
+  (collides? (circle p radius)
+                  (rect-shape body)))
+
+(defn get-bodies-at-position [position]
+  (when-let [cell (get-cell position)]
+    (filter #(point-in-rect? position (body-rect %))
+            (map #(get @id-entity-map %) (get-body-ids cell)))))
+
+(defn bodies-in-range? [b1 b2 range-sqr]
+  (in-range? (:value (:position @b1)) (:value (:position @b2)) range-sqr))
+
+; circle-collides creates a new Circle shape for every check -> could be optimized
+(defn get-touched-bodies
+  [posi radius]
+  (filter #(circle-collides? posi radius %)
+          (get-bodies-from-cells
+            (calc-touched-cells posi radius radius))))
+
+(defn get-other-solid-bodies
+  ([position half-w half-h body-id touched-cells]
+    (filter
+      #(and
+         (not= (:id (meta %)) body-id)
+         (:solid (:body @%))
+         (rect-collision? [position half-w half-h] (get-body-bounds %)))
+      (get-bodies-from-cells touched-cells)))
+  ([position half-w half-h touched-cells]
+    (get-other-solid-bodies position half-w half-h -1 touched-cells))
+  ([position body touched-cells]
+    (get-other-solid-bodies position (:half-width (:body @body)) (:half-height (:body @body)) (:id (meta body)) touched-cells)))
+
+(defn colliding-with-other-solid-bodies? [body]
+  (boolean
+    (not-empty
+      (get-other-solid-bodies (:value (:position @body)) body (:cached-touched-cells (:body @body))))))
+
+(defn blocked-location?
+  ([posi half-w half-h movement-type]
+    (let [touched-cells (calc-touched-cells posi half-w half-h)]
+      (or
+        (some #(cell-blocked? % movement-type) touched-cells)
+        (seq (get-other-solid-bodies posi half-w half-h touched-cells)))))
+  ([posi body movement-type]
+    (blocked-location? posi (:half-width (:body @body)) (:half-height (:body @body)) movement-type))
+  ([posi body]
+    (blocked-location? posi body (:movement-type (:movement @body)))))
+
+; TODO adjacent-cells could be nil -> :middle @cell -> NPE
+(defn- body-find-nearby-valid-location [body posi]
+  (when-let [cell (first (filter #(not (blocked-location? (:middle @%) body))
+                              (cached-get-adjacent-cells (get-cell posi))))]
+    (:middle @cell)))
+
+(defn teleport
+  "searches nearby positions for a free one if target is blocked
+   if none exists -> just teleports to the blocked position."
+  [body posi]
+  (swap-position! body
+                  (if-not (blocked-location? posi body)
+                    posi
+                    (if-let [valid (body-find-nearby-valid-location body posi)]
+                      valid
+                      posi))))
+;;
+
+(defn is-burrowed? [entity]
+  (if-let [c (:burrow @entity)]
+    (:burrowed c)))
+
+(defn is-affectable? [entity]
+  (not (is-burrowed? entity)))
+
+(defn- body-is-visible? [entity]
+  (not (is-burrowed? entity)))
+
+; hier entity mit position component benotigt - kein body
+; Has to work with entities who have :position aber kein :body!
+; in sight of player-body -> ray from player-body! ; not in sight of some light-source ..
+(defn on-screen-and-in-sight? [entity]
+  (and
+    ; TODO posi-in-rect hier? / does not take into account body size
+    (let [[x y] (:value (:position @entity))
+          x (float x)
+          y (float y)
+          [cx cy] (get-camera-position)
+          px (float cx)
+          py (float cy)
+          xdist (Math/abs (- x px))
+          ydist (Math/abs (- y py))]
+      (and
+        (<= xdist (inc half-display-w-in-tiles))
+        (<= ydist (inc half-display-h-in-tiles))))
+    (or
+      (when @debug-mode entities-always-in-los)
+      (:always-in-sight @entity)
+      (and (body-is-visible? entity)
+           (not (ray-blocked? (:value (:position @player-body)) (:value (:position @entity))))))))
+
+; Assert: not jumping over tiles, so speed is <1 tile at max-delta
+
+(defn- body-get-direction-fn [d] (if (pos? d) + -))
+
+(defn- body-get-to-check-tiles-big [body [x y] xdir ydir]
+  (let [half-w (:half-width (:body @body))
+        half-h (:half-height (:body @body))
+        x (float x),y (float y),half-w (float half-w),half-h (float half-h)]
+    (set
+      (concat
+        (when-not (zero? xdir)
+          (let [x (int ((body-get-direction-fn xdir) x half-w))
+                t (int (- y half-h))
+                b (int (+ y half-h))]
+            (for [y (range t (inc b))]
+              [x y])))
+        (when-not (zero? ydir)
+          (let [y (int ((body-get-direction-fn ydir) y half-h))
+                l (int (- x half-w))
+                r (int (+ x half-w))]
+            (for [x (range l (inc r))]
+              [x y])))))))
+
+(defn- body-get-to-check-tiles-small [body [x y] xdir ydir]
+  (let [half-w (:half-width (:body @body))
+        half-h (:half-height (:body @body))
+        x (float x),y (float y),half-w (float half-w),half-h (float half-h)]
+    (set
+      (concat
+        (when-not (zero? xdir)
+          (let [x (int ((body-get-direction-fn xdir) x half-w))
+                t (int (- y half-h))
+                b (int (+ y half-h))]
+            [[x t] [x b]]))
+        (when-not (zero? ydir)
+          (let [y (int ((body-get-direction-fn ydir) y half-h))
+                l (int (- x half-w))
+                r (int (+ x half-w))]
+            [[l y] [r y]]))))))
+
+(defn get-to-check-tiles [body new-posi xdir ydir]
+  (if (:is-multiple-cell (:body @body))
+    (body-get-to-check-tiles-big body new-posi xdir ydir)
+    (body-get-to-check-tiles-small body new-posi xdir ydir)))
+
+;;
+
+(defn get-other-bodies-in-adjacent-cells [entity]
+  (->> (:value (:position @entity))  ; TODO could be faster using occupied-cell instead of get-cell...
+    get-cell
+    cached-get-adjacent-cells
+    get-bodies-from-cells
+    (remove #(= (:id (meta %)) (:id (meta entity))))))
+
+;;
+
+(defn get-dist-to-player
+  "only works for single cell bodies, may return nil when outside of potential-field"
+  [entity]
+  (:dist-to-player @(:occupied-cell (:body @entity))))

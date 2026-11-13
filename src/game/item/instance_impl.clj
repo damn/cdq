@@ -17,7 +17,7 @@
 
     [cdq.core :refer [get-rand-weighted-item rand-int-between]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
-    [game.components.render :refer [show-gains-hp-effect show-gains-mana-effect]]
+    [cdq.core :refer [show-gains-hp-effect show-gains-mana-effect]]
     [game.components.destructible :refer [get-hp get-player-armor]]
     [game.components.skills.core :refer [get-mana get-skill-use-mouse-tile-pos skillmanager-skill]]
     [game.components.skills.utils :refer [check-line-of-sight get-player-ranged-vector]]
