@@ -4,7 +4,7 @@
     [cdq.core :refer [create-image]]
     cdq.core
     [cdq.core :refer [enter-state]]
-    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [cdq.core :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]
     [cdq.core :refer [active]]
     [cdq.core :refer [get-text-height]]

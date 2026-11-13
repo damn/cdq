@@ -1,7 +1,7 @@
 (ns game.tests.fnplotter
   (:require
     [cdq.core :refer [black red white]]
-    [engine.render.graphics :refer [draw-rect fill-rect]]
+    [cdq.core :refer [draw-rect fill-rect]]
     [cdq.core :refer [start-slick-basicgame]]
     [cdq.core :refer [high-weighted]]))
 

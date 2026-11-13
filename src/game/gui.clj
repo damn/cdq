@@ -3,7 +3,7 @@
     [cdq.core :refer [point-in-rect?]]
     [cdq.core :refer [rgbcolor white]]
     [cdq.core :refer [create-image draw-image get-dimensions]]
-    [engine.render.graphics :refer [draw-rect fill-rect render-readable-text]]
+    [cdq.core :refer [draw-rect fill-rect render-readable-text]]
     [cdq.core :refer [deflazygetter]]
     [cdq.core :refer [get-mouse-pos is-key-pressed? is-leftm-consumed? try-consume-leftm-pressed]]
     [cdq.core :refer [get-defaultfont get-text-height get-text-width]]))

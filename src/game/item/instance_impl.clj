@@ -310,7 +310,7 @@
     (try-pickup-item
       (create-item-instance "Grenade")))
 
-  (require '[game.components.ingame-loop :refer [do-in-game-loop]])
+  (require '[cdq.core :refer [do-in-game-loop]])
   (do-in-game-loop
     (try-pickup-item
       (create-item-instance "Battle-Drugs")))

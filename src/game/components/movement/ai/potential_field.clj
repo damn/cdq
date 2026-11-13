@@ -5,7 +5,7 @@
   (:require
     [cdq.core :refer [direction-vector get-distance]]
     [cdq.core :refer [rgbcolor set-color white]]
-    [engine.render.graphics :refer [draw-string fill-rect]]
+    [cdq.core :refer [draw-string fill-rect]]
     [game.components.position :refer [get-tile]]
     [game.components.movement :refer [movement-component]]
     [cdq.core :refer [cells get-8-neighbour-positions]]

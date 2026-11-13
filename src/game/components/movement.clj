@@ -62,7 +62,7 @@
   ; f�r testen wie oft try-moved/update-posi-def average ist. -> so 1.4 ca.
   (def try-moved (atom 0))
   (def update-posi-def (atom 0))
-  (require '[game.components.ingame-loop :refer [ingame-loop-comp]])
+  (require '[cdq.core :refer [ingame-loop-comp]])
   (require '[game.components.render :refer [rendering]])
   (ingame-loop-comp :debug-infos
     (rendering :above-gui [g c]

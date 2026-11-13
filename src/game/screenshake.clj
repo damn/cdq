@@ -1,5 +1,5 @@
 (ns game.screenshake
-  (:require [engine.render.graphics :as g]))
+  (:require [cdq.core :refer [graphics-translate]]))
 
 (def shake-delay 45) ; Delay in ms between each new shake.
 
@@ -48,13 +48,13 @@
   (when (and
           (not= 0 @shakex)
           (not= 0 @shakey))
-    (g/translate g @shakex @shakey)))
+    (graphics-translate g @shakex @shakey)))
 
 (defn translate-shake-after-render [g]
   (when (and
           (not= 0 @shakex)
           (not= 0 @shakey))
-    (g/translate g (- @shakex) (- @shakey))))
+    (graphics-translate g (- @shakex) (- @shakey))))
 
 
 

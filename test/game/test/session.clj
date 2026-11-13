@@ -4,7 +4,7 @@
             [game.test.helper :refer [deftest-ingame start-game-once-fixture]]
             [game.components.render :refer [create-circle-render-effect]]
             
-            [game.maps.contentfields :refer [get-all-entities-of-current-map]]
+            [cdq.core :refer [get-all-entities-of-current-map]]
             [cdq.core :refer [get-component get-position]]
             [game.components.position :refer [swap-position!]]
             game.player.session-data))

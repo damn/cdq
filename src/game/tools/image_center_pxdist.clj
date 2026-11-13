@@ -4,7 +4,7 @@
     [cdq.core :refer [start-slick-basicgame]]
     [cdq.core :refer [get-mouse-pos is-leftm-pressed? update-mousebutton-state]]
     [cdq.core :refer [create-image]]
-    [engine.render.graphics :refer [render-centered-shape render-readable-text]]))
+    [cdq.core :refer [render-centered-shape render-readable-text]]))
 
 (def posis (atom []))
 

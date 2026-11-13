@@ -2,9 +2,9 @@
   (:require
     [cdq.core :refer [rgbcolor]]
     [game.components.render :refer [rendering]]
-    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [cdq.core :refer [ingame-loop-comp]]
     [game.player.skill.learnable :refer [render-skillbutton-tooltip]]
-        [engine.render.graphics :refer [fill-rect render-readable-text]]
+        [cdq.core :refer [fill-rect render-readable-text]]
     [cdq.core :refer [is-key-pressed? screen-height]]
     [game.gui :refer [get-absolute-posi get-bounds is-visible? make-imgbutton mouseover? remove-guicomponent set-visible]]
     [game.ingame-gui :refer [ingamestate-display]]

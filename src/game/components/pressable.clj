@@ -1,15 +1,15 @@
 (ns game.components.pressable
   (:require
     [cdq.core :refer [white]]
-    [engine.render.graphics :refer [render-readable-text]]
+    [cdq.core :refer [render-readable-text]]
     [game.components.body-render :refer [body-outline-height]]
     [cdq.core :refer [try-consume-leftm-pressed]]
     cdq.core
     [game.mouseoverbody :refer [get-mouseover-body]]
-    [game.utils.tilemap :refer [screenpos-of-tilepos]]
+    [cdq.core :refer [screenpos-of-tilepos]]
     [cdq.core :refer [active player-body]]
     [game.components.body :refer [bodies-in-range?]]
-    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [cdq.core :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]))
 
 (defn pressable-component [mouseover-text pressed & {color :color}]

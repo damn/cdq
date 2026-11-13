@@ -1,6 +1,6 @@
 (ns game.test.helper
   (:require game.start
-            [game.components.ingame-loop :refer (do-in-game-loop)]
+            [cdq.core :refer [do-in-game-loop]]
             [clojure.test :refer (deftest)]))
 
 (defn start-game-once-fixture [f]

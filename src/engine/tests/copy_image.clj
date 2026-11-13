@@ -3,7 +3,7 @@
     [cdq.core :refer [start-slick-basicgame]]
     [cdq.core :refer [get-scaled-copy]]
     [engine.render.assets :refer [spritesheet-frames]]
-    [engine.render.graphics :refer [fill-rect]])
+    [cdq.core :refer [fill-rect]])
   (:import (org.newdawn.slick Image Color)))
 
 ; maybe compress the data so savegame is more readable? 1ASssF9g8aAgsGDGe

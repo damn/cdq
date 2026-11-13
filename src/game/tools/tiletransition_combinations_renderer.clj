@@ -1,7 +1,7 @@
 (ns game.tools.tiletransition-combinations-renderer
   (:require
     [cdq.core :refer [black gray white]]
-    [engine.render.graphics :refer [fill-rect render-readable-text]]
+    [cdq.core :refer [fill-rect render-readable-text]]
     [cdq.core :refer [get-8-neighbour-positions]]
     [cdq.core :refer [boolperm]]
     [cdq.core :refer [mapvals]]

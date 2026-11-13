@@ -4,7 +4,7 @@
     [cdq.core :refer [start-slick-basicgame]]
     [cdq.core :refer [if-chance]]
     [cdq.core :refer [astar-find-path]]
-    [game.maps.tiledmaps :refer [construct-tiledmap create-grid-from-tiled-map]]
+    [cdq.core :refer [construct-tiledmap create-grid-from-tiled-map]]
     [cdq.core :refer [get-transition-tile-value]]
     [game.tools.tiledmap-grid-convert :refer [make-tiledmap-file resource]]))
 

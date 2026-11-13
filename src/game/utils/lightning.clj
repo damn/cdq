@@ -4,7 +4,7 @@
     [cdq.core :refer [rgbcolor white]]
     cdq.core
     [game.utils.raycast :refer [ray-blocked?]]
-    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [cdq.core :refer [ingame-loop-comp]]
     [game.maps.minimap :refer [update-minimap]]
     [cdq.core :refer [compare-times int-posi]]
     [cdq.core :refer [genmap]]
@@ -12,7 +12,7 @@
     [cdq.core :refer [debug-mode in-pixel]]
     [cdq.core :refer [active create-entity player-body]]
     [game.components.position :refer [position-component]]
-    [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
+    [cdq.core :refer [get-entities-in-active-content-fields]]
     [cdq.core :refer [add-cell-blocks-changed-listener inside-map?]])
   (:import org.newdawn.slick.tiled.LightManager
            (org.newdawn.slick Color Image)))

@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [black blue darkGray red rgbcolor set-color white]]
     [cdq.core :refer [create-empty-image]]
-    [engine.render.graphics :refer [draw-grid draw-string fill-rect]]
+    [cdq.core :refer [draw-grid draw-string fill-rect]]
     [cdq.core :refer [height posis width]]
     [cdq.core :refer [assoc-ks]]
     [cdq.core :refer [start-slick-basicgame]]

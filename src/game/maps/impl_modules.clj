@@ -59,7 +59,7 @@
      :rand-item-max-lvl rand-item-max-lvl}))
 
 
-;(use 'game.components.ingame-loop)
+;(use 'cdq.core)
 ;(do-in-game-loop
 ;  (repeatedly-until-no-error
 ;                  (fn []

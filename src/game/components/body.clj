@@ -1,7 +1,7 @@
 (ns game.components.body
   (:require
     [cdq.core :refer [circle collides? does-not-fit-in-a-tile? get-touched-tiles in-range? point-in-rect? rect-collision? rectangle]] [cdq.core :as debug]
-            [game.maps.camera :refer [get-camera-position]]
+            [cdq.core :refer [get-camera-position]]
             [cdq.core :refer [debug-mode half-display-h-in-tiles half-display-w-in-tiles tile-height tile-width]]
             [cdq.core :refer [safe-merge]]
             [cdq.core :refer [id-entity-map player-body]]
@@ -9,7 +9,6 @@
             [game.components.position :refer [swap-position!]]
             game.components.misc
             [cdq.core :refer [cell-add-body cached-get-adjacent-cells cell-blocked? get-bodies-from-cells get-body-ids get-cell get-cells cell-remove-body]]
-            game.maps.contentfields
             [game.utils.raycast :refer [ray-blocked?]]))
 
 (defn get-body-bounds [body]

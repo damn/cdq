@@ -7,7 +7,7 @@
     [cdq.core :refer [create-image]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation]]
-    [engine.render.graphics :refer [render-readable-text]]
+    [cdq.core :refer [render-readable-text]]
     cdq.core
     cdq.core
     [game.maps.minimap :refer [show-on-minimap]]
@@ -19,14 +19,13 @@
     [cdq.core :refer [play-sound]]
     [cdq.core :refer [is-key-down? is-leftbutton-down? is-leftm-consumed?]]
     cdq.core
-    game.maps.contentfields
     [cdq.core :refer [add-to-removelist create-entity player-body]]
     [cdq.core :refer [switch-state]]
     [game.components.position :refer [position-component]]
     [game.components.movement :refer [movement-component]]
     game.components.movement
     [game.components.misc :refer [mana-regen-component rotation-component set-rotation-angle]]
-    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [cdq.core :refer [ingame-loop-comp]]
     [game.components.render :refer [animation-component rendering]]
     game.components.render
     [game.components.destructible :refer [destructible-component is-dead? player-start-hp]]

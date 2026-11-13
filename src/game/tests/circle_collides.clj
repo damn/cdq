@@ -3,11 +3,11 @@
     [cdq.core :refer [circle]]
     [cdq.core :refer [green red]]
     [cdq.core :refer [tile-width]]
-    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [cdq.core :refer [ingame-loop-comp]]
     [game.components.render :refer [rendering]]
     [cdq.core :refer [id-entity-map]]
     [game.components.destructible :refer [get-destructible-bodies]]
-    [game.utils.tilemap :refer [screenpos-of-tilepos]]
+    [cdq.core :refer [screenpos-of-tilepos]]
     [game.utils.raycast :refer [ray-blocked?]]))
 ; monsters live in game.start
 
@@ -29,7 +29,7 @@
             (some #(not (ray-blocked? posi (:value (:position @%))))
               (get-destructible-bodies posi circle-radius :monster))
             red green))))))
-;(remove-entity :circle-collides)
+;(remove-ingame-loop-entity :circle-collides)
 ; (player-in-nova-range? (get-entity 441))
 
 ; ich glauben das ist oben links aufgebaut

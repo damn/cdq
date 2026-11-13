@@ -10,8 +10,8 @@
     [game.components.render :refer [animation-entity]]
     [game.components.body :refer [colliding-with-other-solid-bodies? get-dist-to-player get-other-bodies-in-adjacent-cells is-burrowed?]]
     game.components.position
-    [game.components.ingame-loop :refer [ingame-loop-comp]]
-    [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
+    [cdq.core :refer [ingame-loop-comp]]
+    [cdq.core :refer [get-entities-in-active-content-fields]]
     cdq.core))
 
 (alter-var-root #'cdq.core/init-fns conj

@@ -8,7 +8,7 @@
     [cdq.core :refer [create-image get-scaled-copy]]
     [engine.render.animation :refer [create-animation render-centered-animation]]
     [engine.render.assets :refer [folder-animation folder-frames]]
-    [engine.render.graphics :refer [render-readable-text]]
+    [cdq.core :refer [render-readable-text]]
     cdq.core
     [cdq.core :refer [active add-to-removelist is-player? player-body reset-component-state-after-blocked]]
     game.components.misc

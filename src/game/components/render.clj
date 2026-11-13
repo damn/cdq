@@ -5,7 +5,7 @@
     [cdq.core :refer [make-counter counter-ratio tick]]
     [cdq.core :refer [get-dimensions render-centered-image render-rotated-centered-image]]
     [engine.render.animation :refer [get-frame is-stopped? restart]]
-    [engine.render.graphics :refer [draw-line fill-centered-circle render-centered-shape render-readable-text]]
+    [cdq.core :refer [draw-line fill-centered-circle render-centered-shape render-readable-text]]
     [cdq.core :refer [define-order int-posi make-fn order-contains?]]
     [cdq.core :refer [safe-merge]]
     [cdq.core :refer [readable-number]]
@@ -13,8 +13,8 @@
     [cdq.core :refer [active add-to-removelist create-entity create-entity-no-init update-counter!]]
     [game.components.misc :refer [delete-after-duration-component]]
     [game.components.position :refer [position-component]]
-    [game.components.ingame-loop :refer [ingame-loop-comp]]
-    [game.utils.tilemap :refer [screenpos-of-tilepos]]
+    [cdq.core :refer [ingame-loop-comp]]
+    [cdq.core :refer [screenpos-of-tilepos]]
     [game.utils.lightning :refer [set-brightness set-cached-brightness]])
   (:import org.newdawn.slick.Color))
 

@@ -6,7 +6,7 @@
     [cdq.core :refer [mapvals]]
     [cdq.core :refer [lower-than-max? min-max-val rest-to-max set-to-max]]
     [engine.render.animation :refer [is-stopped?]]
-    [game.utils.tilemap :refer [get-mouse-tile-pos]]
+    [cdq.core :refer [get-mouse-tile-pos]]
     [game.utils.msg-to-player :refer [show-msg-to-player]]
     [cdq.core :refer [active is-player? update-counter!]]
     [cdq.core :refer [blocks-component switch-state]]

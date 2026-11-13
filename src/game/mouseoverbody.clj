@@ -9,10 +9,10 @@
     [game.components.body :refer [get-bodies-at-position on-screen-and-in-sight?]]
     [game.components.destructible :refer [attackable-by-player?]]
     [game.components.render :refer [render-on-map-order]]
-    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [cdq.core :refer [ingame-loop-comp]]
     cdq.core
 
-    [game.utils.tilemap :refer [get-mouse-tile-pos]]))
+    [cdq.core :refer [get-mouse-tile-pos]]))
 
 (defn- get-current-mouseover-body []
   (when-not (mouse-inside-some-gui-component?)

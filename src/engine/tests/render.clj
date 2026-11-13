@@ -3,7 +3,7 @@
     [cdq.core :refer [white]]
     [cdq.core :refer [start-slick-basicgame]]
     [cdq.core :refer [create-image]]
-    [engine.render.graphics :refer [fill-rect render-readable-text]])
+    [cdq.core :refer [fill-rect render-readable-text]])
   (:import (org.newdawn.slick Image Color)))
 
 (def image)

@@ -2,11 +2,11 @@
   (:require
     [cdq.core :refer [direction-vector get-normal-vectors scale-vector vec-posi vector-add vector2f]]
     [cdq.core :refer [green red set-color]]
-    [engine.render.graphics :refer [draw-line]]
+    [cdq.core :refer [draw-line]]
     [cdq.core :refer [get-mouse-pos]]
     [cdq.core :refer [half-screen-h half-screen-w]]
     [cdq.core :refer [player-body]]
-    [game.utils.tilemap :refer [get-mouse-tile-pos screenpos-of-tilepos]]
+    [cdq.core :refer [get-mouse-tile-pos screenpos-of-tilepos]]
     [cdq.core :refer [get-jcell-grid get-map-h get-map-w]]
     cdq.core)
   (:import game.utils.RayCaster))

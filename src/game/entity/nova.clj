@@ -6,7 +6,7 @@
     [game.components.position :refer [position-component]]
     [game.components.destructible :refer [deal-dmg get-destructible-bodies]]
     [clojure.set :refer [union]]
-        [engine.render.graphics :refer [render-centered-shape]]
+        [cdq.core :refer [render-centered-shape]]
     [cdq.core :refer [in-pixel]]
     [cdq.core :refer [active add-to-removelist create-entity update-counter!]]
     [game.components.render :refer [render-on-map single-animation-component]]))

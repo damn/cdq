@@ -3,7 +3,7 @@
     [cdq.core :refer [point-in-rect?]]
     [cdq.core :refer [gray rgbcolor]]
     [cdq.core :refer [draw-image get-dimensions get-scaled-copy get-sub-image]]
-    [engine.render.graphics :refer [draw-rect fill-rect]]
+    [cdq.core :refer [draw-rect fill-rect]]
     [clojure.set :refer [select union]]
     cdq.core
     [cdq.core :refer [int-posi]]
@@ -12,7 +12,7 @@
     [cdq.core :refer [id-entity-map]]
     [cdq.core :refer [get-current-map-data]]
     [cdq.core :refer [get-bodies-from-cells get-cells]]
-    [game.maps.camera :refer [get-camera-position]])
+    [cdq.core :refer [get-camera-position]])
   (:import (org.newdawn.slick Graphics Image)))
 
 (defn- get-image  [] (:minimap-image  (get-current-map-data)))

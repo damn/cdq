@@ -19,6 +19,7 @@
                               SpriteSheetFont)
            (org.newdawn.slick.geom Circle Rectangle Shape Transform Vector2f)
            (org.newdawn.slick.state StateBasedGame)
+           (org.newdawn.slick.tiled LightManager TiledMap)
            (org.newdawn.slick.util.pathfinding AStarPathFinder Mover Path TileBasedMap))
   (:require [clojure.string :as str]))
 
@@ -2203,3 +2204,320 @@ and the amount of overall 'noise' is gradually reduced: ")
 (defn mark-3x3-spaces [grid]
   (let [rooms (filter #(spawn-is-3x3-space? grid %) (posis grid))]
     (assoc-ks grid rooms :room)))
+
+;; graphics
+
+(defn- graphics-center-shape [^Shape shape [x y]]
+  (doto shape
+    (.setCenterX x)
+    (.setCenterY y)))
+
+(defn draw-shape [^Graphics g shape]
+  (.draw g shape))
+
+(defn render-centered-shape
+  ([g shape posi]
+   (render-centered-shape g shape posi white))
+  ([g shape posi color]
+   (graphics-center-shape shape posi)
+   (set-color g color)
+   (draw-shape g shape)))
+
+(defn fill-rect
+  ([g [x y w h] color]
+    (fill-rect g x y w h color))
+  ([^Graphics g x y w h color]
+    (set-color g color)
+    (.fillRect g x y w h)))
+
+(defn draw-rect
+  ([g [x y w h] color]
+    (draw-rect g x y w h color))
+  ([^Graphics g x y w h color]
+    (set-color g color)
+    (.drawRect g x y w h)))
+
+(defn draw-string [^Graphics g x y s]
+  (.drawString g (str s) x y))
+
+(defn- graphics-no-of-lines
+  "for example lineheight 20 and textheight 1-20 -> 1 line; 21-40 -> 2 lines etc."
+  [txtheight lineh]
+  (int (Math/ceil (/ txtheight lineh))))
+
+; workaround for drawstring does not detect \newline
+; => seperate for the right number of newlines
+; for example        ["abc\ncdef" :x "123" :a "4\n\n3"]
+; needs to look like ["abc" "cdef" :x "123" :a "4" "" "3"]
+; multiple \n\n in a row (at the end of the string) will not be detected by split-lines but it is okay
+; because they will be counted in the height and not rendered anything in it anyway
+; only problem: "Test\n\n" will be converted to "Test" with split-lines ...
+; (partition-by #(= \newline %) "abc\n\n") also doesnt work...
+(defn- graphics-seperate-newline-strings [coll]
+  (reduce #(if (coll? %2) (vec (concat %1 %2)) (conj %1 %2))
+          []
+          (map #(if (string? %) (str/split-lines %) %) coll)))
+
+(defn- graphics-render-colored-text [^Graphics g x y & colors-and-more]
+  (let [lineh (get-line-height)
+        y (atom y)
+        colors-and-more (graphics-seperate-newline-strings ; draw-string of spritesheetfont does not understand \newline so we have to seperate them manually
+                          (remove nil? colors-and-more))] ; we dont want newlines for nils
+    (doseq [elem colors-and-more]
+      (if (instance? Color elem)
+        (.setColor g elem)
+        (let [originals (str elem)
+              s (apply str (filter allowed-characters originals))]
+          (when-seq [not-allowed (remove allowed-characters originals)]
+            (println "Characters not in font file: " (pr-str not-allowed) " of string: " (str elem)))
+          (draw-string g x @y s)
+          (swap! y + (* lineh
+                        (graphics-no-of-lines (get-text-height originals) lineh)))))))) ; height of originals because \newlines would be filtered out
+
+(defn- graphics-get-readable-renderx
+  "if string goes out of screen-width bounds it is shifted to the left."
+  [string x]
+  (let [xpuffer (- (get-screen-width)
+                   (+ x (get-text-width string)))]
+    (if (neg? xpuffer) (- x (- xpuffer)) x)))
+
+(defn- graphics-get-readable-rendery
+  "if string goes out of screen-height bounds it is shifted to the top."
+  [string y]
+  (let [ypuffer (- (get-screen-height)
+                   (+ y (get-text-height string)))]
+    (if (<= ypuffer 0) (- y (- ypuffer)) y)))
+
+; TODO shift and background set default to false because is not expected when programming gui texts...
+(defn render-readable-text
+  "textcolorseq consists of colors and the rest is str-ed. dont use keywords because of destructuring!"
+  [g x y & args]
+  (let [[{:keys [centerx centery bigfont above shift background]
+          :or {shift true background true}}
+         textcolorseq] (split-kvs-and-more args)
+        whole-text (->> textcolorseq
+                     (remove #(instance? Color %))
+                     (remove nil?) ; so there will be no "\n" interposed between empty lines... (render-colored-text does not increse lineh with empty lines)
+                     (map str)
+                     (interpose "\n")
+                     (apply str))
+        _ (.setFont ^Graphics g (if bigfont (get-defaultfont) (get-defaultfont)))
+        w (inc (get-text-width whole-text))
+        h (get-text-height whole-text)
+        x (if-not centerx x (- x (/ w 2))) ; before shifting calculate centered x/y
+        y (if-not centery y (- y (/ h 2)))
+        y (if-not above y (- y (get-text-height whole-text)))
+        x (if shift (graphics-get-readable-renderx whole-text x) x)
+        y (if shift (graphics-get-readable-rendery whole-text y) y)
+        x (int x)
+        y (int y)]
+    (when background
+      (fill-rect g x y w h transparent-black))
+    (set-color g white)
+    (apply graphics-render-colored-text g x y textcolorseq)
+    (reset-font g)))
+
+(defn fill-centered-circle [^Graphics g radius position color]
+  (set-color g color)
+  (let [^Shape shape (circle [-1 -1] radius)]
+    (graphics-center-shape shape position)
+    (.fill g shape)))
+
+(defn draw-grid
+  "Grid lines start at top left corner."
+  [^Graphics g leftx topy gridw gridh cellw cellh]
+  (let [w (* gridw cellw)
+        h (* gridh cellh)
+        buttomy (+ topy h)
+        rightx (+ leftx w)]
+    (doseq [idx (range (inc gridw))
+            :let [linex (+ leftx (* idx cellw))]]
+      (.drawLine g linex topy linex buttomy))
+    (doseq [idx (range (inc gridh))
+            :let [liney (+ topy (* idx cellh))]]
+      (.drawLine g leftx liney rightx liney))))
+
+(defn draw-line
+  ([g [sx sy] [ex ey]]
+   (draw-line g sx sy ex ey))
+  ([^Graphics g x y ex ey]
+   (.drawLine g x y ex ey)))
+
+(defn graphics-translate [^Graphics g x y]
+  (.translate g x y))
+
+(defn reset-transform [^Graphics g]
+  (.resetTransform g))
+
+;; camera
+
+(defn get-camera-position
+  "returns the current center-of-screen-map-tile-position.
+Rendering the map, minimap, map-entities depends on the camera position"
+  []
+  (:value (:position @player-body)))
+
+;; tilemap
+
+(defn tilepos-of-screenpos [[x y]]
+  (let [[middlex middley] (get-camera-position)
+        dist-to-middle-x (- x half-screen-w)
+        dist-to-middle-y (- y half-screen-h)
+        tile-x (+ middlex (/ dist-to-middle-x tile-width))
+        tile-y (+ middley (/ dist-to-middle-y tile-height))]
+    [tile-x tile-y]))
+
+(defn screenpos-of-tilepos [[x y]]
+    (let [[middlex middley] (get-camera-position)
+          dist-to-middle-x (- x middlex)
+          dist-to-middle-y (- y middley)
+          screen-x (+ half-screen-w (* dist-to-middle-x tile-width))
+          screen-y (+ half-screen-h (* dist-to-middle-y tile-height))]
+      [screen-x screen-y]))
+
+(defn get-mouse-tile-pos []
+  (tilepos-of-screenpos (get-mouse-pos)))
+
+(defn mouse-int-tile-pos []
+  (int-posi (get-mouse-tile-pos)))
+
+;; contentfields
+
+; Contentfield Entities
+; -> :position sollten sie haben
+; Ansonsten :updatefn / :renderfn ansonsten ist sinnlos sie dazuzufugen.
+; TODO entities dont save a contenfield in their :position component but just the idx (for printing..), also simpler here?
+(let [field-w 14 ; in tiles
+      field-h 10]
+
+  (defn create-mapcontentfields [w h]
+    (create-grid (inc (int (/ w field-w))) ; inc wegen randern
+                      (inc (int (/ h field-h)))
+                      (fn [idx]
+                        {:idx idx, :entities (atom #{})})))
+
+  (defn- contentfield-idx-of-position [[x y]]
+    [(int (/ x field-w))
+     (int (/ y field-h))]))
+
+(defn- contentfield-get-fields [] (:contentfields (get-current-map-data)))
+
+(defn get-content-field [entity] (:content-field (:position @entity)))
+
+(defn remove-entity-from-content-field [entity] (swap! (:entities (get-content-field entity)) disj entity))
+
+(defn put-entity-in-correct-content-field [entity]
+  (let [old-field (get-content-field entity)
+        new-field (get (contentfield-get-fields)
+                       (contentfield-idx-of-position (:value (:position @entity))))]
+    (when-not (= old-field new-field)
+      (swap! (:entities new-field) conj entity)
+      (swap! entity assoc-in [:position :content-field] new-field)
+      (when old-field
+        (swap! (:entities old-field) disj entity)))))
+
+(defn get-player-content-field-idx [] (:idx (get-content-field player-body)))
+
+(defn get-entities-in-active-content-fields
+  "of current map"
+  []
+  (mapcat #(deref (:entities %)); (comp deref :entities) or #(... %) ?
+    (remove nil?
+            (map (contentfield-get-fields)  ; keep (get-contentfields)  ?  also @ potential field thing
+                 (let [idx (get-player-content-field-idx)]
+                   (cons idx (get-8-neighbour-positions idx)))))))
+
+(defn get-all-entities-of-current-map []
+  (mapcat #(deref (:entities %)) (cells (contentfield-get-fields))))
+
+;; ingame-loop
+
+(def ^:private ingame-loop-ids (atom #{}))
+
+(defn ingame-loop-comp [& args]
+  (create-entity
+    {:type :ingame-loop-entity
+     :init     #(swap! ingame-loop-ids conj (:id (meta %)))
+     :destruct #(swap! ingame-loop-ids disj (:id (meta %)))}
+    (apply merge {:type (first args)} (rest args))))
+
+(defn get-ingame-loop-entities []
+  (map #(get @id-entity-map %) @ingame-loop-ids))
+
+(defmacro do-in-game-loop [& expr]
+  `(ingame-loop-comp :temporary
+     (active [delta# c# entity#]
+       ~@expr
+       (add-to-removelist entity#))))
+
+(defn remove-ingame-loop-entity [ctype]
+  (->>
+    (get-ingame-loop-entities)
+    (first (filter #(ctype @%)))
+    add-to-removelist))
+
+;; tiledmaps
+
+(defn construct-tiledmap
+  ([file]
+   (TiledMap. ^String file))
+  ([file lightmanager]
+   (TiledMap. ^String file ^LightManager lightmanager)))
+
+(defn get-layer-index [tiled-map layername]
+  (let [idx (.getLayerIndex ^TiledMap tiled-map layername)]
+    (when-not (= -1 idx) idx)))
+
+; Conversion of TiledMap to cell-grid
+
+(defn- tiled-get-blocks-property [^TiledMap tiled-map [x y] layer-index]
+  (let [gid (.getTileId tiled-map x y layer-index)
+        undefined (zero? gid)]
+    (when-not undefined ; no tile placed at this location
+      (case (.getTileProperty tiled-map gid "walkable" "default")
+        "air" :airwalkable
+        "ground" :ground
+        "default" :wall))))
+
+(defn create-grid-from-tiled-map [^TiledMap tiled-map]
+  (let [ground-layer-idx (get-layer-index tiled-map "ground")
+        details-layer-idx (get-layer-index tiled-map "details")]
+    (create-grid (.getWidth tiled-map)
+                 (.getHeight tiled-map)
+                 (fn [p]
+                   (or
+                     (when details-layer-idx
+                       (tiled-get-blocks-property tiled-map p details-layer-idx))
+                     (tiled-get-blocks-property tiled-map p ground-layer-idx))))))
+
+(defn create-cell-grid-from-tiled-map [tiled-map]
+  (transform (create-grid-from-tiled-map tiled-map)
+             (fn [p value]
+               (when value
+                 (create-cell p (case value
+                                  :ground #{}
+                                  :wall #{:air :ground}
+                                  :airwalkable #{:ground}))))))
+
+;;
+
+; .getTileProperty returns The value assigned to the property on the tile (or the default value if none is supplied)
+(defn get-tile-property-value [[x y] ^TiledMap tiled-map layer-idx property]
+  (let [gid (.getTileId tiled-map x y layer-idx)
+        value (.getTileProperty tiled-map gid property "def")]
+    (when-not (= "def" value)
+      value)))
+
+(defn get-tileproperties [^TiledMap tiled-map layername property]
+  (when-let [idx (get-layer-index tiled-map layername)]
+    (for [x (range (.getWidth tiled-map))
+          y (range (.getHeight tiled-map))
+          :let [value (get-tile-property-value [x y] tiled-map idx property)]
+          :when value] ; dont use when-let because then nil's will be in the result sequence
+      [[x y] value])))
+
+(defn get-player-entity-start-position [tiled-map]
+  (let [tile-values (get-tileproperties tiled-map "entities" "player")]
+    (cond (empty? tile-values) (throw (Error. "Player start position not found in \"entities\" layer of tiledmap."))
+          (= (count tile-values) 1) (first (first tile-values))
+          :else (throw (Error. "Multiple player start positions found in \"entities\" layer of tiledmap.")))))

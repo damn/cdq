@@ -1,12 +1,12 @@
 (ns game.utils.msg-to-player
   (:require
-    [engine.render.graphics :refer [render-readable-text]]
+    [cdq.core :refer [render-readable-text]]
     [cdq.core :refer [half-screen-h half-screen-w]]
     [game.components.render :refer [rendering]]
     [cdq.core :refer [create-counter reset-counter! update-counter]]
     [cdq.core :refer [atom-session]]
     [cdq.core :refer [active]]
-    [game.components.ingame-loop :refer [ingame-loop-comp]]))
+    [cdq.core :refer [ingame-loop-comp]]))
 
 (def ^:private message (atom nil))
 (def message-session (atom-session message :save-session false))

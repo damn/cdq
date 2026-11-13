@@ -90,7 +90,7 @@
     :color (:color item-instance)))
 
 (comment
-  (game.components.ingame-loop/do-in-game-loop
+  (cdq.core/do-in-game-loop
     (create-item-body [42 22] "Cyber-Implant")))
 
 (def ^:private item-body-dimensions [8 8])

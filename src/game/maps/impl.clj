@@ -22,7 +22,7 @@
     [game.monster.spawn :refer [bloodcaves-groups spawn-monsters tech-groups techgy-groups try-spawn]]
     cdq.core
     [cdq.core :refer [cell-blocks-changed-update-listeners change-cell-blocks get-cell]]
-    [game.maps.tiledmaps :refer [construct-tiledmap create-grid-from-tiled-map get-layer-index get-player-entity-start-position get-tile-property-value get-tileproperties]]
+    [cdq.core :refer [construct-tiledmap create-grid-from-tiled-map get-layer-index get-player-entity-start-position get-tile-property-value get-tileproperties]]
     [game.maps.minimap :refer [show-on-minimap]]
     game.item.instance
     [game.item.instance :refer [create-item-body]]

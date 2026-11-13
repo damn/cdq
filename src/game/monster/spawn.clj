@@ -24,7 +24,7 @@
 
 (comment
 
-  (require '[game.components.ingame-loop :refer [do-in-game-loop]])
+  (require '[cdq.core :refer [do-in-game-loop]])
   (do-in-game-loop
       (try-spawn [12.5 5.5] :first-boss))
   )

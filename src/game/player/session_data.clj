@@ -24,7 +24,7 @@
     [cdq.core :refer [log translate-to-tile-middle]]
     [cdq.core :refer [distinct-seq?]]
     [game.monster.spawn :refer [try-spawn]]
-    [game.maps.tiledmaps :refer [get-tileproperties]]
+    [cdq.core :refer [get-tileproperties]]
     [cdq.core :refer [version]]
     [game.status-options :refer [session]]))
 

@@ -1,7 +1,7 @@
 (ns game.tests.target-in-front
   (:require
     [cdq.core :refer [green red set-color]]
-    [engine.render.graphics :refer [draw-shape]]
+    [cdq.core :refer [draw-shape]]
     [cdq.core :refer [tile-width]]
     [cdq.core :refer [safe-merge]]
     game.components.body

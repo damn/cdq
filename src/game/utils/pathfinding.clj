@@ -1,6 +1,6 @@
 (ns game.utils.pathfinding
   (:require
-    [game.utils.tilemap :refer [get-mouse-tile-pos]]
+    [cdq.core :refer [get-mouse-tile-pos]]
     [cdq.core :refer [cell-blocked? get-cell get-map-h get-map-w]]
     [cdq.core :refer [player-body]])
   (:import

@@ -1,7 +1,7 @@
 (ns game.components.position
   (:require
     [cdq.core :refer [int-posi when-apply]]
-    [game.maps.contentfields :refer [put-entity-in-correct-content-field remove-entity-from-content-field]]))
+    [cdq.core :refer [put-entity-in-correct-content-field remove-entity-from-content-field]]))
 
 (defn position-component [p]
   {:type :position

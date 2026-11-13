@@ -13,7 +13,7 @@
     [cdq.core :refer [create-image draw-image get-dimensions get-scaled-copy get-sub-image]]
     [engine.render.animation :refer [create-animation]]
     [engine.render.assets :refer [folder-animation folder-frames get-sprite spritesheet-frames]]
-    [engine.render.graphics :refer [draw-grid fill-rect render-readable-text reset-transform translate]]
+    [cdq.core :refer [draw-grid fill-rect render-readable-text reset-transform graphics-translate]]
     [cdq.core :refer [height width]]
     [cdq.core :refer [enter-state init-state-based-game state-based-game]]
     [cdq.core :refer [jar-file?]]
@@ -62,15 +62,15 @@
     [game.maps.mapchange :refer [check-change-map]]
     [game.player.session-data :refer [current-character-name get-session-file-character-names]]
     [game.utils.lightning :refer [image-corners set-cached-brightness]]
-    [game.utils.tilemap :refer [get-mouse-tile-pos mouse-int-tile-pos]]
+    [cdq.core :refer [get-mouse-tile-pos mouse-int-tile-pos]]
     [game.screenshake :refer [translate-shake-after-render translate-shake-before-render update-shake]]
     [game.mouseoverbody :refer [get-mouseover-body]]
     [game.ingame-gui :refer [background-color char-hotkey close-all-frames foreground-color frame-screenborder-distance ingamestate-display mouse-inside-some-gui-component? options-hotkey some-visible-frame?]]
-    [game.maps.contentfields :refer [get-entities-in-active-content-fields get-player-content-field-idx]]
+    [cdq.core :refer [get-entities-in-active-content-fields get-player-content-field-idx]]
     [cdq.core :refer [cell-blocked? get-body-ids get-cell get-cell-grid get-map-h get-map-w]]
-    [game.maps.camera :refer [get-camera-position]]
-    [game.maps.tiledmaps :refer [get-layer-index]]
-    [game.components.ingame-loop :refer [get-ingame-loop-entities ingame-loop-comp]]
+    [cdq.core :refer [get-camera-position]]
+    [cdq.core :refer [get-layer-index]]
+    [cdq.core :refer [get-ingame-loop-entities ingame-loop-comp]]
     [game.item.cells :refer [add-item-to-cell cell-empty-and-allows-item? cell-filled-and-allows-item? inc-count-of-item? item-in-use? item-not-in-use? remove-item-from-cell remove-one-item]]
     [game.item.grids :refer [background-icons cell-h cell-w hks-cells inventory-height inventoryry item-grids]]
     [game.item.colors :refer [equip-boni-item-color]]
@@ -1792,7 +1792,7 @@ PSI-Explosion
   (let [[x y] (int-posi (translate-position (get-camera-position)))
         xtranslate (- half-screen-w x)
         ytranslate (- half-screen-h y)]
-    (translate g xtranslate ytranslate)
+    (graphics-translate g xtranslate ytranslate)
     (doseq [[entity {:keys [renderfn] :as component}] (sort-by-order (to-be-rendered-entities-from-map)
                                                                      (comp :order second) render-on-map-order)]
       (try

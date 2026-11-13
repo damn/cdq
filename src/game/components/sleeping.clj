@@ -1,17 +1,17 @@
 (ns game.components.sleeping
   (:require
     [cdq.core :refer [circle rect-collision? rectangle]]
-    [engine.render.graphics :refer [render-centered-shape render-readable-text]]
+    [cdq.core :refer [render-centered-shape render-readable-text]]
     [cdq.core :refer [create-counter update-counter]]
     [cdq.core :refer [atom-session]]
     [cdq.core :refer [in-pixel screen-height screen-width]]
     [cdq.core :refer [active block-active-components unblock-active-components]]
     cdq.core
     [game.components.render :refer [rendering]]
-    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [cdq.core :refer [ingame-loop-comp]]
     [game.components.body :refer [get-body-bounds get-other-bodies-in-adjacent-cells]]
-    [game.maps.camera :refer [get-camera-position]]
-    [game.maps.contentfields :refer [get-entities-in-active-content-fields]]
+    [cdq.core :refer [get-camera-position]]
+    [cdq.core :refer [get-entities-in-active-content-fields]]
     cdq.core))
 
 (def ^:private half-aggro-width-tiles 11)

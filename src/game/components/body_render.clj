@@ -5,8 +5,8 @@
     [cdq.core :as debug]
     [cdq.core :refer [create-image draw-image]]
     [engine.render.animation :refer [get-frame]]
-    [engine.render.graphics :refer [draw-rect draw-shape fill-rect render-readable-text]]
-    [game.utils.tilemap :refer [screenpos-of-tilepos]]
+    [cdq.core :refer [draw-rect draw-shape fill-rect render-readable-text]]
+    [cdq.core :refer [screenpos-of-tilepos]]
     [cdq.core :refer [get-ratio]]
     [cdq.core :refer [counter-ratio]]
     [cdq.core :refer [debug-mode in-pixel]]
@@ -15,7 +15,7 @@
     game.components.body
     [game.components.destructible :refer [destructible? get-hp]]
     [game.components.render :refer [current-animation rendering]]
-    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [cdq.core :refer [ingame-loop-comp]]
     [game.components.skills.core :refer [get-active-skill get-skill is-attacking?]]
     [game.components.skills.melee :refer [body-in-melee-range? melee-puffer start-melee-puffer]]
     [game.utils.lightning :refer [active-lightning]])

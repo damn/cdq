@@ -3,11 +3,11 @@
     [cdq.core :refer [rgbcolor]]
     clojure.set
     [game.components.render :refer [rendering]]
-    [game.components.ingame-loop :refer [ingame-loop-comp]]
+    [cdq.core :refer [ingame-loop-comp]]
     [cdq.core :refer [log split-key-val-and-maps]]
     [cdq.core :refer [readable-number variance-val-str]]
     [cdq.core :refer [create-image]]
-    [engine.render.graphics :refer [fill-rect render-readable-text]]
+    [cdq.core :refer [fill-rect render-readable-text]]
     [cdq.core :refer [screen-height]]
     game.media
     [game.gui :refer [get-bounds is-visible? make-frame make-imgbutton mouseover? set-visible switch-visible]]
