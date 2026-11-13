@@ -13,7 +13,7 @@
     [cdq.core :refer [show-on-minimap]]
     [game.components.skills.core :refer [is-attacking? reset-skills]]
     [game.components.skills.melee :refer [get-player-skill-animation-key]]
-    [game.utils.lightning :refer [light-component]]
+    [cdq.core :refer [light-component]]
     [cdq.core :refer [set-to-max]]
     [cdq.core :refer [when-seq]]
     [cdq.core :refer [play-sound]]

@@ -2,7 +2,6 @@
   (:require
     [cdq.core :as data]
     [cdq.core :refer [get-setting]]
-    game.utils.lightning
     [cdq.core :refer [log translate-to-tile-middle xor]]
     cdq.core
     [cdq.core :refer [create-grid-from-gen-grid create-jcell-grid]]
@@ -47,7 +46,7 @@
 (defn tilemap-make-argmap [bodyseq]
   (let [temp (apply hash-map bodyseq)
         tiled-map (construct-tiledmap (str "maps/" (:file temp))
-                                      game.utils.lightning/lightmanager)]
+                                      cdq.core/lightmanager)]
     (merge (dissoc temp :file)
            {:start-position (translate-to-tile-middle (get-player-entity-start-position tiled-map))
             :tiled-map tiled-map

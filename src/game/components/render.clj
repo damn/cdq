@@ -15,7 +15,7 @@
     [cdq.core :refer [position-component]]
     [cdq.core :refer [ingame-loop-comp]]
     [cdq.core :refer [screenpos-of-tilepos]]
-    [game.utils.lightning :refer [set-brightness set-cached-brightness]])
+    [cdq.core :refer [set-brightness set-cached-brightness]])
   (:import org.newdawn.slick.Color))
 
 (defn- make-rendering-props [order fnargs]

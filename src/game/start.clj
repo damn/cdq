@@ -61,7 +61,7 @@
     [cdq.core :as cupd]
     [game.maps.mapchange :refer [check-change-map]]
     [game.player.session-data :refer [current-character-name get-session-file-character-names]]
-    [game.utils.lightning :refer [image-corners set-cached-brightness]]
+    [cdq.core :refer [image-corners set-cached-brightness]]
     [cdq.core :refer [get-mouse-tile-pos mouse-int-tile-pos]]
     [game.screenshake :refer [translate-shake-after-render translate-shake-before-render update-shake]]
     [game.mouseoverbody :refer [get-mouseover-body]]

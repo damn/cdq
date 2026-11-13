@@ -2,7 +2,7 @@
   (:require
     [cdq.core :refer [app-game-container fullscreen-supported?]]
     [cdq.core :refer [get-setting]]
-    [game.utils.lightning :refer [active-lightning]]
+    [cdq.core :refer [active-lightning]]
     cdq.core))
 
 (defprotocol StatusCheckBox

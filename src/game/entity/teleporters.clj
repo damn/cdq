@@ -8,7 +8,6 @@
     [cdq.core :refer [play-sound]]
     game.media
     cdq.core
-    game.utils.lightning
     [cdq.core :refer [show-on-minimap]]
     [game.maps.mapchange :refer [queue-map-change]]
     [cdq.core :refer [create-entity]]

@@ -19,7 +19,6 @@
     game.player.core
     game.player.skill.learnable
     game.player.skill.selection-list
-    game.utils.lightning
     game.utils.msg-to-player
     [cdq.core :refer [log translate-to-tile-middle]]
     [cdq.core :refer [distinct-seq?]]
@@ -62,7 +61,7 @@
 (defn- place-entities [tiled-map]
   ; looping through all tiles of the map 3 times. but dont do it in 1 loop because player needs to be initialized before all monsters!
   (doseq [[posi _] (get-tileproperties tiled-map "entities" "light")]
-    (game.utils.lightning/map-lightsource (translate-to-tile-middle posi)))
+    (cdq.core/map-lightsource (translate-to-tile-middle posi)))
   (doseq [[posi value] (get-tileproperties tiled-map "entities" "monster")]
     (try-spawn (translate-to-tile-middle posi) (keyword value) :debug false)))
 
@@ -174,7 +173,7 @@
         [#'cdq.core/update-session]
         [#'game.components.sleeping/session]
         [#'game.components.burrow/session]
-        [#'game.utils.lightning/session]
+        [#'cdq.core/lightning-session]
         [#'game.utils.msg-to-player/counter-session]
         [#'game.utils.msg-to-player/message-session]]))
 

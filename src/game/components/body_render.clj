@@ -18,7 +18,7 @@
     [cdq.core :refer [ingame-loop-comp]]
     [game.components.skills.core :refer [get-active-skill get-skill is-attacking?]]
     [game.components.skills.melee :refer [body-in-melee-range? melee-puffer start-melee-puffer]]
-    [game.utils.lightning :refer [active-lightning]])
+    [cdq.core :refer [active-lightning]])
   (:import (org.newdawn.slick Color Image)))
 
 (defn- melee-debug-info [g p body]

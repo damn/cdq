@@ -28,7 +28,6 @@
     [game.item.instance-impl :refer [create-rand-item]]
     [cdq.core :refer [get-current-map-data]]
     [cdq.core :refer [rand-int-between]]
-    game.utils.lightning
     [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi get-spriteidx]]
     [cdq.core :refer [border-position? fill-single-cells scalegrid undefined-value-behind-walls wall-at?]]
     [cdq.core :refer [cave-gridgen]]
@@ -47,7 +46,7 @@
     (create-body :solid true
                  :dimensions [16 16]
                  :mouseover-outline true)
-    ;(game.utils.lightning/light-component :intensity 0.7 :radius 2)
+    ;(cdq.core/light-component :intensity 0.7 :radius 2)
     (pressable-component ""
                          (fn [this-body]
                            (play-sound "bfxr_chestopen.wav")
