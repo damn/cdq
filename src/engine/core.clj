@@ -5,10 +5,6 @@
     (org.newdawn.slick ScalableGame AppGameContainer BasicGame Sound Font Graphics GameContainer
                        SpriteSheet SpriteSheetFont)))
 
-(def fns (list))
-
-;;
-
 ; method of AppGameContainer does flip = true; -> so flip the icons vertical!
 ; dont supply a icon24.tga else windows will use it for ALT+TAB which needs a 32x32!
 ; uncompressed 32BIT TGA IMAGES
@@ -41,6 +37,8 @@
     (def app-game-container container)
     (.start (Thread.
               #(.start container)))))
+
+(def fns (list))
 
 (defn start-slick-basicgame
   [& {:keys [full-screen title width height init update render]
