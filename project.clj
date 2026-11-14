@@ -10,10 +10,10 @@
   ;; slick2d inlined at slick/src
   :java-source-paths ["src" "slick/src"]
   :aot [cdq.core] ; read-string of Animation record
-  :main game.start
+  :main cdq.core
   :uberjar-name "cdq_3.jar"
   :omit-source true
-  :manifest {"Launcher-Main-Class" "game.start"
+  :manifest {"Launcher-Main-Class" "cdq.core"
              "SplashScreen-Image" "splash.gif"
              "Launcher-VM-Args" "-Xms256m -Xmx256m"}
   :jvm-opts ~(let [libpath (.getAbsolutePath (java.io.File. "native/macosx"))]
@@ -22,7 +22,7 @@
                 (str "-Djava.library.path=" libpath)
                 (str "-Dorg.lwjgl.librarypath=" libpath)
                 "-Dvisualvm.display.name=CDQ"])
-  :profiles {:uberjar {:aot [game.starter game.start]
+  :profiles {:uberjar {:aot [game.starter cdq.core]
                        :main game.starter}}
   :plugins [[lein-hiera "2.0.0"]]
   :aliases {"build" ["do" "clean" "uberjar"]}
