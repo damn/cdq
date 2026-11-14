@@ -46,8 +46,8 @@
                        (when (:teleporter value)
                          (static-teleporter
                            :save-game true
-                           :from [@cdq.core/current-map (translate-to-tile-middle posi)]
-                           :to [next-map (:start-position (cdq.core/get-map-data next-map))])))
+                           :from [@current-map (translate-to-tile-middle posi)]
+                           :to [next-map (:start-position (get-map-data next-map))])))
                      (doseq [[posi value] grid2d]
                        (when-let [doortype (:door value)]
                          (make-door (translate-to-tile-middle posi)
@@ -78,7 +78,7 @@
 ;                                      "module7.tmx"])
 ;                                   ["module_end.tmx"]))) door-sprite-indizes))))
 
-(cdq.core/defgeneratedmap :level-one
+(defgeneratedmap :level-one
   (makemodulebasedmap :modules (map
                                  #(str "modules/level1/" %)
                                  (concat
@@ -98,7 +98,7 @@
                       :pretty-name "Level 1"
                       :rand-item-max-lvl 1))
 
-(cdq.core/defgeneratedmap :level-two
+(defgeneratedmap :level-two
   (makemodulebasedmap :modules (map #(str "modules/" %)
                                     (concat
                                       ["level2/start.tmx"]
@@ -114,7 +114,7 @@
                       :pretty-name "Level 2"
                       :rand-item-max-lvl 2))
 
-(cdq.core/defgeneratedmap :level-three
+(defgeneratedmap :level-three
   (makemodulebasedmap :modules (map #(str "modules/" %) ["level3/boss.tmx"])
                       :next-map :level-three
                       :spritesheet gauntletly3-tilesheet

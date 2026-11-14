@@ -25,12 +25,13 @@
            (org.newdawn.slick.loading LoadingList)
            (org.newdawn.slick.geom Circle Rectangle Shape Transform Vector2f)
            (org.newdawn.slick.state BasicGameState StateBasedGame)
-           (org.newdawn.slick.tiled LightManager TiledMap)
+           (org.newdawn.slick.tiled LightManager TiledMap TileSet)
            (org.newdawn.slick.util.pathfinding AStarPathFinder Mover Path TileBasedMap)
            (org.newdawn.slick.opengl CursorLoader))
   (:require [clojure.set :as set]
             [clojure.string :as str]
-            [clojure.walk :refer [postwalk]]))
+            [clojure.walk :refer [postwalk]]
+            [utils.prxml :refer [xml-str]]))
 
 (defn indexed ; from clojure.contrib.seq-utils (discontinued in 1.3)
   "Returns a lazy sequence of [index, item] pairs, where items come
@@ -174,6 +175,61 @@
   (cells [this])
   (width [this])
   (height [this]))
+
+(defn convert-to-localid [[x y] sheetw]
+  (+ x (* y sheetw)))
+
+; increase spritesheet width from 4 to 7 and update localids:
+; (convert-to-localid (convert-to-spriteposi localid 4) 7)
+
+(defn convert-to-spriteposi [localid sheetw]
+  {:post [(integer? (% 0))
+          (integer? (% 1))]}
+  (assert (and (integer? localid) (>= localid 0)) (str "localid: " localid))
+  [(mod localid sheetw)
+   (int (/ localid sheetw))])
+
+(defn get-spriteidx [[x y] ^TiledMap tiled-map layer-idx]
+  (let [gid (.getTileId tiled-map x y layer-idx)]
+    (when-not (zero? gid)
+      (let [tileset ^TileSet (.getTileSetByGID tiled-map gid)]
+        (convert-to-spriteposi (- gid (.firstGID tileset)) (.tilesAcross tileset))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(comment
+      "A thing to note about the tileset is the firstgid attribute. The map
+		  layer data is an array of 32-bit integers storing global tile ids.
+		  Global means that they span the possibly multiple tilesets that the
+		  map is using. Each tileset internally uses local tile ids, and the
+		  firstgid attributes specifies how the local ids are mapped to global
+		  ids. Namely, a tile with id A in the tileset will be referred to with
+		  a number equal to firstgid+A in the layer data.")
+		
+(comment "Comment from mapeditor.org WIKI: The GIDs are arranged from left to
+		     right and top to bottom. For example, if you have a map with a width
+		     of 4 and a height of 3, then the GIDs in the data stream will be in
+		     the following order (0,0) (1,0) (2,0) (3,0) (0,1) (1,1) (2,1) (3,1)
+		     (0,2) (1,2) (2,2) (3,2)")
+		
+(defn make-tiledmap-file [tilesize targetfile grid calc-gid & tilesets]
+  (let [width (width grid)
+        height (height grid)]
+    (spit targetfile
+          (xml-str
+            [:decl! {:version "1.0"}]
+            [:map {:version 1.0 :orientation "orthogonal" :width width :height height :tilewidth tilesize :tileheight tilesize}
+             (for [[firstgid tsx-source] tilesets]
+               [:tileset {:firstgid firstgid :source tsx-source}])
+             [:layer {:name "ground" :width width :height height}
+              [:data
+               (for [y (range height) ; y,x because rightmost fastest
+                     x (range width)
+                     :let [posi [x y]
+                           value (get grid posi)
+                           gid (calc-gid grid posi value)]]
+                 ; <tile gid="74"/>
+                 [:tile {:gid gid}])]]]))))
 
 (defn- transform-values [data width height f]
   (mapv
@@ -9899,6 +9955,370 @@ PSI-Explosion
               (let [img (get-scaled-copy (nth sheet-frames 8) 0.5)]
                 (.draw img 50 200)
                 (.draw (recreate-image (save-image-data img)) 150 200)))))
+
+(defn resource [s] (str "maps/test/" s))
+
+;;; entity.chest (inlined)
+
+(defn- create-chest* [position item-name]
+  (create-entity
+    (position-component position)
+    (create-body :solid true
+                 :dimensions [16 16]
+                 :mouseover-outline true)
+    ;(cdq.core/light-component :intensity 0.7 :radius 2)
+    (pressable-component ""
+                         (fn [this-body]
+                           (play-sound "bfxr_chestopen.wav")
+                           (add-to-removelist this-body)
+                           (if item-name
+                             (create-item-body position item-name)
+                             (create-rand-item position :max-lvl (:rand-item-max-lvl (get-current-map-data))))))
+    (show-on-minimap magenta)
+    {:type :always-in-sight}
+    (image-render-component (get-itemsprite [1 4]))))
+
+(defn create-chest [position & {item-name :item-name}]
+  (create-chest* position item-name))
+
+;;; entity.door (inlined)
+
+; another way of handling the open door was to change the image&mouseover-outline to false&remove component :pressable
+; but it had still a :body component which blocks mouseoverentities that lie below it because there is always only 1 mouseoverbody at each position
+; ... or remove the :body component too?
+(defn- make-open-door [p image]
+  (create-entity
+    (position-component p)
+    {:type :always-in-sight}
+    (image-render-component image :order :air)))
+
+(defn make-door [p closed-image open-image] ; make-closed-door ?
+  (create-entity
+    (position-component p)
+    (create-body :solid false
+                 :dimensions [16 16]
+                 :mouseover-outline true)
+    {:type :always-in-sight}
+    (show-on-minimap green)
+    (image-render-component closed-image :order :air)
+    {:type :clicked :is? false}
+    (pressable-component ""
+                         (fn [entity]
+                           (when-not (:is? (:clicked @entity))
+                             (swap! entity assoc-in [:clicked :is?] true)
+                             (play-sound "ReversyH-Nick_Ros-105.wav")
+                             (add-to-removelist entity)
+                             (make-open-door p open-image)
+                             (change-cell-blocks (get-cell p) #{})
+                             (cell-blocks-changed-update-listeners))))))
+
+
+
+;;; tools.transitiontilemaker16 (inlined; was :as gauntletly)
+
+(let [idxvalues-order [[1 0] [-1 0] [0 1] [0 -1]]]
+  (assert (= (get-4-neighbour-positions [0 0]) idxvalues-order)))
+
+(comment
+  ; Values for every neighbour:
+  {          [0 -1] 1
+   [-1 0]  8          [1 0] 2
+             [0 1] 4 })
+
+; so the idxvalues-order corresponds to the following values for a neighbour tile:
+(def ^:private idxvalues [2 8 4 1])
+
+(defn- get-transition-tile-idxvalue [count-neighbour? grid posi]
+  (apply +
+         (map-indexed (fn [idx p] (if (count-neighbour? p (get grid p))
+                                    (get idxvalues idx)
+                                    0))
+                      (get-4-neighbour-positions posi))))
+
+; => gives value between 0 and 15
+; => sprite-idx for every value is defined in a map
+; => count :walls
+
+(def ^:private idxvalue-localids
+  {0 0,
+   1 22,
+   2 7,
+   3 23,
+   4 1,
+   5 15,
+   6 16,
+   7 21,
+   8 10,
+   9 24,
+   10 9,
+   11 2,
+   12 17,
+   13 14,
+   14 3,
+   15 8})
+
+(defn- calc-localid [grid posi value]
+  (case value
+    :undefined nil
+    :ground 43
+    :wall (let [idxvalue (get-transition-tile-idxvalue (fn [posi value] (= :wall value)) grid posi)]
+            (assert ((set (keys idxvalue-localids)) idxvalue))
+            (get idxvalue-localids idxvalue))))
+
+(let [spritesheet-width 7]
+
+  (defn calc-sprite-posi [grid posi value]
+    (when-let [localid (calc-localid grid posi value)]
+      (convert-to-spriteposi localid spritesheet-width))))
+
+;;
+
+(def ^:private firstgid 1)
+
+(defn- calc-gid [grid posi value]
+  (when-let [localid (calc-localid grid posi value)]
+    (+ firstgid localid)))
+
+;(use '(mapgen nad cave utils cellular))
+;(start-slick-basicgame
+;  :init (fn [container]
+;          (doseq [f cdq.core/init-fns]
+;            (f))
+;          (let [grid (cellular-automata-gridgen 100
+;                                                100
+;                                                :fillprob 64
+;                                                :random (java.util.Random.)
+;                                                :generations 5
+;                                                :wall-borders true)
+;                grid (-> grid connect-regions fix-not-allowed-diagonals undefined-value-behind-walls)]
+;            (make-tiledmap-file 16
+;                                (resource "gauntletly.tmx")
+;                                grid
+;                                calc-gid
+;                                [firstgid "gauntletly.tsx"]))
+;          (println "SUCCESS!")
+;          (System/exit 0)))
+
+
+;;; mapgen.module (inlined)
+
+(defn- print-cell [celltype]
+  (print (case celltype
+           nil " "
+           :ground "_"
+           :wall "#"
+           :airwalkable ".")))
+
+(defn- print-row [y grid]
+  (dorun (map #(print-cell (get grid [% y])) (range (width grid))))
+  (println))
+
+(defn printgrid [grid]  ; TODO use :print-cell print-cell
+  (dorun (map #(print-row % grid) (range (height grid)))))
+
+(defn- transform-grid-to-print [grid]
+  (-> grid
+      (dissoc :connections)
+      (mapgrid->vectorgrid :blockvalue)
+      first
+      printgrid))
+
+;;;;;;;;;;;;;;;;;;;;
+
+(defn- get-tiles [[leftx topy] width height]
+  (for [x (range leftx (+ leftx width))
+        y (range topy (+ topy height))]
+    [x y]))
+
+(defn- place-module [grid topleft {:keys [modulegrid tiledmap connections]} & {set-player-start :set-player-start}]
+  (let [ground-layer-idx (get-layer-index tiledmap "ground")
+        details-layer-idx (get-layer-index tiledmap "details")
+        entities-layer-idx (get-layer-index tiledmap "entities")
+        grid (reduce (fn [grid module-loc]
+                       (assoc grid
+                              (mapv + topleft module-loc)
+                              {:blockvalue (get modulegrid module-loc)
+                               :sprite-idx (get-spriteidx module-loc tiledmap ground-layer-idx )
+                               :details-sprite-idx (get-spriteidx module-loc tiledmap details-layer-idx)
+                               :monster (when entities-layer-idx
+                                          (get-tile-property-value module-loc tiledmap entities-layer-idx "monster"))
+                               :chest (when entities-layer-idx
+                                          (get-tile-property-value module-loc tiledmap entities-layer-idx "chest"))
+                               :teleporter (when entities-layer-idx
+                                             (get-tile-property-value module-loc tiledmap entities-layer-idx "teleporter"))}))
+                     grid
+                     (posis modulegrid))
+        ; connect to one of all module connection points:
+        ;grid (update-in grid [:connections] concat (map #(mapv + topleft %) connections))
+
+        ; connect to only the last module:
+        grid (assoc-in grid [:connections] (map #(mapv + topleft %) connections))
+        ]
+    (if set-player-start
+      (assoc-in grid [(mapv + topleft (get-player-entity-start-position tiledmap)) :player] true)
+      grid)))
+
+; TODO could change this so it checks only tiles that are placed and not all in a rectangle
+(defn- overlap?
+  "Module overlaps with existing grid tiles when some of the tiles of the potential location of the module
+   are already defined in the grid. Keeps 1 distance to other modules so we have a wall of width 1 between them ->
+  no not allowed diagonals!"
+  [grid grid-cp {:keys [modulegrid]} module-cp]
+  (some grid (get-tiles (mapv - grid-cp module-cp [1 1])
+                        (+ (width modulegrid) 2)
+                        (+ (height modulegrid) 2))))
+
+(defn- fits?
+  "Checks if the module fits on the grid connection point. If yes returns the module-cp(s) that fit with it."
+  [grid grid-cp module]
+  (remove #(overlap? grid grid-cp module %) (:connections module)))
+
+(defn- door-sprite-idx [grid [x y] horizontal? door-sprite-indizes]
+  (if horizontal?
+    (-> grid
+      (assoc-in [[(dec x) y] :sprite-idx] (:left (:horizontal door-sprite-indizes)))
+      (assoc-in [[(inc x) y] :sprite-idx] (:right (:horizontal door-sprite-indizes))))
+    (-> grid
+      (assoc-in [[x (dec y)] :sprite-idx] (:up (:vertical door-sprite-indizes)))
+      (assoc-in [[x (inc y)] :sprite-idx] (:down (:vertical door-sprite-indizes))))))
+
+(defn- set-connection-point-door [grid [x y] door-sprite-indizes]
+  (let [horizontal? (not (get grid [(dec x) y]))]
+    (-> grid
+      (assoc [x y] {:blockvalue :wall
+                    :sprite-idx (:below door-sprite-indizes)
+                    :door (if horizontal? :horizontal :vertical)})
+      (door-sprite-idx [x y] horizontal? door-sprite-indizes))))
+
+(defn- place-module-at-random-connection [grid module door-sprite-indizes]
+  (let [grid-connection-points (shuffle (:connections grid))
+        matches (for [grid-cp grid-connection-points
+                      :let [module-cps (fits? grid grid-cp module)]
+                      :when (seq module-cps)]
+                  ; rand-nth because multiple connection points on 1 wall may result in multiple fitting locations
+                  [grid-cp (rand-nth module-cps)])
+        _ (assert (seq matches) "Can not fit module with other modules.")
+        [grid-cp module-cp] (first matches)]
+    (-> grid
+      (place-module (mapv - grid-cp module-cp) module)
+      (set-connection-point-door grid-cp door-sprite-indizes))))
+
+; TODO for performance remove already connected cps (grid-cp) from (:connections grid)
+; grid (update-in grid [:connections] #(remove #{grid-cp} %))
+; but takes x2 as long ! ..
+; can also remove @ place-module :remove-connectionpoint...
+; use visualvm for bottleneck anyway...
+; test with (Random. seed) & nth coll (srand-int (count ...) random) & (sshuffle) ...
+
+(defn- is-corner-position? [[x y] grid] ; TODO move to grid2d/cdq.core ?
+  (and (or (= x 0) (= x (dec (width grid))))
+       (or (= y 0) (= y (dec (height grid))))))
+
+(defn- read-module [modulefilename]
+  (let [tiled-map (construct-tiledmap modulefilename)
+        modulegrid (create-grid-from-tiled-map tiled-map)
+        width (width modulegrid)
+        height (height modulegrid)
+        connection-points (map first (get-tileproperties tiled-map "entities" "connection"))
+        shifted-connection-points (map (fn [[x y]]
+                                         (cond (= x 0)            [-1 y]
+                                               (= x (dec width))  [width y]
+                                               (= y 0)            [x -1]
+                                               (= y (dec height)) [x height]))
+                                       connection-points)]
+    (assert (every? #(border-position? % modulegrid) connection-points))
+    (assert (not-any? #(is-corner-position? % modulegrid) connection-points)
+            "Connection points of modules can not be in one of the four corners.")
+    {:tiledmap tiled-map
+     :modulegrid modulegrid
+     :connections shifted-connection-points}))
+
+(defn make-module-based-grid [modulefilenames door-sprite-indizes]
+  (let [modules (map read-module modulefilenames)
+        grid {}
+        grid (place-module grid [0 0] (first modules) :set-player-start true)
+        grid (reduce (fn [grid module]
+                       (let [grid (place-module-at-random-connection grid module door-sprite-indizes)]
+                         ;(transform-grid-to-print grid)
+                         ;(println)
+                         grid))
+                     grid
+                     (rest modules))]
+    ;(transform-grid-to-print grid)
+    ;(println)
+    (dissoc grid :connections)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+; Concept;
+
+; rooms will not have empty borders like before => walls will be added automatically so just make ground tiles
+
+; there can be any number of connection points but they will need to be at the border of the module
+; these connection points are then shifted 1 or -1 so they are outside of the room (depending on which side)
+
+(comment
+"################
+ ########X#######
+ ####__________##
+ ####__________##
+ ####__________##
+ ####__________##
+ #X#X__________X#
+ #_____________##
+ #_____________##
+ #_____________##
+ ####__________##
+ ####__________##
+ ########XX######
+ #######_____####
+ #######_____####
+ #######_____####
+ #######_____####
+ #######_____####
+ #########X######
+ ################")
+; the left room has a C.point on the top right corner connected with the left connection point of the middle room
+; this leads to both rooms touching so close ...
+; we only want 1 cell wall openings where we put a door
+; so dont put connection point in one of the four corners
+
+
+
+
+
+
+
+
+
+
+;;; maps.impl
+
+; created&loaded in the order defined here
+; map with player is first (items need player dependency and maybe more dependencies; also start the game in that map!)
+; -> assert?
+
+(def dungeon-blockprops
+  {:undefined nil
+   :airwalkable #{:ground}
+   :wall #{:ground :air}
+   :ground #{}})
 
 (comment
   (engine-render-test!)
