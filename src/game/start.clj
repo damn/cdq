@@ -2056,9 +2056,33 @@ PSI-Explosion
                                         (is-leftm-consumed?)
                                         (is-rightm-consumed?)))))))
 
+
+; maybe compress the data so savegame is more readable? 1ASssF9g8aAgsGDGe
+(comment
+  (shorter (save-image-data (nth sheet-frames 7)))
+  {:ref "effects/expbig.png", :sub-bounds [0 40 40 40], :bounds [80 80]}
+  )
+(defn copy-image-test! []
+  (start-slick-basicgame
+    :init (fn [container]
+            (doseq [f cdq.core/init-fns]
+              (f))
+            (def ^:private sheet-frames (map #(get-scaled-copy % 2)
+                                             (spritesheet-frames "effects/expbig.png" 40 40))))
+    :render (fn [container g]
+              (fill-rect g 0 0 800 600 Color/blue)
+              (let [img (nth sheet-frames 7)
+                    frankenstein (recreate-image (save-image-data img))]
+                (.draw img 50 50)
+                (.draw frankenstein 150 50))
+              (let [img (get-scaled-copy (nth sheet-frames 8) 0.5)]
+                (.draw img 50 200)
+                (.draw (recreate-image (save-image-data img)) 150 200)))))
+
 (comment
   (engine-render-test!)
   (fnplotter!)
   (input-test!)
+  (copy-image-test!)
   (start) ; or -main
   )
