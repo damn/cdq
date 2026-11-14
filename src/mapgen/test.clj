@@ -167,35 +167,34 @@
     ))
 ;    mark-spawn-spaces
 
-(def ^:private key-commands
-  `{:A generate-cave
-    :B populate
-    :C show-possible-room-locations
-    :E show-random-end-posis
-    :S generate-cellular
-    :F flood-fill-grid
-    :Z flood-fill-from-start-to-end-path
-    :G flood-fill-distances-heatmap
-    :R color-regions-grid
-    :P postprocess
-    :D colorize-nads})
 
-(start-slick-basicgame
-  :width screenw
-  :height screenh
-  :init (fn [container]
-          (cdq.core/init-input!)
-          (update-grid (generate-cave)))
-  :update (fn [container delta]
-            (doseq [[k command] key-commands
-                    :let [f @(find-var command)]]
-              (when (is-key-pressed? k)
-                (update-grid (f)))))
-  :render (fn [container g]
-            (fill-rect g 0 0 screenw screenh darkGray)
-            (.drawCentered @current-image (/ screenw 2) (/ screenh 2)) ; TODO
-            (set-color g white)
-            (draw-string g 0 0 (get-mouse-tile-pos))
-            ;(draw-spawn-field-grid g (/ border 2) (/ border 2) w h)
-            ))
+
+(let [key-commands {:A generate-cave
+                    :B populate
+                    :C show-possible-room-locations
+                    :E show-random-end-posis
+                    :S generate-cellular
+                    :F flood-fill-grid
+                    :Z flood-fill-from-start-to-end-path
+                    :G flood-fill-distances-heatmap
+                    :R color-regions-grid
+                    :P postprocess
+                    :D colorize-nads}]
+  (start-slick-basicgame
+    :width screenw
+    :height screenh
+    :init (fn [container]
+            (cdq.core/init-input!)
+            (update-grid (generate-cave)))
+    :update (fn [container delta]
+              (doseq [[k f] key-commands]
+                (when (is-key-pressed? k)
+                  (update-grid (f)))))
+    :render (fn [container g]
+              (fill-rect g 0 0 screenw screenh darkGray)
+              (.drawCentered @current-image (/ screenw 2) (/ screenh 2)) ; TODO
+              (set-color g white)
+              (draw-string g 0 0 (get-mouse-tile-pos))
+              ;(draw-spawn-field-grid g (/ border 2) (/ border 2) w h)
+              )))
 
