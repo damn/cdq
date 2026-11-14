@@ -60,5 +60,3 @@
                  [:tile {:gid gid}])]]]))))
 
 (defn resource [s] (str "maps/test/" s))
-
-

@@ -30,7 +30,6 @@
     [cdq.core :refer [fix-not-allowed-diagonals]]
     [cdq.core :refer [cellular-automata-gridgen connect-regions]]
     [cdq.core :refer [is-5x5-walls-entrance?]])
-
   (:import java.util.Random))
 
 ;;; entity.chest (inlined)
