@@ -2083,6 +2083,3 @@ PSI-Explosion
   (engine-render-test!)
   (fnplotter!)
   )
-
-
-(fnplotter!)
