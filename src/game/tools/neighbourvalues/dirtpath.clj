@@ -1,4 +1,4 @@
-(ns game.tools.dirtpath
+(ns game.tools.dirtpath ; fixme neighborvalue folder not mentioned, also what is this?
   (:require
     [cdq.core :refer [get-8-neighbour-positions]]
     [cdq.core :refer [start-slick-basicgame]]

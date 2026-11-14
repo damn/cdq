@@ -8,7 +8,7 @@
            (org.newdawn.slick.loading LoadingList)
            org.newdawn.slick.state.BasicGameState)
   (:require
-    [cdq.core :refer [direction-vector get-angle-to-position get-touched-tiles in-range? normalise rotate-angle-to-angle vector-from-angle vector2f]]
+    [cdq.core :refer [start-slick-basicgame direction-vector get-angle-to-position get-touched-tiles in-range? normalise rotate-angle-to-angle vector-from-angle vector2f]]
     [cdq.core :refer [black green lightGray orange red rgbcolor set-color white yellow]]
     [cdq.core :refer [create-image draw-image get-dimensions get-scaled-copy get-sub-image]]
     [cdq.core :refer [create-animation]]
@@ -1990,3 +1990,73 @@ PSI-Explosion
 
 (defn -main []
   (start))
+
+; fillrect 2/2 weil beim rotieren von images schärfe verloren geht
+(defn- run-pixels-x [^Image image g xrange yrange]
+  (dorun (map
+    (fn [y] ;doseq
+      (some
+        (fn [x]
+          (when (pos? (.getAlpha (.getColor image x y)))
+            (fill-rect g x y 2 2 white)
+            true))
+        xrange))
+    yrange)))
+
+; fillrect 2/2 weil beim rotieren von images schärfe verloren geht
+(defn- run-pixels-y [^Image image g xrange yrange]
+  (dorun (map
+    (fn [x] ;doseq
+      (some
+        (fn [y]
+          (when (pos? (.getAlpha (.getColor image x y)))
+            (fill-rect g x y 2 2 white)
+            true))
+        yrange))
+    xrange)))
+
+(defn- create-selection-image [^Image original]
+  (let [w (.getWidth original)
+        h (.getHeight original)
+        selection-image (Image. w h)
+        g (.getGraphics selection-image)]
+    (run-pixels-x original g (range w) (range h))
+    (run-pixels-x original g (reverse (range w)) (range h))
+    (run-pixels-y original g (range w) (range h))
+    (run-pixels-y original g (range w) (reverse (range h)))
+    (.flush g)
+    selection-image))
+
+(defn engine-render-test! []
+  (start-slick-basicgame
+    :init (fn [container]
+            (def image (create-image "opponents/storage1.png")))
+    :render (fn [container g]
+              (fill-rect g 0 0 800 600 Color/blue)
+              (.draw image 50 50)
+              ; image filter color, white = normal colors; black = black outline
+              ; .drawFlash & filterColor => differentoutline colors?
+              (.draw image (float 150) (float 50) Color/blue)
+              (.draw image (float 200) (float 50) Color/white)
+              (.draw (create-selection-image image) (float 200) (float 50) Color/green)
+              (.draw image (float 250) (float 50) Color/black)
+              (render-readable-text g 200 180 :background false (apply str (map char (range 32 91))))
+              (render-readable-text g 200 200 :background true
+                                    Color/white "Loading...0%"
+                                    Color/green "Loading...0%"
+                                    Color/yellow "HELLO WORLD\nnewlineyellow"
+                                    Color/white "I LOVE YOU"
+                                    123
+                                    nil
+                                    Color/green "NOBODY!"
+                                    nil
+                                    nil
+                                    1234
+                                    5
+                                    \o
+                                    3/2
+                                    Color/magenta "blablabla \n this is a text \n and it continues\n\n"
+                                    Color/white "forever\nand"
+                                    "ever"))))
+
+(engine-render-test!)
