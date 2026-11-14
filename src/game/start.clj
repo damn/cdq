@@ -8,12 +8,12 @@
            (org.newdawn.slick.loading LoadingList)
            org.newdawn.slick.state.BasicGameState)
   (:require
-    [cdq.core :refer [start-slick-basicgame direction-vector get-angle-to-position get-touched-tiles in-range? normalise rotate-angle-to-angle vector-from-angle vector2f]]
+    [cdq.core :refer [high-weighted start-slick-basicgame direction-vector get-angle-to-position get-touched-tiles in-range? normalise rotate-angle-to-angle vector-from-angle vector2f]]
     [cdq.core :refer [black green lightGray orange red rgbcolor set-color white yellow]]
     [cdq.core :refer [create-image draw-image get-dimensions get-scaled-copy get-sub-image]]
     [cdq.core :refer [create-animation]]
     [cdq.core :refer [folder-animation folder-frames get-sprite spritesheet-frames]]
-    [cdq.core :refer [draw-grid fill-rect render-readable-text reset-transform graphics-translate]]
+    [cdq.core :refer [draw-rect draw-grid fill-rect render-readable-text reset-transform graphics-translate]]
     [cdq.core :refer [height width]]
     [cdq.core :refer [enter-state init-state-based-game state-based-game]]
     [cdq.core :refer [jar-file?]]
@@ -2059,4 +2059,30 @@ PSI-Explosion
                                     Color/white "forever\nand"
                                     "ever"))))
 
-(engine-render-test!)
+(defn fnplotter! []
+  (let [width 400
+        height width
+        leftx 200
+        topy 100
+        bottomy (+ topy height)
+        high-weighted2 (fn [x]
+                         (/ (* 2 x) (+ 1 x)))
+        points (map (fn [x] [x (high-weighted x)]) (range 0 1 0.01))
+        points (map (fn [x] [x (high-weighted x)]) (repeatedly 50 rand))]
+    (start-slick-basicgame
+      :width 800
+      :height 600
+      :init (fn [container])
+      :render (fn [container g]
+                (fill-rect g 0 0 800 600 black)
+                (doseq [[x y] points]
+                  (draw-rect g (+ leftx (* x width)) (- bottomy (* y height)) 0 0 red))
+                (draw-rect g leftx topy width height white)))))
+
+(comment
+  (engine-render-test!)
+  (fnplotter!)
+  )
+
+
+(fnplotter!)
