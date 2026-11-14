@@ -3,6 +3,7 @@ Action Video Game written in Clojure
 
 ```
 development=false lein run
+lein run -m mapgen.test
 ```
 
 in order to start.

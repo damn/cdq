@@ -30,8 +30,6 @@
                 *print-level* 3}
   )
 
-; :main mapgen.test
-;
 ; TODO: set correct natives for OSX, linux
 
 ; TODO

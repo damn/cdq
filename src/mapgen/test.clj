@@ -184,8 +184,7 @@
   :width screenw
   :height screenh
   :init (fn [container]
-          (doseq [f cdq.core/init-fns]
-            (f))
+          (cdq.core/init-input!)
           (update-grid (generate-cave)))
   :update (fn [container delta]
             (doseq [[k command] key-commands

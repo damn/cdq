@@ -1114,10 +1114,11 @@
 
 ; Call update-mousebutton-state each frame and run init-fns at game start.
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private slick-input
-      (.getInput app-game-container))))
+(defn init-input! []
+  (def ^:private slick-input
+    (.getInput app-game-container)))
+
+(alter-var-root #'init-fns conj init-input!)
 
 (defn clear-key-pressed-record   [] (.clearKeyPressedRecord   ^Input slick-input))
 (defn clear-mouse-pressed-record [] (.clearMousePressedRecord ^Input slick-input))
