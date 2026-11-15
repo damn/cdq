@@ -474,18 +474,12 @@
       (throw (IllegalArgumentException. (str "Could not find key " k " in config")))
       value)))
 
-; TODO this stuff should not be here ? ..
 (def screen-width 384)
 (def screen-height 288)
 (def screen-scale 2)
-
 (def version "alpha3")
 
-;;
-
 (def debug-mode (atom false))
-
-;;
 
 (def tile-width 16)
 (def tile-height 16)
@@ -507,7 +501,6 @@
 (def left-offset-in-tiles (int half-display-w-in-tiles))
 (def top-offset-in-tiles (int half-display-h-in-tiles))
 
-
 (def entities-always-in-los true)
 
 (def show-body-debug-info false)
@@ -525,8 +518,6 @@
 (def show-comps-count false)
 
 (def show-contentfield false)
-
-; map rendering
 
 (def show-map-grid true)
 
