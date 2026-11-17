@@ -1,12 +1,13 @@
-(ns game.tools.dirtpath ; fixme neighborvalue folder not mentioned, also what is this?
-  (:require
-    [cdq.core :refer [get-8-neighbour-positions]]
-    [cdq.core :refer [start-slick-basicgame]]
-    [cdq.core :refer [if-chance]]
-    [cdq.core :refer [astar-find-path]]
-    [cdq.core :refer [construct-tiledmap create-grid-from-tiled-map]]
-    [cdq.core :refer [get-transition-tile-value
-                      make-tiledmap-file resource]]))
+(ns game.tools.neighbourvalues.dirtpath 
+  (:require [cdq.core :refer [get-8-neighbour-positions 
+                              start-slick-basicgame 
+                              if-chance
+                              astar-find-path
+                              construct-tiledmap
+                              create-grid-from-tiled-map
+                              get-transition-tile-value
+                              make-tiledmap-file 
+                              resource]]))
 
 (def ^:private ground-firstgid 1)
 (def ^:private circle-tiles-firstgid 91)
@@ -30,41 +31,42 @@
     (= :wall (get grid posi))
     (some #(= :wall (get grid %)) (get-8-neighbour-positions posi))))
 
-(start-slick-basicgame
-  :init (fn [container]
-          (doseq [f cdq.core/init-fns]
-            (f))
-          (let [grid (create-grid-from-tiled-map (construct-tiledmap (resource "tech.tmx")))
-                pathposis (astar-find-path [10 10] [5 73] grid pathblocked?)
-                is-path-posi? (fn [p] (some #{p} pathposis))
-                is-transition-posi? (fn [posi value] (and (= :ground value)
-                                                          (not (is-path-posi? posi))
-                                                          (some is-path-posi? (get-8-neighbour-positions posi))))
-                blocked (+ ground-firstgid 63)
+(defn -main []
+  (start-slick-basicgame
+    :init (fn [container]
+            #_(doseq [f cdq.core/init-fns]
+              (f))
+            (let [grid (create-grid-from-tiled-map (construct-tiledmap (resource "tech.tmx")))
+                  pathposis (astar-find-path [10 10] [5 73] grid pathblocked?)
+                  is-path-posi? (fn [p] (some #{p} pathposis))
+                  is-transition-posi? (fn [posi value] (and (= :ground value)
+                                                            (not (is-path-posi? posi))
+                                                            (some is-path-posi? (get-8-neighbour-positions posi))))
+                  blocked (+ ground-firstgid 63)
 
-                main-stone-gid (+ circle-tiles-firstgid 16)
-                walkable main-stone-gid
-                walkableopt (map #(+ circle-tiles-firstgid %) [12 13 14 15])
-                dirt-lid 28
-                pathgid (+ circle-tiles-firstgid dirt-lid)
-                calc-gid (fn [grid posi value]
-                           (cond
-                             (is-transition-posi? posi value)  (+ circle-tiles-firstgid
-                                                                  (get-transition-tile-value
-                                                                    posi
-                                                                    grid
-                                                                    :neighbourvalues neighbourvalues
-                                                                    :default-value dirt-lid
-                                                                    :count-neighbour? (fn [posi value] (is-path-posi? posi))))
-                             (some #{posi} pathposis) pathgid
-                             (= :ground value) (if-chance 10 (rand-nth walkableopt) walkable)
-                             (= :wall value) blocked))]
-            (make-tiledmap-file 48
-                                (resource "neu_with_path.tmx")
-                                grid
-                                calc-gid
-                                [ground-firstgid "Ground.tsx"]
-                                [circle-tiles-firstgid "circletiles48.tsx"]))
-          (System/exit 0)))
+                  main-stone-gid (+ circle-tiles-firstgid 16)
+                  walkable main-stone-gid
+                  walkableopt (map #(+ circle-tiles-firstgid %) [12 13 14 15])
+                  dirt-lid 28
+                  pathgid (+ circle-tiles-firstgid dirt-lid)
+                  calc-gid (fn [grid posi value]
+                             (cond
+                               (is-transition-posi? posi value)  (+ circle-tiles-firstgid
+                                                                    (get-transition-tile-value
+                                                                      posi
+                                                                      grid
+                                                                      :neighbourvalues neighbourvalues
+                                                                      :default-value dirt-lid
+                                                                      :count-neighbour? (fn [posi value] (is-path-posi? posi))))
+                               (some #{posi} pathposis) pathgid
+                               (= :ground value) (if-chance 10 (rand-nth walkableopt) walkable)
+                               (= :wall value) blocked))]
+              (make-tiledmap-file 48
+                                  "resources/maps/test/neu_with_path.tmx"
+                                  grid
+                                  calc-gid
+                                  [ground-firstgid "Ground.tsx"]
+                                  [circle-tiles-firstgid "circletiles48.tsx"]))
+            (System/exit 0))))
 
 
