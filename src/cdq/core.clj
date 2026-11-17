@@ -9348,11 +9348,9 @@ PSI-Explosion
       :else (enter-state options)))
   (when (is-key-pressed? :TAB)
     (enter-state minimap))
-  (when (and (get-setting :debug-mode)
-             (is-key-pressed? :D))
+  (when (is-key-pressed? :D)
     (swap! debug-mode not))
-  (when (and (get-setting :is-pausable)
-             (is-key-pressed? :P))
+  (when (is-key-pressed? :P)
     (swap! running not))
   (when @running
     (update-mousebutton-state)
@@ -9771,17 +9769,11 @@ PSI-Explosion
     :show-fps false
     :lock-framerate false))
 
-(def development-config {:debug-mode true
-                         :is-pausable true
-                         :map-impl-namespace 'game.maps.impl})
+; TODO 'D' debug mode / 'P' - pause (not shown)
 
-(def production-config {:debug-mode false
-                        :is-pausable false
-                        :map-impl-namespace 'game.maps.impl})
-
-(def test-config {:debug-mode true
-                  :is-pausable true
-                  :map-impl-namespace 'game.maps.impl-test})
+(def development-config {:map-impl-namespace 'game.maps.impl})
+(def production-config  {:map-impl-namespace 'game.maps.impl})
+(def test-config        {:map-impl-namespace 'game.maps.impl-test})
 
 (defn game! []
   (.bindRoot #'config development-config)
