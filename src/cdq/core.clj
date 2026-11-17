@@ -994,8 +994,6 @@
     (.start (Thread.
               #(.start container)))))
 
-(def init-fns (list))
-
 (defn start-slick-basicgame
   [& {:keys [full-screen title width height init update render]
       :or {title "test" width 800 height 600
@@ -1038,9 +1036,7 @@
 (def allowed-characters (set (map char (range 32 126))))
 
 ; anuvverbubbla font has (range 32 91) & at draw-string make (.toUpperCase (str s))
-; (alter-var-root #'cdq.core/init-fns conj
-;   (fn []
-;     (def ^:private anuvverbubbla (SpriteSheetFont. (SpriteSheet. "anuvverbubbla_8x8.png" 8 8) \space))))
+; (def ^:private anuvverbubbla (SpriteSheetFont. (SpriteSheet. "anuvverbubbla_8x8.png" 8 8) \space))
 
 (deflazygetter get-defaultfont
   (SpriteSheetFont. (SpriteSheet. "simple_6x8.png" 6 8) \space))
@@ -1099,13 +1095,9 @@
 (defn reset-counter [counter]
   (assoc counter :cnt 0))
 
-; Call update-mousebutton-state each frame and run init-fns at game start.
+; Call update-mousebutton-state each frame.
 
-(defn init-input! []
-  (def ^:private slick-input
-    (.getInput app-game-container)))
-
-(alter-var-root #'init-fns conj init-input!)
+(def ^:private slick-input)
 
 (defn clear-key-pressed-record   [] (.clearKeyPressedRecord   ^Input slick-input))
 (defn clear-mouse-pressed-record [] (.clearMousePressedRecord ^Input slick-input))
@@ -3956,9 +3948,7 @@ assert lastindexOf slash is the same for names in a folder?
   (gui-render-label g component)
   (gui-render-pressable-rect g component))
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private gui-selected-img (create-image "selected.png"))))
+(def ^:private gui-selected-img)
 
 (defn- gui-render-checkbox [g {:keys [bounds] :as component}]
   (let [[x y w h] bounds]
@@ -4470,12 +4460,8 @@ assert lastindexOf slash is the same for names in a folder?
       (variance-val (* hp-multiplier player-standard-dmg) 0.5))
     (destructible-monster-armor armor-perc-reduce)))
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def explosion-frames (spritesheet-frames "effects/expsmall.png" 20 20))))
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private destructible-blood-frames (spritesheet-frames "effects/blood.png" 20 20))))
+(def explosion-frames)
+(def ^:private destructible-blood-frames)
 
 (defn- destructible-create-hit-effect [body]
   (if-let [{trigger :trigger} (:hit-effect @body)]
@@ -4770,21 +4756,7 @@ over a skill at the bottom left selection lists.
 * Use items in actionbar: Q,W and E.
 * Minimap: TAB")
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private ingame-gui-controlsframe (let [w ;(+ 10 (get-text-width ingame-gui-controls-text)) TODO FIXME
-                              320]
-                          (make-frame :name :controls
-                                      :bounds [frame-screenborder-distance
-                                               212
-                                               w
-                                               (+ 2 (get-text-height ingame-gui-controls-text))]
-                                      :hotkey ingame-gui-controls-hotkey
-                                      :visible true
-                                      :parent ingamestate-display)))
-    (make-label :location [2 2]
-                :text ingame-gui-controls-text
-                :parent ingame-gui-controlsframe)))
+(def ^:private ingame-gui-controlsframe)
 
 (def buttonx-start 60) ; rechts neben skill-selection-buttons
 (def ingame-gui-x-dist 18) ; mit get-mouse-pos rausgefunden
@@ -4800,42 +4772,6 @@ over a skill at the bottom left selection lists.
 
 ; -1 location: free sp button
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (make-imgbutton
-      :image (create-image "icons/character.png" :scale buttonscale)
-      :location [(+ buttonx-start (* ingame-gui-x-dist 0)) (- screen-height 18)]
-      :pressed #(gui-switch-visible (ingame-gui-find-component ingamestate-display :character))
-      :tooltip (ingame-gui-hotkey-str char-hotkey "Character Attributes")
-      :parent ingamestate-display)
-
-    (make-imgbutton
-      :image (create-image "icons/skills.png" :scale buttonscale)
-      :location [(+ buttonx-start (* ingame-gui-x-dist 1)) (- screen-height 18)]
-      :pressed #(gui-switch-visible (ingame-gui-find-component ingamestate-display :skillmenu))
-      :tooltip (ingame-gui-hotkey-str skillmenu-hotkey "Skills")
-      :parent ingamestate-display)
-
-    (make-imgbutton
-      :image (create-image "icons/inventory.png" :scale buttonscale)
-      :location [(+ buttonx-start (* ingame-gui-x-dist 2)) (- screen-height 18)]
-      :pressed #(gui-switch-visible (ingame-gui-find-component ingamestate-display :inventory))
-      :tooltip (ingame-gui-hotkey-str inventory-hotkey "Inventory")
-      :parent ingamestate-display)
-
-    (make-imgbutton
-      :image (create-image "icons/controls.png" :scale buttonscale)
-      :location [(+ buttonx-start (* ingame-gui-x-dist 3)) (- screen-height 18)]
-      :pressed #(gui-switch-visible (ingame-gui-find-component ingamestate-display :controls))
-      :tooltip (ingame-gui-hotkey-str ingame-gui-controls-hotkey "Game Controls/Hotkeys")
-      :parent ingamestate-display)
-
-    (make-imgbutton
-      :image (create-image "icons/options.png" :scale buttonscale)
-      :location [(+ buttonx-start (* ingame-gui-x-dist 4)) (- screen-height 18)]
-      :pressed #(enter-state options)
-      :tooltip (ingame-gui-hotkey-str options-hotkey "Options/Exit")
-      :parent ingamestate-display)))
 
 ;; item grids
 
@@ -4890,16 +4826,7 @@ over a skill at the bottom left selection lists.
 (def ^:private item-grid-inventoryrx (- screen-width item-grid-inventory-width frame-screenborder-distance))
 (def inventoryry frame-screenborder-distance)
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def inventory-frame (make-frame :name :inventory
-                                     :bounds [item-grid-inventoryrx
-                                              inventoryry
-                                              item-grid-inventory-width
-                                              inventory-height]
-                                     :hotkey inventory-hotkey
-                                     :visible false
-                                     :parent ingamestate-display))))
+(def inventory-frame)
 
 (defn showing-player-inventory? [] (gui-visible? inventory-frame))
 
@@ -4923,11 +4850,7 @@ over a skill at the bottom left selection lists.
   :is-equipment-cell false
   :visible-check showing-player-inventory?)
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def item-background-icons {:torso (create-image "items/armorbg.png")
-                           :hands (create-image "items/handsbg.png")
-                           :implants (create-image "items/implantsbg.png")})))
+(def item-background-icons)
 
 (add-item-grid
   :grid-type :hands
@@ -5382,16 +5305,7 @@ so the entity can get in melee range.")
 
 ;;;
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private body-render-outlines {:green {:topleft (create-image "outline/tl.png" :scale 0.5)
-                                     :topright (create-image "outline/tr.png" :scale 0.5)
-                                     :bottomleft (create-image "outline/bl.png" :scale 0.5)
-                                     :bottomright (create-image "outline/br.png" :scale 0.5)}
-                             :red {:topleft (create-image "outline/tl_r.png" :scale 0.5)
-                                   :topright (create-image "outline/tr_r.png" :scale 0.5)
-                                   :bottomleft (create-image "outline/bl_r.png" :scale 0.5)
-                                   :bottomright (create-image "outline/br_r.png" :scale 0.5)}})))
+(def ^:private body-render-outlines)
 
 (def body-outline-height 2)
 
@@ -5438,9 +5352,6 @@ so the entity can get in melee range.")
   (defn reset-default-mouse-cursor []
     (set-mouse-cursor (item-get-default-mouse-cursor) hotspotx hotspoty)))
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (reset-default-mouse-cursor)))
 
 ; (.setDefaultMouseCursor app-game-container) -> der normale
 
@@ -5519,9 +5430,7 @@ so the entity can get in melee range.")
 
 ;; media
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private items-spritesheet (spritesheet "items/items.png" 16 16))))
+(def ^:private items-spritesheet)
 
 (defn get-itemsprite [p]
   (get-sprite items-spritesheet p))
@@ -6295,12 +6204,8 @@ so the entity can get in melee range.")
 
 ;; burrow
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private burrow-dust-frames (spritesheet-frames "effects/dust.png" 15 15))))
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private burrow-dark-dust-frames (spritesheet-frames "effects/darkdust.png" 30 30))))
+(def ^:private burrow-dust-frames)
+(def ^:private burrow-dark-dust-frames)
 
 (defn- do-burrow [entity & {audiovisual :audiovisual :or {audiovisual true}}]
   (when audiovisual
@@ -6502,9 +6407,7 @@ so the entity can get in melee range.")
 
 (def ^:private psi-charge-body-distance 10)
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private psi-charge-frames (map #(get-scaled-copy % 7 7) (folder-frames "effects/psicharges/")))))
+(def ^:private psi-charge-frames)
 
 (defeffectentity ^:private psi-charge [body attackinc moveinc]
   :target body
@@ -6631,13 +6534,7 @@ so the entity can get in melee range.")
     (into {} (for [skill (map #(%) @learnable-skill-init-fns)]
                [(:type skill) skill]))))
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private skillmenu-frame (make-frame :name :skillmenu
-                                      :bounds [skillmenu-x skillmenu-y 100 95]
-                                      :hotkey skillmenu-hotkey
-                                      :visible false
-                                      :parent ingamestate-display))))
+(def ^:private skillmenu-frame)
 
 (defn- init-skillmenu-buttons []
   (let [x 5
@@ -6657,10 +6554,6 @@ so the entity can get in melee range.")
                                                 (assign-unused-hotkey-and-open-skillslist (:type skill))))
                                    :parent skillmenu-frame)}))))
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (init-learnable-skills)
-    (init-skillmenu-buttons)))
 
 (defn- learnable-properties-str [props-map]
   (apply str (for [[k v] props-map]
@@ -6720,16 +6613,7 @@ so the entity can get in melee range.")
                   :learned (for [[skilltype skill] learnable-skills]
                              [skilltype false])})))
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private freeskillpointsbutton
-      (make-imgbutton
-        :image (create-image "icons/skills_free.png" :scale buttonscale)
-        :location [(+ buttonx-start (* ingame-gui-x-dist -1)) (- screen-height 18)]
-        :pressed #(gui-switch-visible skillmenu-frame)
-        :tooltip "You have free skill points"
-        :parent ingamestate-display
-        :visible false))))
+(def ^:private freeskillpointsbutton)
 
 (ingame-loop-comp :update-button-visibility
   (active [delta c _]
@@ -6737,9 +6621,7 @@ so the entity can get in melee range.")
 
 ;; projectile
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private projectile-hits-wall-frames (folder-frames "effects/ember/"))))
+(def ^:private projectile-hits-wall-frames)
 
 (defn- projectile-wall-hit-plop [position]
   (animation-entity
@@ -7266,11 +7148,7 @@ so the entity can get in melee range.")
     (def ^:private skill-selection-button-y y)
     button))
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private selected-skill-buttons
-      {:left (skill-selection-create-selected-button :left skill-selection-x-left)
-       :right (skill-selection-create-selected-button :right skill-selection-x-right)})))
+(def ^:private selected-skill-buttons)
 
 (defn- skill-selection-create-list [mousebutton buttonx buttony]
   (doseq [button (map :button (mousebutton skill-selection-lists))]
@@ -7556,9 +7434,7 @@ so the entity can get in melee range.")
                                :equip-boni (create-random-boni itemname (get-rand-weighted-item boni-counts) :max-level max-lvl)
                                :color equip-boni-item-color)))))
 
-(alter-var-root #'init-fns conj
-  (fn []
-    (def ^:private item-grenade-frames (folder-frames "effects/grenade/"))))
+(def ^:private item-grenade-frames)
 
 ; TODO auch defusable aber net damit gemacht -> vlt mit split-kvs-and-more und unten equip/unequip zuf�hren?
 (defitem "Grenade" [{cnt :count}]
@@ -8113,9 +7989,7 @@ so the entity can get in melee range.")
         path-w (in-tiles projectile-pxsize)]
     (is-path-blocked? sx sy tx ty path-w)))
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private redball-frames (folder-frames "effects/red_ball/"))))
+(def ^:private redball-frames)
 
 (let [maxrange 10
       maxrange-squared (Math/pow maxrange 2)
@@ -8147,9 +8021,7 @@ so the entity can get in melee range.")
     :state-blocks state-blocks
     :props (redball-projectile-skill-props)))
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private monsterdie-frames (folder-frames "effects/monsterexplosion/"))))
+(def ^:private monsterdie-frames)
 
 (defn monster-die-effect [body]
   (animation-entity
@@ -8181,12 +8053,8 @@ so the entity can get in melee range.")
 
 (defn default-death-trigger [] (death-trigger default-monster-death))
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private bigger-explosion-frames (spritesheet-frames "effects/explosn.png" 20 20))))
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private big-explosion-frames (spritesheet-frames "effects/expbig.png" 40 40))))
+(def ^:private bigger-explosion-frames)
+(def ^:private big-explosion-frames)
 
 (defn rand-posis-hit-effect
   "pixel distance from center of boss for explosions"
@@ -8373,9 +8241,7 @@ so the entity can get in melee range.")
     (single-animation-component
       (folder-animation :folder "opponents/station/" :duration 500 :looping true))))
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private mine-explosion-frames (folder-frames "effects/mine/"))))
+(def ^:private mine-explosion-frames)
 
 (defmonster mine {:hp 1 :armor 0 :pxw 15 :pxh 15}
   (death-trigger (fn [this-body]
@@ -8565,9 +8431,7 @@ so the entity can get in melee range.")
       :monster-nova
       :melee)))
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private monster-nova-frames (folder-frames "effects/monsternova/"))))
+(def ^:private monster-nova-frames)
 
 (defn- create-nova-melee-skillmanager []
   (let [melee-weapon (skillmanager-skill
@@ -8689,9 +8553,7 @@ so the entity can get in melee range.")
     :hit-effects effects
     :maxtime 12000))
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private boss-explosion (folder-frames "effects/bossexplosion/"))))
+(def ^:private boss-explosion)
 
 (defmonster first-boss {:hp 20 :armor 50 :pxw 33 :pxh 63}
   (big-body-hit-effect [[12 -15] [-8 -15] [0 -23] [1 -6] [-9 -4] [-8 4] [8 8] [-8 15] [3 23] [-6 25]])
@@ -8753,9 +8615,7 @@ so the entity can get in melee range.")
 
 (def curse-infostr "Curse\nOnly one curse is active at a time\n")
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private curse-frames (map #(get-scaled-copy % 0.3) (folder-frames "effects/curse/")))))
+(def ^:private curse-frames)
 
 (defn create-curse-effect [[x y]]
   (play-sound "bfxr_curse.wav")
@@ -8763,9 +8623,7 @@ so the entity can get in melee range.")
     :position [x (- y (in-tiles (/ 80 3)))]
     :animation (create-animation curse-frames)))
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private projectile-frames (folder-frames "effects/energyball/"))))
+(def ^:private projectile-frames)
 
 (deflearnable-skill player-ranged
   :manacost 2
@@ -8816,9 +8674,7 @@ finisher-skills.
    :show-info-for [:cost]}
   (player-melee-props [psi-charge-hit-effect]))
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private nova-frames (folder-frames "effects/nova/"))))
+(def ^:private nova-frames)
 
 (deflearnable-skill nova
   :manacost 10
@@ -8912,9 +8768,7 @@ Stuns and deals damage
                  (dorun (map #(deal-dmg dmg %) hits))))})
 
 (def ^:private psi-bolt-pxradius 17)
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private psi-bolt-frames (folder-frames "effects/psibolt/"))))
+(def ^:private psi-bolt-frames)
 
 (defn- do-skill-psi-bolt [entity component]
   (let [cnt (consume-psi-charges entity)
@@ -9162,37 +9016,8 @@ PSI-Explosion
 
 (declare set-visiblity-state)
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (init-textfield)
-    (def ^:private create-char-button (make-textbutton :location [menu-second-column-x (+ menu-buttons-y 30)]
-                                                       :text "create"
-                                                       :pressed try-create-character
-                                                       :parent menu-display))
-    (def ^:private credits-label (make-label :location [menu-second-column-x menu-buttons-y]
-                                             :text creditstxt
-                                             :parent menu-display))
-    (make-textbutton :location [menu-buttons-x menu-buttons-y]
-                     :text "New Character"
-                     :pressed (fn []
-                                (.setText textfield "")
-                                (.start (Thread. (fn []
-                                                   (Thread/sleep 100)
-                                                   (.setFocus textfield true))))
-                                (set-visiblity-state :new-char))
-                     :parent menu-display)
-    (make-textbutton :text "Load Character"
-                     :location [menu-buttons-x (+ menu-buttons-y 25)]
-                     :pressed #(set-visiblity-state :load-char)
-                     :parent menu-display)
-    (make-textbutton :text "Credits"
-                     :location [menu-buttons-x (+ menu-buttons-y 50)]
-                     :pressed #(set-visiblity-state :credits)
-                     :parent menu-display)
-    (make-textbutton :text "Exit Game"
-                     :location [menu-buttons-x (+ menu-buttons-y 75)]
-                     :pressed #(.exit app-game-container)
-                     :parent menu-display)))
+(def ^:private create-char-button)
+(def ^:private credits-label)
 
 (let [visibility {:none      [false false false false]
                   :new-char  [false true true false]
@@ -9211,11 +9036,6 @@ PSI-Explosion
 
 (def ^:private music nil)
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (alter-var-root #'music (constantly
-                              (doto (Music. "sounds/dungeon1.xm" true)
-                                (.setVolume (float 1)))))))
 
 (def mainmenu-gamestate
   (let [id (get-unique-number)]
@@ -9409,13 +9229,11 @@ PSI-Explosion
                         white
                         infostr))
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private rahmen (create-image "gui/rahmen.png"))
-    (def ^:private rahmenw (first (get-dimensions rahmen)))
-    (def ^:private rahmenh (second (get-dimensions rahmen)))
-    (def ^:private hpcontent (create-image "gui/hp.png"))
-    (def ^:private manacontent (create-image "gui/mana.png"))))
+(def ^:private rahmen)
+(def ^:private rahmenw)
+(def ^:private rahmenh)
+(def ^:private hpcontent)
+(def ^:private manacontent)
 
 (defn- render-hpmana-bar [g x y contentimg minmaxval name]
   (draw-image rahmen x y)
@@ -9440,13 +9258,7 @@ PSI-Explosion
         (render-readable-text g half-screen-w 0 :centerx true
                               (str (readable-number armor) " Armor\n" (get-armor-reduce-info armor)))))))
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private character-frame (make-frame :name :character
-                                      :bounds [(- screen-width frame-screenborder-distance 160) (+ inventoryry inventory-height 5) 160 30]
-                                      :hotkey char-hotkey
-                                      :visible false
-                                      :parent ingamestate-display))))
+(def ^:private character-frame)
 
 (defn- status-dmg-info [{:keys [is-melee dmg-info] :as skill}]
   (cond
@@ -9653,33 +9465,7 @@ PSI-Explosion
 (def ^:private options-by 20)
 (def ^:private options-ypuffer 12)
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def ^:private options-display (make-guidisplay))
-    (make-textbutton
-      :text "Exit"
-      :location [options-bx options-by]
-      :pressed #(enter-state mainmenu-gamestate)
-      :parent options-display)
-    (make-textbutton
-      :text "Resume"
-      :location [options-bx (+ options-by (* options-ypuffer 2))]
-      :pressed #(enter-state ingame)
-      :parent options-display)
-    (dorun
-      (map-indexed
-        (fn [idx item]
-          (make-checkbox :text (status-get-text item)
-                         :location [100 (+ options-by (* options-ypuffer idx))]
-                         :pressed #(status-set-state item %)
-                         :selected (boolean (status-get-state item))
-                         :parent options-display))
-        @status-check-boxes))
-    (when-not (fullscreen-supported?)
-      (make-label :location [options-bx 150]
-                  :text "This resolution is not supported in fullscreen mode."
-                  :visible true
-                  :parent options-display))))
+(def ^:private options-display)
 
 (def options-gamestate
   (proxy [BasicGameState] []
@@ -9751,8 +9537,183 @@ PSI-Explosion
   (.bindRoot #'config development-config)
   (let [title "Cyber-Dungeon-Quest"
         init! (fn []
-                (doseq [f cdq.core/init-fns]
-                  (f)))
+                (.bindRoot #'slick-input (.getInput app-game-container))
+                (.bindRoot #'gui-selected-img (create-image "selected.png"))
+                (.bindRoot #'explosion-frames (spritesheet-frames "effects/expsmall.png" 20 20))
+                (.bindRoot #'destructible-blood-frames (spritesheet-frames "effects/blood.png" 20 20))
+                (.bindRoot #'ingame-gui-controlsframe
+                  (let [w ;(+ 10 (get-text-width ingame-gui-controls-text)) TODO FIXME
+                        320]
+                    (make-frame :name :controls
+                                :bounds [frame-screenborder-distance
+                                         212
+                                         w
+                                         (+ 2 (get-text-height ingame-gui-controls-text))]
+                                :hotkey ingame-gui-controls-hotkey
+                                :visible true
+                                :parent ingamestate-display)))
+                (make-label :location [2 2]
+                            :text ingame-gui-controls-text
+                            :parent ingame-gui-controlsframe)
+                (make-imgbutton
+                  :image (create-image "icons/character.png" :scale buttonscale)
+                  :location [(+ buttonx-start (* ingame-gui-x-dist 0)) (- screen-height 18)]
+                  :pressed #(gui-switch-visible (ingame-gui-find-component ingamestate-display :character))
+                  :tooltip (ingame-gui-hotkey-str char-hotkey "Character Attributes")
+                  :parent ingamestate-display)
+                (make-imgbutton
+                  :image (create-image "icons/skills.png" :scale buttonscale)
+                  :location [(+ buttonx-start (* ingame-gui-x-dist 1)) (- screen-height 18)]
+                  :pressed #(gui-switch-visible (ingame-gui-find-component ingamestate-display :skillmenu))
+                  :tooltip (ingame-gui-hotkey-str skillmenu-hotkey "Skills")
+                  :parent ingamestate-display)
+                (make-imgbutton
+                  :image (create-image "icons/inventory.png" :scale buttonscale)
+                  :location [(+ buttonx-start (* ingame-gui-x-dist 2)) (- screen-height 18)]
+                  :pressed #(gui-switch-visible (ingame-gui-find-component ingamestate-display :inventory))
+                  :tooltip (ingame-gui-hotkey-str inventory-hotkey "Inventory")
+                  :parent ingamestate-display)
+                (make-imgbutton
+                  :image (create-image "icons/controls.png" :scale buttonscale)
+                  :location [(+ buttonx-start (* ingame-gui-x-dist 3)) (- screen-height 18)]
+                  :pressed #(gui-switch-visible (ingame-gui-find-component ingamestate-display :controls))
+                  :tooltip (ingame-gui-hotkey-str ingame-gui-controls-hotkey "Game Controls/Hotkeys")
+                  :parent ingamestate-display)
+                (make-imgbutton
+                  :image (create-image "icons/options.png" :scale buttonscale)
+                  :location [(+ buttonx-start (* ingame-gui-x-dist 4)) (- screen-height 18)]
+                  :pressed #(enter-state options)
+                  :tooltip (ingame-gui-hotkey-str options-hotkey "Options/Exit")
+                  :parent ingamestate-display)
+                (.bindRoot #'inventory-frame
+                  (make-frame :name :inventory
+                              :bounds [item-grid-inventoryrx
+                                       inventoryry
+                                       item-grid-inventory-width
+                                       inventory-height]
+                              :hotkey inventory-hotkey
+                              :visible false
+                              :parent ingamestate-display))
+                (.bindRoot #'item-background-icons
+                  {:torso (create-image "items/armorbg.png")
+                   :hands (create-image "items/handsbg.png")
+                   :implants (create-image "items/implantsbg.png")})
+                (.bindRoot #'body-render-outlines
+                  {:green {:topleft (create-image "outline/tl.png" :scale 0.5)
+                           :topright (create-image "outline/tr.png" :scale 0.5)
+                           :bottomleft (create-image "outline/bl.png" :scale 0.5)
+                           :bottomright (create-image "outline/br.png" :scale 0.5)}
+                   :red {:topleft (create-image "outline/tl_r.png" :scale 0.5)
+                         :topright (create-image "outline/tr_r.png" :scale 0.5)
+                         :bottomleft (create-image "outline/bl_r.png" :scale 0.5)
+                         :bottomright (create-image "outline/br_r.png" :scale 0.5)}})
+                (reset-default-mouse-cursor)
+                (.bindRoot #'items-spritesheet (spritesheet "items/items.png" 16 16))
+                (.bindRoot #'burrow-dust-frames (spritesheet-frames "effects/dust.png" 15 15))
+                (.bindRoot #'burrow-dark-dust-frames (spritesheet-frames "effects/darkdust.png" 30 30))
+                (.bindRoot #'psi-charge-frames (map #(get-scaled-copy % 7 7) (folder-frames "effects/psicharges/")))
+                (.bindRoot #'skillmenu-frame
+                  (make-frame :name :skillmenu
+                              :bounds [skillmenu-x skillmenu-y 100 95]
+                              :hotkey skillmenu-hotkey
+                              :visible false
+                              :parent ingamestate-display))
+                (init-learnable-skills)
+                (init-skillmenu-buttons)
+                (.bindRoot #'freeskillpointsbutton
+                  (make-imgbutton
+                    :image (create-image "icons/skills_free.png" :scale buttonscale)
+                    :location [(+ buttonx-start (* ingame-gui-x-dist -1)) (- screen-height 18)]
+                    :pressed #(gui-switch-visible skillmenu-frame)
+                    :tooltip "You have free skill points"
+                    :parent ingamestate-display
+                    :visible false))
+                (.bindRoot #'projectile-hits-wall-frames (folder-frames "effects/ember/"))
+                (.bindRoot #'selected-skill-buttons
+                  {:left (skill-selection-create-selected-button :left skill-selection-x-left)
+                   :right (skill-selection-create-selected-button :right skill-selection-x-right)})
+                (.bindRoot #'item-grenade-frames (folder-frames "effects/grenade/"))
+                (.bindRoot #'redball-frames (folder-frames "effects/red_ball/"))
+                (.bindRoot #'monsterdie-frames (folder-frames "effects/monsterexplosion/"))
+                (.bindRoot #'bigger-explosion-frames (spritesheet-frames "effects/explosn.png" 20 20))
+                (.bindRoot #'big-explosion-frames (spritesheet-frames "effects/expbig.png" 40 40))
+                (.bindRoot #'mine-explosion-frames (folder-frames "effects/mine/"))
+                (.bindRoot #'monster-nova-frames (folder-frames "effects/monsternova/"))
+                (.bindRoot #'boss-explosion (folder-frames "effects/bossexplosion/"))
+                (.bindRoot #'curse-frames (map #(get-scaled-copy % 0.3) (folder-frames "effects/curse/")))
+                (.bindRoot #'projectile-frames (folder-frames "effects/energyball/"))
+                (.bindRoot #'nova-frames (folder-frames "effects/nova/"))
+                (.bindRoot #'psi-bolt-frames (folder-frames "effects/psibolt/"))
+                (init-textfield)
+                (.bindRoot #'create-char-button
+                  (make-textbutton :location [menu-second-column-x (+ menu-buttons-y 30)]
+                                   :text "create"
+                                   :pressed try-create-character
+                                   :parent menu-display))
+                (.bindRoot #'credits-label
+                  (make-label :location [menu-second-column-x menu-buttons-y]
+                              :text creditstxt
+                              :parent menu-display))
+                (make-textbutton :location [menu-buttons-x menu-buttons-y]
+                                 :text "New Character"
+                                 :pressed (fn []
+                                            (.setText textfield "")
+                                            (.start (Thread. (fn []
+                                                               (Thread/sleep 100)
+                                                               (.setFocus textfield true))))
+                                            (set-visiblity-state :new-char))
+                                 :parent menu-display)
+                (make-textbutton :text "Load Character"
+                                 :location [menu-buttons-x (+ menu-buttons-y 25)]
+                                 :pressed #(set-visiblity-state :load-char)
+                                 :parent menu-display)
+                (make-textbutton :text "Credits"
+                                 :location [menu-buttons-x (+ menu-buttons-y 50)]
+                                 :pressed #(set-visiblity-state :credits)
+                                 :parent menu-display)
+                (make-textbutton :text "Exit Game"
+                                 :location [menu-buttons-x (+ menu-buttons-y 75)]
+                                 :pressed #(.exit app-game-container)
+                                 :parent menu-display)
+                (.bindRoot #'music
+                  (doto (Music. "sounds/dungeon1.xm" true)
+                    (.setVolume (float 1))))
+                (.bindRoot #'rahmen (create-image "gui/rahmen.png"))
+                (.bindRoot #'rahmenw (first (get-dimensions rahmen)))
+                (.bindRoot #'rahmenh (second (get-dimensions rahmen)))
+                (.bindRoot #'hpcontent (create-image "gui/hp.png"))
+                (.bindRoot #'manacontent (create-image "gui/mana.png"))
+                (.bindRoot #'character-frame
+                  (make-frame :name :character
+                              :bounds [(- screen-width frame-screenborder-distance 160) (+ inventoryry inventory-height 5) 160 30]
+                              :hotkey char-hotkey
+                              :visible false
+                              :parent ingamestate-display))
+                (.bindRoot #'options-display (make-guidisplay))
+                (make-textbutton
+                  :text "Exit"
+                  :location [options-bx options-by]
+                  :pressed #(enter-state mainmenu-gamestate)
+                  :parent options-display)
+                (make-textbutton
+                  :text "Resume"
+                  :location [options-bx (+ options-by (* options-ypuffer 2))]
+                  :pressed #(enter-state ingame)
+                  :parent options-display)
+                (dorun
+                  (map-indexed
+                    (fn [idx item]
+                      (make-checkbox :text (status-get-text item)
+                                     :location [100 (+ options-by (* options-ypuffer idx))]
+                                     :pressed #(status-set-state item %)
+                                     :selected (boolean (status-get-state item))
+                                     :parent options-display))
+                    @status-check-boxes))
+                (when-not (fullscreen-supported?)
+                  (make-label :location [options-bx 150]
+                              :text "This resolution is not supported in fullscreen mode."
+                              :visible true
+                              :parent options-display)))
         states [(deferred-preload-gamestate (get-unique-number) init!)
                 mainmenu-gamestate
                 loading-gamestate
@@ -9876,8 +9837,7 @@ PSI-Explosion
     (start-slick-basicgame
       :title "Input Test"
       :init (fn [container]
-              (doseq [f cdq.core/init-fns]
-                (f)))
+              (.bindRoot #'slick-input (.getInput app-game-container)))
       :update (fn [container delta]
                 (update-mousebutton-state)
                 (when (is-key-pressed? :A)
@@ -9912,8 +9872,6 @@ PSI-Explosion
 (defn copy-image-test! []
   (start-slick-basicgame
     :init (fn [container]
-            (doseq [f cdq.core/init-fns]
-              (f))
             (def ^:private sheet-frames (map #(get-scaled-copy % 2)
                                              (spritesheet-frames "effects/expbig.png" 40 40))))
     :render (fn [container g]
@@ -10052,8 +10010,6 @@ PSI-Explosion
 ;(use '(mapgen nad cave utils cellular))
 ;(start-slick-basicgame
 ;  :init (fn [container]
-;          (doseq [f cdq.core/init-fns]
-;            (f))
 ;          (let [grid (cellular-automata-gridgen 100
 ;                                                100
 ;                                                :fillprob 64
