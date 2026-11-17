@@ -80,18 +80,11 @@
             (swap! x inc)))
         combinations))))
 
-(start-slick-basicgame
-  :width screenw
-  :height 600
-  :init (fn [container]
-          (doseq [f cdq.core/init-fns]
-            (f)))
-  :render (fn [container g]
-            (fill-rect g 0 0 800 600 gray)
-            (render g)))
-
-
-
-
-
-
+(defn -main []
+  (start-slick-basicgame
+    :width screenw
+    :height 600
+    :init (fn [container])
+    :render (fn [container g]
+              (fill-rect g 0 0 800 600 gray)
+              (render g))))

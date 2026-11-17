@@ -1,9 +1,5 @@
 (ns game.tools.neighbourvalues.iceworld
-  (:require
-    cdq.core
-    [cdq.core :refer [spritesheet]]
-    [cdq.core :refer [get-transition-tile-value]]
-    [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi make-tiledmap-file resource]]))
+  (:require [cdq.core :refer [spritesheet get-transition-tile-value convert-to-spriteposi make-tiledmap-file resource]]))
 
 ; needs a grid scaled x2 at least and nil cells behind other walls; also remove NADS & single cells
 

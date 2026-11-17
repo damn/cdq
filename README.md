@@ -4,6 +4,8 @@ Action Video Game written in Clojure
 ```
 lein run
 lein run -m mapgen.test
+lein run -m game.tools.tiletransition-combinations-renderer
+lein run -m game.tools.neighbourvalues.greenwalls
 ```
 
 in order to start.

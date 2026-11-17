@@ -1,10 +1,7 @@
 (ns game.tools.neighbourvalues.greenwalls
-  (:require
-    cdq.core
-    [cdq.core :refer [spritesheet]]
-    [cdq.core :refer [if-chance]]
-    [cdq.core :refer [get-transition-tile-value]]
-    [game.tools.tiledmap-grid-convert :refer [convert-to-spriteposi]]))
+  (:require [cdq.core :refer [start-slick-basicgame 
+                              spritesheet if-chance get-transition-tile-value convert-to-spriteposi 
+                              make-tiledmap-file connect-regions fix-not-allowed-diagonals cellular-automata-gridgen]]))
 
 ; needs a grid scaled x2 at least and nil cells behind other walls; also remove NADS & single cells
 
@@ -45,31 +42,25 @@
     (when-let [localid (calc-localid grid posi value)]
       (convert-to-spriteposi localid spritesheet-width))))
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def tilesheet (spritesheet "maps/test/greenwalls.png" 48 48))))
-
-;(use '(mapgen nad cave utils cellular))
-;(start-slick-basicgame
-;  :init (fn [container]
-;          (doseq [f cdq.core/init-fns]
-;            (f))
-;          (let [grid (cellular-automata-gridgen 50 50
-;                                                :fillprob 64
-;                                                :random (java.util.Random.)
-;                                                :generations 5
-;                                                :wall-borders true)
-;                grid (-> grid connect-regions fix-not-allowed-diagonals
-;                       ;fill-single-cells
-;                       ;(scalegrid 2)
-;                       ;undefined-value-behind-walls
-;                       )]
-;            (make-tiledmap-file 48
-;                                (resource "cave_walls.tmx")
-;                                grid
-;                                calc-gid
-;                                [greenwalls-firstgid "greenwalls.tsx"]))
-;          (System/exit 0)))
-
-
-
+(defn -main []
+  (start-slick-basicgame
+    :init (fn [container]
+            (def tilesheet (spritesheet "maps/test/greenwalls.png" 48 48))
+            (let [grid (cellular-automata-gridgen 50 50
+                                                  :fillprob 64
+                                                  :random (java.util.Random.)
+                                                  :generations 5
+                                                  :wall-borders true)
+                  grid (-> grid connect-regions fix-not-allowed-diagonals
+                           ;fill-single-cells
+                           ;(scalegrid 2)
+                           ;undefined-value-behind-walls
+                           )
+                  target-file-path "resources/maps/test/cave_walls.tmx"]
+              (make-tiledmap-file 48
+                                  target-file-path
+                                  grid
+                                  calc-gid
+                                  [greenwalls-firstgid "greenwalls.tsx"])
+              (println "Wrote " target-file-path))
+            (System/exit 0))))

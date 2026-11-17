@@ -5,8 +5,8 @@
     [cdq.core :refer [if-chance]]
     [cdq.core :refer [astar-find-path]]
     [cdq.core :refer [construct-tiledmap create-grid-from-tiled-map]]
-    [cdq.core :refer [get-transition-tile-value]]
-    [game.tools.tiledmap-grid-convert :refer [make-tiledmap-file resource]]))
+    [cdq.core :refer [get-transition-tile-value
+                      make-tiledmap-file resource]]))
 
 (def ^:private ground-firstgid 1)
 (def ^:private circle-tiles-firstgid 91)
