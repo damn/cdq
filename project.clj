@@ -1,5 +1,5 @@
 (defproject cyberdungeonquest "alpha 3-SNAPSHOT"
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[org.clojure/clojure "1.12.0"]
                  [org.lwjgl.lwjgl/lwjgl          "2.9.3"]
                  ;; natives extracted manually to native/macosx (lein :native-prefix was pulling wrong platform)
                  [org.lwjgl.lwjgl/lwjgl-platform "2.9.3" :classifier "natives-osx"]
