@@ -5598,12 +5598,10 @@ so the entity can get in melee range.")
   (status-get-state [this] (.isShowingFPS app-game-container))
   (status-set-state [this is-selected] (.setShowFPS app-game-container is-selected)))
 
-; config is not initialized before 'start'
-#_(when (get-setting :lightning-options-menu-checkbox)
-  (status-check-box
-    (status-get-text [this] "Lightning effects")
-    (status-get-state [this] @active-lightning)
-    (status-set-state [this is-selected] (reset! active-lightning is-selected))))
+(status-check-box
+  (status-get-text [this] "Lightning effects")
+  (status-get-state [this] @active-lightning)
+  (status-set-state [this is-selected] (reset! active-lightning is-selected)))
 
 (def status-options-session (reify Session
                (load-session [_ data]
@@ -9773,38 +9771,27 @@ PSI-Explosion
     :show-fps (get-setting :show-fps)
     :lock-framerate false))
 
-(def development-config {:show-resolution-setup true
-                         ; :start-automatically true
-                         :show-controls-frame true
+(def development-config {:show-controls-frame true
                          :show-fps true
-                         ; :lightning-options-menu-checkbox true
                          :debug-mode true
                          :is-pausable true
                          :map-impl-namespace 'game.maps.impl})
 
-(def production-config {:show-resolution-setup true
-                        ; :start-automatically false
-                        :show-controls-frame true
+(def production-config {:show-controls-frame true
                         :show-fps false
-                        ; :lightning-options-menu-checkbox false
                         :debug-mode false
                         :is-pausable false
                         :map-impl-namespace 'game.maps.impl})
 
-(def test-config {:show-resolution-setup false
-                  ; :start-automatically false
-                  :show-controls-frame false
+(def test-config {:show-controls-frame false
                   :show-fps true
-                  ; :lightning-options-menu-checkbox true
                   :debug-mode true
                   :is-pausable true
                   :map-impl-namespace 'game.maps.impl-test})
 
 (defn game! []
   (.bindRoot #'config development-config)
-  (if (get-setting :show-resolution-setup)
-    (resolution-setup-frame start-the-game)
-    (start-the-game false)))
+  (resolution-setup-frame start-the-game))
 
 (defn -main []
   (game!))
