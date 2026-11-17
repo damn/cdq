@@ -9750,25 +9750,6 @@ PSI-Explosion
       (render [container statebasedgame g]
         (render-readable-text g 0 0 :shift true (apply str (interleave (map #(.getDescription %) @loaded-resources) (repeat "\n"))))))))
 
-;;; boot
-
-(defn- start-the-game [fullscreen]
-  (init-state-based-game "Cyber-Dungeon-Quest"
-    [deferred-preload-gamestate
-     mainmenu-gamestate
-     loading-gamestate
-     ingame-gamestate
-     options-gamestate
-     minimap-gamestate])
-  (create-and-start-app-game-container
-    :game state-based-game
-    :width screen-width
-    :height screen-height
-    :scale screen-scale
-    :full-screen fullscreen
-    :show-fps false
-    :lock-framerate false))
-
 ; TODO 'D' debug mode / 'P' - pause (not shown)
 
 (def development-config {:map-impl-namespace 'game.maps.impl})
@@ -9777,7 +9758,23 @@ PSI-Explosion
 
 (defn game! []
   (.bindRoot #'config development-config)
-  (resolution-setup-frame start-the-game))
+  (let [start-the-game (fn [fullscreen]
+                         (init-state-based-game "Cyber-Dungeon-Quest"
+                                                [deferred-preload-gamestate
+                                                 mainmenu-gamestate
+                                                 loading-gamestate
+                                                 ingame-gamestate
+                                                 options-gamestate
+                                                 minimap-gamestate])
+                         (create-and-start-app-game-container
+                           :game state-based-game
+                           :width screen-width
+                           :height screen-height
+                           :scale screen-scale
+                           :full-screen fullscreen
+                           :show-fps false
+                           :lock-framerate false))]
+    (resolution-setup-frame start-the-game)))
 
 (defn -main []
   (game!))
