@@ -4786,7 +4786,7 @@ over a skill at the bottom left selection lists.
                                                w
                                                (+ 2 (get-text-height ingame-gui-controls-text))]
                                       :hotkey ingame-gui-controls-hotkey
-                                      :visible (get-setting :show-controls-frame)
+                                      :visible true
                                       :parent ingamestate-display)))
     (make-label :location [2 2]
                 :text ingame-gui-controls-text
@@ -9768,24 +9768,18 @@ PSI-Explosion
     :height screen-height
     :scale screen-scale
     :full-screen fullscreen
-    :show-fps (get-setting :show-fps)
+    :show-fps false
     :lock-framerate false))
 
-(def development-config {:show-controls-frame true
-                         :show-fps true
-                         :debug-mode true
+(def development-config {:debug-mode true
                          :is-pausable true
                          :map-impl-namespace 'game.maps.impl})
 
-(def production-config {:show-controls-frame true
-                        :show-fps false
-                        :debug-mode false
+(def production-config {:debug-mode false
                         :is-pausable false
                         :map-impl-namespace 'game.maps.impl})
 
-(def test-config {:show-controls-frame false
-                  :show-fps true
-                  :debug-mode true
+(def test-config {:debug-mode true
                   :is-pausable true
                   :map-impl-namespace 'game.maps.impl-test})
 
