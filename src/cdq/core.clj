@@ -9217,8 +9217,6 @@ PSI-Explosion
   (init-load-saved-game-textbuttons)
   (set-visiblity-state :none))
 
-(def ^:private menu-skipped (atom false))
-
 (def ^:private music nil)
 
 (alter-var-root #'cdq.core/init-fns conj
@@ -9250,11 +9248,7 @@ PSI-Explosion
 
       (update [container statebasedgame delta]
         (update-mousebutton-state)
-        (update-guicomponent menu-display)
-        (when (and (get-setting :skip-main-menu-at-startup)
-                   (not @menu-skipped))
-          (reset! menu-skipped true)
-          (start-loading-game "Testchar" :new-character true)))
+        (update-guicomponent menu-display))
 
       (render [container statebasedgame g]
         (render-guicomponent g menu-display)
@@ -9779,38 +9773,32 @@ PSI-Explosion
     :show-fps (get-setting :show-fps)
     :lock-framerate false))
 
-(def development-config {:skip-main-menu-at-startup false
-                         :show-resolution-setup true
+(def development-config {:show-resolution-setup true
                          ; :start-automatically true
                          :show-controls-frame true
                          :show-fps true
                          ; :lightning-options-menu-checkbox true
                          :debug-mode true
                          :is-pausable true
-                         :map-impl-namespace 'game.maps.impl
-                         })
+                         :map-impl-namespace 'game.maps.impl})
 
-(def production-config {:skip-main-menu-at-startup false
-                        :show-resolution-setup true
+(def production-config {:show-resolution-setup true
                         ; :start-automatically false
                         :show-controls-frame true
                         :show-fps false
                         ; :lightning-options-menu-checkbox false
                         :debug-mode false
                         :is-pausable false
-                        :map-impl-namespace 'game.maps.impl
-                        })
+                        :map-impl-namespace 'game.maps.impl})
 
-(def test-config {:skip-main-menu-at-startup true
-                  :show-resolution-setup false
+(def test-config {:show-resolution-setup false
                   ; :start-automatically false
                   :show-controls-frame false
                   :show-fps true
                   ; :lightning-options-menu-checkbox true
                   :debug-mode true
                   :is-pausable true
-                  :map-impl-namespace 'game.maps.impl-test
-                  })
+                  :map-impl-namespace 'game.maps.impl-test})
 
 (defn game! []
   (.bindRoot #'config development-config)
