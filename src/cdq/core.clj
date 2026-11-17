@@ -9716,20 +9716,15 @@ PSI-Explosion
     (render [container statebasedgame g]
       (render-minimap g))))
 
-;;; deferred-preload (was game.state.deferred-preload)
-
-(def ^:private next-resource (atom nil))
-(def ^:private loaded-resources (atom []))
-
-(def deferred-preload-gamestate
-  (let [id (get-unique-number)]
+(defn deferred-preload-gamestate [id init!]
+  (let [next-resource (atom nil)
+        loaded-resources (atom [])]
     (proxy [BasicGameState] []
       (getID [] id)
 
       (init [container statebasedgame]
         (LoadingList/setDeferredLoading true)
-        (doseq [f cdq.core/init-fns]
-          (f)))
+        (init!))
 
       (update [container statebasedgame delta]
         (when-let [resource @next-resource]
@@ -9756,7 +9751,10 @@ PSI-Explosion
 (defn game! []
   (.bindRoot #'config development-config)
   (let [title "Cyber-Dungeon-Quest"
-        states [deferred-preload-gamestate
+        init! (fn []
+                (doseq [f cdq.core/init-fns]
+                  (f)))
+        states [(deferred-preload-gamestate (get-unique-number) init!)
                 mainmenu-gamestate
                 loading-gamestate
                 ingame-gamestate
