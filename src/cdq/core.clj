@@ -462,10 +462,6 @@
 
 (declare ^:private config)
 
-(defn init-config! [file]
-  (alter-var-root #'config (fn [_]
-                             (-> file slurp read-string))))
-
 (defn get-setting [k]
   (let [value (get-in config
                       (if (sequential? k) k [k])
@@ -9783,21 +9779,47 @@ PSI-Explosion
     :show-fps (get-setting :show-fps)
     :lock-framerate false))
 
-(defn start [& {:keys [config]}]
-  (let [development-mode (if-let [dev (System/getenv "development")]
-                           (Boolean/valueOf dev)
-                           (not jar-file?))
-        file (cond config config
-                   development-mode "config/development.clj"
-                   :else "config/production.clj")]
-    (log "Using config file: " file)
-    (init-config! file))
+(def development-config {:skip-main-menu-at-startup false
+                         :show-resolution-setup true
+                         ; :start-automatically true
+                         :show-controls-frame true
+                         :show-fps true
+                         ; :lightning-options-menu-checkbox true
+                         :debug-mode true
+                         :is-pausable true
+                         :map-impl-namespace 'game.maps.impl
+                         })
+
+(def production-config {:skip-main-menu-at-startup false
+                        :show-resolution-setup true
+                        ; :start-automatically false
+                        :show-controls-frame true
+                        :show-fps false
+                        ; :lightning-options-menu-checkbox false
+                        :debug-mode false
+                        :is-pausable false
+                        :map-impl-namespace 'game.maps.impl
+                        })
+
+(def test-config {:skip-main-menu-at-startup true
+                  :show-resolution-setup false
+                  ; :start-automatically false
+                  :show-controls-frame false
+                  :show-fps true
+                  ; :lightning-options-menu-checkbox true
+                  :debug-mode true
+                  :is-pausable true
+                  :map-impl-namespace 'game.maps.impl-test
+                  })
+
+(defn game! []
+  (.bindRoot #'config development-config)
   (if (get-setting :show-resolution-setup)
     (resolution-setup-frame start-the-game)
     (start-the-game false)))
 
 (defn -main []
-  (start))
+  (game!))
 
 ; fillrect 2/2 weil beim rotieren von images schärfe verloren geht
 (defn- run-pixels-x [^Image image g xrange yrange]
