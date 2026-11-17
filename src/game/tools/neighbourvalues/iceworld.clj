@@ -45,9 +45,7 @@
   (defn calc-sprite-posi [grid posi value]
     (convert-to-spriteposi (calc-localid grid posi value) spritesheet-width)))
 
-(alter-var-root #'cdq.core/init-fns conj
-  (fn []
-    (def tilesheet (spritesheet "maps/iceworld.png" 48 48))))
+#_(def tilesheet (spritesheet "maps/iceworld.png" 48 48))
 
 (def blockprops
   {:undefined #{:ground}
@@ -74,9 +72,7 @@
 
 ; 16x16 TEST
 
-;(alter-var-root #'cdq.core/init-fns conj
-;  (fn []
-;    (def tilesheet (spritesheet "maps/test/dirt16x16likeiceworldblocks.png" 16 16))))
+;(def tilesheet (spritesheet "maps/test/dirt16x16likeiceworldblocks.png" 16 16))
 ;(use '(mapgen nad cave utils))
 ;(do
 ;  (make-tiledmap-file 16

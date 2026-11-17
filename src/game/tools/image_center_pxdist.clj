@@ -17,8 +17,6 @@
 
 (start-slick-basicgame
   :init (fn [container]
-          (doseq [f cdq.core/init-fns]
-            (f))
           (def image (create-image "opponents/station/station01.png")))
 
   :update (fn [container delta]

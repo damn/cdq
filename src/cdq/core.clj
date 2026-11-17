@@ -9747,7 +9747,6 @@ PSI-Explosion
 
 ; TODO first one namespace -> can use dev-loop then (weird require/intern/etc stuff?)
 ; also searching simpler
-; grep -rn --include="*.edn" --include="*.clj" "init-fns" .
 (defn game! []
   (.bindRoot #'config development-config)
   (let [title "Cyber-Dungeon-Quest"

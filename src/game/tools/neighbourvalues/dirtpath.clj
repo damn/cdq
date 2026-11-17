@@ -34,8 +34,6 @@
 (defn -main []
   (start-slick-basicgame
     :init (fn [container]
-            #_(doseq [f cdq.core/init-fns]
-              (f))
             (let [grid (create-grid-from-tiled-map (construct-tiledmap (resource "tech.tmx")))
                   pathposis (astar-find-path [10 10] [5 73] grid pathblocked?)
                   is-path-posi? (fn [p] (some #{p} pathposis))
