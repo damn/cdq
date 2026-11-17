@@ -1195,13 +1195,7 @@
 
 (def jar-file? (running-as-jar?))
 
-;; state-based game
-
-(defn init-state-based-game [title states]
-  (def state-based-game
-    (proxy [StateBasedGame] [title]
-      (initStatesList [_]
-        (dorun (map #(.addState this %) states))))))
+(declare state-based-game)
 
 (defn enter-state [state]
   (.enterState state-based-game
@@ -9756,16 +9750,23 @@ PSI-Explosion
 (def production-config  {:map-impl-namespace 'game.maps.impl})
 (def test-config        {:map-impl-namespace 'game.maps.impl-test})
 
+; TODO first one namespace -> can use dev-loop then (weird require/intern/etc stuff?)
+; also searching simpler
+; grep -rn --include="*.edn" --include="*.clj" "init-fns" .
 (defn game! []
   (.bindRoot #'config development-config)
-  (let [start-the-game (fn [fullscreen]
-                         (init-state-based-game "Cyber-Dungeon-Quest"
-                                                [deferred-preload-gamestate
-                                                 mainmenu-gamestate
-                                                 loading-gamestate
-                                                 ingame-gamestate
-                                                 options-gamestate
-                                                 minimap-gamestate])
+  (let [title "Cyber-Dungeon-Quest"
+        states [deferred-preload-gamestate
+                mainmenu-gamestate
+                loading-gamestate
+                ingame-gamestate
+                options-gamestate
+                minimap-gamestate]
+        start-the-game (fn [fullscreen]
+                         (.bindRoot #'state-based-game 
+                                    (proxy [StateBasedGame] [title]
+                                      (initStatesList [_]
+                                        (dorun (map #(.addState this %) states)))))
                          (create-and-start-app-game-container
                            :game state-based-game
                            :width screen-width
@@ -10297,5 +10298,5 @@ PSI-Explosion
   (fnplotter!)
   (input-test!)
   (copy-image-test!)
-  (start) ; or -main
+  (game!)
   )
